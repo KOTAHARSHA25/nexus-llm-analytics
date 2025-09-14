@@ -12,7 +12,3 @@ def test_report_agent_stub():
     result = agent.compile_report(data=None)
     assert 'message' in result and 'stub' in result['message']
 
-def test_rag_agent_stub():
-    agent = RAGAgent()
-    result = agent.retrieve(query='test')
-    assert 'message' in result and 'stub' in result['message']

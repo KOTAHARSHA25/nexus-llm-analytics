@@ -1,7 +1,9 @@
 
 
+
 from backend.agents.data_agent import DataAgent
 from backend.agents.review_agent import ReviewAgent
+from backend.agents.rag_agent import RAGAgent
 from backend.core.sandbox import Sandbox
 from backend.core.utils import AgentRegistry, friendly_error
 
@@ -20,6 +22,7 @@ class ControllerAgent:
             review_agent=self.registry.get('review_agent'),
             sandbox=self.registry.get('sandbox')
         ))
+        self.registry.register('rag_agent', RAGAgent(persist_directory="./test_chroma_db"))
         # Optionally register/override agents from config
         if agent_config:
             for name, agent in agent_config.items():
@@ -27,16 +30,23 @@ class ControllerAgent:
 
     def handle_query(self, query, filename=None, **kwargs):
         data_agent = self.registry.get('data_agent')
-        if not data_agent:
-            return friendly_error("No data agent registered.", suggestion="Check agent configuration or contact support.")
-        if filename:
-            load_result = data_agent.load_file(filename)
-            if isinstance(load_result, dict) and load_result.get("error"):
-                return friendly_error(load_result.get("error"), suggestion="Check the file name and format.")
-        else:
+        rag_agent = self.registry.get('rag_agent')
+        if not data_agent or not rag_agent:
+            return friendly_error("Required agents not registered.", suggestion="Check agent configuration or contact support.")
+        if not filename:
             return friendly_error("No file provided.", suggestion="Please upload or specify a data file.")
 
-        # Query routing
+        # Route to RAG agent for unstructured data (PDF/TXT) or explicit 'rag' query
+        if filename.lower().endswith(('.pdf', '.txt')) or query == "rag":
+            # For RAG, just pass the query string
+            return rag_agent.retrieve(query, n_results=kwargs.get('n_results', 3))
+
+        # Otherwise, use DataAgent for structured data
+        load_result = data_agent.load_file(filename)
+        if isinstance(load_result, dict) and load_result.get("error"):
+            return friendly_error(load_result.get("error"), suggestion="Check the file name and format.")
+
+        # Query routing for structured data
         if query == "summarize":
             return data_agent.summarize()
         elif query == "describe":

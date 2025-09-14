@@ -99,6 +99,22 @@ frontend/node_modules/
 frontend/.next/
 frontend/out/
 
+# Monorepo-wide Node/Next ignores
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+out/
+**/out/
+.turbo/
+.vercel/
+**/.vercel/
+
+# Nexus Analytics Dashboard app
+nexus-analytics-dashboard/node_modules/
+nexus-analytics-dashboard/.next/
+nexus-analytics-dashboard/out/
+
 # === Editor/IDE ===
 .vscode/
 .idea/
@@ -107,9 +123,22 @@ frontend/out/
 .cursorignore
 .cursorindexingignore
 
+# === Environment files ===
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+.env.*
+
 # === Jupyter/Notebook ===
 .ipynb_checkpoints
 
 # === Misc ===
 .DS_Store
 Thumbs.db
+
+# === Test/Reports/Artifacts ===
+frontend/test-results/
+**/playwright-report/
+**/playwright/.cache/
