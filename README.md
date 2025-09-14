@@ -8,7 +8,8 @@ Nexus-LLM-Analytics is a local-first, privacy-focused AI assistant for advanced 
 
 ---
 
-## ✨ Features
+
+## ✨ Features & Advanced Capabilities
 
 - Natural language to actionable data workflows
 - Handles both structured (tables, spreadsheets) and unstructured (documents, text) data
@@ -17,6 +18,13 @@ Nexus-LLM-Analytics is a local-first, privacy-focused AI assistant for advanced 
 - Autonomous code review and correction
 - Interactive visualizations and professional report generation
 - Extensible with new agents and features
+- **Automated test suite** (pytest)
+- **Data versioning & audit trail** (JSONL log of all analysis steps)
+- **Configurable logging levels** (DEBUG/INFO/WARNING/ERROR via env var)
+- **Frontend error/status feedback** (real-time user feedback)
+- **Pluggable agent system** (add/swap agents via registry)
+- **Export/download logs and reports** (API endpoints)
+- **User-friendly error messages** (actionable, with suggestions)
 
 ---
 
@@ -81,14 +89,17 @@ Nexus operates as a full-stack, multi-agent system:
 
 ---
 
+
 ## 🚀 Get Started
 
 1. Clone the repository
 2. Install dependencies (see requirements.txt and package.json)
 3. Start the backend (FastAPI) and frontend (Next.js)
 4. Upload your data and ask questions in natural language
+5. Download logs and audit trail from the API (`/generate-report/download-log`, `/generate-report/download-audit`)
 
 ---
+
 
 ## 🖥️ Commands
 
@@ -105,6 +116,9 @@ cd frontend
 npm install
 cd ..
 
+# Run all backend tests
+pytest tests/
+
 # Start the backend (FastAPI)
 uvicorn backend.main:app --reload
 
@@ -113,7 +127,34 @@ cd frontend
 npm run dev
 ```
 
+## 🧪 Testing & Linting
+
+```bash
+# Run all backend tests
+pytest tests/
+
+# (Optional) Lint Python code (requires flake8 or ruff)
+flake8 backend/ tests/
+# or
+ruff check backend/ tests/
+
+# (Optional) Lint frontend code
+cd frontend
+npm run lint
+```
+
+## ✅ Feature Checklist
+
+- [x] Automated test suite (pytest)
+- [x] Data versioning and audit trail
+- [x] Configurable logging levels
+- [x] Frontend error/status feedback
+- [x] Pluggable agent system
+- [x] Export/download logs and reports
+- [x] User-friendly error messages
+
 ---
+
 
 ## 📫 Contributing & Support
 
