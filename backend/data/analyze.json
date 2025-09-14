@@ -1,4 +1,4 @@
-{
-  "query": "summarize",
-  "filename": "1.json"
-}
+[
+  {"category": "A", "value": 1},
+  {"category": "B", "value": 2}
+]

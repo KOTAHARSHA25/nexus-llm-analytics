@@ -1,7 +1,11 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api import analyze, upload, report
+from backend.core.utils import setup_logging
 
+
+setup_logging()
 app = FastAPI(title="Nexus-LLM-Analytics API")
 
 # CORS settings for frontend-backend communication
