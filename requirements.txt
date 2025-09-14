@@ -1,0 +1,14 @@
+fastapi
+crewai
+crewai_tools
+langchain-community
+pandas
+pydantic
+uvicorn
+python-dotenv
+chromadb
+plotly
+pypdf2
+reportlab
+restrictedpython
+python-multipart
