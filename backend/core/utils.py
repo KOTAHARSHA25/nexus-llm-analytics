@@ -1,8 +1,22 @@
-# Data versioning/audit trail
+# Shared utility functions for backend
 import datetime
 import os
 import json
+import logging
 
+class JsonFormatter(logging.Formatter):
+	def format(self, record):
+		log_record = {
+			'level': record.levelname,
+			'time': self.formatTime(record, self.datefmt),
+			'name': record.name,
+			'message': record.getMessage(),
+		}
+		if record.exc_info:
+			log_record['exception'] = self.formatException(record.exc_info)
+		return json.dumps(log_record)
+
+# Data versioning/audit trail
 def log_data_version(event, filename, details=None):
 	audit_dir = os.path.join(os.path.dirname(__file__), '../../data/audit')
 	os.makedirs(audit_dir, exist_ok=True)
@@ -17,9 +31,7 @@ def log_data_version(event, filename, details=None):
 
 # Configurable logging level
 def setup_logging(logfile='nexus.log'):
-	import os
-	import logging
-	level = os.environ.get('NEXUS_LOG_LEVEL', 'INFO').upper()
+	level = os.environ.get('LOG_LEVEL', 'INFO').upper()
 	logger = logging.getLogger()
 	logger.setLevel(level)
 	# Console handler
@@ -47,22 +59,5 @@ class AgentRegistry:
 		self.registry[name] = agent
 	def get(self, name):
 		return self.registry.get(name)
-
-
-# Shared utility functions for backend
-import logging
-import json
-
-class JsonFormatter(logging.Formatter):
-	def format(self, record):
-		log_record = {
-			'level': record.levelname,
-			'time': self.formatTime(record, self.datefmt),
-			'name': record.name,
-			'message': record.getMessage(),
-		}
-		if record.exc_info:
-			log_record['exception'] = self.formatException(record.exc_info)
-		return json.dumps(log_record)
 
 

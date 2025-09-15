@@ -1,16 +1,23 @@
 "use client";
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Textarea } from "./ui/textarea";
+
+import type React from "react";
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { MessageSquare, Send, Lightbulb } from "lucide-react";
 
 interface QueryInputProps {
-  value: string;
-  onChange: (v: string) => void;
-  onSend: () => void;
-  loading: boolean;
+  onQuery: (query: string) => void;
+  isLoading: boolean;
+  disabled: boolean;
 }
 
 const exampleQueries = [
@@ -20,28 +27,19 @@ const exampleQueries = [
   "What insights can you extract from this dataset?",
 ];
 
-const QueryInput: React.FC<QueryInputProps> = ({ value, onChange, onSend, loading }) => {
-  const [localValue, setLocalValue] = useState(value);
-
-  React.useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
-
-  const handleExampleClick = (example: string) => {
-    setLocalValue(example);
-    onChange(example);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setLocalValue(e.target.value);
-    onChange(e.target.value);
-  };
+export function QueryInput({ onQuery, isLoading, disabled }: QueryInputProps) {
+  const [query, setQuery] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (localValue.trim() && !loading) {
-      onSend();
+    if (query.trim() && !disabled) {
+      onQuery(query.trim());
+      setQuery("");
     }
+  };
+
+  const handleExampleClick = (example: string) => {
+    setQuery(example);
   };
 
   return (
@@ -51,25 +49,34 @@ const QueryInput: React.FC<QueryInputProps> = ({ value, onChange, onSend, loadin
           <MessageSquare className="h-5 w-5" />
           Natural Language Query
         </CardTitle>
-        <div className="text-sm text-muted-foreground">Ask questions about your data in plain English</div>
+        <CardDescription>
+          Ask questions about your data in plain English
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit} className="space-y-4">
           <Textarea
             placeholder={
-              loading
-                ? "Please wait for the current query to finish..."
-                : "What would you like to know about your data? e.g., 'Show me the top 10 customers by revenue'"
+              disabled
+                ? "Please upload files first to start querying..."
+                : "e.g., 'Show me the top 10 customers by revenue'"
             }
-            value={localValue}
-            onChange={handleInputChange}
-            disabled={loading}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            disabled={disabled || isLoading}
             className="min-h-[100px] resize-none"
           />
+
           <div className="flex justify-between items-center">
-            <p className="text-xs text-muted-foreground">{localValue.length}/500 characters</p>
-            <Button type="submit" disabled={!localValue.trim() || loading} className="gap-2">
-              {loading ? (
+            <p className="text-xs text-muted-foreground">
+              {query.length}/500
+            </p>
+            <Button
+              type="submit"
+              disabled={!query.trim() || disabled || isLoading}
+              className="gap-2"
+            >
+              {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                   Analyzing...
@@ -83,11 +90,11 @@ const QueryInput: React.FC<QueryInputProps> = ({ value, onChange, onSend, loadin
             </Button>
           </div>
         </form>
-        {/* Example queries */}
-        {!loading && (
+
+        {!disabled && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Lightbulb className="h-4 w-4 text-accent" />
+              <Lightbulb className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">Try these examples:</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -95,7 +102,7 @@ const QueryInput: React.FC<QueryInputProps> = ({ value, onChange, onSend, loadin
                 <Badge
                   key={index}
                   variant="outline"
-                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+                  className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                   onClick={() => handleExampleClick(example)}
                 >
                   {example}
@@ -107,6 +114,4 @@ const QueryInput: React.FC<QueryInputProps> = ({ value, onChange, onSend, loadin
       </CardContent>
     </Card>
   );
-};
-
-export default QueryInput;
+}

@@ -8,7 +8,8 @@ uvicorn
 python-dotenv
 chromadb
 plotly
-pypdf2
+PyPDF2
 reportlab
-restrictedpython
+RestrictedPython
 python-multipart
+werkzeug

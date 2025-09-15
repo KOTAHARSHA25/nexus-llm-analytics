@@ -112,14 +112,14 @@ class DataAgent:
             return {"error": "No data loaded."}
         if column not in self.data.columns:
             return {"error": f"Column '{column}' not found."}
-        code = f"result = data[data['{column}'] == '{value}']"
+        code = f"result = data[data['{column}'] == filter_value]"
         explanation = f"Filter rows where column '{column}' equals '{value}'."
         review = self.review_agent.review(code)
         logging.info({"event": "code_review", "query": "filter", "code": code, "review_status": review["status"]})
         if review["status"] != "ok":
             logging.warning({"event": "code_review_failed", "query": "filter", "explanation": review["explanation"]})
             return {"error": review["explanation"]}
-        exec_result = self.sandbox.execute(review["corrected_code"], data=self.data)
+        exec_result = self.sandbox.execute(review["corrected_code"], data=self.data, extra_globals={'filter_value': value})
         logging.info({"event": "code_execution", "query": "filter", "result_keys": list(exec_result.keys())})
         if "error" in exec_result:
             logging.error({"event": "code_execution_error", "query": "filter", "error": exec_result["error"]})

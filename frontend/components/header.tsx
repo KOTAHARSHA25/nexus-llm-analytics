@@ -1,9 +1,7 @@
-
-import React from "react";
-import { Button } from "./ui/button";
 import { BarChart3, Settings, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export default function Header() {
+export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-6">
@@ -13,7 +11,9 @@ export default function Header() {
           </div>
           <div>
             <h1 className="text-xl font-bold">Nexus LLM Analytics</h1>
-            <p className="text-sm text-muted-foreground">AI-Powered Data Insights</p>
+            <p className="text-sm text-muted-foreground">
+              AI-Powered Data Insights
+            </p>
           </div>
         </div>
 

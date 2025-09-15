@@ -1,108 +1,152 @@
 "use client";
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import FileUpload from "../components/file-upload";
-import QueryInput from "../components/query-input";
-import ResultsDisplay from "../components/results-display";
-import { Zap, Bot, Download, Sparkles } from "lucide-react";
 
-const HomePage: React.FC = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
+import { useState } from "react";
+import { Header } from "@/components/header";
+import { FileUpload } from "@/components/file-upload";
+import { QueryInput } from "@/components/query-input";
+import { ResultsDisplay } from "@/components/results-display";
+import { Sidebar } from "@/components/sidebar";
+import { Button } from "@/components/ui/button";
+import { Download, Menu, X, Sparkles, Zap } from "lucide-react";
+
+export default function AnalyticsDashboard() {
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
-  const [status, setStatus] = useState("idle");
-  const [message, setMessage] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [hasResults, setHasResults] = useState(false);
+  const [queryHistory, setQueryHistory] = useState<string[]>([]);
 
-  // Simulate file upload
-  const handleFileSelect = async (f: File) => {
-    setUploading(true);
-    setFile(f);
-    setFileName(f.name);
-    setStatus("loading");
-    setMessage("Uploading file...");
-    // TODO: Replace with real upload logic
-    setTimeout(() => {
-      setUploading(false);
-      setStatus("success");
-      setMessage("File uploaded successfully.");
-    }, 1000);
+  const handleFileUpload = (files: File[]) => {
+    setUploadedFiles(files);
   };
 
-  // Simulate query send
-  const handleSend = async () => {
-    setLoading(true);
-    setStatus("loading");
-    setMessage("Processing query...");
-    // TODO: Replace with real query logic
+  const handleQuery = async (queryText: string) => {
+    setQuery(queryText);
+    setIsLoading(true);
+    setQueryHistory((prev) => [queryText, ...prev.slice(0, 4)]);
+
+    // Simulate API call with more realistic data
     setTimeout(() => {
-      setResults({ query, file: fileName, data: "Sample result data." });
-      setLoading(false);
-      setStatus("success");
-      setMessage("Query processed successfully.");
-    }, 1200);
+      setResults({
+        summary:
+          "Analysis complete! Found 3 key insights from your data with 94% confidence. The dataset shows strong performance trends with notable growth patterns in Q2.",
+        insights: [
+          {
+            title: "Revenue Growth",
+            description: "12% increase in total revenue compared to last quarter",
+          },
+          {
+            title: "Customer Retention",
+            description: "94.1% retention rate, up 2.1% from previous period",
+          },
+          { title: "Performance Metrics", description: "Average score improved to 87.3 points" },
+        ],
+      });
+      setIsLoading(false);
+      setHasResults(true);
+    }, 2000);
+  };
+
+  const handleDownloadReport = () => {
+    console.log("Downloading report...");
   };
 
   return (
-    <div className="container mx-auto max-w-7xl space-y-8">
-      {/* Hero */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="rounded-full px-3 py-1">
-            <Sparkles className="h-3 w-3 mr-1" /> AI-Powered Analytics Platform
-          </Badge>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <Header />
+
+      <div className="flex">
+        {/* Mobile sidebar toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50 md:hidden backdrop-blur-sm bg-background/80"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+
+        {/* Sidebar */}
+        <div
+          className={`fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <Sidebar queryHistory={queryHistory} />
         </div>
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Welcome to Nexus LLM Analytics
-        </h1>
-        <p className="text-muted-foreground text-base md:text-lg max-w-3xl">
-          Upload your data files and ask questions in natural language. Get instant
-          insights with interactive visualizations powered by advanced AI.
-        </p>
-        <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2"><Zap className="h-4 w-4" /> Lightning Fast</div>
-          <div className="flex items-center gap-2"><Bot className="h-4 w-4" /> AI-Powered</div>
-          <div className="flex items-center gap-2"><Download className="h-4 w-4" /> Export Ready</div>
-        </div>
+
+        {/* Overlay for mobile */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-30 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />
+        )}
+
+        {/* Main content */}
+        <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto">
+          <div className="space-y-8">
+            {/* Enhanced welcome section */}
+            <div className="text-center space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-foreground border border-accent/20 text-sm font-medium">
+                <Sparkles className="h-4 w-4 text-accent" />
+                AI-Powered Analytics Platform
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-balance bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Welcome to Nexus LLM Analytics
+              </h1>
+              <p className="text-xl text-muted-foreground text-pretty max-w-2xl mx-auto leading-relaxed">
+                Upload your data files and ask questions in natural language. Get instant insights with interactive
+                visualizations powered by advanced AI.
+              </p>
+              <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-accent" />
+                  <span>Lightning Fast</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-accent" />
+                  <span>AI-Powered</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Download className="h-4 w-4 text-accent" />
+                  <span>Export Ready</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main dashboard grid */}
+            <div className="grid gap-8 lg:grid-cols-2">
+              {/* File Upload */}
+              <div className="space-y-6">
+                <FileUpload onFileUpload={handleFileUpload} uploadedFiles={uploadedFiles} />
+
+                {/* Query Input */}
+                <QueryInput onQuery={handleQuery} isLoading={isLoading} disabled={uploadedFiles.length === 0} />
+              </div>
+
+              {/* Results Display */}
+              <div className="space-y-6">
+                <ResultsDisplay results={results} isLoading={isLoading} />
+
+                {/* Enhanced Download Report Button */}
+                {hasResults && (
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={handleDownloadReport}
+                      className="gap-2 bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 shadow-lg hover:shadow-xl transition-all duration-200"
+                      size="lg"
+                      data-download-btn
+                    >
+                      <Download className="h-5 w-5" />
+                      Download Report
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
-
-      {/* Content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>File Upload</CardTitle>
-            <div className="text-muted-foreground">Upload PDF, CSV, JSON, or TXT files for analysis (Max 10MB per file)</div>
-          </CardHeader>
-          <CardContent>
-            <FileUpload onFileSelect={handleFileSelect} uploading={uploading} fileName={fileName} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Analysis Results</CardTitle>
-            <div className="text-muted-foreground">Your analysis results will appear here</div>
-          </CardHeader>
-          <CardContent>
-            <ResultsDisplay status={status as any} message={message} results={results} />
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Ask a Question</CardTitle>
-          <div className="text-muted-foreground">Describe what you want to analyze in plain English</div>
-        </CardHeader>
-        <CardContent>
-          <QueryInput value={query} onChange={setQuery} onSend={handleSend} loading={loading} />
-        </CardContent>
-      </Card>
     </div>
   );
-};
-
-export default HomePage;
+}

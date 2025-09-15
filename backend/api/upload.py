@@ -1,7 +1,7 @@
-
 from fastapi import APIRouter, UploadFile, File
 import os
 import io
+from werkzeug.utils import secure_filename
 try:
     import PyPDF2
 except ImportError:
@@ -17,16 +17,17 @@ os.makedirs(DATA_DIR, exist_ok=True)
 @router.post("/")
 async def upload_document(file: UploadFile = File(...)):
     allowed = ('.csv', '.json', '.pdf', '.txt')
-    if not file.filename.lower().endswith(allowed):
+    filename = secure_filename(file.filename)
+    if not filename.lower().endswith(allowed):
         return {"error": "Only CSV, JSON, PDF, and TXT files are supported."}
-    file_path = os.path.join(DATA_DIR, file.filename)
+    file_path = os.path.join(DATA_DIR, filename)
     content = await file.read()
     with open(file_path, "wb") as f:
         f.write(content)
 
     # Extract text if PDF or TXT
     extracted_text = None
-    if file.filename.lower().endswith('.pdf'):
+    if filename.lower().endswith('.pdf'):
         if PyPDF2 is None:
             return {"error": "PyPDF2 is not installed. Please install it to process PDFs."}
         try:
@@ -34,7 +35,7 @@ async def upload_document(file: UploadFile = File(...)):
             extracted_text = "\n".join(page.extract_text() or '' for page in pdf_reader.pages)
         except Exception as e:
             return {"error": f"Failed to extract text from PDF: {e}"}
-    elif file.filename.lower().endswith('.txt'):
+    elif filename.lower().endswith('.txt'):
         try:
             extracted_text = content.decode('utf-8')
         except Exception as e:
@@ -46,4 +47,4 @@ async def upload_document(file: UploadFile = File(...)):
         with open(text_path, 'w', encoding='utf-8') as tf:
             tf.write(extracted_text)
 
-    return {"filename": file.filename, "message": "File uploaded successfully.", "extracted_text_path": text_path if extracted_text else None}
+    return {"filename": filename, "message": "File uploaded successfully.", "extracted_text_path": text_path if extracted_text else None}

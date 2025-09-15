@@ -1,17 +1,20 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api import analyze, upload, report
 from backend.core.utils import setup_logging
+from dotenv import load_dotenv
+import os
 
-
+load_dotenv()
 setup_logging()
 app = FastAPI(title="Nexus-LLM-Analytics API")
 
 # CORS settings for frontend-backend communication
+allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust for production
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
