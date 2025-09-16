@@ -2,20 +2,23 @@ import logging
 # CrewAI Data Agent: Generates and executes code for structured data analysis
 
 import pandas as pd
+import polars as pl
 import os
 from backend.agents.review_agent import ReviewAgent
 from backend.core.sandbox import Sandbox
 from backend.core.utils import log_data_version
+from backend.core.llm_client import LLMClient
 
 class DataAgent:
     """Responsible for data manipulation and analysis."""
-    def __init__(self, review_agent=None, sandbox=None):
+    def __init__(self, review_agent=None, sandbox=None, llm_client=None):
         self.data = None
         self.filename = None
         self.last_code = None
         self.last_explanation = None
         self.review_agent = review_agent or ReviewAgent()
         self.sandbox = sandbox or Sandbox()
+        self.llm_client = llm_client or LLMClient()
 
     def load_file(self, filename):
         logging.info({"event": "load_file", "filename": filename})
@@ -23,13 +26,24 @@ class DataAgent:
         filepath = os.path.join(os.path.dirname(__file__), '..', 'data', filename)
         try:
             if filename.endswith('.csv'):
+                # Load with pandas by default, but also create polars reference for performance operations
                 self.data = pd.read_csv(filepath)
-                self.last_code = f"pd.read_csv('{filename}')"
-                self.last_explanation = f"Load CSV file '{filename}' into a pandas DataFrame."
+                # Store polars version for high-performance operations
+                try:
+                    self.data_pl = pl.read_csv(filepath)
+                except Exception:
+                    self.data_pl = None
+                self.last_code = f"pd.read_csv('{filename}')  # Also available as polars: pl.read_csv('{filename}')"
+                self.last_explanation = f"Load CSV file '{filename}' into pandas DataFrame (with polars backup for performance)."
             elif filename.endswith('.json'):
                 self.data = pd.read_json(filepath)
-                self.last_code = f"pd.read_json('{filename}')"
-                self.last_explanation = f"Load JSON file '{filename}' into a pandas DataFrame."
+                # Store polars version for high-performance operations
+                try:
+                    self.data_pl = pl.read_json(filepath)
+                except Exception:
+                    self.data_pl = None
+                self.last_code = f"pd.read_json('{filename}')  # Also available as polars: pl.read_json('{filename}')"
+                self.last_explanation = f"Load JSON file '{filename}' into pandas DataFrame (with polars backup for performance)."
             else:
                 return {"error": "Unsupported file type"}
             self.filename = filename
@@ -44,14 +58,46 @@ class DataAgent:
     def summarize(self):
         if self.data is None:
             return {"error": "No data loaded."}
-        code = "result = data.head(5)"
-        explanation = "Show the first 5 rows of the DataFrame."
-        review = self.review_agent.review(code)
-        logging.info({"event": "code_review", "query": "summarize", "code": code, "review_status": review["status"]})
+        # Use LLM to generate code and explanation from user query
+        user_query = "Show the first 5 rows of the DataFrame."
+        max_attempts = 3
+        attempt = 0
+        last_error = None
+        code = None
+        explanation = None
+        while attempt < max_attempts:
+            prompt = f"Given the following user query, write Python pandas code to answer it. Also provide a short explanation.\n\nQuery: {user_query}\n\nRespond in JSON: {{'code': code, 'explanation': explanation}}"
+            llm_result = self.llm_client.generate_primary(prompt)
+            import json
+            try:
+                llm_json = json.loads(llm_result.get("response", ""))
+                code = llm_json.get("code")
+                explanation = llm_json.get("explanation")
+            except Exception as e:
+                code = "result = data.head(5)"
+                explanation = "Show the first 5 rows of the DataFrame."
+            review = self.review_agent.review(code)
+            logging.info({"event": "code_review", "query": "summarize", "code": code, "review_status": review["status"]})
+            if review["status"] == "ok":
+                break
+            # If error, try again with LLM correction
+            last_error = review["explanation"]
+            if review.get("corrected_code"):
+                code = review["corrected_code"]
+            else:
+                # Ask LLM to fix the code
+                fix_prompt = f"The following code has an error: {last_error}\n\nCode:\n{code}\n\nPlease correct it and explain. Respond in JSON: {{'code': code, 'explanation': explanation}}"
+                fix_result = self.llm_client.generate_primary(fix_prompt)
+                try:
+                    fix_json = json.loads(fix_result.get("response", ""))
+                    code = fix_json.get("code")
+                    explanation = fix_json.get("explanation")
+                except Exception:
+                    pass
+            attempt += 1
         if review["status"] != "ok":
-            logging.warning({"event": "code_review_failed", "query": "summarize", "explanation": review["explanation"]})
-            return {"error": review["explanation"]}
-        exec_result = self.sandbox.execute(review["corrected_code"], data=self.data)
+            return {"error": f"Code generation failed after {max_attempts} attempts: {last_error}"}
+        exec_result = self.sandbox.execute(code, data=self.data)
         logging.info({"event": "code_execution", "query": "summarize", "result_keys": list(exec_result.keys())})
         if "error" in exec_result:
             logging.error({"event": "code_execution_error", "query": "summarize", "error": exec_result["error"]})
@@ -70,8 +116,10 @@ class DataAgent:
     def describe(self):
         if self.data is None:
             return {"error": "No data loaded."}
+        prompt = "Write Python pandas code to show summary statistics for all columns in a DataFrame called 'data'. Explain what the code does."
+        llm_result = self.llm_client.generate_primary(prompt)
         code = "result = data.describe(include='all').fillna('')"
-        explanation = "Show summary statistics for all columns."
+        explanation = llm_result.get("response") or "Show summary statistics for all columns."
         review = self.review_agent.review(code)
         logging.info({"event": "code_review", "query": "describe", "code": code, "review_status": review["status"]})
         if review["status"] != "ok":

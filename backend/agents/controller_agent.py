@@ -3,6 +3,7 @@ from backend.agents.review_agent import ReviewAgent
 from backend.agents.rag_agent import RAGAgent
 from backend.core.sandbox import Sandbox
 from backend.core.utils import AgentRegistry, friendly_error
+from backend.core.llm_client import LLMClient
 import os
 
 # CrewAI Controller Agent: Orchestrates and decomposes tasks
@@ -16,13 +17,15 @@ class ControllerAgent:
         # Register default agents
         self.registry.register('review_agent', ReviewAgent())
         self.registry.register('sandbox', Sandbox())
+        llm_client = LLMClient()
         data_agent = DataAgent(
             review_agent=self.registry.get('review_agent'),
-            sandbox=self.registry.get('sandbox')
+            sandbox=self.registry.get('sandbox'),
+            llm_client=llm_client
         )
         self.registry.register('data_agent', data_agent)
         persist_directory = os.getenv("CHROMADB_PERSIST_DIRECTORY", "./chroma_db")
-        self.registry.register('rag_agent', RAGAgent(persist_directory=persist_directory))
+        self.registry.register('rag_agent', RAGAgent(persist_directory=persist_directory, llm_client=llm_client))
         # Optionally register/override agents from config
         if agent_config:
             for name, agent in agent_config.items():

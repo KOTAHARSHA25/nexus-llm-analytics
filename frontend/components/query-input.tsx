@@ -21,10 +21,14 @@ interface QueryInputProps {
 }
 
 const exampleQueries = [
-  "What are the key trends in this data?",
-  "Show me a summary of the main findings",
-  "Create a visualization of the performance metrics",
-  "What insights can you extract from this dataset?",
+  "Show me a summary of the first 10 rows",
+  "What are the statistical patterns in this data?",
+  "Create a bar chart showing the distribution",
+  "Find all records where revenue is greater than 1000",
+  "Show me the correlation between age and income",
+  "What are the top 5 categories by count?",
+  "Generate a trend analysis over time",
+  "Identify any outliers in the dataset",
 ];
 
 export function QueryInput({ onQuery, isLoading, disabled }: QueryInputProps) {
@@ -59,7 +63,7 @@ export function QueryInput({ onQuery, isLoading, disabled }: QueryInputProps) {
             placeholder={
               disabled
                 ? "Please upload files first to start querying..."
-                : "e.g., 'Show me the top 10 customers by revenue'"
+                : "Ask anything about your data in natural language - our AI agents will understand and analyze it for you!"
             }
             value={query}
             onChange={(e) => setQuery(e.target.value)}

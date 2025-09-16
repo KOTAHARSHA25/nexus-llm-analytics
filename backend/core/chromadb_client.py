@@ -1,7 +1,9 @@
 
+
 # Handles ChromaDB integration for vector storage and retrieval
 import chromadb
 from chromadb.config import Settings
+import requests
 
 class ChromaDBClient:
 	def __init__(self, persist_directory="./chroma_db"):
@@ -37,8 +39,20 @@ def chunk_text(text, chunk_size=500, overlap=50):
 		i += chunk_size - overlap
 	return chunks
 
-# Embedding stub (to be replaced with real embedding model)
-def embed_text(text):
-	# TODO: Replace with real embedding model (e.g., Ollama, sentence-transformers)
-	# For now, return None to use Chroma's default embedding
+
+def embed_text(text, model="nomic-embed-text"):
+	"""
+	Get embedding vector for text using Ollama's embedding API.
+	Returns a list of floats (embedding) or None on failure.
+	"""
+	url = "http://localhost:11434/api/embeddings"
+	payload = {"model": model, "prompt": text}
+	try:
+		response = requests.post(url, json=payload, timeout=60)
+		response.raise_for_status()
+		data = response.json()
+		if "embedding" in data:
+			return data["embedding"]
+	except Exception as e:
+		print(f"[embed_text] Embedding failed: {e}")
 	return None

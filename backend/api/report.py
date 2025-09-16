@@ -1,14 +1,23 @@
-# Endpoint to download logs and reports
-from fastapi import APIRouter, Response, Request
+# Enhanced endpoint for professional report generation and downloads
+from fastapi import APIRouter, Response, Request, HTTPException
+from pydantic import BaseModel
+from typing import List, Dict, Any, Optional
 import os
 import json
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from io import BytesIO
-
+import logging
+from core.enhanced_reports import EnhancedReportManager, ReportTemplate
 
 router = APIRouter()
+
+class ReportGenerationRequest(BaseModel):
+    results: List[Dict[str, Any]]
+    format_type: str = "pdf"  # "pdf", "excel", or "both"
+    title: Optional[str] = None
+    include_methodology: bool = True
+    include_raw_data: bool = True
+
+# Initialize enhanced report manager
+report_manager = EnhancedReportManager()
 
 
 @router.get('/download-log')
@@ -31,51 +40,75 @@ def download_audit():
 
 
 
-# Handles /generate-report endpoint for report generation
+# Enhanced report generation endpoint
 @router.post("/")
-async def generate_report(request: Request):
-    data = await request.json()
-    analysis_results = data.get("results", [])
-
-    # Generate PDF
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    styles = getSampleStyleSheet()
-    # Add a default paragraph style if it doesn't exist
-    if 'p' not in styles:
-        styles.add(ParagraphStyle(name='p', parent=styles['Normal']))
-    story = []
-
-    story.append(Paragraph("Nexus-LLM-Analytics Report", styles['h1']))
-    story.append(Spacer(1, 12))
-
-    for result in analysis_results:
-        story.append(Paragraph(result.get("title", "Analysis Result"), styles['h2']))
-        story.append(Paragraph(f"Query: {result.get('query', 'N/A')}", styles['p']))
-        story.append(Paragraph(f"Code: <code>{result.get('code', 'N/A')}</code>", styles['p']))
-        story.append(Paragraph(f"Explanation: {result.get('explanation', 'N/A')}", styles['p']))
+async def generate_report(request: ReportGenerationRequest):
+    """
+    Generate professional reports in multiple formats
+    """
+    logging.info(f"[REPORT] Generating {request.format_type} report with {len(request.results)} analysis results")
+    
+    try:
+        # Create custom template if title is provided
+        template = None
+        if request.title:
+            template = ReportTemplate(title=request.title)
         
-        # Handle different result types (preview, describe, etc.)
-        if 'preview' in result:
-            story.append(Paragraph(json.dumps(result['preview'], indent=2), styles['p']))
-        if 'describe' in result:
-            story.append(Paragraph(json.dumps(result['describe'], indent=2), styles['p']))
-        if 'value_counts' in result:
-            story.append(Paragraph(json.dumps(result['value_counts'], indent=2), styles['p']))
+        # Generate report using enhanced report manager
+        report_path = report_manager.generate_report(
+            analysis_results=request.results,
+            format_type=request.format_type,
+            template=template
+        )
+        
+        # Store the report path for download
+        data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+        os.makedirs(data_dir, exist_ok=True)
+        
+        # Copy to data directory for download
+        if isinstance(report_path, list):
+            # Multiple files generated
+            stored_paths = []
+            for path in report_path:
+                filename = os.path.basename(path)
+                stored_path = os.path.join(data_dir, filename)
+                
+                # Copy file
+                import shutil
+                shutil.copy2(path, stored_path)
+                stored_paths.append(stored_path)
             
-        story.append(Spacer(1, 12))
-
-    doc.build(story)
-    pdf_bytes = buffer.getvalue()
-    buffer.close()
-
-    # For simplicity, we'll save it to a temporary file.
-    # In a real app, you might use a more robust storage solution.
-    report_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'generated_report.pdf')
-    with open(report_path, "wb") as f:
-        f.write(pdf_bytes)
-
-    return {"message": "Report generated successfully", "report_path": report_path}
+            return {
+                "success": True,
+                "message": f"Reports generated successfully",
+                "report_paths": stored_paths,
+                "format": request.format_type,
+                "analysis_count": len(request.results)
+            }
+        else:
+            # Single file generated
+            filename = os.path.basename(report_path)
+            stored_path = os.path.join(data_dir, filename)
+            
+            # Copy file
+            import shutil
+            shutil.copy2(report_path, stored_path)
+            
+            return {
+                "success": True,
+                "message": f"Report generated successfully",
+                "report_path": stored_path,
+                "format": request.format_type,
+                "analysis_count": len(request.results)
+            }
+            
+    except Exception as e:
+        logging.error(f"[REPORT] Generation failed: {e}")
+        return {
+            "success": False,
+            "error": f"Report generation failed: {str(e)}",
+            "suggestion": "Check the analysis results format and try again"
+        }
 
 
 # Download generated report stub

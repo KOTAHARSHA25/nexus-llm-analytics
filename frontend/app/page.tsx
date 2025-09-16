@@ -10,53 +10,112 @@ import { Button } from "@/components/ui/button";
 import { Download, Menu, X, Sparkles, Zap } from "lucide-react";
 
 export default function AnalyticsDashboard() {
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [hasResults, setHasResults] = useState(false);
   const [queryHistory, setQueryHistory] = useState<string[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
-  const handleFileUpload = (files: File[]) => {
-    setUploadedFiles(files);
+  const handleFileUpload = (filenames: string[]) => {
+    setUploadedFiles(filenames);
   };
 
+  // Enhanced query handling with natural language processing
   const handleQuery = async (queryText: string) => {
     setQuery(queryText);
     setIsLoading(true);
+    setErrorMsg(null);
+    setStatusMsg("Processing your natural language query...");
     setQueryHistory((prev) => [queryText, ...prev.slice(0, 4)]);
-
-    // Simulate API call with more realistic data
-    setTimeout(() => {
-      setResults({
-        summary:
-          "Analysis complete! Found 3 key insights from your data with 94% confidence. The dataset shows strong performance trends with notable growth patterns in Q2.",
-        insights: [
-          {
-            title: "Revenue Growth",
-            description: "12% increase in total revenue compared to last quarter",
-          },
-          {
-            title: "Customer Retention",
-            description: "94.1% retention rate, up 2.1% from previous period",
-          },
-          { title: "Performance Metrics", description: "Average score improved to 87.3 points" },
-        ],
+    setResults(null);
+    setHasResults(false);
+    try {
+      // The backend now handles natural language queries automatically
+      setStatusMsg("AI agents are analyzing your query...");
+      const res = await fetch("http://127.0.0.1:8000/analyze/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: queryText,
+          filename: uploadedFiles[0],
+        }),
       });
-      setIsLoading(false);
+      setStatusMsg("Waiting for backend response...");
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setErrorMsg(data.error || "Analysis failed");
+        setIsLoading(false);
+        setStatusMsg(null);
+        return;
+      }
+      setResults(data);
       setHasResults(true);
-    }, 2000);
+      setStatusMsg("Analysis complete.");
+    } catch (e) {
+      setErrorMsg("Network error");
+      setStatusMsg(null);
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setStatusMsg(null), 2000);
+    }
   };
 
-  const handleDownloadReport = () => {
-    console.log("Downloading report...");
+  // Download report logic
+  const handleDownloadReport = async () => {
+    if (!results) return;
+    setIsDownloading(true);
+    setErrorMsg(null);
+    setStatusMsg("Generating report in backend...");
+    try {
+      // 1. Generate report
+      const genRes = await fetch("http://127.0.0.1:8000/generate-report/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ results: [results] }),
+      });
+      const genData = await genRes.json();
+      if (!genRes.ok || genData.error) {
+        setErrorMsg(genData.error || "Failed to generate report");
+        setIsDownloading(false);
+        setStatusMsg(null);
+        return;
+      }
+      setStatusMsg("Downloading report from backend...");
+      // 2. Download report
+      const dlRes = await fetch("http://127.0.0.1:8000/download-report/");
+      if (!dlRes.ok) {
+        setErrorMsg("Failed to download report");
+        setIsDownloading(false);
+        setStatusMsg(null);
+        return;
+      }
+      const blob = await dlRes.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "generated_report.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      setStatusMsg("Report downloaded.");
+    } catch (e) {
+      setErrorMsg("Failed to download report");
+      setStatusMsg(null);
+    } finally {
+      setIsDownloading(false);
+      setTimeout(() => setStatusMsg(null), 2000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <Header />
-
       <div className="flex">
         {/* Mobile sidebar toggle */}
         <Button
@@ -122,13 +181,19 @@ export default function AnalyticsDashboard() {
 
                 {/* Query Input */}
                 <QueryInput onQuery={handleQuery} isLoading={isLoading} disabled={uploadedFiles.length === 0} />
+                {errorMsg && <div className="text-red-600 text-sm">{errorMsg}</div>}
+                {statusMsg && <div className="text-blue-600 text-sm">{statusMsg}</div>}
               </div>
 
               {/* Results Display */}
               <div className="space-y-6">
-                <ResultsDisplay results={results} isLoading={isLoading} />
+                <ResultsDisplay 
+                  results={results} 
+                  isLoading={isLoading} 
+                  filename={uploadedFiles[0]} 
+                />
 
-                {/* Enhanced Download Report Button */}
+                {/* Download Report Button (only if backend supports) */}
                 {hasResults && (
                   <div className="flex justify-center">
                     <Button
@@ -136,9 +201,10 @@ export default function AnalyticsDashboard() {
                       className="gap-2 bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 shadow-lg hover:shadow-xl transition-all duration-200"
                       size="lg"
                       data-download-btn
+                      disabled={isDownloading}
                     >
                       <Download className="h-5 w-5" />
-                      Download Report
+                      {isDownloading ? "Downloading..." : "Download Report"}
                     </Button>
                   </div>
                 )}

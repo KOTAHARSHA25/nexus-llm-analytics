@@ -99,8 +99,13 @@ def test_controller_agent_dispatch():
     with open(dummy_filepath, "w") as f:
         f.write("This is a test file for summarization.")
 
+
     result = controller.handle_query('summarize this file', filename='test_file.txt')
-    assert isinstance(result, list)
+    # RAGAgent now returns a dict with 'chunks', 'query', 'summary'
+    assert isinstance(result, dict)
+    assert 'chunks' in result
+    assert 'query' in result
+    assert 'summary' in result
 
     # Clean up the dummy file
     os.remove(dummy_filepath)

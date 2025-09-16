@@ -3,6 +3,7 @@ crewai
 crewai_tools
 langchain-community
 pandas
+polars
 pydantic
 uvicorn
 python-dotenv
@@ -13,3 +14,7 @@ reportlab
 RestrictedPython
 python-multipart
 werkzeug
+openpyxl
+seaborn
+scipy
+scikit-learn

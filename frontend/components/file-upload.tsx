@@ -24,8 +24,8 @@ import {
 } from "lucide-react";
 
 interface FileUploadProps {
-  onFileUpload: (files: File[]) => void;
-  uploadedFiles: File[];
+  onFileUpload: (filenames: string[]) => void;
+  uploadedFiles: string[];
 }
 
 const getFileIcon = (fileType: string) => {
@@ -43,10 +43,11 @@ const getFileIcon = (fileType: string) => {
 export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<
-    "idle" | "uploading" | "success"
+    "idle" | "uploading" | "success" | "error"
   >("idle");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [rejectedFiles, setRejectedFiles] = useState<string[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -59,7 +60,7 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
   }, []);
 
   const handleDrop = useCallback(
-    (e: React.DragEvent) => {
+    async (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragOver(false);
 
@@ -95,49 +96,63 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
           });
         }, 200);
 
-        setTimeout(() => {
-          clearInterval(progressInterval);
-          setUploadProgress(100);
-          onFileUpload(validFiles);
-          setUploadStatus("success");
-          setTimeout(() => setRejectedFiles([]), 5000);
-        }, 1500);
+        const uploaded: string[] = [];
+        for (const file of validFiles) {
+          const filename = await uploadToBackend(file);
+          if (filename) uploaded.push(filename);
+        }
+
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+        if (uploaded.length > 0) {
+          onFileUpload([...uploadedFiles, ...uploaded]);
+        }
+        setUploadStatus("success");
+        setTimeout(() => setRejectedFiles([]), 5000);
       }
     },
-    [onFileUpload]
+    [onFileUpload, uploadedFiles]
   );
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadToBackend = async (file: File) => {
+    setUploadStatus("uploading");
+    setErrorMsg(null);
+    setUploadProgress(0);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+  const res = await fetch("http://127.0.0.1:8000/upload-documents/", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setUploadStatus("error");
+        setErrorMsg(data.error || "Upload failed");
+        return null;
+      }
+      setUploadStatus("success");
+      return data.filename;
+    } catch (e) {
+      setUploadStatus("error");
+      setErrorMsg("Network error");
+      return null;
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
       setUploadStatus("uploading");
       setUploadProgress(0);
-
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + Math.random() * 15;
-        });
-      }, 200);
-
-      setTimeout(() => {
-        clearInterval(progressInterval);
-        setUploadProgress(100);
-        onFileUpload(files);
-        setUploadStatus("success");
-      }, 1500);
-    }
-  };
-
-  const removeFile = (index: number) => {
-    const newFiles = uploadedFiles.filter((_, i) => i !== index);
-    onFileUpload(newFiles);
-    if (newFiles.length === 0) {
-      setUploadStatus("idle");
-      setUploadProgress(0);
+      const uploaded: string[] = [];
+      for (const file of files) {
+        const filename = await uploadToBackend(file);
+        if (filename) uploaded.push(filename);
+      }
+      if (uploaded.length > 0) {
+        onFileUpload([...uploadedFiles, ...uploaded]);
+      }
     }
   };
 
@@ -193,6 +208,10 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
           )}
         </div>
 
+        {errorMsg && (
+          <div className="text-red-600 text-sm">{errorMsg}</div>
+        )}
+
         {rejectedFiles.length > 0 && (
           <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
             <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
@@ -209,19 +228,23 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
           <div className="space-y-3">
             <h4 className="text-sm font-medium">Uploaded Files:</h4>
             <div className="space-y-2">
-              {uploadedFiles.map((file, index) => (
+              {uploadedFiles.map((filename, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border"
                 >
                   <div className="flex items-center gap-3">
-                    {getFileIcon(file.type)}
-                    <p className="text-sm font-medium truncate">{file.name}</p>
+                    {/* File icon based on extension */}
+                    {getFileIcon(filename)}
+                    <p className="text-sm font-medium truncate">{filename}</p>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeFile(index)}
+                    onClick={() => {
+                      const newFiles = uploadedFiles.filter((_, i) => i !== index);
+                      onFileUpload(newFiles);
+                    }}
                     className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
                   >
                     <X className="h-4 w-4" />

@@ -1,12 +1,13 @@
 from fastapi import APIRouter
+import logging
 from pydantic import BaseModel
 from typing import Optional
-from backend.agents.controller_agent import ControllerAgent
+from agents.crew_manager import CrewManager
 
-# Handles /analyze endpoint logic for data analysis requests
+# Handles /analyze endpoint logic for data analysis requests using CrewAI
 
 router = APIRouter()
-controller = ControllerAgent()
+crew_manager = CrewManager()
 
 
 class AnalyzeRequest(BaseModel):
@@ -18,10 +19,12 @@ class AnalyzeRequest(BaseModel):
 
 @router.post("/")
 async def analyze_query(request: AnalyzeRequest):
-    result = controller.handle_query(
+    logging.info(f"[ANALYZE] Received query: {request.query}, filename: {request.filename}, column: {request.column}, value: {request.value}")
+    result = crew_manager.handle_query(
         request.query,
         request.filename,
         column=request.column,
         value=request.value,
     )
+    logging.info(f"[ANALYZE] Result: {result}")
     return result
