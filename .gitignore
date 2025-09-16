@@ -94,6 +94,16 @@ data/audit/
 *.csv
 *.tmp
 
+# === Personal/Sensitive Data Files ===
+# Exclude personal resume files - use sample_* files for testing
+backend/data/*Resume*.pdf*
+backend/data/*resume*.pdf*
+backend/data/HARSHA*
+backend/data/Harsha*
+# Include sample/demo files
+!backend/data/sample_*.pdf.extracted.txt
+!backend/data/professional_*.pdf.extracted.txt
+
 # === Node/Frontend ===
 frontend/node_modules/
 frontend/.next/
