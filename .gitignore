@@ -1,9 +1,27 @@
 # Nexus LLM Analytics custom ignores
 nexus.log
 *.log
-data/audit/
-frontend/node_modules/
-frontend/.next/
+logs/
+**/logs/
+data/uploads/
+data/exports/
+chroma_db/
+**/chroma_db/
+reports/
+src/frontend/node_modules/
+src/frontend/.next/
+
+# Additional temp/cache files
+installed.txt
+upgrade.txt
+eachfile.txt
+verify_improvements.py
+*.bak
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
 # C extensions
 *.so
 
@@ -25,13 +43,17 @@ sdist/
 
 # === Python build, test, and environment ===
 __pycache__/
+*/__pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 .env
 .envrc
 .venv
 env/
+**/env/
 venv/
+**/venv/
 ENV/
 .cursorindexingignore
 venv.bak/
@@ -94,20 +116,10 @@ data/audit/
 *.csv
 *.tmp
 
-# === Personal/Sensitive Data Files ===
-# Exclude personal resume files - use sample_* files for testing
-backend/data/*Resume*.pdf*
-backend/data/*resume*.pdf*
-backend/data/HARSHA*
-backend/data/Harsha*
-# Include sample/demo files
-!backend/data/sample_*.pdf.extracted.txt
-!backend/data/professional_*.pdf.extracted.txt
-
 # === Node/Frontend ===
-frontend/node_modules/
-frontend/.next/
-frontend/out/
+src/frontend/node_modules/
+src/frontend/.next/
+src/frontend/out/
 
 # Monorepo-wide Node/Next ignores
 node_modules/

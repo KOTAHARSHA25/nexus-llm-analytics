@@ -1,0 +1,37 @@
+{
+  "primary_model": "tinyllama",
+  "review_model": "tinyllama",
+  "embedding_model": "nomic-embed-text",
+  "auto_model_selection": false,
+  "allow_swap_usage": true,
+  "memory_buffer_gb": 0.5,
+  "preferred_performance": "balanced",
+  "first_time_setup_complete": true,
+  "last_updated": "2025-09-19T17:36:28.247433",
+  "model_test_results": {
+    "phi3:mini": {
+      "success": true,
+      "timestamp": "2025-09-19T17:36:28.247433",
+      "response_time": 176.08316659927368,
+      "error": null
+    },
+    "tinyllama": {
+      "success": true,
+      "timestamp": "2025-09-17T23:57:31.852703",
+      "response_time": 99.54479098320007,
+      "error": null
+    },
+    "nomic-embed-text": {
+      "success": false,
+      "timestamp": "2025-09-17T23:45:19.418776",
+      "response_time": 4.892045497894287,
+      "error": "Document analysis failed: litellm.APIConnectionError: OllamaException - {\"error\":\"model requires more system memory (3.8 GiB) than is available (3.1 GiB)\"}"
+    },
+    "llama3.1:8b": {
+      "success": false,
+      "timestamp": "2025-09-17T23:45:34.996226",
+      "response_time": 5.205552577972412,
+      "error": "Document analysis failed: litellm.APIConnectionError: OllamaException - {\"error\":\"model requires more system memory (3.8 GiB) than is available (3.2 GiB)\"}"
+    }
+  }
+}
