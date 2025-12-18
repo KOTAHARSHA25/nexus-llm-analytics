@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 250 100% 98%;
+    --foreground: 234 47% 13%;
+
+    --card: 255 100% 99%;
+    --card-foreground: 234 47% 13%;
+ 
+    --popover: 255 100% 99%;
+    --popover-foreground: 234 47% 13%;
+ 
+    --primary: 262 73% 57%;
+    --primary-foreground: 255 100% 99%;
+ 
+    --secondary: 270 100% 98%;
+    --secondary-foreground: 262 73% 57%;
+ 
+    --muted: 270 100% 96%;
+    --muted-foreground: 215 25% 60%;
+ 
+    --accent: 142 76% 36%;
+    --accent-foreground: 255 100% 99%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 255 100% 99%;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 255 100% 99%;
+
+    --info: 207 89% 61%;
+    --info-foreground: 255 100% 99%;
+ 
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 255 100% 99%;
+
+    --border: 270 100% 92%;
+    --input: 270 100% 94%;
+    --ring: 262 73% 57%;
+ 
+    --radius: 0.75rem;
+
+    /* Custom gradient colors */
+    --gradient-start: 262 73% 57%;
+    --gradient-middle: 142 76% 36%;
+    --gradient-end: 207 89% 61%;
+  }
+ 
+  .dark {
+    --background: 234 47% 6%;
+    --foreground: 250 100% 98%;
+ 
+    --card: 234 47% 8%;
+    --card-foreground: 250 100% 98%;
+ 
+    --popover: 234 47% 8%;
+    --popover-foreground: 250 100% 98%;
+ 
+    --primary: 262 73% 67%;
+    --primary-foreground: 234 47% 6%;
+ 
+    --secondary: 234 47% 12%;
+    --secondary-foreground: 250 100% 98%;
+ 
+    --muted: 234 47% 12%;
+    --muted-foreground: 215 25% 65%;
+ 
+    --accent: 142 76% 46%;
+    --accent-foreground: 234 47% 6%;
+
+    --success: 142 76% 46%;
+    --success-foreground: 234 47% 6%;
+
+    --warning: 45 93% 57%;
+    --warning-foreground: 234 47% 6%;
+
+    --info: 207 89% 71%;
+    --info-foreground: 234 47% 6%;
+ 
+    --destructive: 0 84% 70%;
+    --destructive-foreground: 234 47% 6%;
+ 
+    --border: 234 47% 15%;
+    --input: 234 47% 15%;
+    --ring: 262 73% 67%;
+
+    /* Custom gradient colors for dark mode */
+    --gradient-start: 262 73% 67%;
+    --gradient-middle: 142 76% 46%;
+    --gradient-end: 207 89% 71%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .gradient-bg {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-middle)), hsl(var(--gradient-end)));
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-middle)));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .dark .glass-card {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .plugin-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .plugin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .plugin-card:hover {
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.05);
+  }
+}

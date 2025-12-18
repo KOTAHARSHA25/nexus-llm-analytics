@@ -1,0 +1,45 @@
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T13:34:43.868561"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T13:34:43.918528"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T13:34:43.948089"}
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T13:36:26.341351"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T13:36:26.458877"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T13:36:26.464937"}
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T14:06:49.459769"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T14:06:49.491343"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T14:06:49.505636"}
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T14:07:58.040469"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T14:07:58.163252"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T14:07:58.175365"}
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T14:10:11.038406"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T14:10:11.096989"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T14:10:11.293777"}
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T14:41:33.985210"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T14:41:34.012531"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T14:41:34.030169"}
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T15:16:39.925300"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T15:16:39.942827"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T15:16:39.963273"}
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T15:18:53.635969"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T15:18:53.650972"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T15:18:53.657969"}
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T15:25:10.433547"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T15:25:10.447717"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T15:25:10.455719"}
+{"event": "load_file", "filename": "analyze.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-14T15:27:44.462596"}
+{"event": "file_loaded", "filename": "analyze.json", "details": {"columns": ["category", "value"]}, "timestamp": "2025-09-14T15:27:44.541640"}
+{"event": "summarize", "filename": "analyze.json", "details": {"preview": [{"category": "A", "value": 1}, {"category": "B", "value": 2}]}, "timestamp": "2025-09-14T15:27:44.655717"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x'; import os; os.system('echo vulnerable'); '", "filtered_count": 0}, "timestamp": "2025-09-15T10:52:22.545000"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x", "filtered_count": 1}, "timestamp": "2025-09-15T10:52:22.574542"}
+{"event": "load_file", "filename": "1.json", "details": {"action": "load_file_start"}, "timestamp": "2025-09-15T16:16:37.708396"}
+{"event": "file_loaded", "filename": "1.json", "details": {"columns": ["name", "rollNumber"]}, "timestamp": "2025-09-15T16:16:37.813284"}
+{"event": "summarize", "filename": "1.json", "details": {"preview": [{"name": "harsha", "rollNumber": "22r21a6695"}]}, "timestamp": "2025-09-15T16:16:41.885439"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x'; import os; os.system('echo vulnerable'); '", "filtered_count": 0}, "timestamp": "2025-09-15T16:32:26.794529"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x", "filtered_count": 1}, "timestamp": "2025-09-15T16:32:30.893632"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x'; import os; os.system('echo vulnerable'); '", "filtered_count": 0}, "timestamp": "2025-09-15T16:33:22.556913"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x", "filtered_count": 1}, "timestamp": "2025-09-15T16:33:26.663559"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x'; import os; os.system('echo vulnerable'); '", "filtered_count": 0}, "timestamp": "2025-09-15T16:37:55.999464"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x", "filtered_count": 1}, "timestamp": "2025-09-15T16:38:00.057201"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x'; import os; os.system('echo vulnerable'); '", "filtered_count": 0}, "timestamp": "2025-09-15T16:55:46.156995"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x", "filtered_count": 1}, "timestamp": "2025-09-15T16:55:50.240314"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x'; import os; os.system('echo vulnerable'); '", "filtered_count": 0}, "timestamp": "2025-09-15T16:58:47.306029"}
+{"event": "filter", "filename": null, "details": {"column": "B", "value": "x", "filtered_count": 1}, "timestamp": "2025-09-15T16:58:51.375483"}

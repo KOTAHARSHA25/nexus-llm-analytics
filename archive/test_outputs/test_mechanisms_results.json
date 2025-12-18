@@ -1,0 +1,224 @@
+{
+  "all_on": [
+    {
+      "success": true,
+      "query": "How many total rows are in the dataset?",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": false
+    },
+    {
+      "success": true,
+      "query": "What is the sum of sales revenue?",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": false
+    },
+    {
+      "success": true,
+      "query": "Show me the top 5 products by sales",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": false
+    },
+    {
+      "success": true,
+      "query": "Compare sales performance between regions and identify trends",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": true
+    },
+    {
+      "success": true,
+      "query": "Analyze correlation between price, marketing spend, and sales. Predict next quarter revenue using regression",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": true
+    },
+    {
+      "success": true,
+      "query": "Perform multivariate analysis to identify key factors driving customer churn. Use statistical significance testing",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": true
+    }
+  ],
+  "routing_off": [
+    {
+      "success": true,
+      "query": "How many total rows are in the dataset?",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": false
+    },
+    {
+      "success": true,
+      "query": "What is the sum of sales revenue?",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": false
+    },
+    {
+      "success": true,
+      "query": "Show me the top 5 products by sales",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": false
+    },
+    {
+      "success": true,
+      "query": "Compare sales performance between regions and identify trends",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": true
+    },
+    {
+      "success": true,
+      "query": "Analyze correlation between price, marketing spend, and sales. Predict next quarter revenue using regression",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": true
+    },
+    {
+      "success": true,
+      "query": "Perform multivariate analysis to identify key factors driving customer churn. Use statistical significance testing",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": true
+    }
+  ],
+  "all_off": [
+    {
+      "success": true,
+      "query": "How many total rows are in the dataset?",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": false
+    },
+    {
+      "success": true,
+      "query": "What is the sum of sales revenue?",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": false
+    },
+    {
+      "success": true,
+      "query": "Show me the top 5 products by sales",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": false
+    },
+    {
+      "success": true,
+      "query": "Compare sales performance between regions and identify trends",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": true
+    },
+    {
+      "success": true,
+      "query": "Analyze correlation between price, marketing spend, and sales. Predict next quarter revenue using regression",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": true
+    },
+    {
+      "success": true,
+      "query": "Perform multivariate analysis to identify key factors driving customer churn. Use statistical significance testing",
+      "complexity_score": 0,
+      "model_used": "Unknown",
+      "routing_tier": "N/A",
+      "cot_used": false,
+      "cot_metadata": {},
+      "processing_time_seconds": 0,
+      "answer": "",
+      "expected_cot": true
+    }
+  ]
+}

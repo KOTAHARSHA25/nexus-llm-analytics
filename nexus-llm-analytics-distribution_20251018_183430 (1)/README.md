@@ -1,0 +1,363 @@
+# 🚀 Nexus LLM Analytics v2
+
+**Advanced AI-Powered Data Analytics Platform with Multi-Agent Architecture**
+
+> A sophisticated, privacy-first data analytics platform that combines the power of Large Language Models with specialized AI agents to provide comprehensive data analysis, visualization, and insights.
+
+---
+
+## 🎯 **Project Overview**
+
+Nexus LLM Analytics is a next-generation data analytics platform that leverages **multi-agent AI architecture** to transform natural language queries into actionable data insights. Built with privacy-first principles, all processing happens locally using **Ollama** for LLM inference.
+
+### **Key Differentiators**
+- 🤖 **Multi-Agent System**: 5 specialized AI agents working in coordination
+- 🔌 **Plugin Architecture**: Extensible system with 5 specialized analytical agents
+- 🏠 **Local-First**: Complete privacy - no data leaves your machine
+- 🎨 **Modern UI**: React/Next.js interface with real-time updates
+- 📊 **Comprehensive Analytics**: Statistical, financial, ML, and time-series analysis
+- 🔍 **File Preview**: Advanced preview system for multiple file formats
+
+---
+
+## ✨ **Core Features**
+
+### **🧠 Multi-Agent Intelligence**
+- **Data Analyst Agent**: Statistical analysis and data manipulation
+- **RAG Specialist Agent**: Document analysis and information retrieval
+- **Reviewer Agent**: Quality assurance and validation
+- **Visualizer Agent**: Interactive chart and graph generation
+- **Reporter Agent**: Professional report compilation
+
+### **🔌 Specialized Plugin Agents**
+1. **📊 Statistical Agent**: Advanced statistical analysis, hypothesis testing, correlation analysis
+2. **📈 Time Series Agent**: ARIMA forecasting, trend analysis, seasonality detection
+3. **💰 Financial Agent**: Business metrics, profitability analysis, financial health assessment
+4. **🤖 ML Insights Agent**: Machine learning analysis, clustering, anomaly detection, PCA
+5. **🗄️ SQL Agent**: Multi-database support, query generation, schema analysis
+
+### **📁 File Support**
+- **Structured Data**: CSV, JSON, XLSX, XLS
+- **Documents**: PDF, DOCX, PPTX, RTF, TXT
+- **Raw Text Input**: Direct text analysis capability
+- **Database Files**: SQL, SQLite, DB files
+
+### **🎨 Advanced UI Features**
+- **File Preview**: Popup previews for all supported file types
+- **Tabbed Results**: Analysis, Review Insights, Charts, Technical Details
+- **Collapsible Sections**: Clean, organized result presentation
+- **Download Reports**: Export analysis results in multiple formats
+- **Real-time Updates**: Live progress tracking and status updates
+
+---
+
+## 🏗️ **Architecture**
+
+### **Technology Stack**
+- **Backend**: FastAPI, Python 3.11+
+- **Frontend**: React 18, Next.js 14, TypeScript
+- **AI Framework**: CrewAI for multi-agent coordination
+- **LLM**: Ollama (local inference)
+- **Database**: ChromaDB for vector storage
+- **UI**: Tailwind CSS, Radix UI components
+- **Visualization**: Plotly, Recharts
+
+### **System Architecture**
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   React UI      │    │   FastAPI        │    │   AI Agents     │
+│   - File Upload │◄──►│   - REST API     │◄──►│   - Data Analyst│
+│   - Results     │    │   - WebSocket    │    │   - RAG Spec.   │
+│   - Preview     │    │   - File Mgmt    │    │   - Reviewer    │
+└─────────────────┘    └──────────────────┘    │   - Visualizer  │
+                                                │   - Reporter    │
+┌─────────────────┐    ┌──────────────────┐    └─────────────────┘
+│   Plugin System │    │   Ollama LLM     │    ┌─────────────────┐
+│   - Statistical │◄──►│   - Local Inf.   │    │   Data Storage  │
+│   - Time Series │    │   - Model Mgmt   │    │   - ChromaDB    │
+│   - Financial   │    │   - Privacy      │    │   - File Cache  │
+│   - ML Insights │    └──────────────────┘    │   - Logs        │
+│   - SQL Agent   │                            └─────────────────┘
+└─────────────────┘
+```
+
+---
+
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+- Python 3.11 or higher
+- Node.js 18 or higher
+- Ollama installed and running
+- 8GB+ RAM recommended
+
+### **Installation**
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/KOTAHARSHA25/nexus-llm-analytics.git
+   cd nexus-llm-analytics
+   ```
+
+2. **Set up Python environment**
+   ```bash
+   python -m venv env
+   # Windows
+   env\Scripts\activate
+   # Linux/Mac
+   source env/bin/activate
+   
+   pip install -r requirements.txt
+   ```
+
+3. **Install and configure Ollama**
+   ```bash
+   # Install Ollama (visit https://ollama.ai for installation)
+   ollama pull llama3.1:8b
+   ollama pull phi3:latest
+   ```
+
+4. **Set up frontend**
+   ```bash
+   cd src/frontend
+   npm install
+   ```
+
+5. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your preferences
+   ```
+
+### **Running the Application**
+
+1. **Start the backend**
+   ```bash
+   cd src/backend
+   python -m uvicorn main:app --reload --port 8000
+   ```
+
+2. **Start the frontend**
+   ```bash
+   cd src/frontend
+   npm run dev
+   ```
+
+3. **Access the application**
+   - Frontend: http://localhost:3000
+   - API Documentation: http://localhost:8000/docs
+
+---
+
+## 💡 **Usage Examples**
+
+### **Statistical Analysis**
+```
+Query: "Analyze the correlation between sales and marketing spend"
+→ Statistical Agent performs correlation analysis with significance testing
+→ Results include correlation coefficients, p-values, confidence intervals
+```
+
+### **Financial Analysis**
+```
+Query: "Calculate our company's financial health metrics"
+→ Financial Agent computes profitability ratios, growth metrics, ROI
+→ Generates comprehensive financial dashboard
+```
+
+### **Time Series Forecasting**
+```
+Query: "Forecast next quarter's revenue based on historical data"
+→ Time Series Agent applies ARIMA modeling
+→ Provides forecasts with confidence intervals and trend analysis
+```
+
+### **Machine Learning Insights**
+```
+Query: "Find customer segments in our user data"
+→ ML Insights Agent performs clustering analysis
+→ Identifies distinct customer groups with characteristics
+```
+
+---
+
+## 🔧 **Advanced Features**
+
+### **Retry Logic with Fallback**
+- **2 automatic retries** for failed analyses
+- **Model switching**: Falls back to review model if primary fails
+- **Graceful degradation**: Continues with available agents
+
+### **Review Model Integration**
+- **Dual-model validation**: Primary model + review model
+- **Quality assessment**: Automated result validation
+- **Feedback loop**: Review insights improve future analyses
+
+### **Plugin Extensibility**
+- **Hot-reloadable plugins**: Add new agents without restart
+- **Configuration-driven**: JSON-based plugin configuration
+- **Capability routing**: Intelligent agent selection based on query
+
+### **Enhanced Error Handling**
+- **User-friendly messages**: Clear, actionable error descriptions
+- **Detailed logging**: Comprehensive system monitoring
+- **Recovery mechanisms**: Multiple fallback strategies
+
+---
+
+## 📊 **Plugin System Deep Dive**
+
+### **How Plugins Work**
+1. **Auto-Discovery**: System scans `/plugins` directory for new agents
+2. **Capability Matching**: Each plugin declares what it can handle
+3. **Confidence Scoring**: Plugins rate their ability to handle queries (0.0-1.0)
+4. **Intelligent Routing**: Best plugin is selected automatically
+5. **Fallback Chain**: If plugin fails, system uses built-in agents
+
+### **Plugin Benefits**
+- **Specialized Expertise**: Domain-specific algorithms and calculations
+- **Better Accuracy**: Precise computations vs. LLM approximations
+- **Faster Performance**: Optimized algorithms for specific tasks
+- **Extensibility**: Easy to add new analytical capabilities
+
+### **Current Plugin Capabilities**
+- **Statistical**: 15+ statistical tests and methods
+- **Time Series**: ARIMA, seasonal decomposition, stationarity tests
+- **Financial**: 20+ business metrics and financial ratios
+- **ML Insights**: Clustering, PCA, anomaly detection, pattern recognition
+- **SQL**: Multi-database queries, schema analysis, optimization
+
+---
+
+## 🔐 **Privacy & Security**
+
+### **Local-First Architecture**
+- ✅ All LLM inference runs locally via Ollama
+- ✅ No data transmitted to external APIs
+- ✅ Complete control over your data
+- ✅ Offline capability for sensitive environments
+
+### **Security Features**
+- 🔒 Sandboxed code execution
+- 🔒 Input validation and sanitization
+- 🔒 File upload restrictions
+- 🔒 Secure file handling
+
+---
+
+## 📈 **Performance**
+
+### **System Requirements**
+- **Minimum**: 8GB RAM, 4-core CPU
+- **Recommended**: 16GB RAM, 8-core CPU
+- **Storage**: 10GB+ for models and data
+
+### **Performance Optimizations**
+- **Lazy Loading**: Components load on-demand
+- **Caching**: Intelligent result caching
+- **Streaming**: Real-time result updates
+- **Memory Management**: Optimized for long-running analyses
+
+---
+
+## 🛠️ **Development**
+
+### **Project Structure**
+```
+nexus-llm-analytics/
+├── src/
+│   ├── backend/
+│   │   ├── api/            # REST API endpoints
+│   │   ├── agents/         # Core AI agents
+│   │   ├── core/           # System utilities
+│   │   └── main.py         # FastAPI application
+│   └── frontend/
+│       ├── app/            # Next.js pages
+│       ├── components/     # React components
+│       └── hooks/          # Custom hooks
+├── plugins/                # Specialized AI agents
+├── docs/                   # Documentation
+├── tests/                  # Test suites
+└── data/                   # Data storage
+```
+
+### **Adding New Plugins**
+1. Create new Python file in `/plugins`
+2. Inherit from `BasePluginAgent`
+3. Implement required methods: `get_metadata()`, `can_handle()`, `execute()`
+4. System automatically discovers and loads the plugin
+
+### **Testing**
+```bash
+pytest tests/                    # Run all tests
+pytest tests/test_plugins.py     # Test plugin system
+pytest tests/test_api.py         # Test API endpoints
+```
+
+---
+
+## 🤝 **Contributing**
+
+### **Development Setup**
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Install development dependencies: `pip install -r requirements-dev.txt`
+4. Make changes and add tests
+5. Run tests: `pytest`
+6. Submit pull request
+
+### **Plugin Development**
+- Follow the `BasePluginAgent` interface
+- Add comprehensive error handling
+- Include metadata and capability declarations
+- Write tests for your plugin
+
+---
+
+## 📋 **Roadmap**
+
+### **Upcoming Features**
+- [ ] **Real-time Collaboration**: Multi-user analysis sessions
+- [ ] **Advanced Visualizations**: Interactive dashboards
+- [ ] **Export Formats**: PDF, Excel, PowerPoint reports
+- [ ] **API Integration**: External data source connectors
+- [ ] **Model Marketplace**: Community plugin sharing
+
+### **Long-term Vision**
+- Enterprise deployment options
+- Advanced security features
+- Distributed computing support
+- Mobile application
+
+---
+
+## 📝 **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 **Acknowledgments**
+
+- **CrewAI** - Multi-agent framework
+- **Ollama** - Local LLM inference
+- **FastAPI** - High-performance API framework
+- **React/Next.js** - Modern frontend framework
+
+---
+
+## 📞 **Support**
+
+- **Documentation**: [docs/](docs/)
+- **Issues**: [GitHub Issues](https://github.com/KOTAHARSHA25/nexus-llm-analytics/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/KOTAHARSHA25/nexus-llm-analytics/discussions)
+
+---
+
+<div align="center">
+
+**Made with ❤️ for data scientists, analysts, and AI enthusiasts**
+
+⭐ **Star this repository if you find it useful!** ⭐
+
+</div>

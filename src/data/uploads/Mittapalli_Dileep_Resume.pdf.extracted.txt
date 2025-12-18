@@ -1,0 +1,43 @@
+ 
+ 
+ 
+SUMMARY  Dileep Mittapalli  
+mittapallidileep123@gmail.com |  9849047112  | 
+LINKED -IN 
+Aspiring  AI Engineer  with hands -on experience  in machine  learning,  web technologies (HTML, CSS, JavaScript). 
+Eager to leverage technical skills  and a strong foundation in AI &amp; ML to contribute to innovative projects, while 
+continuously learning and growing in a dynamic tech environment.  
+EDUCATION  
+Bachelor  of Technology  – Computer  Science  and Engineering  2023-Present  
+Marri  Laxman  Reddy  Institute  of Technology  – Hyderabad  CGPA:  8.6/10 
+Diploma  in Mining  Engineering  2020 -2023  
+Govt  Polytechnic -Kothagudem  CGPA -9.3/10 
+School   2020  
+Regina Carmeli Convent High School  CGPA -10/10  
+ 
+SKILLS  
+● Programming Languages : Java, Python, C 
+● Web/App  Developemt:  HTML,  CSS,  JavaScript  
+● Areas  of Interest : Web Development,  DSA  
+ 
+PROJECTS  
+Real -Time Fire Detection Using CCTV &amp; YOLOv8   
+• Developed a real -time fire detection system using a YOLOv8 model integrated with OpenCV to process live 
+CCTV feeds, achieving high detection accuracy across multiple camera streams.  
+• Implemented email alert functionality to notify users with specific camera IDs when fire is detected, ensuring 
+prompt action and safety.  
+• Optimized model performance with a hybrid dataset of 20K+ fire images, enhancing detection speed and reducing 
+false alarms by over 20%  
+Potato Plant Disease Detection Using CNN   
+• Engineered a CNN -based model incorporating 1D, 2D, and 3D convolutional layers to extract spectral and spatial 
+features from leaf images.  
+• Enabled early and accurate disease diagnosis to assist farmers in applying targeted fertilizers, significantly 
+improving crop quality and yield.  
+• Designed a user -friendly interface to ensure ease of use for non -technical agricultural users, enhancing adoption in 
+rural areas.  
+ 
+CERTIFICATIONS  
+• Programming  Essentials  in Python  - Certified  by CISCO.  
+• Data  Structures  and Algorithms  using  Java - Certified  by NPTEL.  
+• Data  Analytics  Essentials  - Certified  by CISCO.  
+• Data  Structures  and Algorithms  - Certified  by SMART  INTERVIEWS  

@@ -1,0 +1,571 @@
+{
+  "scenario_1_all_on": [
+    {
+      "success": true,
+      "time": 56.32015562057495,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 23.640374183654785,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 23.926101684570312,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 28.294658184051514,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 25.37716031074524,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 54.65348768234253,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 86.03400802612305,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_2_routing_off": [
+    {
+      "success": true,
+      "time": 0.0004417896270751953,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.00023555755615234375,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.0002048015594482422,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.000339508056640625,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.00022101402282714844,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.00032973289489746094,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.00031948089599609375,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_3_all_off": [
+    {
+      "success": true,
+      "time": 0.0003681182861328125,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.00043487548828125,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.00024080276489257812,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.00021505355834960938,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.0001990795135498047,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.0003151893615722656,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.00034880638122558594,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_4_cot_independent": [
+    {
+      "success": true,
+      "time": 0.00031757354736328125,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.00020647048950195312,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_5_manual_override": [
+    {
+      "success": false,
+      "time": 96.26542830467224,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": false,
+      "time": 39.24218010902405,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_6_user_model_parameter": [
+    {
+      "success": false,
+      "time": 49.839022636413574,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": false,
+      "time": 43.65325880050659,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_7_data_complexity": [
+    {
+      "success": true,
+      "time": 0.0002646446228027344,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.0003509521484375,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_8_query_ambiguity": [
+    {
+      "success": true,
+      "time": 52.26964855194092,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 32.971014976501465,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_9_rapid_fire": [
+    {
+      "success": true,
+      "result": "[CATEGORY]: [TOP 3-5 RESULTS WITH TOTAL VALUE IN THIS ORDER], with a total value of [TOTAL VALUE].\n\nCRITICAL: All calculations are ALREADY DONE. Just read and report the numbers shown.",
+      "filename": "C:\\Users\\mitta\\OneDrive\\Documents\\nexus-llm-analytics-dist\\nexus-llm-analytics-dist\\data\\samples\\sales_data.csv",
+      "query": "How many rows are in this dataset?",
+      "type": "structured_analysis",
+      "execution_time": 0,
+      "retry_attempt": 0,
+      "metadata": {},
+      "routing_info": {
+        "selected_model": "tinyllama:latest",
+        "selected_tier": "fast",
+        "complexity_score": 0.107,
+        "routing_time_ms": 0.29,
+        "intelligent_routing_enabled": true,
+        "using_force_model": false,
+        "reason": "Intelligent routing (complexity: 0.107)"
+      },
+      "processing_time_seconds": 0.0002694129943847656
+    },
+    {
+      "success": true,
+      "result": "To analyze data from the \"C:\\Users\\mitta\\OneDrive\\Documents\\nexus-llm-analytics-dist\\nexus-llm-analytics-dist\\data\\samples\\sales_data.csv\" using the provided CRITICAL report, follow these steps:\n1. Make sure you have the required Python installation and version installed on your computer. This is specified in the CRITICAL section.\n2. Navigate to the desired data file location and open it with your preferred text editor or code editor.\n3. Inspect the \"data\" section of the CSV file, which contains a table containing various rows and columns.\n4. Use the Python dictionary comprehension syntax (list comprehension) to group each row into a dictionary based on its category. This process is performed in the \"process_data()\" function provided by the CRITICAL report.\n5. The top 3-5 results with their total values can be found in the \"total\" column of each dictionary, which can then be listed using the built-in Python list method \"list()\" (without quotes).\n6. The output will be displayed as a list, and each result's count, category group, and total value will be printed separately.",
+      "filename": "C:\\Users\\mitta\\OneDrive\\Documents\\nexus-llm-analytics-dist\\nexus-llm-analytics-dist\\data\\samples\\sales_data.csv",
+      "query": "Count the unique products",
+      "type": "structured_analysis",
+      "execution_time": 0,
+      "retry_attempt": 0,
+      "metadata": {},
+      "routing_info": {
+        "selected_model": "tinyllama:latest",
+        "selected_tier": "fast",
+        "complexity_score": 0.106,
+        "routing_time_ms": 0.1,
+        "intelligent_routing_enabled": true,
+        "using_force_model": false,
+        "reason": "Intelligent routing (complexity: 0.106)"
+      },
+      "processing_time_seconds": 0.0004239082336425781
+    },
+    {
+      "success": true,
+      "result": "Certainly! Here's a more detailed breakdown of the data analysis and calculations in the \"What is the sum of revenues?\" question:\n\n1. Grouping Revenue Data: To group the revenue data based on categories, you can use the \"AGGREGATED AGGR\" section of the Data Info Report. In this case, the \"AGGREGATED AGGR\" section will show the aggregated revenues grouped by category.\n\n2. Total Revenues: To calculate the total revenues, simply count the matching values in each category group. For example, for the top three results with their Total values shown above, you can count \"Total (13.7m)\" as \"3\", and then list those three results at the end of your output.\n\n3. List Top 3-5 Results: To list only the top 3-5 results with their Total values, add a \"Max\" filter to the \"AGGREGATED AGGR\" section, which will show the highest value in each category group. Then, you can loop through each matching result and print its name followed by its corresponding Total value (i.e., \"Name: $[Total value]\" for each result).\n\n4. No Calculation Needed: The calculations are already done for you. When you're ready to report your results, simply read the Data Info Report, and you should see the top 3-5 results with their Total values listed in the \"AGGREGATED AGGR\" section. It's just a matter of printing each result out in order.",
+      "filename": "C:\\Users\\mitta\\OneDrive\\Documents\\nexus-llm-analytics-dist\\nexus-llm-analytics-dist\\data\\samples\\sales_data.csv",
+      "query": "What is the sum of revenue?",
+      "type": "structured_analysis",
+      "execution_time": 0,
+      "retry_attempt": 0,
+      "metadata": {},
+      "routing_info": {
+        "selected_model": "tinyllama:latest",
+        "selected_tier": "fast",
+        "complexity_score": 0.107,
+        "routing_time_ms": 0.09,
+        "intelligent_routing_enabled": true,
+        "using_force_model": false,
+        "reason": "Intelligent routing (complexity: 0.107)"
+      },
+      "processing_time_seconds": 0.0002620220184326172
+    }
+  ],
+  "scenario_10_cache_behavior": [
+    {
+      "success": true,
+      "time": 43.812687158584595,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    },
+    {
+      "success": true,
+      "time": 0.0004305839538574219,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_11_mixed_complexity": [
+    {
+      "success": true,
+      "time": 85.35034704208374,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_12_review_model_different": [
+    {
+      "success": false,
+      "time": 45.82044219970703,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_13_complexity_upgrade": [
+    {
+      "success": true,
+      "time": 85.25305366516113,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown"
+    }
+  ],
+  "scenario_14_lightweight_model_accuracy": [
+    {
+      "success": true,
+      "time": 0.00046634674072265625,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 48.1344780921936,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 36.189608335494995,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 27.585545539855957,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 52.6823456287384,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 42.227057695388794,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 64.55763483047485,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    }
+  ],
+  "scenario_15_balanced_model_accuracy": [
+    {
+      "success": true,
+      "time": 0.0004131793975830078,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 64.64769196510315,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 24.70538020133972,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 26.019250869750977,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 30.364407777786255,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 329.9974615573883,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 71.94046998023987,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    }
+  ],
+  "scenario_16_powerful_model_accuracy": [
+    {
+      "success": true,
+      "time": 0.0006940364837646484,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 38.00489568710327,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 48.61834120750427,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 27.5726215839386,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 55.90327978134155,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 21157.753652572632,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    },
+    {
+      "success": false,
+      "time": 27.747828722000122,
+      "tier": "N/A",
+      "cot": false,
+      "complexity": 0,
+      "model": "Unknown",
+      "accurate": false
+    }
+  ]
+}

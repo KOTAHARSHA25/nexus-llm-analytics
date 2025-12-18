@@ -1,0 +1,27 @@
+{
+  "company-info": {
+    "name": "TechCorp™ 科技",
+    "founded": "2020-01-15",
+    "active": true,
+    "employees": null,
+    "departments": [
+      {
+        "dept-id": 1,
+        "dept.name": "Engineering",
+        "head": null,
+        "budget": 500000,
+        "active": true,
+        "members": [
+          {
+            "name": "Alice",
+            "salary": null
+          },
+          {
+            "name": "李明",
+            "salary": 80000
+          }
+        ]
+      }
+    ]
+  }
+}

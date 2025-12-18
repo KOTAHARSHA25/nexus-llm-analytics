@@ -1,0 +1,26 @@
+{
+  "test_metadata": {
+    "date": "2025-11-09T17:28:47.197684",
+    "random_seed": 42,
+    "python_version": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+    "total_queries": 1035,
+    "test_duration_seconds": 1.580488920211792
+  },
+  "statistics": {
+    "accuracy": {
+      "point_estimate": 0.0,
+      "ci_95_lower": 0.0,
+      "ci_95_upper": 0.0036978297199025895,
+      "sample_size": 1035
+    },
+    "timing": {
+      "mean": 1.4651388429321242,
+      "median": 0.04179996903985739,
+      "std": 13.81854869085419,
+      "min": 0.030700000934302807,
+      "max": 420.60910002328455,
+      "p50": 0.04179996903985739,
+      "p95": 5.561750032938505,
+      "p99": 25.688504031859335
+    },
+    "tier_distribution": {

@@ -1,0 +1,364 @@
+{
+  "version": "NEW",
+  "timestamp": "2025-12-16T17:36:14.824580",
+  "backend_url": "http://localhost:8000",
+  "categories": {
+    "simple": [
+      {
+        "query": "What is the total revenue?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 32.16,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What is the total revenue?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "b88cdf60-2011-442e-bef7-00c4cbc16e12",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "How many rows are in this dataset?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.18,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "How many rows are in this dataset?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "3c0e7423-5e6a-4b31-983b-9219129df6b5",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "What is the average sales?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.17,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What is the average sales?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "0b1a9d2a-7eb1-48ac-8dbf-da8f69d84b72",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Show the top 5 products by revenue",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.14,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Show the top 5 products by revenue",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "05ef6647-9a3f-4c9a-9a3e-593070a769df",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "What is the maximum marketing_spend?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.2,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What is the maximum marketing_spend?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "2bcaf007-dca8-4a75-973f-1f5e41508fa5",
+          "status": "success",
+          "error": null
+        }
+      }
+    ],
+    "medium": [
+      {
+        "query": "Compare sales by region",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.19,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Compare sales by region",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "cce39734-b6b2-4c50-b3d6-a0a3ca097e0c",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "What is the correlation between sales and revenue?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.27,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What is the correlation between sales and revenue?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "ce87e304-a551-4669-8a0f-34b7838176d9",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Group by product and show total sales for each",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.27,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Group by product and show total sales for each",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "217be2a2-6661-4f8d-8110-6245f0bfe362",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Which region has the highest average revenue?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.21,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Which region has the highest average revenue?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "5b350f31-3fe8-42a7-8158-48712bd37d01",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Show the distribution of stress levels",
+        "filename": "StressLevelDataset.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.33,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Show the distribution of stress levels",
+          "filename": "StressLevelDataset.csv",
+          "filenames": [
+            "StressLevelDataset.csv"
+          ],
+          "analysis_id": "80dc5482-fdcf-492f-879c-0e0a33ed90e1",
+          "status": "success",
+          "error": null
+        }
+      }
+    ],
+    "complex": [
+      {
+        "query": "Analyze the relationship between anxiety_level and stress_level",
+        "filename": "StressLevelDataset.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.22,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Analyze the relationship between anxiety_level and stress_level",
+          "filename": "StressLevelDataset.csv",
+          "filenames": [
+            "StressLevelDataset.csv"
+          ],
+          "analysis_id": "d980fc79-337c-4f28-a07f-6323d17d5d17",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "What factors most strongly predict high stress levels?",
+        "filename": "StressLevelDataset.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.17,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What factors most strongly predict high stress levels?",
+          "filename": "StressLevelDataset.csv",
+          "filenames": [
+            "StressLevelDataset.csv"
+          ],
+          "analysis_id": "b6c4b882-dfb1-4f11-94f0-f5189fc7921f",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Identify any outliers in the sales data",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.24,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Identify any outliers in the sales data",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "1a16d4a8-7407-411d-8161-588bb832b67f",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Calculate year-over-year growth pattern by region",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.21,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Calculate year-over-year growth pattern by region",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "9d2422d4-c82c-4079-b116-1723852d25ff",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Perform statistical analysis on marketing_spend effectiveness",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "",
+        "error": null,
+        "elapsed_seconds": 8.24,
+        "raw_response": {
+          "result": "",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Perform statistical analysis on marketing_spend effectiveness",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "0c464f19-9e26-42bf-80b8-0c6c99e61948",
+          "status": "success",
+          "error": null
+        }
+      }
+    ]
+  },
+  "summary": {
+    "total_queries": 15,
+    "passed": 15,
+    "failed": 0,
+    "total_time_seconds": 147.2
+  }
+}

@@ -1,0 +1,364 @@
+{
+  "version": "NEW_FIXED",
+  "timestamp": "2025-12-16T18:22:45.781543",
+  "backend_url": "http://localhost:8000",
+  "categories": {
+    "simple": [
+      {
+        "query": "What is the total revenue?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "Widget A by product: $535,265\nWidget B by product: $478,520\nWidget C by product: $420,633\nWidget D by product: $583,909\nWidget E by product: $544,717",
+        "error": null,
+        "elapsed_seconds": 145.57,
+        "raw_response": {
+          "result": "Widget A by product: $535,265\nWidget B by product: $478,520\nWidget C by product: $420,633\nWidget D by product: $583,909\nWidget E by product: $544,717",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What is the total revenue?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "57c89f0f-693c-4cfe-aef0-7e4f1499b42a",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "How many rows are in this dataset?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "- Widget A by product: $91,649\n- Widget B by product: $120,040\n- Widget C by product: $106,838\n- Widget D by product: $90,708\n- Widget E by product: $111,588",
+        "error": null,
+        "elapsed_seconds": 117.26,
+        "raw_response": {
+          "result": "- Widget A by product: $91,649\n- Widget B by product: $120,040\n- Widget C by product: $106,838\n- Widget D by product: $90,708\n- Widget E by product: $111,588",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "How many rows are in this dataset?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "ed75b262-9703-40af-96a9-4d08331bde37",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "What is the average sales?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "Widget A - North: $535,265\nNorth: East: $694,789\nEast: $131,307 (Sales), $694,789 (Revenue)\nWest: $72,008 (Marketing Spend)",
+        "error": null,
+        "elapsed_seconds": 155.07,
+        "raw_response": {
+          "result": "Widget A - North: $535,265\nNorth: East: $694,789\nEast: $131,307 (Sales), $694,789 (Revenue)\nWest: $72,008 (Marketing Spend)",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What is the average sales?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "6678485a-73ac-41ca-ab10-cd1d36eb13ae",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Show the top 5 products by revenue",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "- East: $694,789\n- North: $551,226\n- South: $685,231\n- West: $631,798\n- Widget D has the highest revenue. (Widget A is second with $535,265)",
+        "error": null,
+        "elapsed_seconds": 146.83,
+        "raw_response": {
+          "result": "- East: $694,789\n- North: $551,226\n- South: $685,231\n- West: $631,798\n- Widget D has the highest revenue. (Widget A is second with $535,265)",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Show the top 5 products by revenue",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "1ccbd7a7-5376-47b8-8f2e-f110a966e377",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "What is the maximum marketing_spend?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "Sales by Product - Top results with their Total values:\n- Widget D: $90,708\n- Widget E: $111,588\n- Widget C: $106,838\n- Widget B: $120,040\n- Widget A: $91,649",
+        "error": null,
+        "elapsed_seconds": 127.54,
+        "raw_response": {
+          "result": "Sales by Product - Top results with their Total values:\n- Widget D: $90,708\n- Widget E: $111,588\n- Widget C: $106,838\n- Widget B: $120,040\n- Widget A: $91,649",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What is the maximum marketing_spend?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "26b1fb62-3a50-4b9e-ba2d-30b32ac49024",
+          "status": "success",
+          "error": null
+        }
+      }
+    ],
+    "medium": [
+      {
+        "query": "Compare sales by region",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "- East: $694,789 in revenue\n- North: $551,226 in revenue\n- South: $685,231 in revenue\n- West: $631,798 in revenue\n\nNote: These values were selected from the \"REVENUE by REGION\" section and are among the top totals for each region.",
+        "error": null,
+        "elapsed_seconds": 113.65,
+        "raw_response": {
+          "result": "- East: $694,789 in revenue\n- North: $551,226 in revenue\n- South: $685,231 in revenue\n- West: $631,798 in revenue\n\nNote: These values were selected from the \"REVENUE by REGION\" section and are among the top totals for each region.",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Compare sales by region",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "7c67ed7a-d117-4836-a309-60057d482701",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "What is the correlation between sales and revenue?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "Sales by Product:\n- Widget A: $91,649\n- Widget B: $120,040\n- Widget C: $106,838\n- Widget D: $90,708\n- Widget E: $111,588\n\nRevenue by Product:\n- Widget A: $535,265\n- Widget B: $478,520\n- Widget C: $420,633\n- Widget D: $583,909\n- Widget E: $544,717",
+        "error": null,
+        "elapsed_seconds": 133.66,
+        "raw_response": {
+          "result": "Sales by Product:\n- Widget A: $91,649\n- Widget B: $120,040\n- Widget C: $106,838\n- Widget D: $90,708\n- Widget E: $111,588\n\nRevenue by Product:\n- Widget A: $535,265\n- Widget B: $478,520\n- Widget C: $420,633\n- Widget D: $583,909\n- Widget E: $544,717",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What is the correlation between sales and revenue?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "d1562356-9329-4c04-b3d6-14f5663b6ba7",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Group by product and show total sales for each",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "- East: $694,789\n- North: $551,226\n- South: $685,231\n- West: $631,798\n\n(Note: The above results are listed in descending order of total revenue for each region.)",
+        "error": null,
+        "elapsed_seconds": 92.49,
+        "raw_response": {
+          "result": "- East: $694,789\n- North: $551,226\n- South: $685,231\n- West: $631,798\n\n(Note: The above results are listed in descending order of total revenue for each region.)",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Group by product and show total sales for each",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "3ab5befb-c0ec-4332-b41d-44f28413c1e5",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Which region has the highest average revenue?",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "- East: $694,789\n- North: $551,226\n- South: $685,231\n- West: $631,798\n\nThe region with the highest average revenue is not listed among these top 4 results. However, if we consider the individual averages provided for each product and multiply it by their respective occurrences per category within a region (which should yield total revenues), none of the 'grouped aggregations' will reveal any one particular region as having an overall highest average revenue compared to others since all regions have been presented with similar totals.\n\nIf you need further information or assistance, please let me know!",
+        "error": null,
+        "elapsed_seconds": 143.35,
+        "raw_response": {
+          "result": "- East: $694,789\n- North: $551,226\n- South: $685,231\n- West: $631,798\n\nThe region with the highest average revenue is not listed among these top 4 results. However, if we consider the individual averages provided for each product and multiply it by their respective occurrences per category within a region (which should yield total revenues), none of the 'grouped aggregations' will reveal any one particular region as having an overall highest average revenue compared to others since all regions have been presented with similar totals.\n\nIf you need further information or assistance, please let me know!",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Which region has the highest average revenue?",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "1e09810e-a172-42f2-a4ac-81a454ca193c",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Show the distribution of stress levels",
+        "filename": "StressLevelDataset.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "Anxiety Level: $12,170\nSelf Esteem: $19,555\nMental Health History: $542\nDepression: $13,811\nHeadache: $2,759\nBlood Pressure: $2,400\nSleep Quality: $2,926\nBreathing Problem: $3,029\nNoise Level: $2,914\nLiving Conditions: $2,770",
+        "error": null,
+        "elapsed_seconds": 81.36,
+        "raw_response": {
+          "result": "Anxiety Level: $12,170\nSelf Esteem: $19,555\nMental Health History: $542\nDepression: $13,811\nHeadache: $2,759\nBlood Pressure: $2,400\nSleep Quality: $2,926\nBreathing Problem: $3,029\nNoise Level: $2,914\nLiving Conditions: $2,770",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Show the distribution of stress levels",
+          "filename": "StressLevelDataset.csv",
+          "filenames": [
+            "StressLevelDataset.csv"
+          ],
+          "analysis_id": "b948b094-3922-4fbe-a493-060f32e162d1",
+          "status": "success",
+          "error": null
+        }
+      }
+    ],
+    "complex": [
+      {
+        "query": "Analyze the relationship between anxiety_level and stress_level",
+        "filename": "StressLevelDataset.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "As requested, I will only report on \"stress_level\" since it's not listed in any category but is closely related to anxiety and depression which are present. Using the provided pre-calculated statistics from StressLevelDataset.csv (and assuming a direct correlation between these variables):\n\n[Depression]: $13,811\n[Anxiety_level]: $12,170",
+        "error": null,
+        "elapsed_seconds": 90.41,
+        "raw_response": {
+          "result": "As requested, I will only report on \"stress_level\" since it's not listed in any category but is closely related to anxiety and depression which are present. Using the provided pre-calculated statistics from StressLevelDataset.csv (and assuming a direct correlation between these variables):\n\n[Depression]: $13,811\n[Anxiety_level]: $12,170",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Analyze the relationship between anxiety_level and stress_level",
+          "filename": "StressLevelDataset.csv",
+          "filenames": [
+            "StressLevelDataset.csv"
+          ],
+          "analysis_id": "90d192e7-2f3f-404e-ae0e-6dc4e06212a6",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "What factors most strongly predict high stress levels?",
+        "filename": "StressLevelDataset.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "Depression: $13,811\nSelf_esteem: $19,555\nBlood_pressure: $2,400\nStress_level: [Matching total here] (Note: This value was not provided in the original data)",
+        "error": null,
+        "elapsed_seconds": 96.8,
+        "raw_response": {
+          "result": "Depression: $13,811\nSelf_esteem: $19,555\nBlood_pressure: $2,400\nStress_level: [Matching total here] (Note: This value was not provided in the original data)",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "What factors most strongly predict high stress levels?",
+          "filename": "StressLevelDataset.csv",
+          "filenames": [
+            "StressLevelDataset.csv"
+          ],
+          "analysis_id": "acbe7df2-01b4-4f9f-ab02-3db576b04136",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Identify any outliers in the sales data",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "- Widget A by REGION - East: $694,789\n- Widget B by REGION - West: $583,909\n- Widget C by REGION - South: $685,231\n- Widget D by REGION - North: $551,226\n- Widget E by REGION - East: $631,798",
+        "error": null,
+        "elapsed_seconds": 133.39,
+        "raw_response": {
+          "result": "- Widget A by REGION - East: $694,789\n- Widget B by REGION - West: $583,909\n- Widget C by REGION - South: $685,231\n- Widget D by REGION - North: $551,226\n- Widget E by REGION - East: $631,798",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Identify any outliers in the sales data",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "eba2fda0-d5bb-45e5-89d2-12e86a9007cd",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Calculate year-over-year growth pattern by region",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "- East: $694,789\n- North: $551,226\n- South: $685,231\n- West: $631,798\n- Widget A (East): $20,000*  [Total value]\n- Widget B (North): $40,000*   [Total value]\n- Widget C (South): $50,000*    [Total value]\n- ... and so on for the top spenders in each region based on their \"Marketing_spend\" data.",
+        "error": null,
+        "elapsed_seconds": 139.08,
+        "raw_response": {
+          "result": "- East: $694,789\n- North: $551,226\n- South: $685,231\n- West: $631,798\n- Widget A (East): $20,000*  [Total value]\n- Widget B (North): $40,000*   [Total value]\n- Widget C (South): $50,000*    [Total value]\n- ... and so on for the top spenders in each region based on their \"Marketing_spend\" data.",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Calculate year-over-year growth pattern by region",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "23b6d5b5-65d3-4c6c-af59-80351c64b28c",
+          "status": "success",
+          "error": null
+        }
+      },
+      {
+        "query": "Perform statistical analysis on marketing_spend effectiveness",
+        "filename": "sales_data.csv",
+        "success": true,
+        "status_code": 200,
+        "result": "- Sales by Region:\n  \u2022 East: $1,31,307\n  \u2022 North: $1,41,879\n  \u2022 South: $1,25,393\n  \u2022 West: $1,22,244\n\n- Revenue by Product:\n  \u2022 Widget A: $6,37,230 (top value)\n  \u2022 Widget B: $4,78,520\n  \u2022 Widget C: $4,20,633\n  \u2022 Widget D: $5,83,909\n  \u2022 Widget E: $5,44,717\n\n- Marketing Spend by Product:\n  \u2022 Widget A: $1,05,825 (top value)\n  \u2022 Widget B: $1,00,796\n  \u2022 Widget C: $1,11,302\n  \u2022 Widget D: $1,25,400\n  \u2022 Widget E: $1,11,877",
+        "error": null,
+        "elapsed_seconds": 133.44,
+        "raw_response": {
+          "result": "- Sales by Region:\n  \u2022 East: $1,31,307\n  \u2022 North: $1,41,879\n  \u2022 South: $1,25,393\n  \u2022 West: $1,22,244\n\n- Revenue by Product:\n  \u2022 Widget A: $6,37,230 (top value)\n  \u2022 Widget B: $4,78,520\n  \u2022 Widget C: $4,20,633\n  \u2022 Widget D: $5,83,909\n  \u2022 Widget E: $5,44,717\n\n- Marketing Spend by Product:\n  \u2022 Widget A: $1,05,825 (top value)\n  \u2022 Widget B: $1,00,796\n  \u2022 Widget C: $1,11,302\n  \u2022 Widget D: $1,25,400\n  \u2022 Widget E: $1,11,877",
+          "visualization": null,
+          "code": null,
+          "execution_time": 0.0,
+          "query": "Perform statistical analysis on marketing_spend effectiveness",
+          "filename": "sales_data.csv",
+          "filenames": [
+            "sales_data.csv"
+          ],
+          "analysis_id": "3328f19a-ee5c-4dd9-a886-fad20b373047",
+          "status": "success",
+          "error": null
+        }
+      }
+    ]
+  },
+  "summary": {
+    "total_queries": 15,
+    "passed": 15,
+    "failed": 0,
+    "total_time_seconds": 1849.9
+  }
+}

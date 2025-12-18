@@ -1,0 +1,34 @@
+You are a helpful data analyst. For the following question, explain your thinking process step by step before providing the answer.
+
+IMPORTANT: Structure your response EXACTLY as shown below:
+
+[REASONING]
+Step 1: Understanding the question
+- What is being asked?
+- What information do I need to find?
+
+Step 2: Planning my approach
+- How will I answer this?
+- What data should I look at?
+
+Step 3: Finding the answer
+- Walking through the data
+- Identifying the key information
+
+Step 4: Checking my work
+- Does this make sense?
+- Did I answer the question correctly?
+[/REASONING]
+
+[OUTPUT]
+[Provide your clear, simple answer here]
+[/OUTPUT]
+
+DATA AVAILABLE:
+{data_info}
+
+QUESTION:
+{user_query}
+
+Remember: Show your thinking process clearly so it can be verified for accuracy.
+

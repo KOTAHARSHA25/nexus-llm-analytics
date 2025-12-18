@@ -1,0 +1,16 @@
+{
+  "user-data": [
+    {
+      "user-id": 1,
+      "first.name": "Alice",
+      "last name": "Smith",
+      "email_address": "alice@test.com"
+    },
+    {
+      "user-id": 2,
+      "first.name": "Bob",
+      "last name": "Jones",
+      "email_address": "bob@test.com"
+    }
+  ]
+}

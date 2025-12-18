@@ -1,0 +1,7031 @@
+[
+  {
+    "query": "Calculate statistical confidence intervals for key metrics",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate statistical confidence intervals for key metrics",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate Bayesian credible intervals for parameter estimates",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate statistical confidence intervals for key metrics",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show trends in customer acquisition over the year",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate statistical confidence intervals for key metrics",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform supply chain optimization with multi-objective goals",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show trends in customer acquisition over the year",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Top 3 selling items",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show trends in customer acquisition over the year",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Run Monte Carlo simulations for risk assessment",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate Bayesian credible intervals for parameter estimates",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Run Monte Carlo simulations for risk assessment",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Run Monte Carlo simulations for risk assessment",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate Bayesian credible intervals for parameter estimates",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate statistical confidence intervals for key metrics",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate Bayesian credible intervals for parameter estimates",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate statistical confidence intervals for key metrics",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform supply chain optimization with multi-objective goals",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate statistical confidence intervals for key metrics",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform supply chain optimization with multi-objective goals",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate statistical confidence intervals for key metrics",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show trends in customer acquisition over the year",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Run Monte Carlo simulations for risk assessment",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform supply chain optimization with multi-objective goals",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Run Monte Carlo simulations for risk assessment",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Top 3 selling items",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Top 3 selling items",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show trends in customer acquisition over the year",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Calculate statistical confidence intervals for key metrics",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Top 3 selling items",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform supply chain optimization with multi-objective goals",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show trends in customer acquisition over the year",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Aggregate orders by customer segment with averages",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.5295,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.529,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Top 3 selling items",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show trends in customer acquisition over the year",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Top 3 selling items",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show conversion rates by marketing channel over time",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show trends in customer acquisition over the year",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show trends in customer acquisition over the year",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryA-Medium",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform supply chain optimization with multi-objective goals",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Lowest prices first",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Most recent comments",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sort by date descending",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Top 3 selling items",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Rank products by sales",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show seasonal decomposition of sales data",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show period-over-period percentage changes",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show year-over-year comparison with variance",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1365,
+    "category": "CategoryA-Medium",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.137,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Summarize revenue by product and time period",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryA-Medium",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Top 3 selling items",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryA-Simple",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Perform resource allocation using optimization algorithms",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryA-Complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show sales trends",
+    "expected": "balanced",
+    "actual": "fast",
+    "complexity": 0.15000000000000002,
+    "category": "CategoryB-EdgeCase: Ambiguous: 'trends' implies time-series but minimal detail",
+    "semantic": 0.1,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.1,
+        "weight": 0.15,
+        "contribution": 0.015
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.15,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "I would like you to please provide me with a comprehensive detailed analysis of all the sales data that we have collected over the past several years, including breakdowns by every possible dimension such as region, product category, customer segment, time period, and any other relevant factors, and I also need you to identify any interesting patterns, trends, or anomalies that might be present in the data",
+    "expected": "balanced",
+    "actual": "full",
+    "complexity": 0.588,
+    "category": "CategoryB-EdgeCase: Long query but mostly descriptive",
+    "semantic": 0.42000000000000004,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.42,
+        "weight": 0.15,
+        "contribution": 0.063
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.588,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Sales?",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryB-EdgeCase: Minimal context, likely simple aggregation",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Show top 10 and cluster customers",
+    "expected": "full",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryB-EdgeCase: Mixed: top-n (simple) + cluster (complex) = complex wins",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Waht is the avrage saels???",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.41400000000000003,
+    "category": "CategoryB-EdgeCase: Typos shouldn't drastically change complexity",
+    "semantic": 0.26,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.26,
+        "weight": 0.15,
+        "contribution": 0.039
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.414,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Which factors drive sales most?",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryB-EdgeCase: Implies feature importance = ML",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Is this pattern statistically significant?",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3915,
+    "category": "CategoryB-EdgeCase: Implies hypothesis testing",
+    "semantic": 0.11000000000000001,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.11,
+        "weight": 0.15,
+        "contribution": 0.017
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.392,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "What's the optimal price point?",
+    "expected": "full",
+    "actual": "balanced",
+    "complexity": 0.3765,
+    "category": "CategoryB-EdgeCase: Implies optimization",
+    "semantic": 0.010000000000000002,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.01,
+        "weight": 0.15,
+        "contribution": 0.002
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.377,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "machine learning prediction optimization statistical analysis forecast model cluster SHOW TOTAL",
+    "expected": "fast",
+    "actual": "full",
+    "complexity": 0.5339999999999999,
+    "category": "CategoryC-Adversarial: Spam keywords but ends with simple request",
+    "semantic": 0.06,
+    "data": 0.30000000000000004,
+    "operation": 0.75,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.06,
+        "weight": 0.15,
+        "contribution": 0.009
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.75,
+        "weight": 0.6,
+        "contribution": 0.45
+      },
+      "total_score": 0.534,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "Let's do something simple... predict customer churn using deep learning",
+    "expected": "full",
+    "actual": "fast",
+    "complexity": 0.1395,
+    "category": "CategoryC-Adversarial: Starts simple, ends complex",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.1,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.1,
+        "weight": 0.6,
+        "contribution": 0.06
+      },
+      "total_score": 0.14,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  },
+  {
+    "query": "This definitely requires a PhD in statistics: what's 2+2?",
+    "expected": "fast",
+    "actual": "balanced",
+    "complexity": 0.3795,
+    "category": "CategoryC-Adversarial: Sarcastic complexity claim, simple operation",
+    "semantic": 0.03,
+    "data": 0.30000000000000004,
+    "operation": 0.5,
+    "reason": {
+      "semantic_analysis": {
+        "score": 0.03,
+        "weight": 0.15,
+        "contribution": 0.004
+      },
+      "data_analysis": {
+        "score": 0.3,
+        "weight": 0.25,
+        "contribution": 0.075
+      },
+      "operation_analysis": {
+        "score": 0.5,
+        "weight": 0.6,
+        "contribution": 0.3
+      },
+      "total_score": 0.38,
+      "tier_thresholds": {
+        "fast": "< 0.25",
+        "balanced": "0.25 - 0.45",
+        "full_power": "> 0.45"
+      }
+    }
+  }
+]

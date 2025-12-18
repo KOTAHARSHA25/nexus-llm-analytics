@@ -1,0 +1,312 @@
+INTELLIGENT ROUTING BENCHMARK RESULTS
+================================================================================
+
+
+SIMPLE QUERIES:
+--------------------------------------------------------------------------------
+
+Query 1: What is the total sales?
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.084ms
+  Correct: Yes
+
+Query 2: How many products are there?
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.048ms
+  Correct: Yes
+
+Query 3: What is the average revenue?
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.037ms
+  Correct: Yes
+
+Query 4: Show me the first 5 rows
+  Complexity: 0.190
+  Tier: fast
+  Routing Time: 0.036ms
+  Correct: Yes
+
+Query 5: What columns are in this dataset?
+  Complexity: 0.340
+  Tier: balanced
+  Routing Time: 0.036ms
+  Correct: No
+
+Query 6: Count the number of records
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.034ms
+  Correct: Yes
+
+Query 7: What is the maximum price?
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.031ms
+  Correct: Yes
+
+Query 8: What is the minimum value?
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.029ms
+  Correct: Yes
+
+Query 9: Sum all quantities
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.032ms
+  Correct: Yes
+
+Query 10: Show unique categories
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.037ms
+  Correct: Yes
+
+Query 11: What is the dataset size?
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.032ms
+  Correct: Yes
+
+Query 12: List all column names
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.033ms
+  Correct: Yes
+
+Query 13: How many rows are there?
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.032ms
+  Correct: Yes
+
+Query 14: What is the mean sales?
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.031ms
+  Correct: Yes
+
+Query 15: Show data types
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.035ms
+  Correct: Yes
+
+Query 16: Count unique values
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.031ms
+  Correct: Yes
+
+Query 17: What is the total count?
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.257ms
+  Correct: Yes
+
+Query 18: Display column statistics
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.049ms
+  Correct: Yes
+
+Query 19: Show the first record
+  Complexity: 0.183
+  Tier: fast
+  Routing Time: 0.035ms
+  Correct: Yes
+
+Query 20: What is the sum of revenue?
+  Complexity: 0.190
+  Tier: fast
+  Routing Time: 0.035ms
+  Correct: Yes
+
+MEDIUM QUERIES:
+--------------------------------------------------------------------------------
+
+Query 1: Compare sales by region and show trends
+  Complexity: 0.428
+  Tier: balanced
+  Routing Time: 0.045ms
+  Correct: Yes
+
+Query 2: Calculate year-over-year growth by category
+  Complexity: 0.333
+  Tier: balanced
+  Routing Time: 0.036ms
+  Correct: Yes
+
+Query 3: Analyze correlation between price and sales with visualization
+  Complexity: 0.340
+  Tier: balanced
+  Routing Time: 0.037ms
+  Correct: Yes
+
+Query 4: What is the correlation between price and sales?
+  Complexity: 0.340
+  Tier: balanced
+  Routing Time: 0.033ms
+  Correct: Yes
+
+Query 5: Identify seasonal patterns in the data
+  Complexity: 0.365
+  Tier: balanced
+  Routing Time: 0.034ms
+  Correct: Yes
+
+Query 6: Compare performance trends across different regions
+  Complexity: 0.453
+  Tier: full
+  Routing Time: 0.036ms
+  Correct: No
+
+Query 7: Compare performance across different regions
+  Complexity: 0.395
+  Tier: balanced
+  Routing Time: 0.035ms
+  Correct: Yes
+
+Query 8: Analyze profit trends and revenue patterns
+  Complexity: 0.390
+  Tier: balanced
+  Routing Time: 0.033ms
+  Correct: Yes
+
+Query 9: Show revenue breakdown by product category with comparison
+  Complexity: 0.190
+  Tier: fast
+  Routing Time: 0.036ms
+  Correct: No
+
+Query 10: Analyze customer segmentation by spending patterns
+  Complexity: 0.540
+  Tier: full
+  Routing Time: 0.034ms
+  Correct: No
+
+Query 11: Calculate profit margins by product line with trends
+  Complexity: 0.365
+  Tier: balanced
+  Routing Time: 0.033ms
+  Correct: Yes
+
+Query 12: Compare this quarter vs last quarter with growth analysis
+  Complexity: 0.403
+  Tier: balanced
+  Routing Time: 0.032ms
+  Correct: Yes
+
+Query 13: Analyze year-to-date performance trends
+  Complexity: 0.358
+  Tier: balanced
+  Routing Time: 0.236ms
+  Correct: Yes
+
+Query 14: Identify top-performing products by region with comparison
+  Complexity: 0.215
+  Tier: fast
+  Routing Time: 0.068ms
+  Correct: No
+
+Query 15: Calculate customer lifetime value with analysis
+  Complexity: 0.365
+  Tier: balanced
+  Routing Time: 0.043ms
+  Correct: Yes
+
+Query 16: Analyze sales trends over time with patterns
+  Complexity: 0.390
+  Tier: balanced
+  Routing Time: 0.037ms
+  Correct: Yes
+
+Query 17: Compare weekday vs weekend sales with distribution
+  Complexity: 0.403
+  Tier: balanced
+  Routing Time: 0.035ms
+  Correct: Yes
+
+Query 18: Calculate growth rate by segment with trends
+  Complexity: 0.565
+  Tier: full
+  Routing Time: 0.032ms
+  Correct: No
+
+Query 19: Analyze revenue per customer category with patterns
+  Complexity: 0.340
+  Tier: balanced
+  Routing Time: 0.034ms
+  Correct: Yes
+
+Query 20: Identify sales patterns by day of week with trends
+  Complexity: 0.415
+  Tier: balanced
+  Routing Time: 0.035ms
+  Correct: Yes
+
+COMPLEX QUERIES:
+--------------------------------------------------------------------------------
+
+Query 1: Predict customer churn using historical patterns with machine learning
+  Complexity: 0.565
+  Tier: full
+  Routing Time: 0.039ms
+  Correct: Yes
+
+Query 2: Perform multi-variate regression analysis on sales drivers with statistical tests
+  Complexity: 0.565
+  Tier: full
+  Routing Time: 0.035ms
+  Correct: Yes
+
+Query 3: Cluster customers into segments and explain their characteristics with segmentation
+  Complexity: 0.565
+  Tier: full
+  Routing Time: 0.037ms
+  Correct: Yes
+
+Query 4: Identify anomalies and outliers in transaction patterns and explain why they're unusual
+  Complexity: 0.580
+  Tier: full
+  Routing Time: 0.036ms
+  Correct: Yes
+
+Query 5: Build a time series forecast with confidence intervals and seasonality detection
+  Complexity: 0.580
+  Tier: full
+  Routing Time: 0.034ms
+  Correct: Yes
+
+Query 6: Analyze the statistical significance of regional differences using ANOVA hypothesis testing
+  Complexity: 0.643
+  Tier: full
+  Routing Time: 0.032ms
+  Correct: Yes
+
+Query 7: Perform principal component analysis to reduce dimensionality with optimization
+  Complexity: 0.340
+  Tier: balanced
+  Routing Time: 0.041ms
+  Correct: No
+
+Query 8: Calculate customer lifetime value with cohort analysis and segmentation
+  Complexity: 0.565
+  Tier: full
+  Routing Time: 0.033ms
+  Correct: Yes
+
+Query 9: Detect outliers using multiple statistical methods and validate with hypothesis testing
+  Complexity: 0.580
+  Tier: full
+  Routing Time: 0.229ms
+  Correct: Yes
+
+Query 10: Build a predictive model for future revenue with feature importance and optimization
+  Complexity: 0.580
+  Tier: full
+  Routing Time: 0.036ms
+  Correct: Yes

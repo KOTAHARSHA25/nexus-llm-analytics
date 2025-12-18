@@ -1,0 +1,26 @@
+[
+  {
+    "quarter": "Q1-2024",
+    "revenue": 1250000,
+    "expenses": 890000,
+    "profit": 360000
+  },
+  {
+    "quarter": "Q2-2024",
+    "revenue": 1380000,
+    "expenses": 920000,
+    "profit": 460000
+  },
+  {
+    "quarter": "Q3-2024",
+    "revenue": 1420000,
+    "expenses": 950000,
+    "profit": 470000
+  },
+  {
+    "quarter": "Q4-2024",
+    "revenue": 1550000,
+    "expenses": 980000,
+    "profit": 570000
+  }
+]

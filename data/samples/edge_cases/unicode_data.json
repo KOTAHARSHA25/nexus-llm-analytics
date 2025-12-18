@@ -1,0 +1,29 @@
+{
+  "customers": [
+    {
+      "name": "李明",
+      "city": "北京",
+      "amount": 1000
+    },
+    {
+      "name": "محمد",
+      "city": "القاهرة",
+      "amount": 2000
+    },
+    {
+      "name": "José García",
+      "city": "Madrid",
+      "amount": 1500
+    },
+    {
+      "name": "Müller",
+      "city": "München",
+      "amount": 1800
+    },
+    {
+      "name": "Test 😀 Emoji",
+      "city": "Tokyo 🇯🇵",
+      "amount": 2500
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "scenario": "9. Rapid Fire Queries",
+    "description": "Concurrent load test",
+    "config": {
+      "auto_selection": true,
+      "enable_routing": true
+    },
+    "total_time": 2.4639732837677,
+    "queries_run": 3,
+    "successful": 3,
+    "failed": 0,
+    "avg_time_per_query": 0.8213244279225668,
+    "results": [
+      {
+        "query": "How many rows are in this dataset?",
+        "success": true,
+        "time": 2.0450987815856934,
+        "result": "\ud83d\udccc The following data represents the sales, revenues, and marketing spend by region in a given year, along with the associated product names, regions, sales, revenues, and marketing speeds in that year. The table includes sample data for three different regions (East, North, and South), as well as one sample data point from each region (West).\n\n\ud83d\udccc Sample Data:\nRegion | Sales | Revenue | Price | Marketing Spend (in $)\n------ | ----- | ------ | ---- | ------------\nEast   | 108,325 | 67,694  | 76.000 | 28,000\nNorth  | 131,307 | 55,144  | 67.000 | -36,062\nSouth  | 125,271 | 51,671  | 86.927 | 5,416\nWest   | 101,798 | 43,878  | 107.000 | -5,500\n\n\ud83d\udccc Answer Format:\nFor each category (e.g., \"Product\"), the table displays the total value (in \"$\") associated with that category along with each region. For each region, the table also includes sample data for three different product names in that region, along with the sales, revenues, and marketing speeds (defined as sales x price) from that region. The answer is printed below the table:\n\n\"East: $[Total value] | North: $[Total value] | South: $[Total value] | West: $[Total value]\"",
+        "expected_tier": "FAST",
+        "expected_complexity": "LOW",
+        "expect_cot": false,
+        "ground_truth": 100
+      },
+      {
+        "query": "Count the unique products",
+        "success": true,
+        "time": 2.047337770462036,
+        "result": "Here is a Python script that generates the requested table and sample data, along with an answer format, by using the pandas library. The data is sourced from a CSV file and formatted according to the schema described in the output table.\n\n```python\nimport pandas as pd\nfrom datetime import timedelta\n\n# Import CSV file with product, region, sales, and revenues\ndf = pd.read_csv(\"products.csv\")\ndf[\"timestamp\"] = pd.to_datetime(df[\"timestamp\"])\ndf[\"timestamp\"] += timedelta(hours=1)  # Add one hour to timestamp for formatting\n\n# Create product category table with products, sales, and marketing expenses (in USD)\ncategories = [\n    {\"name\": \"Widget A\", \"region\": \"North\", \"salestotal\": 7370.0, \"revenuetotal\": 2800.0},\n    {\"name\": \"Widget B\", \"region\": \"South\", \"salestotal\": 5665.0, \"revenuetotal\": 2134.0},\n    {\"name\": \"Widget C\", \"region\": \"West\", \"salestotal\": 4567.0, \"revenuetotal\": 1856.0},\n]\n\n# Create sample data for marketing expenses (USD) and marketing expense ratio (%)\nsample_data = [\n    {\n        \"product\": \"Widget A\",\n        \"region\": \"North\",\n        \"sales\": 7370,\n        \"revenuetotal\": 2800,\n        \"marketingsale\": pd.to_datetime(df[\"timestamp\"]).dt.date.dayofyear * 365.0 + df[\"timestamp\"].iloc[0] / 365.0,\n        \"marketingsalestotal\": 1245.80,\n    },\n    {\n        \"product\": \"Widget B\",\n        \"region\": \"South\",\n        \"sales\": 5665,\n        \"revenuetotal\": 2134,\n        \"marketingsale\": pd.to_datetime(df[\"timestamp\"]).dt.date.dayofyear * 365.0 + df[\"timestamp\"].iloc[0] / 365.0,\n        \"marketingsalestotal\": 819.42,\n    },\n    {\n        \"product\": \"Widget C\",\n        \"region\": \"West\",\n        \"sales\": 4567,\n        \"revenuetotal\": 1856,\n        \"marketingsale\": pd.to_datetime(df[\"timestamp\"]).dt.date.dayofyear * 365.0 + df[\"timestamp\"].iloc[0] / 365.0,\n        \"marketingsalestotal\": 292.84,\n    },\n]\n\n# Create sample data for marketing expenses (%) and marketing expense ratio (%)\nsample_data_exp = [\n    {\n        \"product\": \"Widget A\",\n        \"region\": \"North\",\n        \"sales\": 7370,\n        \"revenuetotal\": 2800,\n        \"marketingsaleratio\": 1.4569999999999998,\n    },\n    {\n        \"product\": \"Widget B\",\n        \"region\": \"South\",\n        \"sales\": 5665,\n        \"revenuetotal\": 2134,\n        \"marketingsaleratio\": 2.018799999999999,\n    },\n    {\n        \"product\": \"Widget C\",\n        \"region\": \"West\",\n        \"sales\": 4567,\n        \"revenuetotal\": 1856,\n        \"marketingsaleratio\": 3.309999999999999,\n    },\n]\n\n# Create sample data for inventory (USD) and inventory total (in units)\nsample_data = [\n    {\n        \"product\": \"Widget A\",\n        \"region\": \"North\",\n        \"sales\": 7370,\n        \"revenuetotal\": 2800,\n        \"inventorytotal\": 100,\n        \"unitcost\": 5.66,\n    },\n    {\n        \"product\": \"Widget B\",\n        \"region\": \"South\",\n        \"sales\": 5665,\n        \"revenuetotal\": 2134,\n        \"inventorytotal\": 90,\n        \"unitcost\": 4.5799999999999985,\n    },\n    {\n        \"product\": \"Widget C\",\n        \"region\": \"West\",\n        \"sales\": 4567,\n        \"revenuetotal\": 1856,\n        \"inventorytotal\": 200,\n        \"unitcost\": 3.319999999999999,\n    },\n]\n\n# Define output table data types and column names\noutput_table = pd.concat(\n    [\n        df[\"product\"],\n        pd.DataFrame(sample_data, columns=[\"region\", \"sales\", \"revenuetotal\"]),\n        sample_data_exp[[\"product\", \"region\", \"sales\", \"revengetotal\", \"inventorytotal\"]],\n        [\"marketingsale\", \"marketingsalestotal\"],\n    ],\n    axis=1,\n)\noutput_table.rename(columns={\"inventorytotal\": \"inventory\"}, inplace=True)\noutput_table.columns = [\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitcost\"]\noutput_table[\"unitcost\"] = output_table[\"unitcost\"].str.replace(\",\", \"\")\noutput_table.rename(columns={\"unitcost\": \"unitCost\"}, inplace=True)\n\n# Generate table with marketing expenses (USD) and marketing expense ratio (%)\nmarketingsale = output_table[\"inventory\"] * output_table[\"unitCost\"].astype(\"float64\") / output_table[\n    \"revengetotal\"\n].astype(\"float64\")\n\n# Format inventory data in units of USD and marketing expenses (%)\noutput_table = pd.concat(\n    [\n        df[\"product\"],\n        pd.DataFrame([df[\"marketingsale\"]]),\n        sample_data_exp[[\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitCost\", \"unitCostRatio\", \"inventoryRatio\"]],\n    ],\n    axis=1,\n)\noutput_table.rename(columns={\"inventory\": \"inventory\", \"inventoryRatio\": \"marketingsaleRatio\"}, inplace=True)\noutput_table[\"marketingsaleRatio\"] = output_table[\"marketingsale\"].str.replace(\",\", \"\")\noutput_table.rename(columns={\"marketingsaleRatio\": \"marketingsalessquareroot\", \"inventory\": \"inventoryRatio\"}, inplace=True)\n\n# Generate table with marketing expenses (USD) and marketing expense ratio (%)\nmarketingsale = output_table[\"marketingsale\"] * output_table[[\"region\", \"sales\"]].astype(\"float64\") / output_table[\n    [\"revengetotal\", \"inventoryRatio\"]\n].astype(\"float64\")\noutput_table = pd.concat(\n    [df, pd.DataFrame([df[\"marketingsale\"]]), sample_data_exp[[\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitCost\", \"unitCostRatio\", \"inventoryRatio\"]]],\n    axis=1,\n)\noutput_table.rename(columns={\"marketingsale\": \"marketingsale\"}, inplace=True)\noutput_table.columns = [\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitCost\", \"unitCostRatio\", \"inventoryRatio\"]\noutput_table[\"marketingsale\"] = output_table[\"marketingsale\"].str.replace(\",\", \"\")\noutput_table.rename(columns={\"marketingsale\": \"marketingexpenseRatio\"}, inplace=True)\n\n# Generate table with marketing expenses (USD) and marketing expense ratio (%)\nmarketingsalessquareroot = output_table[\"marketingsale\"] / output_table[[\"region\", \"sales\"]].astype(\"float64\") ** 0.5\noutput_table = pd.concat(\n    [df, pd.DataFrame([df[\"marketingsalessquareroot\"]]), sample_data_exp[[\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitCost\", \"unitCostRatio\", \"inventoryRatio\", \"marketingsaleRatio\"]]],\n    axis=1,\n)\noutput_table.rename(columns={\"marketingsalessquareroot\": \"marketingexpenseSquared\"}, inplace=True)\noutput_table.columns = [\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitCost\", \"unitCostRatio\", \"inventoryRatio\", \"marketingsalessquareroot\"]\noutput_table[\"marketingexpenseSquared\"] = output_table[\"marketingsalessquareroot\"].str.replace(\",\", \"\")\noutput_table.rename(columns={\"marketingexpenseSquared\": \"marketingsaleSquared\"}, inplace=True)\n\n# Generate table with marketing expenses (USD) and marketing expense ratio (%)\nmarketingsalessquareroot = output_table[\"marketingsalessquareroot\"] / output_table[[\"region\", \"sales\"]].astype(\"float64\") ** 0.5\noutput_table = pd.concat(\n    [df, pd.DataFrame([df[\"marketingsalessquareroot\"]]), sample_data_exp[[\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitCost\", \"unitCostRatio\", \"inventoryRatio\", \"marketingsaleRatio\"]]],\n    axis=1,\n)\noutput_table.rename(columns={\"marketingsalessquareroot\": \"marketingexpensePercentage\"}, inplace=True)\noutput_table.columns = [\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitCost\", \"unitCostRatio\", \"inventoryRatio\", \"marketingsaleRatio\"]\noutput_table[\"marketingsalessquarerootPercentage\"] = output_table[\"marketingsalessquareroot\"].str.replace(\",\", \"\")\noutput_table.rename(columns={\"marketingsalessquarerootPercentage\": \"marketingsalesPercentage\"}, inplace=True)\n\n# Generate table with marketing expenses (USD) and marketing expense ratio (%)\nmarketingsalespercentage = output_table[\"marketingsalePercentage\"] / output_table[[\"region\", \"sales\"]].astype(\"float64\") ** 0.5\noutput_table = pd.concat(\n    [df, pd.DataFrame([df[\"marketingsalessquarerootPercentage\"]]), sample_data_exp[[\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitCost\", \"unitCostRatio\", \"inventoryRatio\", \"marketingsaleRatio\", \"marketingsalesPercentage\"]]],\n    axis=1,\n)\noutput_table.rename(columns={\"marketingsalessquarerootPercentage\": \"marketingexpenseRate\"}, inplace=True)\noutput_table.columns = [\"product\", \"region\", \"sales\", \"revengetotal\", \"inventory\", \"unitCost\", \"unitCostRatio\", \"inventoryRatio\", \"marketingsaleRatio\", \"marketingsalesPercentage\"]\noutput_table[\"marketingexpenseRate\"] = output_table[\"marketingsalessquarerootPercentage\"].str.replace(\",\", \"\")\noutput_table.rename(columns={\"marketingexpenseRate\": \"marketingsalesRate\"}, inplace=True)",
+        "expected_tier": "FAST",
+        "expected_complexity": "LOW",
+        "expect_cot": false,
+        "ground_truth": 5
+      },
+      {
+        "query": "What is the sum of revenue?",
+        "success": true,
+        "time": 2.062239170074463,
+        "result": "Here is the formatted answer to the quesion or instruction:\n\nFor each category, the total value of sales, revenues, and marketing spending are displayed as dollar amounts. These values can be easily extracted from the sample data provided in the question.",
+        "expected_tier": "FAST",
+        "expected_complexity": "LOW",
+        "expect_cot": false,
+        "ground_truth": 2563044
+      }
+    ]
+  },
+  {
+    "scenario": "10. Cache Behavior",
+    "description": "Cache hit/miss test",
+    "config": {
+      "auto_selection": true,
+      "enable_routing": true
+    },
+    "total_time": 66.97977137565613,
+    "queries_run": 3,
+    "successful": 3,
+    "failed": 0,
+    "avg_time_per_query": 22.326590458552044,
+    "results": [
+      {
+        "query": "How many rows are in this dataset?",
+        "success": true,
+        "time": 2.033118486404419,
+        "result": "\ud83d\udccc The following data represents the sales, revenues, and marketing spend by region in a given year, along with the associated product names, regions, sales, revenues, and marketing speeds in that year. The table includes sample data for three different regions (East, North, and South), as well as one sample data point from each region (West).\n\n\ud83d\udccc Sample Data:\nRegion | Sales | Revenue | Price | Marketing Spend (in $)\n------ | ----- | ------ | ---- | ------------\nEast   | 108,325 | 67,694  | 76.000 | 28,000\nNorth  | 131,307 | 55,144  | 67.000 | -36,062\nSouth  | 125,271 | 51,671  | 86.927 | 5,416\nWest   | 101,798 | 43,878  | 107.000 | -5,500\n\n\ud83d\udccc Answer Format:\nFor each category (e.g., \"Product\"), the table displays the total value (in \"$\") associated with that category along with each region. For each region, the table also includes sample data for three different product names in that region, along with the sales, revenues, and marketing speeds (defined as sales x price) from that region. The answer is printed below the table:\n\n\"East: $[Total value] | North: $[Total value] | South: $[Total value] | West: $[Total value]\"",
+        "expected_tier": "FAST",
+        "expected_complexity": "LOW",
+        "expect_cot": false,
+        "ground_truth": 100
+      },
+      {
+        "query": "How many rows are in this dataset?",
+        "success": true,
+        "time": 2.04662823677063,
+        "result": "\ud83d\udccc The following data represents the sales, revenues, and marketing spend by region in a given year, along with the associated product names, regions, sales, revenues, and marketing speeds in that year. The table includes sample data for three different regions (East, North, and South), as well as one sample data point from each region (West).\n\n\ud83d\udccc Sample Data:\nRegion | Sales | Revenue | Price | Marketing Spend (in $)\n------ | ----- | ------ | ---- | ------------\nEast   | 108,325 | 67,694  | 76.000 | 28,000\nNorth  | 131,307 | 55,144  | 67.000 | -36,062\nSouth  | 125,271 | 51,671  | 86.927 | 5,416\nWest   | 101,798 | 43,878  | 107.000 | -5,500\n\n\ud83d\udccc Answer Format:\nFor each category (e.g., \"Product\"), the table displays the total value (in \"$\") associated with that category along with each region. For each region, the table also includes sample data for three different product names in that region, along with the sales, revenues, and marketing speeds (defined as sales x price) from that region. The answer is printed below the table:\n\n\"East: $[Total value] | North: $[Total value] | South: $[Total value] | West: $[Total value]\"",
+        "expected_tier": "FAST",
+        "expected_complexity": "LOW",
+        "expect_cot": false,
+        "ground_truth": 100
+      },
+      {
+        "query": "How many rows are in this dataset? exactly",
+        "success": true,
+        "time": 62.90002465248108,
+        "result": "\ud83d\udcca SALES by CATEGORY:\n   - Product:\n     - Noortheast: 73,706\n     - Northwest: 55,113\n     - Southwest: 62,549\n     - West: 72,008\n\ud83d\udcca SALES by REGION:\n   - Product:\n     - Widget A: $[Total value]\n\ud83d\udcca MARKETING_SPEND by CATEGORY:\n   - Product:\n     - Noortheast: $30,279.16\n     - Northwest: $24,825.60\n     - Southwest: $29,172.54\n     - West: $33,872.36\n\ud83d\udcca MARKETING_SPEND by REGION:\n   - Widget A: $[Total value]",
+        "expected_tier": "FAST",
+        "expected_complexity": "LOW",
+        "expect_cot": false,
+        "ground_truth": 100
+      }
+    ]
+  }
+]

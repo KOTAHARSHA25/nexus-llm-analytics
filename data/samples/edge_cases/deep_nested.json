@@ -1,0 +1,26 @@
+{
+  "company": {
+    "departments": {
+      "engineering": {
+        "teams": {
+          "backend": {
+            "members": 5,
+            "budget": 100000
+          },
+          "frontend": {
+            "members": 3,
+            "budget": 75000
+          }
+        }
+      },
+      "sales": {
+        "teams": {
+          "enterprise": {
+            "members": 4,
+            "budget": 80000
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "cot_review": {
+    "enabled": true,
+    "auto_enable_on_routing": true,
+    "complexity_threshold": 0.5,
+    "max_iterations": 2,
+    "timeout_per_iteration_seconds": 30,
+    
+    "tags": {
+      "reasoning_start": "[REASONING]",
+      "reasoning_end": "[/REASONING]",
+      "output_start": "[OUTPUT]",
+      "output_end": "[/OUTPUT]"
+    },
+    
+    "generator": {
+      "role": "generator",
+      "model_source": "dynamic",
+      "use_routed_model": true,
+      "temperature": 0.7,
+      "system_prompt_template": "cot_generator_prompt.txt"
+    },
+    
+    "critic": {
+      "role": "critic",
+      "model_source": "dynamic",
+      "use_review_model": true,
+      "temperature": 0.3,
+      "system_prompt_template": "cot_critic_prompt.txt"
+    },
+    
+    "feedback_synthesis": {
+      "include_original_query": true,
+      "include_previous_attempts": true,
+      "max_history_iterations": 2,
+      "format": "structured"
+    },
+    
+    "performance_tracking": {
+      "log_iterations": true,
+      "log_reasoning_chains": false,
+      "log_critic_feedback": false,
+      "export_format": "json"
+    }
+  }
+}
