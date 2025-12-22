@@ -20,9 +20,9 @@
 ├─────────────────────────────────────────────────────────────────────┤
 │                    Core Processing Layer                           │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐    │
-│  │   CrewAI        │  │  Plugin System  │  │  Optimization   │    │
-│  │   Multi-Agent   │  │  Extensible     │  │  Performance    │    │
-│  │   Orchestrator  │  │  Agent Registry │  │  Memory Mgmt    │    │
+│  │ Analysis        │  │  Plugin System  │  │  Optimization   │    │
+│  │ Service         │  │  Extensible     │  │  Performance    │    │
+│  │ Orchestrator    │  │  Agent Registry │  │  Memory Mgmt    │    │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘    │
 ├─────────────────────────────────────────────────────────────────────┤
 │                      Agent Ecosystem                               │
@@ -56,11 +56,11 @@
 ### **1. Request Processing Flow**
 
 ```
-User Request → Frontend → API Gateway → CrewManager → Agent Selection → Processing → Response
+User Request → Frontend → API Gateway → AnalysisService → Agent Selection → Processing → Response
 
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   User      │───▶│  Frontend   │───▶│  FastAPI    │───▶│  CrewManager│
-│  Interface  │    │   Next.js   │    │   Gateway   │    │ Orchestrator│
+│   User      │───▶│  Frontend   │───▶│  FastAPI    │───▶│  Analysis   │
+│  Interface  │    │   Next.js   │    │   Gateway   │    │  Service    │
 └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
                                                                   │
                                                                   ▼
@@ -105,7 +105,6 @@ nexus-llm-analytics/
 │   │   │   ├── analysis_service.py # Central orchestrator
 │   │   │   └── history_manager.py  # History tracking
 │   │   ├── agents/             # Agent Infrastructure
-│   │   │   ├── agent_factory.py    # Agent creation factory
 │   │   │   └── model_initializer.py # Model setup
 │   │   ├── api/                # REST API Endpoints
 │   │   │   ├── analyze.py          # Analysis endpoints
@@ -389,7 +388,7 @@ Frontend ←→ WebSocket Manager ←→ Analysis Progress ←→ Live Updates
 - **Intelligent routing** - Best agent selected based on query and file type
 
 ### **2. Multi-Agent Coordination**
-- **CrewAI orchestration** - Sophisticated agent collaboration
+- **Plugin Registry orchestration** - Custom agent collaboration via plugin system
 - **Specialized roles** - Each agent has specific expertise areas
 - **Quality review process** - Built-in review and validation
 

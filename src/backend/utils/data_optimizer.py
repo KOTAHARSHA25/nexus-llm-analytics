@@ -469,9 +469,33 @@ class DataOptimizer:
             return sample_df.to_dict('records')
     
     def _generate_preview(self, df: pd.DataFrame, schema: Dict, stats: Dict) -> str:
-        """Generate human-readable preview for LLM"""
+        """Generate human-readable preview for LLM - adapts to data size and complexity"""
         preview_parts = []
         
+        # Detect if this is a small, simple dataset
+        is_small = len(df) <= 10
+        is_simple = len(df.columns) <= 5
+        has_numeric = len(df.select_dtypes(include=[np.number]).columns) > 0
+        
+        # FOR SMALL, SIMPLE DATASETS: Use minimal, clear format
+        if is_small and is_simple:
+            preview_parts.append(f"Data from file (Total: {len(df)} row{'s' if len(df) != 1 else ''}, {len(df.columns)} column{'s' if len(df.columns) != 1 else ''}):")
+            preview_parts.append(f"")
+            
+            # Show ALL rows for small datasets (not just 3)
+            preview_parts.append(df.to_string(index=False, max_cols=len(df.columns)))
+            preview_parts.append(f"")
+            
+            # Simple column info
+            preview_parts.append(f"Columns:")
+            for col in df.columns:
+                dtype = str(df[col].dtype)
+                unique_count = df[col].nunique()
+                preview_parts.append(f"- {col}: {dtype} ({unique_count} unique value{'s' if unique_count != 1 else ''})")
+            
+            return '\n'.join(preview_parts)
+        
+        # FOR LARGE/COMPLEX DATASETS: Use detailed statistics approach
         # Basic info
         preview_parts.append(f"Dataset Overview:")
         preview_parts.append(f"- Total Rows: {stats['total_rows']}")

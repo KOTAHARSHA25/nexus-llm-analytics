@@ -9,6 +9,8 @@ This module combines all optimization functionality:
 - Adaptive timeout management based on system resources
 
 Replaces the separate optimizer files as suggested in DEAD_CODE_ANALYSIS.md
+
+NOTE: CrewAI integration has been removed - system now uses custom Plugin Architecture.
 """
 
 import logging
@@ -20,7 +22,6 @@ import asyncio
 from typing import Dict, List, Any, Optional, Tuple
 from collections import defaultdict, deque
 from functools import lru_cache
-from .crewai_import_manager import start_crewai_preloading, get_crewai_import_manager
 
 
 # ====================================================================
@@ -463,6 +464,9 @@ class StartupOptimizer:
     """
     Application startup optimization system
     Pre-loads expensive components during startup to improve API response times
+    
+    NOTE: CrewAI pre-loading has been removed. System now uses Plugin Architecture
+    which loads agents on-demand from the plugins/ directory.
     """
     
     @staticmethod
@@ -470,44 +474,49 @@ class StartupOptimizer:
         """
         Optimize application startup by pre-loading expensive components
         Call this during application initialization
+        
+        NOTE: Plugin agents are now discovered at runtime via plugin_system.py
         """
         logging.debug("Starting application startup optimization...")
         
         startup_start = time.perf_counter()
         
-        # Start CrewAI background loading immediately 
-        start_crewai_preloading()
-        
-        # Give the background loader a moment to start
-        time.sleep(0.1)
-        
-        manager = get_crewai_import_manager()
-        status = manager.get_status()
-        
-        if not status['loading_in_progress']:
-            logging.warning("CrewAI background loading may not have started properly")
+        # Pre-load plugin registry (lightweight operation)
+        try:
+            from .plugin_system import get_agent_registry
+            registry = get_agent_registry()
+            agent_count = len(registry.registered_agents)
+            logging.info(f"Plugin registry loaded with {agent_count} agents")
+        except Exception as e:
+            logging.warning(f"Plugin registry pre-load failed (non-critical): {e}")
+            agent_count = 0
         
         startup_duration = time.perf_counter() - startup_start
         logging.debug(f"Startup optimization completed in {startup_duration:.3f}s")
         
         return {
             'startup_optimization_time': startup_duration,
-            'crewai_background_loading': status['loading_in_progress'],
-            'estimated_ready_time': 35.0  # Approximate time for CrewAI to load
+            'plugin_agents_loaded': agent_count,
+            'ready_for_requests': True
         }
 
     @staticmethod
     def check_optimization_status():
         """Check if startup optimizations are complete"""
-        manager = get_crewai_import_manager()
-        status = manager.get_status()
-        
-        return {
-            'crewai_loaded': status['crewai_loaded'],
-            'load_duration': status.get('load_duration'),
-            'loading_in_progress': status['loading_in_progress'],
-            'ready_for_requests': status['crewai_loaded']
-        }
+        try:
+            from .plugin_system import get_agent_registry
+            registry = get_agent_registry()
+            return {
+                'plugins_loaded': len(registry.registered_agents) > 0,
+                'agent_count': len(registry.registered_agents),
+                'ready_for_requests': True
+            }
+        except Exception:
+            return {
+                'plugins_loaded': False,
+                'agent_count': 0,
+                'ready_for_requests': False
+            }
 
     @staticmethod
     def wait_for_optimization_completion(timeout: float = 60.0):
@@ -519,8 +528,10 @@ class StartupOptimizer:
             
         Returns:
             bool: True if optimization completed, False if timeout
+            
+        NOTE: Plugin system loads quickly, so this mainly exists for API compatibility
         """
-        logging.info("Waiting for startup optimization to complete...")
+        logging.info("Checking startup optimization status...")
         
         start_wait = time.perf_counter()
         
@@ -530,7 +541,7 @@ class StartupOptimizer:
             if status['ready_for_requests']:
                 total_wait = time.perf_counter() - start_wait
                 logging.info(f"Startup optimization completed in {total_wait:.2f}s")
-                logging.info(f"CrewAI load duration: {status.get('load_duration', 'unknown'):.2f}s")
+                logging.info(f"Loaded {status['agent_count']} plugin agents")
                 return True
             
             # Log progress every 10 seconds

@@ -1,6 +1,7 @@
 # 📁 Nexus LLM Analytics - Complete File Manifest (VERIFIED)
 
-> **Generated:** December 21, 2025  
+> **Generated:** December 22, 2025  
+> **Last Updated:** December 22, 2025  
 > **Analysis Method:** Deep code inspection + import tracing via grep analysis  
 > **Purpose:** Accurately identify which files are ACTUALLY used in production vs. tests vs. dead code
 
@@ -11,11 +12,14 @@ This manifest is based on **actual import statements** found in the codebase, no
 2. Traced dependency chains from entry points (`main.py`, API routers)
 3. Flagged files not reachable from any entry point as TEST-ONLY or DEAD
 
+**NOTE:** As of December 2025, the system uses a **Custom Plugin Architecture** (not CrewAI).
+The main orchestration is done via `analysis_service.py` and `plugin_system.py`.
+
 **Legend:**
 - 🟢 **PRODUCTION** - Imported and used in main application code (main.py, API endpoints, plugins, services)
 - 🟡 **TEST-ONLY** - Only imported in test files, not in production runtime
 - 🔴 **DEAD CODE** - Not imported anywhere, or only in archived/deprecated code
-- 🟠 **LEGACY** - In archive folder, previously deprecated
+- 🟠 **LEGACY** - In archive folder, previously deprecated (includes CrewAI-related files)
 - 📝 **DOCUMENTATION** - Documentation files
 - ⚪ **DATA/CONFIG** - Data or configuration files
 - 🧪 **TEST** - Test files

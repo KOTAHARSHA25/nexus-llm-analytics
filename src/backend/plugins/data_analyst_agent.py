@@ -181,47 +181,22 @@ class DataAnalystAgent(BasePluginAgent):
         return 0.5
 
     def _execute_direct(self, query, data_info, filename, selected_model, analysis_plan=None):
-        strategy_context = ""
-        if analysis_plan:
-            steps_text = "\n".join([f"{s.step_id}. {s.description}" for s in analysis_plan.steps])
-            strategy_context = f"STRATEGY:\n{steps_text}\n"
-            
-        prompt = f"""
-        Analyze the following dataset stats/preview strictly.
-        QUERY: {query}
-        FILE: {filename}
+        # Intelligent context based on data characteristics (not query keywords)
+        # Data optimizer already analyzed the data - respect its decisions
+        hint = ""
+        if 'PRE-CALCULATED STATISTICS' in data_info:
+            # Large dataset detected by optimizer - add minimal guidance
+            hint = "Note: Use the pre-calculated statistics provided below.\n\n"
         
-        {strategy_context}
-        
-        DATA CONTEXT:
-        {data_info}
-        
-        STRICT ANALYSIS RULES & INTEGRITY CHECKS:
-        1. 🧪 DATA QUALITY CHECK (Mandatory):
-           - Report total rows, missing values (if any), and duplicate rows (if any).
-           - If 'duplicate_rows' is > 0 in stats, explicitly flag it as a data quality issue.
-           - If 'null_count' is high in relevant columns, warn the user.
-           
-        2. 📊 INSIGHT GENERATION:
-           - Answer the query using ONLY the provided data context (PRE-CALCULATED STATISTICS).
-           - Do NOT calculate totals/averages yourself from the sample rows – use the "OVERALL COLUMN STATISTICS" section.
-           - Identify key insights based on meaningful fields, not arbitrary limits.
-           - If multiple interpretations are possible, state them clearly.
+        # Clean, direct prompt - query unchanged
+        prompt = f"""{hint}Question: {query}
 
-        3. 🚫 STRICT PROHIBITIONS:
-           - Do NOT analyze only the 3-row sample as if it were the whole dataset.
-           - Do NOT introduce fake metrics or assume values not present.
-           - Do NOT generalize from insufficient data.
-           - If the answer is not in the data, state: "The dataset provided does not contain sufficient information to answer this."
+Data from: {filename}
 
-        FORMAT:
-        - **Data Quality Status**: [Safe/Warning/Critical]
-        - **Direct Answer**: [Clear, number-backed answer]
-        - **Key Insights**: [Bullet points with evidence]
-        - **Validation**: [Why this conclusion is statistically valid based on the logic]
+{data_info}
+
+Answer:"""
         
-        Response:
-        """
         response = self.initializer.llm_client.generate(prompt, model=selected_model)
         if isinstance(response, dict): return response.get('response', str(response))
         return str(response)
@@ -236,10 +211,13 @@ class DataAnalystAgent(BasePluginAgent):
             'columns': available_columns
         }
         
+        # Use the review model from initializer instead of hardcoded model
+        critic_model = self.initializer.review_llm.model if hasattr(self.initializer, 'review_llm') else selected_model
+        
         result = cot_engine.run_correction_loop(
             query=query,
             data_context=data_context,
             generator_model=selected_model,
-            critic_model="gpt-4" # or similar
+            critic_model=critic_model
         )
         return result.final_output, {"cot_iterations": result.total_iterations}

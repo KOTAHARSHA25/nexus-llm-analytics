@@ -82,10 +82,19 @@ class BasePluginAgent(ABC):
     
     def validate_dependencies(self) -> List[str]:
         """Check if all dependencies are available"""
+        # Map package names to import names (for cases where they differ)
+        package_to_import = {
+            'scikit-learn': 'sklearn',
+            'python-dotenv': 'dotenv',
+            'Pillow': 'PIL',
+        }
+        
         missing = []
         for dep in self.metadata.dependencies:
+            # Get the actual import name (may differ from package name)
+            import_name = package_to_import.get(dep, dep)
             try:
-                importlib.import_module(dep)
+                importlib.import_module(import_name)
             except ImportError:
                 missing.append(dep)
         return missing

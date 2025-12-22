@@ -83,35 +83,34 @@ This document explains the **end-to-end data flow** for different data types thr
    - Function: async def analyze_query(request: AnalyzeRequest)
    - Creates: analysis_id for tracking
 
-9. Get CrewManager Singleton
-   📁 File: src/backend/core/crew_singleton.py
-   - Function: get_crew_manager()
-   - Returns: Single shared CrewManager instance
+9. Get AnalysisService Singleton
+   📁 File: src/backend/services/analysis_service.py
+   - Function: get_analysis_service()
+   - Returns: Single shared AnalysisService instance
    - Prevents: Multiple costly initializations
 
-10. Route to Crew Manager
+10. Route via Analysis Service
     📁 File: src/backend/api/analyze.py
-    - Calls: crew_manager.handle_query(
+    - Calls: service.analyze(
         query="What is the total revenue?",
-        filenames=["sales_data.csv"],
-        analysis_id=analysis_id
+        context={"filename": "sales_data.csv"}
       )
 
 ┌─────────────────────────────────────────────────────────────────┐
-│ CREWAI ORCHESTRATION                                            │
+│ PLUGIN SYSTEM ORCHESTRATION                                     │
 └─────────────────────────────────────────────────────────────────┘
 
-11. CrewManager Routes Query
-    📁 File: src/backend/agents/crew_manager.py
-    - Function: handle_query()
+11. Plugin Registry Routes Query
+    📁 File: src/backend/core/plugin_system.py
+    - Function: registry.route_query()
     - Detects: File extension = .csv
-    - Routes to: analyze_structured_data()
+    - Routes to: DataAnalystAgent (highest confidence)
 
 12. Structured Data Analysis
-    📁 File: src/backend/agents/crew_manager.py
-    - Function: analyze_structured_data()
-    - Applies: Caching (30-min TTL)
-    - Calls: _perform_structured_analysis()
+    📁 File: src/backend/plugins/data_analyst_agent.py
+    - Function: execute()
+    - Applies: Data optimization
+    - Calls: _execute_with_cot() or _execute_direct()
 
 13. Data Optimization
     📁 File: utils/data_optimizer.py
@@ -151,9 +150,9 @@ This document explains the **end-to-end data flow** for different data types thr
 │ LLM ANALYSIS                                                    │
 └─────────────────────────────────────────────────────────────────┘
 
-16. Direct LLM Call (Bypass CrewAI)
-    📁 File: src/backend/agents/crew_manager.py
-    - Function: _perform_structured_analysis()
+16. LLM Call via Plugin Agent
+    📁 File: src/backend/plugins/data_analyst_agent.py
+    - Function: execute() → _execute_direct()
     - Creates prompt with:
       • Query: "What is the total revenue?"
       • Data preview: First 5 rows
@@ -220,16 +219,14 @@ This document explains the **end-to-end data flow** for different data types thr
 └─────────────────────────────────────────────────────────────────┘
 
 23. Result Packaging
-    📁 File: src/backend/agents/crew_manager.py
-    - Function: _perform_structured_analysis()
+    📁 File: src/backend/services/analysis_service.py
+    - Function: analyze()
     - Returns: {
         success: true,
         result: "Total revenue is $125,450",
-        filename: "sales_data.csv",
-        query: "What is the total revenue?",
-        type: "structured_analysis",
-        execution_time: 2.5,
-        code: "df['revenue'].sum()"
+        agent: "DataAnalyst",
+        metadata: {filename, execution_time},
+        type: "analysis_result"
       }
 
 24. Send to Frontend
@@ -340,19 +337,19 @@ This document explains the **end-to-end data flow** for different data types thr
 
 10. Analyze Endpoint Routes
     📁 File: src/backend/api/analyze.py
-    - Calls: crew_manager.handle_query()
+    - Calls: service.analyze(query, context)
 
-11. CrewManager Detects Document
-    📁 File: src/backend/agents/crew_manager.py
-    - Function: handle_query()
+11. Plugin Registry Routes to RAG
+    📁 File: src/backend/core/plugin_system.py
+    - Function: route_query()
     - Detects: File extension = .pdf
-    - Routes to: analyze_unstructured_data()
+    - Routes to: RAGAgent (highest confidence for documents)
 
-12. RAG Analysis
-    📁 File: src/backend/agents/crew_manager.py
-    - Function: analyze_unstructured_data()
-    - Applies: Caching (45-min TTL)
-    - Calls: _perform_rag_analysis()
+12. RAG Agent Analysis
+    📁 File: src/backend/plugins/rag_agent.py
+    - Function: execute()
+    - Uses: DocumentIndexer for vector search
+    - Calls: _query_documents()
 
 13. Vector Similarity Search
     📁 File: src/backend/tools/rag_tool.py
@@ -363,7 +360,7 @@ This document explains the **end-to-end data flow** for different data types thr
       3. Returns: Relevant text excerpts with scores
 
 14. Context-Aware LLM Call
-    📁 File: src/backend/agents/crew_manager.py
+    📁 File: src/backend/plugins/rag_agent.py
     - Builds prompt:
       • User query: "What are key findings?"
       • Retrieved context: [chunk1, chunk2, chunk3]
@@ -376,7 +373,7 @@ This document explains the **end-to-end data flow** for different data types thr
     - Returns: "Key findings include: 1) X, 2) Y, 3) Z..."
 
 16. Result with Sources
-    📁 File: src/backend/agents/crew_manager.py
+    📁 File: src/backend/plugins/rag_agent.py
     - Returns: {
         result: "Key findings include...",
         type: "rag_analysis",
@@ -486,34 +483,34 @@ This document explains the **end-to-end data flow** for different data types thr
 4. Analyze Endpoint
    📁 File: src/backend/api/analyze.py
    - Receives: filenames array (length > 1)
-   - Calls: crew_manager.handle_query(filenames=[...])
+   - Calls: service.analyze(query, context={filenames})
 
-5. CrewManager Routes to Multi-File
-   📁 File: src/backend/agents/crew_manager.py
-   - Function: handle_query()
+5. Plugin Registry Routes Multi-File
+   📁 File: src/backend/core/plugin_system.py
+   - Function: route_query()
    - Detects: len(files) > 1
-   - Routes to: analyze_multiple_files()
+   - Routes to: DataAnalystAgent with multi-file context
 
 6. Load Both Files
-   📁 File: src/backend/agents/crew_manager.py
-   - Function: analyze_multiple_files()
+   📁 File: src/backend/plugins/data_analyst_agent.py
+   - Function: execute()
    - Loads: 
      • df1 = pd.read_csv("customers.csv")
      • df2 = pd.read_csv("orders.csv")
 
 7. Detect Join Columns
-   📁 File: src/backend/agents/crew_manager.py
+   📁 File: src/backend/plugins/data_analyst_agent.py
    - Finds common columns: ["customer_id"]
    - Prioritizes: Columns with "_id" suffix
 
 8. Merge DataFrames
-   📁 File: src/backend/agents/crew_manager.py
+   📁 File: src/backend/plugins/data_analyst_agent.py
    - Executes: merged_df = pd.merge(df1, df2, on='customer_id')
    - Saves temp file: data/uploads/merged_customers_orders.csv
 
 9. Analyze Merged Data
-   📁 File: src/backend/agents/crew_manager.py
-   - Calls: analyze_structured_data(query, "merged_customers_orders.csv")
+   📁 File: src/backend/plugins/data_analyst_agent.py
+   - Calls: _execute_direct() or _execute_with_cot()
    - Proceeds with standard structured analysis flow
 
 ```
@@ -883,27 +880,37 @@ src/
 │   │   ├── visualize.py     ← /visualize/* endpoints
 │   │   ├── report.py        ← /generate-report endpoint
 │   │   └── models.py        ← /models/* endpoints
-│   ├── agents/              ← AI agent logic
-│   │   ├── crew_manager.py  ← Main orchestrator
-│   │   ├── query_parser.py  ← NLP query parsing
-│   │   └── specialized_agents.py
+│   ├── agents/              ← Agent infrastructure
+│   │   └── model_initializer.py ← Model setup
+│   ├── services/            ← Service layer
+│   │   └── analysis_service.py ← Main orchestrator
+│   ├── plugins/             ← Plugin agents
+│   │   ├── data_analyst_agent.py ← CSV/JSON analysis
+│   │   ├── rag_agent.py     ← PDF/document RAG
+│   │   ├── statistical_agent.py ← Statistical analysis
+│   │   ├── financial_agent.py ← Financial metrics
+│   │   ├── ml_insights_agent.py ← ML patterns
+│   │   ├── time_series_agent.py ← Time series
+│   │   ├── sql_agent.py     ← SQL generation
+│   │   ├── visualizer_agent.py ← Charts
+│   │   ├── reporter_agent.py ← Reports
+│   │   └── reviewer_agent.py ← Review
 │   ├── core/                ← Core services
+│   │   ├── plugin_system.py ← Agent registry & routing
 │   │   ├── llm_client.py    ← Ollama API client
 │   │   ├── model_selector.py← Smart model selection
+│   │   ├── self_correction_engine.py ← CoT correction
 │   │   ├── circuit_breaker.py← Resilience
 │   │   ├── advanced_cache.py← Caching layer
 │   │   ├── analysis_manager.py← Analysis tracking
-│   │   ├── crew_singleton.py← Singleton manager
 │   │   ├── user_preferences.py← Config management
-│   │   ├── enhanced_reports.py← Report generation
-│   │   └── data_profiler.py ← Data analysis
-│   ├── tools/               ← CrewAI tools
-│   │   ├── rag_tool.py      ← RAG/ChromaDB
-│   │   └── data_tool.py     ← Data manipulation
+│   │   ├── document_indexer.py ← RAG indexing
+│   │   ├── chromadb_client.py ← Vector DB
+│   │   ├── sandbox.py       ← Secure execution
+│   │   └── query_parser.py  ← Query parsing
 │   └── visualization/       ← Chart generation
-│       ├── chart_templates.py← Chart templates
-│       ├── chart_recommender.py← Recommendation
-│       └── plotly_generator.py← Plotly charts
+│       ├── dynamic_charts.py← Chart templates
+│       └── scaffold.py      ← Visualization scaffolding
 │
 ├── frontend/
 │   ├── app/
@@ -934,33 +941,34 @@ tests/
 
 | File Type | Detected In | Routes To | Key File |
 |-----------|-------------|-----------|----------|
-| .csv, .json, .xlsx | crew_manager.py | analyze_structured_data() | crew_manager.py |
-| .pdf, .txt, .docx | crew_manager.py | analyze_unstructured_data() | crew_manager.py |
-| text_data param | analyze.py | Direct LLM call | analyze.py |
-| Multiple files | analyze.py | analyze_multiple_files() | crew_manager.py |
+| .csv, .json, .xlsx | plugin_system.py | DataAnalystAgent | data_analyst_agent.py |
+| .pdf, .txt, .docx | plugin_system.py | RAGAgent | rag_agent.py |
+| text_data param | analyze.py | DataAnalystAgent | data_analyst_agent.py |
+| Multiple files | analyze.py | DataAnalystAgent (multi-file) | data_analyst_agent.py |
 
 ### **2. Performance Optimizations**
 
-- **Singleton Pattern**: crew_singleton.py prevents multiple CrewManager instances
+- **Singleton Pattern**: analysis_service.py prevents multiple service instances
 - **Caching**: advanced_cache.py stores results for 30-45 minutes
 - **Data Optimization**: data_optimizer.py sends only 5 rows to LLM
 - **Circuit Breaker**: circuit_breaker.py prevents cascading failures
-- **Direct LLM Calls**: Bypass CrewAI for faster responses
+- **Plugin Routing**: Direct agent execution via plugin_system.py
 
 ### **3. Smart Features**
 
 - **Auto Model Selection**: model_selector.py picks model based on RAM
 - **Query Parsing**: query_parser.py understands intent (aggregate, filter, etc.)
-- **Chart Recommendations**: chart_recommender.py suggests best visualizations
-- **Multi-File Joins**: crew_manager.py automatically merges related CSVs
-- **RAG Indexing**: rag_tool.py auto-indexes documents on upload
+- **Chart Recommendations**: dynamic_charts.py suggests best visualizations
+- **Multi-File Joins**: data_analyst_agent.py automatically merges related CSVs
+- **RAG Indexing**: document_indexer.py auto-indexes documents on upload
+- **Self-Correction**: self_correction_engine.py refines analysis with CoT
 
 ### **4. User Experience Flow**
 
 ```
-Upload File → Auto-Index (if PDF) → Ask Question → Smart Routing 
-→ Cache Check → LLM Analysis → Auto-Visualize → Auto-Review 
-→ Display Results → Export Report
+Upload File → Auto-Index (if PDF) → Ask Question → Plugin Routing 
+→ Cache Check → Agent Execution → Self-Correction (if enabled)
+→ Auto-Visualize → Auto-Review → Display Results → Export Report
 ```
 
 All steps are **automatic** except "Upload File" and "Ask Question"!
@@ -971,21 +979,22 @@ All steps are **automatic** except "Upload File" and "Ask Question"!
 
 **Want to trace a specific flow?** Start here:
 
-- **CSV Analysis**: `analyze.py` → `crew_manager.py` (line 1054) → `analyze_structured_data()` (line 440)
-- **PDF Analysis**: `analyze.py` → `crew_manager.py` → `analyze_unstructured_data()` (line 716)
-- **Visualization**: `results-display.tsx` → `visualize.py` → `chart_templates.py`
+- **CSV Analysis**: `analyze.py` → `analysis_service.py` → `plugin_system.py` → `data_analyst_agent.py`
+- **PDF Analysis**: `analyze.py` → `analysis_service.py` → `plugin_system.py` → `rag_agent.py`
+- **Visualization**: `results-display.tsx` → `visualize.py` → `dynamic_charts.py`
 - **Report Export**: `results-display.tsx` → `report.py` → `enhanced_reports.py`
-- **Model Selection**: `model_selector.py` (line 1) → User prefs loaded
+- **Model Selection**: `model_selector.py` → User prefs loaded from `user_preferences.py`
 
 **Need to modify behavior?**
 
 - Change model: `config/user_preferences.json` or Settings UI
-- Add chart type: `visualization/chart_templates.py`
+- Add chart type: `visualization/dynamic_charts.py`
 - Modify caching: `core/advanced_cache.py` (change TTL)
 - Custom error messages: `core/error_handling.py`
+- Add new agent: Create plugin in `plugins/` folder (auto-discovered)
 
 ---
 
-**Last Updated**: October 28, 2025
-**Version**: 1.0
+**Last Updated**: December 22, 2025
+**Version**: 2.0 (Updated to reflect Plugin Architecture)
 **Maintained By**: Nexus LLM Analytics Team

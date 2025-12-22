@@ -7,6 +7,9 @@ import os
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 
+# Configure logger for this module
+logger = logging.getLogger(__name__)
+
 # Add src to path
 src_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(src_path))

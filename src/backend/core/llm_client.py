@@ -100,52 +100,6 @@ class LLMClient:
         
         return result
     
-    def _calculate_adaptive_timeout(self, model):
-        """Calculate timeout based on model requirements and system resources"""
-        try:
-            from .model_selector import ModelSelector
-            import os
-            
-            # Get system memory info
-            memory_info = ModelSelector.get_system_memory()
-            available_ram = memory_info["available_gb"]
-            
-            # Base timeouts by model type
-            base_timeouts = {
-                "llama3.1:8b": 600,    # 10 minutes for large model
-                "phi3:mini": 300,      # 5 minutes for medium model  
-                "tinyllama": 120,      # 2 minutes for small model
-                "nomic-embed-text": 60 # 1 minute for embedding
-            }
-            
-            # Clean model name
-            clean_model = model.replace("ollama/", "")
-            base_timeout = base_timeouts.get(clean_model, 300)
-            
-            # Check if using swap (low available RAM for model requirements)
-            model_requirements = ModelSelector.MODEL_REQUIREMENTS.get(clean_model, {})
-            required_ram = model_requirements.get("min_ram_gb", 2.0)
-            
-            # If using swap memory, increase timeout significantly
-            allow_swap = os.getenv("ALLOW_SWAP_USAGE", "false").lower() == "true"
-            if allow_swap and available_ram < required_ram:
-                # Using swap - increase timeout by 3x
-                adaptive_timeout = base_timeout * 3
-                print(f"🐌 Using swap memory - Extended timeout to {adaptive_timeout}s for {clean_model}")
-            elif available_ram < required_ram + 1.0:  # Close to memory limit
-                # Tight memory - increase timeout by 1.5x
-                adaptive_timeout = int(base_timeout * 1.5)
-                print(f"⚠️ Low memory - Extended timeout to {adaptive_timeout}s for {clean_model}")
-            else:
-                # Normal operation
-                adaptive_timeout = base_timeout
-                
-            return adaptive_timeout
-            
-        except Exception as e:
-            print(f"Failed to calculate adaptive timeout: {e}")
-            return 300  # Default fallback
-
     def _calculate_adaptive_timeout(self, model: str) -> int:
         """Calculate timeout based on model requirements and system resources."""
         try:

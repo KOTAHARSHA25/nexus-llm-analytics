@@ -56,7 +56,7 @@ Nexus LLM Analytics is a next-generation data analytics platform that leverages 
 ### **Technology Stack**
 - **Backend**: FastAPI, Python 3.11+
 - **Frontend**: React 18, Next.js 14, TypeScript
-- **AI Framework**: CrewAI for multi-agent coordination
+- **AI Framework**: Custom Plugin System with self-correction
 - **LLM**: Ollama (local inference)
 - **Database**: ChromaDB for vector storage
 - **UI**: Tailwind CSS, Radix UI components

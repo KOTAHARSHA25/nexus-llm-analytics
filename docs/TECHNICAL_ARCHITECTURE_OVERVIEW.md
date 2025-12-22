@@ -70,10 +70,13 @@ The platform follows a **microservices architecture** with clear separation of c
                       │                       │
 ┌─────────────────────▼───────────────────────▼───────────────────┐
 │                    Multi-Agent System                          │
-│                        CrewAI                                  │
+│            Custom Plugin Architecture (10 Agents)              │
 ├─────────────┬──────────────┬──────────────┬──────────────┬─────┤
-│Data Analyst │RAG Specialist│Code Reviewer │Visualizer    │Writer│
-│Agent        │Agent         │Agent         │Agent         │Agent │
+│DataAnalyst  │RAG Agent     │Statistical   │Financial     │ML   │
+│Agent        │              │Agent         │Agent         │Agent│
+├─────────────┼──────────────┼──────────────┼──────────────┼─────┤
+│TimeSeries   │SQL Agent     │Visualizer    │Reporter      │Revw │
+│Agent        │              │Agent         │Agent         │Agent│
 └─────────────┴──────────────┴──────────────┴──────────────┴─────┘
                       │
 ┌─────────────────────▼───────────────────────────────────────────┐
@@ -97,13 +100,14 @@ The platform follows a **microservices architecture** with clear separation of c
 
 ### Architecture Patterns Implemented
 
-1. **Multi-Agent Pattern**: Specialized AI agents for different analytical tasks
+1. **Multi-Agent Pattern**: Specialized AI agents for different analytical tasks via Plugin System
 2. **Microservices Architecture**: Modular, independently deployable services
 3. **Event-Driven Processing**: Asynchronous task handling with status updates
 4. **Secure Sandbox Pattern**: Isolated code execution environment
 5. **Strategy Pattern**: Dynamic model selection based on system resources
 6. **Repository Pattern**: Data access abstraction with ChromaDB
 7. **Observer Pattern**: Real-time status updates and progress tracking
+8. **Self-Correction Pattern**: Generator→Critic→Feedback loop for quality assurance
 
 ---
 

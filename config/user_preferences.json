@@ -1,8 +1,8 @@
 {
-  "primary_model": "tinyllama:latest",
+  "primary_model": "llama3.1:8b",
   "review_model": "phi3:mini",
   "embedding_model": "nomic-embed-text:latest",
-  "auto_model_selection": false,
+  "auto_model_selection": true,
   "allow_swap_usage": true,
   "memory_buffer_gb": 0.5,
   "preferred_performance": "balanced",
