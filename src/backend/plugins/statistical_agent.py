@@ -178,6 +178,10 @@ class StatisticalAgent(BasePluginAgent):
         if file_type and file_type.lower() in [".csv", ".xlsx", ".json", ".txt"]:
             confidence += 0.2
         
+        # HIGH PRIORITY: Correlation is statistical
+        if "correlation" in query_lower or "correlate" in query_lower:
+            confidence += 0.4  # Strong boost for correlation
+        
         # Statistical keywords
         stat_keywords = [
             "statistics", "statistical", "stat", "analysis", "test",

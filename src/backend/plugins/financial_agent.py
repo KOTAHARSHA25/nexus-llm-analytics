@@ -193,13 +193,20 @@ class FinancialAgent(BasePluginAgent):
             logging.debug(f"Financial Agent rejecting document file: {file_type}")
             return 0.0
         
+        # Reject simple calculation queries (let DataAnalyst handle)
+        simple_calc_patterns = ["calculate total", "total revenue by category", "sum by"]
+        if any(pattern in query_lower for pattern in simple_calc_patterns):
+            if not any(word in query_lower for word in ["roi", "profitability", "margin", "ratio"]):
+                logging.debug(f"Financial Agent deferring simple calculation to DataAnalyst")
+                return 0.2  # Low confidence for simple totals
+        
         # File type support - only structured data
         if file_type and file_type.lower() in [".csv", ".xlsx", ".json", ".txt"]:
             confidence += 0.1
         
         # Financial keywords
         financial_keywords = [
-            "financial", "finance", "money", "dollar", "revenue", "profit",
+            "financial", "finance", "money", "dollar", "profit",
             "cost", "expense", "budget", "cash", "investment", "return"
         ]
         

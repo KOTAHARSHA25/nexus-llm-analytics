@@ -35,8 +35,12 @@ class ReporterAgent(BasePluginAgent):
         return True
     
     def can_handle(self, query: str, file_type: Optional[str] = None, **kwargs) -> float:
-        keywords = ["report", "summary", "writeup", "document results"]
-        if any(k in query.lower() for k in keywords):
+        query_lower = query.lower()
+        # Only claim actual report generation, not summary statistics
+        if "summary statistics" in query_lower or "summary stats" in query_lower:
+            return 0.0  # Let DataAnalyst handle
+        keywords = ["report", "writeup", "document results", "generate report"]
+        if any(k in query_lower for k in keywords):
             return 0.8
         return 0.0
 

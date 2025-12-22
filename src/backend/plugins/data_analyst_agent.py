@@ -75,10 +75,14 @@ class DataAnalystAgent(BasePluginAgent):
                     logging.debug(f"DataAnalyst: Deferring to specialized agent for {domain}")
                     return 0.1  # Return very low - let specialist handle it
             
+            # HIGH PRIORITY: Summary statistics is DataAnalyst domain
+            if "summary statistics" in query_lower or "summary stats" in query_lower:
+                confidence += 0.5  # Very strong boost
+            
             # Only boost if query is VERY simple and general
             very_simple_patterns = [
                 "what is the average", "show me the top", "display summary",
-                "what is the name", "get the data"
+                "what is the name", "get the data", "calculate total"
             ]
             if any(pattern in query_lower for pattern in very_simple_patterns):
                 confidence += 0.4  # Boost for truly simple queries
