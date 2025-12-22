@@ -208,6 +208,7 @@ class SQLAgent(BasePluginAgent):
         """
         Enhanced query handling assessment with sophisticated pattern matching
         
+        CRITICAL: SQL Agent should ONLY handle explicit SQL/database queries
         Returns confidence score 0.0-1.0
         """
         if not self.initialized:
@@ -216,122 +217,73 @@ class SQLAgent(BasePluginAgent):
         confidence = 0.0
         query_lower = query.lower()
         
-        # CRITICAL FIX: Reject non-SQL file types immediately to prevent incorrect routing
-        # SQL Agent should ONLY handle SQL-related files, not PDFs, CSVs, etc.
+        # Normalize file_type (handle both "sql" and ".sql")
+        if file_type and not file_type.startswith('.'):
+            file_type = '.' + file_type
+        
+        # CRITICAL FIX: Reject non-SQL file types immediately
         supported_extensions = [".sql", ".db", ".sqlite", ".sqlite3", ".mysql", ".psql"]
         non_sql_extensions = [".pdf", ".docx", ".txt", ".pptx", ".rtf", ".csv", ".json", ".xlsx", ".xls"]
         
-        # If file_type is provided and it's NOT a SQL file, return 0.0 immediately
+        # If file_type is provided and it's NOT a SQL file, return LOW confidence
         if file_type:
             if file_type.lower() in non_sql_extensions:
-                logging.debug(f"SQL Agent rejecting non-SQL file type: {file_type}")
-                return 0.0
+                # Only proceed if query EXPLICITLY mentions SQL/database
+                explicit_sql = ["sql", "database", "query database", "generate sql", "write sql"]
+                if not any(keyword in query_lower for keyword in explicit_sql):
+                    logging.debug(f"SQL Agent rejecting non-SQL file without explicit SQL mention: {file_type}")
+                    return 0.0
+                # If explicit SQL mention with CSV/JSON, give moderate confidence
+                confidence = 0.3
             elif file_type.lower() in supported_extensions:
                 confidence += 0.4
-                # Bonus for SQL files
                 if file_type.lower() == ".sql":
                     confidence += 0.1
         
-        # If no file_type provided, check if query explicitly mentions SQL
-        # Otherwise, be conservative and return low confidence to avoid false positives
-        if not file_type:
-            # Check for SQL statements (most explicit)
-            sql_statement_patterns = ["select ", "insert ", "update ", "delete ", "create ", "alter ", "drop "]
-            has_sql_statement = any(pattern in query_lower for pattern in sql_statement_patterns)
-            
-            # Check for explicit SQL keywords
-            explicit_sql_keywords = ["sql", "database", "query database", "generate sql", "write sql"]
-            has_explicit_sql = any(keyword in query_lower for keyword in explicit_sql_keywords)
-            
-            # If neither SQL statement nor explicit keywords, reject
+        # Require EXPLICIT SQL/database keywords for high confidence
+        explicit_sql_keywords = [
+            "sql", "database", "query database", "generate sql", 
+            "write sql", "create table", "alter table", "drop table"
+        ]
+        has_explicit_sql = any(keyword in query_lower for keyword in explicit_sql_keywords)
+        
+        # Check for SQL statements
+        sql_statement_patterns = ["select ", "insert ", "update ", "delete ", "create ", "alter ", "drop "]
+        has_sql_statement = any(pattern in query_lower for pattern in sql_statement_patterns)
+        
+        # Require at least one of these for non-SQL files
+        if not file_type or file_type.lower() in non_sql_extensions:
             if not (has_sql_statement or has_explicit_sql):
-                logging.debug(f"SQL Agent: No file type and no explicit SQL content - returning 0.0")
+                logging.debug(f"SQL Agent: No explicit SQL content in query - returning 0.0")
                 return 0.0
+            else:
+                # Has explicit SQL keywords
+                confidence += 0.5
         
-        # SQL keyword detection with weighted scoring
-        core_sql_keywords = ["sql", "query", "database", "table", "select", "insert", "update", "delete"]
-        advanced_sql_keywords = ["join", "group by", "order by", "having", "union", "subquery", "index"]
-        function_keywords = ["count", "sum", "avg", "max", "min", "distinct"]
+        # Core SQL keywords (only boost if already showing SQL intent)
+        if confidence > 0:
+            core_sql_keywords = ["query", "table", "select", "insert", "update", "delete", "join"]
+            core_matches = sum(1 for keyword in core_sql_keywords if keyword in query_lower)
+            confidence += min(core_matches * 0.05, 0.15)
         
-        # Core SQL keywords
-        core_matches = sum(1 for keyword in core_sql_keywords if keyword in query_lower)
-        confidence += min(core_matches * 0.08, 0.25)
+        # Advanced SQL keywords (only if base confidence exists)
+        if confidence > 0:
+            advanced_sql_keywords = ["join", "group by", "order by", "having", "union", "subquery", "index"]
+            advanced_matches = sum(1 for keyword in advanced_sql_keywords if keyword in query_lower)
+            confidence += min(advanced_matches * 0.06, 0.2)
         
-        # Advanced SQL keywords
-        advanced_matches = sum(1 for keyword in advanced_sql_keywords if keyword in query_lower)
-        confidence += min(advanced_matches * 0.06, 0.2)
+        # Pattern-based analysis (only if showing SQL intent)
+        if confidence > 0:
+            for pattern_type, pattern_data in self.query_patterns.items():
+                patterns = pattern_data["patterns"]
+                boost = pattern_data["confidence_boost"]
+                
+                matches = sum(1 for pattern in patterns if pattern in query_lower)
+                if matches > 0:
+                    confidence += min(matches * boost * 0.5, boost * 0.5)  # Reduced boost
         
-        # Function keywords
-        function_matches = sum(1 for keyword in function_keywords if keyword in query_lower)
-        confidence += min(function_matches * 0.05, 0.15)
-        
-        # Pattern-based analysis with confidence boosting
-        for pattern_type, pattern_data in self.query_patterns.items():
-            patterns = pattern_data["patterns"]
-            boost = pattern_data["confidence_boost"]
-            
-            matches = sum(1 for pattern in patterns if pattern in query_lower)
-            if matches > 0:
-                confidence += min(matches * boost, boost)
-        
-        # Context analysis - database-related terms
-        db_context_terms = [
-            "database", "db", "schema", "table", "column", "row", "record",
-            "primary key", "foreign key", "index", "constraint", "trigger",
-            "stored procedure", "view", "relation", "entity"
-        ]
-        
-        context_matches = sum(1 for term in db_context_terms if term in query_lower)
-        confidence += min(context_matches * 0.03, 0.15)
-        
-        # SQL statement detection
-        sql_statements = ["select ", "insert ", "update ", "delete ", "create ", "alter ", "drop "]
-        if any(stmt in query_lower for stmt in sql_statements):
-            confidence += 0.2
-        
-        # Natural language to SQL indicators
-        nl_to_sql_indicators = [
-            "generate sql", "write query", "create query", "sql for",
-            "database query", "find records", "get data from"
-        ]
-        
-        if any(indicator in query_lower for indicator in nl_to_sql_indicators):
-            confidence += 0.25
-        
-        # Performance and optimization queries
-        perf_indicators = [
-            "optimize", "performance", "slow query", "execution plan",
-            "explain", "analyze", "index usage", "query plan"
-        ]
-        
-        if any(indicator in query_lower for indicator in perf_indicators):
-            confidence += 0.15
-        
-        # Business intelligence and analytics indicators
-        bi_indicators = [
-            "report", "analytics", "kpi", "metrics", "dashboard",
-            "business intelligence", "data warehouse", "etl"
-        ]
-        
-        if any(indicator in query_lower for indicator in bi_indicators):
-            confidence += 0.1
-        
-        # Penalty for non-SQL content that might be misclassified
-        non_sql_penalties = [
-            "python", "javascript", "html", "css", "json only",
-            "api call", "web scraping", "machine learning model"
-        ]
-        
-        for penalty_term in non_sql_penalties:
-            if penalty_term in query_lower:
-                confidence -= 0.1
-        
-        # Ensure confidence is within bounds
-        confidence = max(0.0, min(confidence, 1.0))
-        
-        logging.debug(f"SQL Agent confidence for query '{query[:50]}...': {confidence:.3f}")
-        
-        return confidence
+        # Cap confidence to prevent over-confidence on ambiguous queries
+        return min(confidence, 0.95)
     
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
         """

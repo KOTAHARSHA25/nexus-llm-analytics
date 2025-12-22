@@ -42,10 +42,58 @@ class DataAnalystAgent(BasePluginAgent):
         return True
     
     def can_handle(self, query: str, file_type: Optional[str] = None, **kwargs) -> float:
-        # High confidence for structured files if no specialized agent picks it up
+        """
+        Enhanced confidence scoring for DataAnalyst
+        High confidence for simple data queries on structured files
+        CONSERVATIVE: Should defer to specialized agents when they apply
+        """
+        confidence = 0.0
+        query_lower = query.lower()
+        
+        # Normalize file_type (handle both "csv" and ".csv")
+        if file_type and not file_type.startswith('.'):
+            file_type = '.' + file_type
+        
+        # Base confidence for structured files - START LOW as fallback agent
         if file_type in [".csv", ".json", ".xlsx", ".xls"]:
-            return 0.9  # High priority for structured data
-        return 0.1
+            confidence = 0.3  # Low base - we're a fallback, not first choice
+            
+            # Strongly reduce if query is specialized domain
+            specialized_domains = {
+                "statistical": ["t-test", "correlation", "anova", "chi-square", "regression", 
+                               "hypothesis", "p-value", "significance", "statistical test"],
+                "time_series": ["forecast", "arima", "predict", "trend", "seasonality", 
+                               "seasonal decomposition", "time series"],
+                "financial": ["roi", "profitability", "financial health", "cash flow", 
+                             "break-even", "profit margin", "investment", "returns"],
+                "ml": ["clustering", "k-means", "anomaly detection", "pca", "machine learning",
+                      "dimensionality", "segments", "patterns using"]
+            }
+            
+            for domain, keywords in specialized_domains.items():
+                if any(keyword in query_lower for keyword in keywords):
+                    logging.debug(f"DataAnalyst: Deferring to specialized agent for {domain}")
+                    return 0.1  # Return very low - let specialist handle it
+            
+            # Only boost if query is VERY simple and general
+            very_simple_patterns = [
+                "what is the average", "show me the top", "display summary",
+                "what is the name", "get the data"
+            ]
+            if any(pattern in query_lower for pattern in very_simple_patterns):
+                confidence += 0.4  # Boost for truly simple queries
+            
+            # Moderate boost for general analysis keywords (only if not specialized)
+            simple_keywords = ["average", "total", "sum", "count", "maximum", "minimum"]
+            keyword_matches = sum(1 for keyword in simple_keywords if keyword in query_lower)
+            confidence += min(keyword_matches * 0.05, 0.15)
+                
+            # Reduce confidence if query explicitly mentions SQL/database
+            sql_specific = ["sql", "query database", "database", "table join", "select from"]
+            if any(keyword in query_lower for keyword in sql_specific):
+                confidence *= 0.2  # Significantly reduce if SQL-specific
+                
+        return min(confidence, 0.85)  # Cap below specialists
 
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
         """Execute analysis using DataOptimizer and LLM"""

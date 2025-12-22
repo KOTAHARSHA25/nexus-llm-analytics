@@ -1,0 +1,126 @@
+{
+  "correct": 13,
+  "incorrect": 4,
+  "errors": 0,
+  "details": [
+    {
+      "test": 1,
+      "query": "Perform a t-test to compare sales between two regions",
+      "expected": "StatisticalAgent",
+      "actual": "StatisticalAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 2,
+      "query": "Calculate the correlation between marketing spend and revenue",
+      "expected": "StatisticalAgent",
+      "actual": "FinancialAgent",
+      "status": "FAIL"
+    },
+    {
+      "test": 3,
+      "query": "Run ANOVA to test if there's a significant difference in performance across groups",
+      "expected": "StatisticalAgent",
+      "actual": "SQLAgent",
+      "status": "FAIL"
+    },
+    {
+      "test": 4,
+      "query": "Forecast next quarter's sales using ARIMA model",
+      "expected": "TimeSeriesAgent",
+      "actual": "TimeSeriesAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 5,
+      "query": "Analyze the trend and seasonality in monthly revenue data",
+      "expected": "TimeSeriesAgent",
+      "actual": "TimeSeriesAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 6,
+      "query": "Predict future demand based on historical patterns",
+      "expected": "TimeSeriesAgent",
+      "actual": "TimeSeriesAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 7,
+      "query": "Calculate the ROI and profitability ratios for this quarter",
+      "expected": "FinancialAgent",
+      "actual": "FinancialAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 8,
+      "query": "Analyze our company's financial health and cash flow",
+      "expected": "FinancialAgent",
+      "actual": "FinancialAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 9,
+      "query": "Compute break-even point and profit margins",
+      "expected": "FinancialAgent",
+      "actual": "FinancialAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 10,
+      "query": "Find customer segments using clustering analysis",
+      "expected": "MLInsightsAgent",
+      "actual": "MLInsightsAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 11,
+      "query": "Detect anomalies in transaction data",
+      "expected": "MLInsightsAgent",
+      "actual": "MLInsightsAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 12,
+      "query": "Perform PCA to reduce dimensionality and identify key features",
+      "expected": "MLInsightsAgent",
+      "actual": "MLInsightsAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 13,
+      "query": "Query the database to find top 10 customers by revenue",
+      "expected": "SQLAgent",
+      "actual": "SQLAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 14,
+      "query": "Generate SQL to join orders and customers tables",
+      "expected": "SQLAgent",
+      "actual": "SQLAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 15,
+      "query": "Analyze the database schema and optimize queries",
+      "expected": "SQLAgent",
+      "actual": "SQLAgent",
+      "status": "PASS"
+    },
+    {
+      "test": 16,
+      "query": "What is the average sales in the dataset?",
+      "expected": "DataAnalystAgent",
+      "actual": "SQLAgent",
+      "status": "FAIL"
+    },
+    {
+      "test": 17,
+      "query": "Show me the top 5 products by quantity sold",
+      "expected": "DataAnalystAgent",
+      "actual": "SQLAgent",
+      "status": "FAIL"
+    }
+  ]
+}
