@@ -101,12 +101,12 @@ File Upload → Validation → Storage → Analysis → Vector Processing → Re
 nexus-llm-analytics/
 ├── src/
 │   ├── backend/                 # Python FastAPI Backend
-│   │   ├── agents/             # Multi-Agent System
-│   │   │   ├── crew_manager.py     # Central orchestrator
-│   │   │   ├── data_agent.py       # Data analysis specialist
-│   │   │   ├── rag_agent.py        # RAG processing specialist
-│   │   │   ├── visualization_agent.py  # Chart generation
-│   │   │   └── specialized_agents.py   # Domain-specific agents
+│   │   ├── services/           # Service Layer
+│   │   │   ├── analysis_service.py # Central orchestrator
+│   │   │   └── history_manager.py  # History tracking
+│   │   ├── agents/             # Agent Infrastructure
+│   │   │   ├── agent_factory.py    # Agent creation factory
+│   │   │   └── model_initializer.py # Model setup
 │   │   ├── api/                # REST API Endpoints
 │   │   │   ├── analyze.py          # Analysis endpoints
 │   │   │   ├── upload.py           # File upload handling
@@ -128,8 +128,10 @@ nexus-llm-analytics/
 │       ├── pages/                  # Next.js pages
 │       └── styles/                 # Styling
 ├── plugins/                    # Extensible Agent Plugins
-│   ├── sql_agent.py               # SQL analysis plugin
-│   └── agents_config.json         # Plugin configuration
+│   ├── data_analyst_agent.py   # Data analysis specialist
+│   ├── rag_agent.py           # RAG processing specialist
+│   ├── visualizer_agent.py    # Chart generation
+│   └── sql_agent.py           # SQL analysis plugin
 ├── data/                       # Data Storage
 │   ├── uploads/                   # User uploaded files
 │   ├── exports/                   # Generated reports
@@ -205,17 +207,16 @@ nexus-llm-analytics/
 
 ### **1. Multi-Agent Orchestration**
 ```
-CrewManager (Singleton)
+AnalysisService (Singleton)
 ├── Intelligent Query Routing
-│   ├── Plugin Agent Priority
-│   ├── Built-in Agent Fallback
-│   └── File Type Detection
-├── Agent Coordination
-│   ├── Data Analyst Agent
-│   ├── RAG Specialist Agent
-│   ├── Visualization Agent
-│   ├── Review Agent
-│   └── Reporter Agent
+│   ├── Agent Registry Integration
+│   ├── Query Complexity Analysis
+│   └── Capability Matching
+├── Service Controller
+│   ├── Data Analyst Plugin
+│   ├── RAG Specialist Plugin
+│   ├── Visualization Plugin
+│   └── Review Plugin
 └── Result Synthesis
     ├── Quality Review
     ├── Format Standardization

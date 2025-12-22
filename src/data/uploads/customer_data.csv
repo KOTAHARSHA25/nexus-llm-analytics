@@ -1,0 +1,101 @@
+customer_id,name,age,city,total_spent,membership_level
+1,Customer 1,62,Chicago,692.92,Bronze
+2,Customer 2,29,New York,1201.02,Bronze
+3,Customer 3,23,Los Angeles,1756.62,Silver
+4,Customer 4,39,Phoenix,2982.71,Gold
+5,Customer 5,37,Chicago,1227.56,Silver
+6,Customer 6,36,Los Angeles,1179.07,Gold
+7,Customer 7,30,Houston,447.87,Bronze
+8,Customer 8,28,Houston,3192.4,Silver
+9,Customer 9,65,Houston,1221.81,Gold
+10,Customer 10,56,Los Angeles,4536.56,Gold
+11,Customer 11,27,Chicago,4312.21,Silver
+12,Customer 12,59,Los Angeles,447.2,Platinum
+13,Customer 13,49,Los Angeles,1266.22,Gold
+14,Customer 14,24,Phoenix,3377.99,Bronze
+15,Customer 15,23,Phoenix,1149.76,Gold
+16,Customer 16,27,Chicago,748.33,Bronze
+17,Customer 17,35,Phoenix,4684.02,Silver
+18,Customer 18,36,Houston,2898.11,Gold
+19,Customer 19,54,Phoenix,2416.09,Bronze
+20,Customer 20,60,Houston,3944.64,Bronze
+21,Customer 21,23,Chicago,4056.74,Silver
+22,Customer 22,57,Los Angeles,1033.01,Gold
+23,Customer 23,34,Los Angeles,574.96,Gold
+24,Customer 24,63,Phoenix,2212.15,Silver
+25,Customer 25,56,Houston,2175.54,Gold
+26,Customer 26,48,New York,2388.42,Silver
+27,Customer 27,36,New York,3672.47,Gold
+28,Customer 28,50,New York,3399.49,Platinum
+29,Customer 29,59,Los Angeles,4922.41,Gold
+30,Customer 30,39,Los Angeles,582.25,Bronze
+31,Customer 31,22,Houston,2072.84,Bronze
+32,Customer 32,32,Phoenix,1762.58,Platinum
+33,Customer 33,49,New York,4322.2,Gold
+34,Customer 34,43,Houston,1318.42,Bronze
+35,Customer 35,39,Houston,1032.02,Bronze
+36,Customer 36,31,Phoenix,2298.21,Gold
+37,Customer 37,35,Houston,2167.22,Silver
+38,Customer 38,43,Phoenix,1464.87,Gold
+39,Customer 39,28,Chicago,1324.05,Silver
+40,Customer 40,27,Phoenix,4624.0,Platinum
+41,Customer 41,46,New York,2271.34,Platinum
+42,Customer 42,28,New York,4320.61,Bronze
+43,Customer 43,44,Phoenix,2796.59,Bronze
+44,Customer 44,44,Chicago,347.88,Bronze
+45,Customer 45,60,Chicago,4996.48,Silver
+46,Customer 46,38,New York,4196.54,Bronze
+47,Customer 47,24,Chicago,4848.08,Gold
+48,Customer 48,51,Houston,4639.2,Silver
+49,Customer 49,56,Los Angeles,4258.61,Platinum
+50,Customer 50,29,Houston,914.92,Silver
+51,Customer 51,46,New York,2479.64,Bronze
+52,Customer 52,27,Chicago,1147.36,Gold
+53,Customer 53,57,Phoenix,2065.1,Gold
+54,Customer 54,40,Los Angeles,387.31,Bronze
+55,Customer 55,62,Phoenix,1956.97,Gold
+56,Customer 56,61,New York,4928.01,Silver
+57,Customer 57,45,Chicago,1399.49,Silver
+58,Customer 58,58,Phoenix,3941.95,Bronze
+59,Customer 59,34,Phoenix,2329.54,Gold
+60,Customer 60,26,Los Angeles,2172.74,Platinum
+61,Customer 61,24,Los Angeles,4790.86,Silver
+62,Customer 62,64,Chicago,4977.57,Silver
+63,Customer 63,36,Los Angeles,2823.26,Silver
+64,Customer 64,40,Phoenix,3620.2,Silver
+65,Customer 65,27,Phoenix,858.5,Platinum
+66,Customer 66,36,New York,1553.87,Bronze
+67,Customer 67,28,Phoenix,4846.68,Silver
+68,Customer 68,46,Chicago,2937.98,Gold
+69,Customer 69,39,Houston,2756.76,Platinum
+70,Customer 70,51,New York,3765.08,Silver
+71,Customer 71,62,New York,380.11,Gold
+72,Customer 72,45,Chicago,2962.47,Silver
+73,Customer 73,32,Chicago,2563.97,Bronze
+74,Customer 74,45,Los Angeles,4278.33,Platinum
+75,Customer 75,44,New York,871.42,Bronze
+76,Customer 76,35,Los Angeles,4807.82,Platinum
+77,Customer 77,64,Phoenix,492.55,Silver
+78,Customer 78,39,New York,1010.54,Silver
+79,Customer 79,65,New York,3015.67,Platinum
+80,Customer 80,63,Houston,3408.54,Gold
+81,Customer 81,26,New York,1252.5,Gold
+82,Customer 82,60,Phoenix,687.44,Silver
+83,Customer 83,62,Los Angeles,4462.41,Silver
+84,Customer 84,32,Los Angeles,1306.46,Bronze
+85,Customer 85,56,Houston,3013.14,Silver
+86,Customer 86,37,Phoenix,3134.97,Platinum
+87,Customer 87,32,Los Angeles,2154.2,Gold
+88,Customer 88,51,Chicago,2959.99,Gold
+89,Customer 89,46,Phoenix,2661.64,Bronze
+90,Customer 90,39,Phoenix,4680.06,Gold
+91,Customer 91,62,Houston,1100.87,Gold
+92,Customer 92,57,Los Angeles,3609.34,Platinum
+93,Customer 93,36,Phoenix,1269.56,Gold
+94,Customer 94,65,Los Angeles,2039.35,Bronze
+95,Customer 95,42,Chicago,3391.28,Bronze
+96,Customer 96,25,Houston,1569.99,Gold
+97,Customer 97,36,Chicago,1649.27,Silver
+98,Customer 98,24,Houston,3784.14,Gold
+99,Customer 99,42,Phoenix,455.46,Bronze
+100,Customer 100,47,Houston,2345.6,Bronze

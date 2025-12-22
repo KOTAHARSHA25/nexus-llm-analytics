@@ -21,23 +21,33 @@ class QueryHistoryResponse(BaseModel):
     total_count: int
 
 # Simple file-based storage for query history
-HISTORY_DIR = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', 'history')
-HISTORY_FILE = os.path.join(HISTORY_DIR, 'query_history.json')
+from backend.core.config import settings
+
 MAX_HISTORY_ITEMS = 100  # Keep only the last 100 queries
 
+def _get_history_file():
+    """Get the path to the history file dynamically"""
+    # Use reports path as base, similar to original logic
+    # Original: DATA_DIR = settings.get_reports_path().parent
+    # We want it to be securely within the allowed data/reports structure
+    data_dir = settings.get_reports_path().parent
+    history_dir = data_dir / 'history'
+    history_dir.mkdir(parents=True, exist_ok=True)
+    return history_dir / 'query_history.json'
+
 def ensure_history_dir():
-    """Ensure the history directory exists"""
-    os.makedirs(HISTORY_DIR, exist_ok=True)
+    """Ensure the history directory exists (deprecated, handled in _get_history_file)"""
+    _get_history_file().parent.mkdir(parents=True, exist_ok=True)
 
 def load_history() -> List[Dict[str, Any]]:
     """Load query history from file"""
-    ensure_history_dir()
+    history_file = _get_history_file()
     
-    if not os.path.exists(HISTORY_FILE):
+    if not os.path.exists(history_file):
         return []
     
     try:
-        with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+        with open(history_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data.get('history', [])
     except Exception as e:
@@ -46,7 +56,7 @@ def load_history() -> List[Dict[str, Any]]:
 
 def save_history(history: List[Dict[str, Any]]) -> bool:
     """Save query history to file"""
-    ensure_history_dir()
+    history_file = _get_history_file()
     
     try:
         # Keep only the most recent items
@@ -57,7 +67,7 @@ def save_history(history: List[Dict[str, Any]]) -> bool:
             'last_updated': datetime.now(timezone.utc).isoformat()
         }
         
-        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+        with open(history_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         
         return True

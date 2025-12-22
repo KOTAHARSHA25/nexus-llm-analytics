@@ -6,7 +6,7 @@ import os
 import time
 from backend.core.model_selector import ModelSelector
 from backend.core.user_preferences import get_preferences_manager
-from backend.core.crew_singleton import get_crew_manager
+from backend.services.analysis_service import get_analysis_service
 
 # API endpoint for model management and selection
 
@@ -272,28 +272,43 @@ async def test_model(request: ModelTestRequest) -> Dict[str, Any]:
     """Test a specific model with a simple query"""
     try:
         import time
+        from backend.agents.model_initializer import get_model_initializer
         
         start_time = time.time()
         
         # Simple test query
         test_query = "Hello, please respond with 'Model test successful'"
         
-        # Get singleton CrewManager instance
-        crew_manager = get_crew_manager()
+        # Determine model name (strip ollama/ prefix if present for direct API call)
+        model_name = request.model_name.replace("ollama/", "")
         
-        # Test the model with a simple unstructured query
-        result = crew_manager.analyze_unstructured_data(
-            query=test_query,
-            filename="test.txt"  # Dummy filename
+        # Use LLMClient directly to test the SPECIFIC model requested
+        # Bypassing AnalysisService which routes to agents using their default models
+        initializer = get_model_initializer()
+        initializer.ensure_initialized()
+        
+        # Generate response using the specific model
+        result = initializer.llm_client.generate(
+            prompt=test_query,
+            model=model_name,
+            adaptive_timeout=False # Fast test
         )
         
         end_time = time.time()
         response_time = end_time - start_time
         
+        # Parse result
+        success = result.get("success", False)
+        # Check if response contains the expected text or is just non-empty
+        response_text = result.get("response", "")
+        if not response_text:
+            success = False
+            error_msg = "Empty response from model"
+        else:
+            error_msg = result.get("error")
+        
         # Save test result
         preferences_manager = get_preferences_manager()
-        success = result.get("success", False)
-        error_msg = result.get("error") if not success else None
         
         preferences_manager.save_model_test_result(
             model_name=request.model_name,
@@ -306,7 +321,7 @@ async def test_model(request: ModelTestRequest) -> Dict[str, Any]:
             "model": request.model_name,
             "success": success,
             "response_time": response_time,
-            "result": result.get("result", ""),
+            "result": response_text,
             "error": error_msg,
             "status": "completed"
         }

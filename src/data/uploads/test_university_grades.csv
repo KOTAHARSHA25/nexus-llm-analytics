@@ -1,0 +1,25 @@
+semester,department,course_name,enrolled_students,average_score,pass_rate
+Spring2024,Biology,Genetics,45,78.5,0.89
+Spring2024,Chemistry,Organic Chemistry,38,72.3,0.82
+Spring2024,Physics,Quantum Mechanics,52,81.2,0.91
+Spring2024,Mathematics,Calculus,67,75.8,0.85
+Fall2023,Biology,Genetics,42,76.9,0.86
+Fall2023,Chemistry,Organic Chemistry,41,70.5,0.79
+Fall2023,Physics,Quantum Mechanics,49,79.8,0.88
+Fall2023,Mathematics,Calculus,63,74.2,0.83
+Spring2024,Biology,Microbiology,51,82.4,0.94
+Spring2024,Chemistry,Analytical Chemistry,35,68.7,0.77
+Spring2024,Physics,Thermodynamics,48,77.6,0.87
+Spring2024,Mathematics,Linear Algebra,58,79.3,0.90
+Fall2023,Biology,Microbiology,47,80.1,0.92
+Fall2023,Chemistry,Analytical Chemistry,33,66.4,0.74
+Fall2023,Physics,Thermodynamics,44,76.2,0.85
+Fall2023,Mathematics,Linear Algebra,55,78.1,0.88
+Spring2024,Biology,Ecology,39,85.6,0.95
+Spring2024,Chemistry,Physical Chemistry,29,71.8,0.81
+Spring2024,Physics,Electromagnetism,56,83.4,0.93
+Spring2024,Mathematics,Differential Equations,61,80.7,0.89
+Fall2023,Biology,Ecology,36,84.2,0.94
+Fall2023,Chemistry,Physical Chemistry,27,69.9,0.78
+Fall2023,Physics,Electromagnetism,53,82.1,0.91
+Fall2023,Mathematics,Differential Equations,59,79.5,0.87

@@ -1,34 +1,8 @@
-# Nexus LLM Analytics custom ignores
-nexus.log
-*.log
-logs/
-**/logs/
-data/uploads/
-data/exports/
-chroma_db/
-**/chroma_db/
-reports/
-src/frontend/node_modules/
-src/frontend/.next/
-
-# Additional temp/cache files
-installed.txt
-upgrade.txt
-eachfile.txt
-verify_improvements.py
-test_core_functionality.py
-test_end_to_end.py
-test_integration.py
-*.bak
-*.tmp
-*.temp
-*.swp
-*.swo
-*~
-# C extensions
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -40,130 +14,69 @@ lib/
 lib64/
 parts/
 sdist/
-
-
-.env
-
-# === Python build, test, and environment ===
-__pycache__/
-*/__pycache__/
-**/__pycache__/
-*.py[cod]
-*$py.class
-.env
-.envrc
-.venv
-env/
-**/env/
-venv/
-**/venv/
-ENV/
-.cursorindexingignore
-venv.bak/
-.pytest_cache/
-.tox/
-.nox/
-.mypy_cache/
-.hypothesis/
-.coverage
-.coverage.*
-.cache
-*.cover
-*.py.cover
-htmlcov/
-dmypy.json
-.dmypy.json
-.pyre/
-.pytype/
-.pdm-python
-.pdm-build/
-.ruff_cache/
-__pypackages__/
-target/
-build/
-
+var/
+wheels/
 *.egg-info/
-.eggs/
+.installed.cfg
 *.egg
 MANIFEST
-develop-eggs/
-# Marimo
-marimo/_static/
-sdist/
-var/
-marimo/_lsp/
-share/python-wheels/
-site/
-celerybeat-schedule
-celerybeat.pid
-*.sage.py
-instance/
-.webassets-cache
-.scrapy
-docs/_build/
-profile_default/
-__marimo__/
-.spyderproject
-.spyproject
-.ropeproject
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# === Logs, audit, and reports ===
-nexus.log
 *.log
-data/audit/
-*.pdf
-*.xlsx
-*.csv
-*.tmp
 
-# === Node/Frontend ===
-src/frontend/node_modules/
-src/frontend/.next/
-src/frontend/out/
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
 
-# Monorepo-wide Node/Next ignores
-node_modules/
-**/node_modules/
-.next/
-**/.next/
-out/
-**/out/
-.turbo/
-.vercel/
-**/.vercel/
+# Environment variables
+.env
+.env.local
 
-# Nexus Analytics Dashboard app
-nexus-analytics-dashboard/node_modules/
-nexus-analytics-dashboard/.next/
-nexus-analytics-dashboard/out/
-
-# === Editor/IDE ===
+# IDEs
 .vscode/
 .idea/
-.abstra/
-.pypirc
-.cursorignore
-.cursorindexingignore
+*.swp
+*.swo
+*~
 
-# === Environment files ===
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.*.local
-.env.*
+# Node.js / Frontend
+node_modules/
+.next/
+.cache/
+*.tsbuildinfo
+out/
 
-# === Jupyter/Notebook ===
-.ipynb_checkpoints
+# Data and uploads
+data/uploads/
+data/reports/
+data/samples/*.pdf
+data/samples/*.csv
+*.pdf
+*.docx
 
-# === Misc ===
+# Logs
+logs/
+*.log
+src/logs/
+src/backend/logs/
+
+# ChromaDB
+chroma_db/
+
+# Test outputs
+reports/
+history/
+
+# Cache and temp files
+*.pyc
+*.pyo
+*.pyd
 .DS_Store
 Thumbs.db
 
-# === Test/Reports/Artifacts ===
-frontend/test-results/
-**/playwright-report/
-**/playwright/.cache/
+# Distribution archives
+nexus-llm-analytics-distribution*/
+archive/
+
+# Broken folder
+broken/

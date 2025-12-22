@@ -22,14 +22,14 @@ import logging
 class DataOptimizer:
     """Optimizes data for LLM consumption"""
     
-    def __init__(self, max_rows: int = 100, max_depth: int = 3, max_chars: int = 2000):
+    def __init__(self, max_rows: int = 100, max_depth: int = 3, max_chars: int = 8000):
         """
         Initialize data optimizer
         
         Args:
             max_rows: Maximum number of rows to sample
             max_depth: Maximum nesting depth to preserve
-            max_chars: Maximum characters in preview
+            max_chars: Maximum characters in preview (Def: 8000 for better context)
         """
         self.max_rows = max_rows
         self.max_depth = max_depth
@@ -52,15 +52,20 @@ class DataOptimizer:
         if file_type is None:
             file_type = self._detect_file_type(filepath)
         
-        # Load and optimize based on type
-        if file_type == 'json':
-            return self._optimize_json(filepath)
-        elif file_type == 'csv':
-            return self._optimize_csv(filepath)
-        elif file_type in ['excel', 'xlsx', 'xls']:
-            return self._optimize_excel(filepath)
-        else:
-            return self._basic_load(filepath)
+        try:
+            # Load and optimize based on type
+            if file_type == 'json':
+                return self._optimize_json(filepath)
+            elif file_type == 'csv':
+                return self._optimize_csv(filepath)
+            elif file_type in ['excel', 'xlsx', 'xls']:
+                return self._optimize_excel(filepath)
+            else:
+                return self._basic_load(filepath)
+                
+        except Exception as e:
+            logging.warning(f"Failed to parse {filepath.name} as {file_type}: {e}. Falling back to text mode.")
+            return self._basic_load(filepath, error_context=str(e))
     
     def _detect_file_type(self, filepath: Path) -> str:
         """Detect file type from extension"""
@@ -193,18 +198,53 @@ class DataOptimizer:
         
         return df
     
-    def _basic_load(self, filepath: Path) -> Dict[str, Any]:
-        """Basic file loading for unknown types"""
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        return {
-            'schema': 'Unknown file type',
-            'sample': content[:self.max_chars],
-            'stats': {'file_size': len(content)},
-            'preview': content[:500],
-            'is_optimized': False
-        }
+    def _basic_load(self, filepath: Path, error_context: str = None) -> Dict[str, Any]:
+        """Basic file loading for unknown types or failed parses"""
+        try:
+            with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+                content = f.read()
+            
+            # Simple stats for text
+            lines = content.splitlines()
+            line_count = len(lines)
+            non_empty_lines = sum(1 for line in lines if line.strip())
+            
+            preview = f"File: {filepath.name} (treated as unstructured text)\n"
+            if error_context:
+                preview += f"⚠️ Note: Structured parsing failed: {error_context}\n"
+            preview += f"Size: {len(content)} bytes, {line_count} lines\n"
+            preview += "="*50 + "\n"
+            preview += content[:self.max_chars]
+            
+            if len(content) > self.max_chars:
+                preview += "\n... (truncated)"
+
+            return {
+                'schema': 'Unstructured Text / Unknown Format',
+                'sample': [{'text': line} for line in lines[:10] if line.strip()],
+                'stats': {
+                    'file_size': len(content),
+                    'line_count': line_count,
+                    'non_empty_lines': non_empty_lines,
+                    'is_fallback': True
+                },
+                'preview': preview,
+                'is_optimized': False,
+                'was_nested': False,
+                'total_rows': line_count,
+                'total_columns': 1,
+                'file_type': 'text'
+            }
+        except Exception as e:
+            # Absolute last resort
+            return {
+                'schema': 'Unreadable File',
+                'sample': [],
+                'stats': {'error': str(e)},
+                'preview': f"Could not read file: {e}",
+                'is_optimized': False,
+                'total_rows': 0
+            }
     
     def _is_nested(self, data: Any, current_depth: int = 0) -> bool:
         """Check if JSON structure is deeply nested"""
@@ -378,6 +418,7 @@ class DataOptimizer:
             'total_columns': len(df.columns),
             'columns': list(df.columns),
             'memory_usage_mb': df.memory_usage(deep=True).sum() / 1024**2,
+            'duplicate_rows': int(df.duplicated().sum()),
         }
         
         # Numeric statistics

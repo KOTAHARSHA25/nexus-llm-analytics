@@ -89,7 +89,6 @@ ALLOWED_MIME_TYPES = {
 
 # Use centralized path resolver
 from backend.utils.data_utils import DataPathResolver
-DATA_DIR = str(DataPathResolver.get_uploads_dir())
 DataPathResolver.ensure_directories_exist()
 
 def validate_filename(filename: str) -> str:
@@ -221,11 +220,12 @@ def sanitize_extracted_text(text: str) -> str:
 
 def secure_file_path(filename: str) -> str:
     """Create secure file path and validate it's within DATA_DIR"""
-    file_path = os.path.join(DATA_DIR, filename)
+    data_dir = str(DataPathResolver.get_uploads_dir())
+    file_path = os.path.join(data_dir, filename)
     
     # Resolve path to prevent directory traversal
     resolved_path = os.path.realpath(file_path)
-    resolved_data_dir = os.path.realpath(DATA_DIR)
+    resolved_data_dir = os.path.realpath(data_dir)
     
     # Ensure the file path is within DATA_DIR
     if not resolved_path.startswith(resolved_data_dir):
@@ -913,6 +913,7 @@ def preview_csv_file(file_path: str, result: dict) -> dict:
         
         # Read CSV file
         df = pd.read_csv(file_path, encoding=encoding, nrows=100)  # Limit to first 100 rows
+        df = df.where(pd.notnull(df), None)  # Replace NaN with None for JSON compliance
         
         result["data"] = df.to_dict('records')
         result["columns"] = list(df.columns)
@@ -941,6 +942,7 @@ def preview_excel_file(file_path: str, result: dict) -> dict:
         
         for sheet_name in excel_file.sheet_names:
             df = pd.read_excel(file_path, sheet_name=sheet_name, nrows=100)
+            df = df.where(pd.notnull(df), None)  # Replace NaN with None for JSON compliance
             sheets_data[sheet_name] = {
                 "data": df.to_dict('records'),
                 "columns": list(df.columns),

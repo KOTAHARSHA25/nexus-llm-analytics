@@ -183,6 +183,11 @@ class SelfCorrectionEngine:
             if critic_feedback.is_valid:
                 # SUCCESS: Reasoning validated
                 logging.debug(f"Reasoning validated on iteration {iteration}")
+                
+                # If we had to correct (iteration > 1), learn from it
+                if iteration > 1:
+                     self._learn_from_correction(iterations[0].parsed_cot, parsed_cot, query)
+
                 return CorrectionResult(
                     final_output=parsed_cot.output,
                     final_reasoning=parsed_cot.reasoning,
@@ -377,3 +382,66 @@ Available Statistics:
                 # Not blocking but logged for audit
         
         return True, None
+
+    def _learn_from_correction(self, original_cot: ParsedCoT, final_cot: ParsedCoT, query: str):
+        """
+        Patent Claim #4: Self-Learning Error Correction.
+        Store the correction pair (Original -> Fixed) to improve future performance.
+        """
+        try:
+            timestamp = time.time()
+            # Simple storage: Append to a JSON lines file
+            # In a production version, this would be a vector DB or structured SQL
+            learning_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', 'error_patterns.jsonl')
+            os.makedirs(os.path.dirname(learning_file), exist_ok=True)
+            
+            entry = {
+                "timestamp": timestamp,
+                "query": query,
+                "original_reasoning": original_cot.reasoning,
+                "corrected_reasoning": final_cot.reasoning,
+                "original_output": original_cot.output,
+                "corrected_output": final_cot.output,
+                "improvement_type": "correction"
+            }
+            
+            import json
+            with open(learning_file, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(entry) + "\n")
+                
+            logging.info(f"[SELF-LEARNING] Stored correction pattern for query: {query[:50]}...")
+            
+        except Exception as e:
+            logging.warning(f"Failed to learn from correction: {e}")
+
+    def get_learned_patterns(self, query: str) -> str:
+        """
+        Retrieve relevant past learnings (Simplified version: returns last 3 corrections)
+        Future/Full implementation: Semantic search over error_patterns.jsonl
+        """
+        try:
+            learning_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', 'error_patterns.jsonl')
+            if not os.path.exists(learning_file):
+                return ""
+            
+            import json
+            patterns = []
+            with open(learning_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip():
+                        patterns.append(json.loads(line))
+            
+            # Return last 2 relevant patterns (naive approach for prototype)
+            # This satisfies the "Application of learned patterns" claim
+            recent = patterns[-2:]
+            if not recent:
+                return ""
+                
+            context = "Past Mistakes to Avoid:\n"
+            for p in recent:
+                context += f"- When asked about similar to '{p['query'][:30]}...', avoid reasoning like '{p['original_reasoning'][:50]}...'. Instead consider '{p['corrected_reasoning'][:50]}...'\n"
+            
+            return context
+            
+        except Exception as e:
+            return ""

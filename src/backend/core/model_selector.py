@@ -57,8 +57,8 @@ class ModelSelector:
             return models_info
             
         except Exception as e:
-            # Use debug level to avoid log spam when Ollama is not running
-            logging.debug(f"Could not fetch models from Ollama: {e}")
+            # Log the actual error to help debugging
+            logging.error(f"Could not fetch models from Ollama at {ollama_url}: {e}")
             return {}
     
     @staticmethod

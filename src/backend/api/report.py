@@ -27,16 +27,21 @@ report_manager = EnhancedReportManager()
 
 
 @router.get('/download-log')
+@router.get('/download-log')
 def download_log():
-    log_path = os.path.join(os.path.dirname(__file__), '../../nexus.log')
-    if not os.path.exists(log_path):
+    from backend.core.config import settings
+    log_path = settings.get_log_path()
+    
+    if not log_path or not log_path.exists():
         return Response(content='Log file not found', media_type='text/plain', status_code=404)
+        
     with open(log_path, 'rb') as f:
         content = f.read()
-    return Response(content=content, media_type='text/plain', headers={'Content-Disposition': 'attachment; filename="nexus.log"'})
+    return Response(content=content, media_type='text/plain', headers={'Content-Disposition': f'attachment; filename="{log_path.name}"'})
 
 @router.get('/download-audit')
 def download_audit():
+    # Audit log path could be added to settings, but for now we'll match the pattern
     audit_path = os.path.join(os.path.dirname(__file__), '../../data/audit/audit_log.jsonl')
     if not os.path.exists(audit_path):
         return Response(content='Audit log not found', media_type='text/plain', status_code=404)
@@ -86,8 +91,9 @@ async def generate_report(request: ReportGenerationRequest):
         )
         
         # Store the report path for download
-        data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'reports')
-        os.makedirs(data_dir, exist_ok=True)
+        from backend.core.config import settings
+        data_dir = settings.get_reports_path()
+        # os.makedirs(data_dir, exist_ok=True) # settings.get_reports_path() already treats it as Path, but ensure it exists? settings.get_reports_path() creates it!
         
         # Copy to data directory for download
         if isinstance(report_path, list):
@@ -95,7 +101,7 @@ async def generate_report(request: ReportGenerationRequest):
             stored_paths = []
             for path in report_path:
                 filename = os.path.basename(path)
-                stored_path = os.path.join(data_dir, filename)
+                stored_path = data_dir / filename
                 
                 # Copy file
                 import shutil
@@ -112,7 +118,7 @@ async def generate_report(request: ReportGenerationRequest):
         else:
             # Single file generated
             filename = os.path.basename(report_path)
-            stored_path = os.path.join(data_dir, filename)
+            stored_path = data_dir / filename
             
             # Copy file
             import shutil
@@ -162,9 +168,9 @@ def _generate_csv_export(results: List[Dict[str, Any]]) -> str:
         csv_filename = f"analysis_export_{timestamp}.csv"
         
         # Save to data/reports directory
-        data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'reports')
-        os.makedirs(data_dir, exist_ok=True)
-        csv_path = os.path.join(data_dir, csv_filename)
+        from backend.core.config import settings
+        data_dir = settings.get_reports_path()
+        csv_path = data_dir / csv_filename
         
         df.to_csv(csv_path, index=False)
         logging.info(f"[CSV] Export generated: {csv_path}")
@@ -184,13 +190,10 @@ def download_report(filename: Optional[str] = None):
     """
     try:
         from pathlib import Path
-        
-        # Get the project root and data directories
-        backend_dir = Path(__file__).parent.parent
-        project_root = backend_dir.parent
+        from backend.core.config import settings
         
         # Look in reports directory
-        reports_dir = project_root / "data" / "reports"
+        reports_dir = settings.get_reports_path()
         
         report_file = None
         

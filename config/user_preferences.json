@@ -1,20 +1,19 @@
 {
-      "primary_model": "phi3:mini",
+  "primary_model": "tinyllama:latest",
   "review_model": "phi3:mini",
   "embedding_model": "nomic-embed-text:latest",
   "auto_model_selection": false,
   "allow_swap_usage": true,
   "memory_buffer_gb": 0.5,
   "preferred_performance": "balanced",
-  "enable_auto_review": false,
-  "review_threshold": 0.5,
+  "enable_intelligent_routing": false,
   "first_time_setup_complete": true,
-  "last_updated": "2025-10-18T15:45:52.672200",
+  "last_updated": "2025-12-21T05:33:38.615313",
   "model_test_results": {
     "phi3:mini": {
       "success": true,
-      "timestamp": "2025-10-18T15:40:49.692428",
-      "response_time": 6.508827209472656e-05,
+      "timestamp": "2025-12-19T20:24:09.363515",
+      "response_time": 6.186197996139526,
       "error": null
     },
     "tinyllama": {
@@ -31,20 +30,20 @@
     },
     "llama3.1:8b": {
       "success": true,
-      "timestamp": "2025-10-18T15:40:47.468916",
-      "response_time": 5.459785461425781e-05,
+      "timestamp": "2025-12-19T20:28:54.650701",
+      "response_time": 10.164336442947388,
       "error": null
     },
     "nomic-embed-text:latest": {
-      "success": true,
-      "timestamp": "2025-10-18T15:40:38.804724",
-      "response_time": 27.380138874053955,
-      "error": null
+      "success": false,
+      "timestamp": "2025-12-19T20:28:34.770485",
+      "response_time": 2.059377670288086,
+      "error": "Service temporarily unavailable: Service error: 400 Client Error: Bad Request for url: http://localhost:11434/api/generate"
     },
     "tinyllama:latest": {
       "success": true,
-      "timestamp": "2025-10-18T15:40:45.163513",
-      "response_time": 0.00010776519775390625,
+      "timestamp": "2025-12-19T20:27:08.594875",
+      "response_time": 4.05894136428833,
       "error": null
     }
   }

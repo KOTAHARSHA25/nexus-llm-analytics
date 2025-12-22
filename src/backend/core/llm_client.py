@@ -33,6 +33,7 @@ class LLMClient:
         self, 
         prompt: str, 
         model: Optional[str] = None, 
+        system: Optional[str] = None,
         adaptive_timeout: bool = True
     ) -> Dict[str, Any]:
         from .circuit_breaker import get_circuit_breaker, CircuitBreakerConfig
@@ -70,25 +71,18 @@ class LLMClient:
             timeout = cb_config.timeout
             
             url = f"{self.base_url}/api/generate"
-            payload = {"model": model, "prompt": prompt}
+            payload = {"model": model, "prompt": prompt, "stream": False}
+            if system:
+                payload["system"] = system
             
-            response = requests.post(url, json=payload, timeout=timeout, stream=True)
+            response = requests.post(url, json=payload, timeout=timeout)
             response.raise_for_status()
-            output = ""
-            for line in response.iter_lines():
-                if line:
-                    try:
-                        import json
-                        data = json.loads(line.decode("utf-8"))
-                        if isinstance(data, dict) and "response" in data:
-                            output += data["response"]
-                    except Exception:
-                        logging.debug("Operation failed (non-critical) - continuing")
             
-            if not output.strip():
+            data = response.json()
+            if "response" in data:
+                return {"model": model, "prompt": prompt, "response": data["response"].strip(), "success": True}
+            else:
                 raise Exception("Empty response from LLM")
-                
-            return {"model": model, "prompt": prompt, "response": output.strip(), "success": True}
         
         # Execute with circuit breaker protection
         result = circuit_breaker.call(_make_llm_call)

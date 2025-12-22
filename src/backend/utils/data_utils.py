@@ -37,8 +37,12 @@ class DataPathResolver:
     @classmethod
     def get_uploads_dir(cls) -> Path:
         """Get uploads directory path (cached)."""
+        from backend.core.config import settings
         if cls._uploads_dir is None:
-            cls._uploads_dir = cls.get_project_root() / "data" / "uploads"
+            cls._uploads_dir = Path(settings.upload_directory)
+            # Ensure it's absolute
+            if not cls._uploads_dir.is_absolute():
+                 cls._uploads_dir = cls.get_project_root() / cls._uploads_dir
         return cls._uploads_dir
     
     @classmethod

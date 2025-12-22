@@ -354,75 +354,39 @@ class IntelligentQueryRouter:
         self.performance_history = defaultdict(list)
         self.load_balancer = HighPerformanceHashMap()
         self.routing_rules = []
-        self._initialize_agents()
+        
+        # Initialize Agent Registry
+        from .plugin_system import AgentRegistry
+        self.registry = AgentRegistry()
+        self._initialize_agents_from_registry()
         self._initialize_routing_rules()
     
-    def _initialize_agents(self):
-        """Initialize available agents with their profiles"""
-        agents_config = [
-            {
-                "agent_id": "data_analyst",
-                "name": "Data Analyst Agent",
-                "capabilities": {
-                    AgentCapability.STATISTICAL_ANALYSIS,
-                    AgentCapability.DATA_VISUALIZATION
-                },
-                "model_provider": ModelProvider.OPENAI,
-                "max_concurrent": 5,
-                "cost_per_query": 0.02
-            },
-            {
-                "agent_id": "ml_engineer", 
-                "name": "ML Engineer Agent",
-                "capabilities": {
-                    AgentCapability.MACHINE_LEARNING,
-                    AgentCapability.PREDICTIVE_ANALYTICS,
-                    AgentCapability.STATISTICAL_ANALYSIS
-                },
-                "model_provider": ModelProvider.ANTHROPIC,
-                "max_concurrent": 3,
-                "cost_per_query": 0.05
-            },
-            {
-                "agent_id": "financial_analyst",
-                "name": "Financial Analyst Agent", 
-                "capabilities": {
-                    AgentCapability.FINANCIAL_MODELING,
-                    AgentCapability.BUSINESS_METRICS,
-                    AgentCapability.STATISTICAL_ANALYSIS
-                },
-                "model_provider": ModelProvider.OPENAI,
-                "max_concurrent": 4,
-                "cost_per_query": 0.03
-            },
-            {
-                "agent_id": "business_intelligence",
-                "name": "Business Intelligence Agent",
-                "capabilities": {
-                    AgentCapability.BUSINESS_METRICS,
-                    AgentCapability.DATA_VISUALIZATION,
-                    AgentCapability.PERFORMANCE_OPTIMIZATION
-                },
-                "model_provider": ModelProvider.GOOGLE,
-                "max_concurrent": 6,
-                "cost_per_query": 0.015
-            },
-            {
-                "agent_id": "text_analyst",
-                "name": "Text Analysis Agent",
-                "capabilities": {
-                    AgentCapability.TEXT_PROCESSING,
-                    AgentCapability.STATISTICAL_ANALYSIS
-                },
-                "model_provider": ModelProvider.ANTHROPIC,
-                "max_concurrent": 4,
-                "cost_per_query": 0.025
-            }
-        ]
+    def _initialize_agents_from_registry(self):
+        """Initialize available agents dynamically from the registry"""
+        # Trigger discovery first
+        self.registry.discover_agents()
         
-        for config in agents_config:
-            agent = AgentProfile(**config)
-            self.agents[agent.agent_id] = agent
+        registered_agents = self.registry.registered_agents
+        
+        for agent_name, agent_instance in registered_agents.items():
+            metadata = agent_instance.get_metadata()
+            
+            # Create a profile from the plugin metadata
+            # Map capabilities (using a default mapping if needed)
+            capabilities = set(metadata.capabilities)
+            
+            # Map cost/concurrency from metadata if available, else defaults
+            # Note: BasePluginAgent metadata might need extensions for these, using safe defaults for now
+            profile = AgentProfile(
+                agent_id=metadata.name.lower().replace(" ", "_"),
+                name=metadata.name,
+                capabilities=capabilities,
+                model_provider=ModelProvider.OPENAI, # Default for now
+                max_concurrent=5,
+                cost_per_query=0.01
+            )
+            self.agents[profile.agent_id] = profile
+            logger.info(f"Registered agent profile: {profile.name}")
     
     def _initialize_routing_rules(self):
         """Initialize intelligent routing rules"""

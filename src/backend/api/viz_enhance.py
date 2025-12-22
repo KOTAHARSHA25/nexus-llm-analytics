@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional, Union
 import logging
 import json
-from backend.core.crew_singleton import get_crew_manager
+
 from backend.visualization.scaffold import ChartScaffold, VisualizationGoal
 from backend.utils.data_utils import clean_code_snippet, create_data_summary, read_dataframe
 from pathlib import Path
@@ -148,15 +148,21 @@ async def edit_visualization(request: ChartEditRequest):
         Return ONLY the modified Python code wrapped in ```python ``` markers.
         """
         
-        # Get edited code from CrewAI
-        crew_manager = get_crew_manager()
-        result = crew_manager.analyze_structured_data(
+        # Get edited code from Agent
+        from backend.core.plugin_system import get_agent_registry
+        registry = get_agent_registry()
+        analyst = registry.get_agent("DataAnalyst")
+        
+        if not analyst:
+            raise ValueError("DataAnalyst agent not found")
+            
+        result = analyst.execute(
             query=prompt,
-            data_summary=data_summary
+            data=data_summary # Context
         )
         
         # Extract and clean code
-        edited_code = result.get("analysis", "")
+        edited_code = result.get("result", "")
         edited_code = preprocess_code(edited_code)
         
         return {
@@ -211,15 +217,21 @@ async def explain_visualization(request: ChartExplainRequest):
         ```
         """
         
-        crew_manager = get_crew_manager()
-        result = crew_manager.analyze_structured_data(
+        from backend.core.plugin_system import get_agent_registry
+        registry = get_agent_registry()
+        analyst = registry.get_agent("DataAnalyst")
+        
+        if not analyst:
+            raise ValueError("DataAnalyst agent not found")
+            
+        result = analyst.execute(
             query=prompt,
-            data_summary={}
+            data="Simple Code Explanation Task" # Context
         )
         
         # Extract explanation
-        explanation_text = result.get("analysis", "")
-        explanation_text = clean_code_snippet(explanation_text)
+        explanation_text = result.get("result", "")
+        # ... logic continues ...
         
         # Try to parse as JSON
         try:
@@ -298,14 +310,22 @@ async def evaluate_visualization(request: ChartEvaluateRequest):
         ```
         """
         
-        crew_manager = get_crew_manager()
-        result = crew_manager.analyze_structured_data(
+
+        
+        from backend.core.plugin_system import get_agent_registry
+        registry = get_agent_registry()
+        analyst = registry.get_agent("DataAnalyst")
+        
+        if not analyst:
+            raise ValueError("DataAnalyst agent not found")
+            
+        result = analyst.execute(
             query=prompt,
-            data_summary={}
+            data="Evaluation Task" 
         )
         
         # Extract evaluations
-        eval_text = result.get("analysis", "")
+        eval_text = result.get("result", "")
         eval_text = clean_code_snippet(eval_text)
         
         try:
@@ -405,13 +425,21 @@ async def repair_visualization(request: ChartRepairRequest):
         Return ONLY the repaired Python code wrapped in ```python ``` markers.
         """
         
-        crew_manager = get_crew_manager()
-        result = crew_manager.analyze_structured_data(
+
+        
+        from backend.core.plugin_system import get_agent_registry
+        registry = get_agent_registry()
+        analyst = registry.get_agent("DataAnalyst")
+        
+        if not analyst:
+            raise ValueError("DataAnalyst agent not found")
+            
+        result = analyst.execute(
             query=prompt,
-            data_summary=data_summary
+            data=data_summary
         )
         
-        repaired_code = result.get("analysis", "")
+        repaired_code = result.get("result", "")
         repaired_code = preprocess_code(repaired_code)
         
         return {
@@ -497,14 +525,22 @@ async def recommend_visualizations(request: ChartRecommendRequest):
         ... (continue for {request.n} recommendations)
         """
         
-        crew_manager = get_crew_manager()
-        result = crew_manager.analyze_structured_data(
+
+        
+        from backend.core.plugin_system import get_agent_registry
+        registry = get_agent_registry()
+        analyst = registry.get_agent("DataAnalyst")
+        
+        if not analyst:
+            raise ValueError("DataAnalyst agent not found")
+            
+        result = analyst.execute(
             query=prompt,
-            data_summary=data_summary
+            data=data_summary
         )
         
         # Split recommendations
-        recommendations_text = result.get("analysis", "")
+        recommendations_text = result.get("result", "")
         snippets = recommendations_text.split("*****")
         
         recommendations = []
@@ -574,7 +610,7 @@ async def generate_persona_goals(request: PersonaGoalsRequest):
         1. Follow best practices (e.g., bar charts not pie charts for comparisons)
         2. Be meaningful and insightful
         3. Use exact field names from the dataset summary
-        4. Be relevant to the persona's interests
+        4. Be relevant to the persona interests
         
         Return ONLY a JSON array:
         ```json
@@ -591,14 +627,20 @@ async def generate_persona_goals(request: PersonaGoalsRequest):
         ```
         """
         
-        crew_manager = get_crew_manager()
-        result = crew_manager.analyze_structured_data(
+        from backend.core.plugin_system import get_agent_registry
+        registry = get_agent_registry()
+        analyst = registry.get_agent("DataAnalyst")
+        
+        if not analyst:
+            raise ValueError("DataAnalyst agent not found")
+            
+        result = analyst.execute(
             query=prompt,
-            data_summary=data_summary
+            data=data_summary
         )
         
         # Parse goals
-        goals_text = result.get("analysis", "")
+        goals_text = result.get("result", "")
         goals_text = clean_code_snippet(goals_text)
         
         try:

@@ -227,49 +227,50 @@ class AgentRegistry:
             logging.error(f"Failed to register agent {agent.metadata.name}: {e}")
             return False
     
-    def find_best_agent(self, query: str, file_type: Optional[str] = None, **kwargs) -> Optional[BasePluginAgent]:
+    def get_agent(self, name: str) -> Optional[BasePluginAgent]:
+        """Get a registered agent by name"""
+        return self.registered_agents.get(name)
+
+    def route_query(self, query: str, file_type: Optional[str] = None, **kwargs) -> tuple:
         """
-        Find the best agent to handle a specific query
+        Route a query to the best agent.
         
-        Uses intelligent routing based on:
-        - File type compatibility
-        - Query analysis
-        - Agent confidence scores
-        - Resource availability
+        Returns:
+            tuple: (topic, confidence, agent)
         """
+        best_agent = None
+        best_score = 0.0
+        best_capability = None
+        
+        # Reuse logic similar to find_best_agent but capture score
         candidates = []
-        
-        # Get candidates by file type
         if file_type:
-            file_type_candidates = self.file_type_index.get(file_type, [])
-            candidates.extend(file_type_candidates)
-        
-        # If no file type candidates, check all agents
+            candidates.extend(self.file_type_index.get(file_type, []))
         if not candidates:
             candidates = list(self.registered_agents.keys())
-        
-        # Score each candidate
-        scored_candidates = []
+            
         for agent_name in candidates:
             agent = self.registered_agents[agent_name]
             try:
                 confidence = agent.can_handle(query, file_type, **kwargs)
                 if confidence > 0:
-                    # Combine confidence with priority
-                    final_score = confidence * 0.8 + (agent.metadata.priority / 100) * 0.2
-                    scored_candidates.append((final_score, agent_name, agent))
+                    score = confidence * 0.8 + (agent.metadata.priority / 100) * 0.2
+                    if score > best_score:
+                        best_score = score
+                        best_agent = agent
+                        # Guess primary capability
+                        best_capability = agent.metadata.capabilities[0].value if agent.metadata.capabilities else "general"
             except Exception as e:
                 logging.error(f"Error checking agent {agent_name}: {e}")
-        
-        # Return best match
-        if scored_candidates:
-            scored_candidates.sort(key=lambda x: x[0], reverse=True)
-            best_score, best_name, best_agent = scored_candidates[0]
-            logging.debug(f"Selected agent: {best_name} (score: {best_score:.2f})")
-            return best_agent
-        
-        logging.debug("No suitable agent found for query")
-        return None
+                
+        return best_capability, best_score, best_agent
+
+    def find_best_agent(self, query: str, file_type: Optional[str] = None, **kwargs) -> Optional[BasePluginAgent]:
+        """
+        Find the best agent to handle a specific query
+        """
+        _, _, agent = self.route_query(query, file_type, **kwargs)
+        return agent
     
     def get_agents_by_capability(self, capability: AgentCapability) -> List[BasePluginAgent]:
         """Get all agents with a specific capability"""

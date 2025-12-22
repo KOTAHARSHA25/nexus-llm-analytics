@@ -25,7 +25,7 @@ class ModelInitializer:
         self._chroma_client = None
         self._primary_llm = None
         self._review_llm = None
-        self._intelligent_router = None
+
         self._tools = None
         self._query_parser = None
         self._cot_engine = None
@@ -83,14 +83,7 @@ class ModelInitializer:
             self._initialize_llms()
         return self._review_llm
     
-    @property
-    def intelligent_router(self):
-        """Get the intelligent router."""
-        if self._intelligent_router is None:
-            from backend.core.intelligent_router import IntelligentRouter
-            self._intelligent_router = IntelligentRouter()
-        return self._intelligent_router
-    
+
     @property
     def tools(self):
         """Get analysis tools."""
@@ -127,15 +120,17 @@ class ModelInitializer:
             primary_model = primary_model or prefs.primary_model or 'llama3.1:8b'
             review_model = review_model or prefs.review_model or 'phi3:mini'
             
-            # Strip ollama/ prefix if present
-            primary_model = primary_model.replace('ollama/', '')
-            review_model = review_model.replace('ollama/', '')
-            
-            self._primary_llm = OllamaLLM(model=primary_model, timeout=120)
-            self._review_llm = OllamaLLM(model=review_model, timeout=60)
-            
+            # Store full model names
             self.cached_models['primary'] = primary_model
             self.cached_models['review'] = review_model
+            
+            # Strip ollama/ prefix for LangChain OllamaLLM class which expects just the model name
+            primary_model_clean = primary_model.replace('ollama/', '')
+            review_model_clean = review_model.replace('ollama/', '')
+            
+            self._primary_llm = OllamaLLM(model=primary_model_clean, timeout=120)
+            
+            self._review_llm = OllamaLLM(model=review_model_clean, timeout=60)
             
             logging.info(f"✅ LLMs initialized: primary={primary_model}, review={review_model}")
             
@@ -145,23 +140,9 @@ class ModelInitializer:
     
     def _create_tools(self) -> list:
         """Create analysis tools for agents."""
-        try:
-            from crewai_tools import FileReadTool, CodeInterpreterTool
-            
-            tools = [
-                FileReadTool(),
-            ]
-            
-            # Try to add code interpreter
-            try:
-                tools.append(CodeInterpreterTool())
-            except Exception:
-                logging.debug("CodeInterpreterTool not available")
-            
-            return tools
-        except Exception as e:
-            logging.warning(f"Could not create tools: {e}")
-            return []
+        # Genesis Compliance: Removed CrewAI tools.
+        # Future tools should be custom implementations if needed.
+        return []
     
     def ensure_initialized(self):
         """Ensure all components are initialized."""
@@ -172,7 +153,7 @@ class ModelInitializer:
         _ = self.llm_client
         _ = self.primary_llm
         _ = self.review_llm
-        _ = self.intelligent_router
+
         
         self._initialized = True
         logging.info("✅ ModelInitializer fully initialized")
@@ -201,20 +182,8 @@ class ModelInitializer:
                 self._cot_config = {'enabled': False}
         return self._cot_config
     
-    def get_task_class(self):
-        """Get CrewAI Task class."""
-        from crewai import Task
-        return Task
     
-    def get_crew_class(self):
-        """Get CrewAI Crew class."""
-        from crewai import Crew
-        return Crew
-    
-    def get_process_class(self):
-        """Get CrewAI Process class."""
-        from crewai import Process
-        return Process
+    # Genesis Compliance: Removed CrewAI class getters (get_task_class, get_crew_class, get_process_class)
 
 
 def get_model_initializer() -> ModelInitializer:

@@ -141,7 +141,7 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
         return null;
       }
       setUploadStatus("success");
-      
+
       // Return file info with metadata
       return {
         name: data.filename || file.name,
@@ -159,15 +159,15 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
 
   const handleDownloadFile = async (filename: string) => {
     try {
-      const response = await fetch(apiUrl(`upload-documents/download-file/${encodeURIComponent(filename)}`));
-      
+      const response = await fetch(apiUrl(`api/upload/download-file/${encodeURIComponent(filename)}`));
+
       if (!response.ok) {
         throw new Error('Download failed');
       }
 
       // Get the blob data
       const blob = await response.blob();
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -175,7 +175,7 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      
+
       // Cleanup
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
@@ -219,11 +219,10 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
       </CardHeader>
       <CardContent className="space-y-4 relative">
         <div
-          className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
-            isDragOver 
-              ? "border-purple-400 bg-gradient-to-br from-purple-500/20 to-blue-500/20 shadow-lg shadow-purple-500/25" 
+          className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${isDragOver
+              ? "border-purple-400 bg-gradient-to-br from-purple-500/20 to-blue-500/20 shadow-lg shadow-purple-500/25"
               : "border-purple-300/50 hover:border-purple-400/70 hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-blue-500/10"
-          }`}
+            }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -246,8 +245,8 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
                 className="hidden"
                 id="file-upload"
               />
-              <Button 
-                asChild 
+              <Button
+                asChild
                 className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
               >
                 <label htmlFor="file-upload" className="cursor-pointer">

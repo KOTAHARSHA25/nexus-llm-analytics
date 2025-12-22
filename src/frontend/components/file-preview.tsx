@@ -94,7 +94,7 @@ export function FilePreview({ fileName, fileType, isOpen, onClose }: FilePreview
 
     try {
       const response = await fetch(
-        apiUrl(`upload-documents/preview-file/${encodeURIComponent(fileName)}`),
+        apiUrl(`api/upload/preview-file/${encodeURIComponent(fileName)}`),
         {
           method: "GET",
           headers: {
@@ -171,7 +171,7 @@ export function FilePreview({ fileName, fileType, isOpen, onClose }: FilePreview
 
   const renderExcelPreview = (sheets: { [key: string]: any }) => {
     const sheetNames = Object.keys(sheets);
-    
+
     if (sheetNames.length === 1) {
       const sheetData = sheets[sheetNames[0]];
       return renderCSVPreview(sheetData.data, sheetData.columns);
@@ -202,7 +202,7 @@ export function FilePreview({ fileName, fileType, isOpen, onClose }: FilePreview
     try {
       const jsonData = JSON.parse(content);
       const formattedJson = JSON.stringify(jsonData, null, 2);
-      
+
       return (
         <ScrollArea className="h-[400px] w-full">
           <pre className="text-sm font-mono bg-muted p-4 rounded-md whitespace-pre-wrap">
@@ -223,7 +223,7 @@ export function FilePreview({ fileName, fileType, isOpen, onClose }: FilePreview
 
   const renderTextPreview = (content: string) => {
     const maxLength = 10000; // Limit preview to 10k characters
-    const displayContent = content.length > maxLength 
+    const displayContent = content.length > maxLength
       ? content.substring(0, maxLength) + "\n... (truncated)"
       : content;
 
@@ -253,28 +253,28 @@ export function FilePreview({ fileName, fileType, isOpen, onClose }: FilePreview
           <div className="grid grid-cols-2 gap-2 text-sm">
             <span className="text-muted-foreground">File Name:</span>
             <span className="font-mono">{fileName}</span>
-            
+
             {metadata.size && (
               <>
                 <span className="text-muted-foreground">Size:</span>
                 <span>{formatFileSize(metadata.size)}</span>
               </>
             )}
-            
+
             {metadata.rows && (
               <>
                 <span className="text-muted-foreground">Rows:</span>
                 <span>{metadata.rows.toLocaleString()}</span>
               </>
             )}
-            
+
             {metadata.columns && (
               <>
                 <span className="text-muted-foreground">Columns:</span>
                 <span>{metadata.columns}</span>
               </>
             )}
-            
+
             {metadata.encoding && (
               <>
                 <span className="text-muted-foreground">Encoding:</span>
@@ -403,7 +403,7 @@ export function FilePreview({ fileName, fileType, isOpen, onClose }: FilePreview
             onClick={() => {
               // Create download link
               const link = document.createElement("a");
-              link.href = apiUrl(`upload-documents/download-file/${encodeURIComponent(fileName)}`);
+              link.href = apiUrl(`api/upload/download-file/${encodeURIComponent(fileName)}`);
               link.download = fileName;
               document.body.appendChild(link);
               link.click();

@@ -17,7 +17,7 @@ import importlib
 import base64
 import io
 import matplotlib.pyplot as plt
-from backend.core.crew_singleton import get_crew_manager
+
 from backend.core.sandbox import EnhancedSandbox
 from backend.utils.data_utils import read_dataframe, create_data_summary, clean_code_snippet
 from backend.visualization.dynamic_charts import ChartTypeAnalyzer, DynamicChartGenerator
@@ -202,12 +202,36 @@ async def generate_visualization(request: VisualizationRequest):
                 logging.info(f"[VISUALIZE] Auto-generated chart result: {result.get('success', False)}")
                 return result
             
-            # Use CrewAI for custom chart generation
-            crew_manager = get_crew_manager()
-            result = crew_manager.create_visualization(
-                data_summary=request.data_summary or df.head().to_string(),
-                chart_type=request.chart_type
+            # Use Visualizer Agent for custom chart generation
+            from backend.core.plugin_system import get_agent_registry
+            registry = get_agent_registry()
+            viz_agent = registry.get_agent("Visualizer")
+            
+            if not viz_agent:
+                 raise HTTPException(status_code=500, detail="Visualizer Agent not found")
+
+            query = f"Create a {request.chart_type} chart for the data."
+            if request.chart_type == "auto":
+                query = "Create the most appropriate chart for this data."
+
+            execution_result = viz_agent.execute(
+                query=query,
+                data=request.data_summary or df.head().to_string()
             )
+            
+            if execution_result.get("success"):
+                # Extract code from the result
+                raw_result = execution_result.get("result", "")
+                from backend.utils.data_utils import clean_code_snippet
+                plotly_code = clean_code_snippet(raw_result)
+                
+                # Create a result dict similar to what was expected
+                result = {
+                    "success": True,
+                    "visualization_code": plotly_code
+                }
+            else:
+                result = {"success": False, "error": execution_result.get("error")}
             
             if result.get("success"):
                 # Execute the generated Plotly code
@@ -359,7 +383,9 @@ async def generate_goal_based_visualization(request: GoalBasedVisualizationReque
             # Use LLM ONLY for filtering (simpler, more reliable)
             logger.debug(f"[VISUALIZE] Using LLM for filtering logic: {request.goal}")
             
-            crew_manager = get_crew_manager()
+            from backend.core.plugin_system import get_agent_registry
+            registry = get_agent_registry()
+            analyst_agent = registry.get_agent("DataAnalyst") # or "Time Series" or whatever, but DataAnalyst is safe fallback
             
             # STEP 1: Simple and direct - let LLM generate filter + chart suggestion together
             if request.analysis_context or request.goal:
@@ -406,12 +432,12 @@ RESPONSE (JSON only):
 
 NOW PROCESS THIS QUESTION!"""
 
-                filter_result = crew_manager.handle_query(
-                    query=filter_query,
-                    filename=request.filename,
-                    column=None,
-                    value=None
-                )
+                filter_result = {"success": False}
+                if analyst_agent:
+                    filter_result = analyst_agent.execute(
+                        query=filter_query,
+                        data=df.head().to_string() # Context provided in query mostly
+                    )
                 
                 if filter_result.get("success") and filter_result.get("result"):
                     result_text = filter_result["result"]

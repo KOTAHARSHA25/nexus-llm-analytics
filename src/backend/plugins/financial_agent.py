@@ -11,7 +11,8 @@ import json
 from datetime import datetime, timedelta
 
 # Add src to path for imports
-src_path = Path(__file__).parent.parent / "src"
+# Add src to path for imports
+src_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(src_path))
 
 try:

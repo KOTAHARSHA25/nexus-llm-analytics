@@ -42,6 +42,9 @@ class ChromaDBClient:
 				'error': f"Query failed: {str(e)}"
 			}
 
+	def list_collections(self):
+		return self.client.list_collections()
+
 def chunk_text(text, chunk_size=500, overlap=50):
 	"""Chunk text into overlapping segments for embedding."""
 	words = text.split()
