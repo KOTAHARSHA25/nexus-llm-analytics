@@ -35,6 +35,24 @@ class CriticFeedback:
     is_valid: bool
     issues: List[CriticIssue]
     raw_response: str
+    
+    @property
+    def feedback(self) -> str:
+        """Generate feedback text from issues for generator improvement"""
+        if not self.issues:
+            return ""
+        
+        feedback_parts = []
+        for i, issue in enumerate(self.issues, 1):
+            feedback_parts.append(f"Issue {i}: {issue.description}")
+            if issue.location:
+                feedback_parts.append(f"   Location: {issue.location}")
+            if issue.severity:
+                feedback_parts.append(f"   Severity: {issue.severity}")
+            if issue.suggestion:
+                feedback_parts.append(f"   Fix: {issue.suggestion}")
+        
+        return "\n".join(feedback_parts)
 
 class CoTParser:
     """Parse and validate CoT-structured responses"""
@@ -48,7 +66,7 @@ class CoTParser:
     
     def parse(self, response: str) -> ParsedCoT:
         """
-        Extract reasoning and output sections from LLM response
+        Extract reasoning and output sections from LLM response with fallback strategies
         
         Args:
             response: Raw LLM response string
@@ -56,6 +74,32 @@ class CoTParser:
         Returns:
             ParsedCoT object with extracted sections
         """
+        # Strategy 1: Exact match (current approach)
+        result = self._parse_exact(response)
+        if result.is_valid:
+            return result
+        
+        # Strategy 2: Fuzzy tag matching (handle variations)
+        result = self._parse_fuzzy(response)
+        if result.is_valid:
+            return result
+        
+        # Strategy 3: Content-based extraction (no tags)
+        result = self._parse_content_based(response)
+        if result.is_valid:
+            return result
+        
+        # Strategy 4: Fallback - return entire response as output
+        return ParsedCoT(
+            reasoning="Unable to extract structured reasoning",
+            output=response.strip(),
+            is_valid=False,
+            error_message="All parsing strategies failed - using raw response",
+            raw_response=response
+        )
+    
+    def _parse_exact(self, response: str) -> ParsedCoT:
+        """Original exact matching strategy"""
         # Extract reasoning section
         reasoning_pattern = f"{re.escape(self.reasoning_start)}(.*?){re.escape(self.reasoning_end)}"
         reasoning_match = re.search(reasoning_pattern, response, re.DOTALL | re.IGNORECASE)
@@ -65,21 +109,12 @@ class CoTParser:
         output_match = re.search(output_pattern, response, re.DOTALL | re.IGNORECASE)
         
         # Validation
-        if not reasoning_match:
+        if not reasoning_match or not output_match:
             return ParsedCoT(
                 reasoning="",
-                output=response,  # Fallback to entire response
-                is_valid=False,
-                error_message="Missing [REASONING] section",
-                raw_response=response
-            )
-        
-        if not output_match:
-            return ParsedCoT(
-                reasoning=reasoning_match.group(1).strip(),
                 output="",
                 is_valid=False,
-                error_message="Missing [OUTPUT] section",
+                error_message="Missing expected tags",
                 raw_response=response
             )
         
@@ -101,6 +136,107 @@ class CoTParser:
             output=output_text,
             is_valid=True,
             error_message=None,
+            raw_response=response
+        )
+    
+    def _parse_fuzzy(self, response: str) -> ParsedCoT:
+        """Match common tag variations (angle brackets, different cases, colons)"""
+        fuzzy_patterns = [
+            # Angle brackets
+            (r'<reasoning>(.*?)</reasoning>', r'<output>(.*?)</output>'),
+            (r'<REASONING>(.*?)</REASONING>', r'<OUTPUT>(.*?)</OUTPUT>'),
+            # Markdown-style
+            (r'##\s*REASONING\s*\n(.*?)(?=##\s*OUTPUT)', r'##\s*OUTPUT\s*\n(.*?)$'),
+            # Colon-based
+            (r'REASONING:(.*?)(?=OUTPUT:)', r'OUTPUT:(.*?)$'),
+            (r'Reasoning:(.*?)(?=Answer:|Output:)', r'(?:Answer|Output):(.*?)$'),
+            # Bold markdown
+            (r'\*\*REASONING\*\*(.*?)(?=\*\*OUTPUT\*\*)', r'\*\*OUTPUT\*\*(.*?)$'),
+        ]
+        
+        for reasoning_pattern, output_pattern in fuzzy_patterns:
+            reasoning_match = re.search(reasoning_pattern, response, re.DOTALL | re.IGNORECASE)
+            output_match = re.search(output_pattern, response, re.DOTALL | re.IGNORECASE)
+            
+            if reasoning_match and output_match:
+                reasoning_text = reasoning_match.group(1).strip()
+                output_text = output_match.group(1).strip()
+                
+                if reasoning_text and len(reasoning_text) >= 50 and output_text:
+                    return ParsedCoT(
+                        reasoning=reasoning_text,
+                        output=output_text,
+                        is_valid=True,
+                        error_message=None,
+                        raw_response=response
+                    )
+        
+        return ParsedCoT(
+            reasoning="",
+            output="",
+            is_valid=False,
+            error_message="Fuzzy matching failed",
+            raw_response=response
+        )
+    
+    def _parse_content_based(self, response: str) -> ParsedCoT:
+        """Extract reasoning and output based on content structure (no tags required)"""
+        # Split by double newlines to find paragraphs
+        paragraphs = [p.strip() for p in response.split('\n\n') if p.strip()]
+        
+        if len(paragraphs) < 2:
+            return ParsedCoT(
+                reasoning="",
+                output="",
+                is_valid=False,
+                error_message="Insufficient structure for content-based parsing",
+                raw_response=response
+            )
+        
+        # Heuristic: Reasoning keywords in early paragraphs, conclusion/answer in later
+        reasoning_keywords = ['because', 'therefore', 'first', 'second', 'step', 'analyze', 'consider']
+        output_keywords = ['result', 'answer', 'conclusion', 'therefore', 'summary', 'final']
+        
+        reasoning_paras = []
+        output_paras = []
+        
+        for i, para in enumerate(paragraphs):
+            para_lower = para.lower()
+            
+            # First 2/3 likely reasoning
+            if i < len(paragraphs) * 0.66:
+                if any(kw in para_lower for kw in reasoning_keywords) or len(para) > 100:
+                    reasoning_paras.append(para)
+            else:
+                # Last 1/3 likely output
+                if any(kw in para_lower for kw in output_keywords) or i == len(paragraphs) - 1:
+                    output_paras.append(para)
+        
+        reasoning_text = '\n\n'.join(reasoning_paras).strip()
+        output_text = '\n\n'.join(output_paras).strip()
+        
+        # Fallback: use last paragraph as output if nothing identified
+        if not output_text and paragraphs:
+            output_text = paragraphs[-1]
+        
+        # Fallback: use all but last as reasoning
+        if not reasoning_text and len(paragraphs) > 1:
+            reasoning_text = '\n\n'.join(paragraphs[:-1])
+        
+        if reasoning_text and len(reasoning_text) >= 50 and output_text:
+            return ParsedCoT(
+                reasoning=reasoning_text,
+                output=output_text,
+                is_valid=True,
+                error_message=None,
+                raw_response=response
+            )
+        
+        return ParsedCoT(
+            reasoning="",
+            output="",
+            is_valid=False,
+            error_message="Content-based parsing failed",
             raw_response=response
         )
     

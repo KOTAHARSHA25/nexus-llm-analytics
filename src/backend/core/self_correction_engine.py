@@ -7,7 +7,8 @@ import time
 import os
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, List
-from .cot_parser import CoTParser, CriticParser, ParsedCoT, CriticFeedback
+from .cot_parser import CoTParser, CriticParser, ParsedCoT, CriticFeedback, CriticIssue
+from .automated_validation import AutomatedValidator
 
 @dataclass
 class CorrectionIteration:
@@ -46,6 +47,7 @@ class SelfCorrectionEngine:
             output_end=config['tags']['output_end']
         )
         self.critic_parser = CriticParser()
+        self.automated_validator = AutomatedValidator()  # NEW: Pre-validation
         
         self.max_iterations = config['max_iterations']
         self.timeout_per_iteration = config['timeout_per_iteration_seconds']
@@ -134,6 +136,58 @@ class SelfCorrectionEngine:
                     termination_reason="parsing_failure",
                     total_time_seconds=time.time() - start_time
                 )
+            
+            # STEP 2.5: Automated pre-validation (NEW - catches obvious errors)
+            auto_validation = self.automated_validator.validate(
+                query=query,
+                reasoning=parsed_cot.reasoning,
+                output=parsed_cot.output,
+                data_context=data_context
+            )
+            
+            if not auto_validation.is_valid:
+                # Automated check found HIGH severity issues - skip LLM critic
+                logging.info(f"Automated validation found {len(auto_validation.issues)} issues")
+                
+                # Convert validation issues to CriticIssue format
+                critic_issues = [
+                    CriticIssue(
+                        description=issue.description,
+                        location=issue.location,
+                        severity=issue.severity,
+                        suggestion=f"Fix: {issue.issue_type}"
+                    )
+                    for issue in auto_validation.issues
+                    if issue.severity == "HIGH"  # Only HIGH severity issues
+                ]
+                
+                critic_feedback = CriticFeedback(
+                    is_valid=False,
+                    issues=critic_issues,
+                    raw_response=auto_validation.to_feedback_text()
+                )
+                
+                # Record iteration with automated rejection
+                iteration_record = CorrectionIteration(
+                    iteration_number=iteration,
+                    generator_response=generator_output,
+                    parsed_cot=parsed_cot,
+                    critic_response="[AUTOMATED_VALIDATION_FAILED]",
+                    critic_feedback=critic_feedback,
+                    correction_needed=True,
+                    timestamp=time.time()
+                )
+                iterations.append(iteration_record)
+                
+                # Build correction prompt for next iteration
+                current_prompt = self._build_generator_prompt(
+                    query=query,
+                    data_context=data_context,
+                    previous_attempt=generator_output,
+                    critic_feedback=critic_feedback.feedback
+                )
+                
+                continue  # Skip LLM critic, go to next iteration
             
             # STEP 3: Critic evaluates reasoning
             critic_prompt = self._build_critic_prompt(
