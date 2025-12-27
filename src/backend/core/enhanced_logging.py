@@ -88,8 +88,13 @@ class EmojiFormatter(logging.Formatter):
         # Format timestamp
         timestamp = datetime.fromtimestamp(record.created).strftime('%H:%M:%S')
         
-        # Format the message
+        # Format the message - TRUNCATE if too long to prevent data dumps
         message = record.getMessage()
+        
+        # Prevent logging of large data previews (likely accidental data dumps)
+        MAX_LOG_LENGTH = 500  # Reasonable limit for log messages
+        if len(message) > MAX_LOG_LENGTH:
+            message = message[:MAX_LOG_LENGTH] + f"... [truncated {len(message)-MAX_LOG_LENGTH} chars]"
         
         # Clean format for console
         if self.use_colors:

@@ -9,6 +9,7 @@ import hashlib
 import json
 import logging
 import pickle
+import os
 from typing import Dict, Any, Optional, Callable, Set, List, Union, Tuple
 from dataclasses import dataclass, field
 from collections import OrderedDict, defaultdict, deque
@@ -181,18 +182,23 @@ class EnhancedCacheManager:
         self.query_patterns = {}
         self.optimization_rules = []
         
-        # Background tasks
-        self._start_background_tasks()
+        # Background tasks (only if not disabled)
+        if not os.environ.get('DISABLE_CACHE_BACKGROUND'):
+            self._start_background_tasks()
     
     def _start_background_tasks(self):
         """Start background optimization tasks"""
-        # Start cache warming task
-        asyncio.create_task(self._periodic_cache_warming())
-        
-        # Start cleanup task
-        asyncio.create_task(self._periodic_cleanup())
-        
-        # Start optimization task
+        try:
+            # Start cache warming task
+            asyncio.create_task(self._periodic_cache_warming())
+            
+            # Start cleanup task
+            asyncio.create_task(self._periodic_cleanup())
+            
+            # Start optimization task
+        except RuntimeError:
+            # No event loop running (e.g., in tests)
+            logging.info("Skipping background tasks - no event loop")
         asyncio.create_task(self._periodic_optimization())
     
     def _generate_optimized_key(self, func_name: str, args: tuple, kwargs: dict) -> str:

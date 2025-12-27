@@ -204,44 +204,42 @@ class FinancialAgent(BasePluginAgent):
         if file_type and file_type.lower() in [".csv", ".xlsx", ".json", ".txt"]:
             confidence += 0.1
         
-        # Financial keywords
-        financial_keywords = [
-            "financial", "finance", "money", "dollar", "profit",
-            "cost", "expense", "budget", "cash", "investment", "return"
+        # STRICT FINANCIAL CONTEXT - Only handle queries with clear financial domain indicators
+        strict_financial_keywords = [
+            "financial", "finance", "investment", "portfolio", "stock", "bond",
+            "equity", "debt", "asset", "liability", "balance sheet", "income statement",
+            "cash flow", "fiscal", "treasury", "securities", "trading"
         ]
         
-        keyword_matches = sum(1 for keyword in financial_keywords if keyword in query_lower)
-        confidence += min(keyword_matches * 0.12, 0.35)
+        strict_financial_matches = sum(1 for keyword in strict_financial_keywords if keyword in query_lower)
         
-        # Specific financial patterns
+        # Only boost confidence if query has STRONG financial context
+        if strict_financial_matches >= 2:
+            confidence += 0.4
+        elif strict_financial_matches == 1:
+            # Single financial keyword - check if it's truly financial context
+            financial_ratios = [
+                "current ratio", "quick ratio", "debt to equity", "return on equity",
+                "return on assets", "asset turnover", "liquidity ratio"
+            ]
+            if any(ratio in query_lower for ratio in financial_ratios):
+                confidence += 0.3
+            else:
+                confidence += 0.15  # Lower boost for single keyword
+        
+        # Currency indicators (strong financial signal)
+        monetary_indicators = ["$", "€", "£", "¥"]
+        if any(indicator in query_lower for indicator in monetary_indicators):
+            confidence += 0.2
+        
+        # Specific financial analysis patterns
         for pattern_type, pattern_data in self.financial_patterns.items():
             patterns = pattern_data["patterns"]
             if any(pattern in query_lower for pattern in patterns):
-                confidence += 0.25
+                # Only boost if also has financial context
+                if strict_financial_matches > 0 or any(indicator in query_lower for indicator in monetary_indicators):
+                    confidence += 0.15
                 break
-        
-        # Business metrics terms
-        business_terms = [
-            "kpi", "metrics", "performance", "analysis", "roi", "margin",
-            "ratio", "growth", "trend", "benchmark", "comparison", "dashboard"
-        ]
-        
-        business_matches = sum(1 for term in business_terms if term in query_lower)
-        confidence += min(business_matches * 0.08, 0.25)
-        
-        # Financial ratios and specific metrics
-        ratio_terms = [
-            "current ratio", "quick ratio", "debt to equity", "return on equity",
-            "return on assets", "profit margin", "asset turnover", "liquidity"
-        ]
-        
-        ratio_matches = sum(1 for term in ratio_terms if term in query_lower)
-        confidence += min(ratio_matches * 0.15, 0.3)
-        
-        # Currency and monetary indicators
-        monetary_indicators = ["$", "€", "£", "¥", "cost", "price", "value", "worth"]
-        monetary_matches = sum(1 for indicator in monetary_indicators if indicator in query_lower)
-        confidence += min(monetary_matches * 0.05, 0.15)
         
         return min(confidence, 1.0)
     
@@ -293,18 +291,22 @@ class FinancialAgent(BasePluginAgent):
     def _load_data(self, filename: str) -> Optional[pd.DataFrame]:
         """Load data from file"""
         try:
-            base_data_dir = Path(__file__).parent.parent / "data"
+            # Project root is 3 levels up from this file (src/backend/plugins)
+            project_root = Path(__file__).parent.parent.parent
+            base_data_dir = project_root / "data"
             
             for subdir in ["uploads", "samples"]:
                 filepath = base_data_dir / subdir / filename
                 if filepath.exists():
+                    logging.info(f"Loading data from: {filepath}")
                     if filename.endswith('.csv'):
                         return pd.read_csv(filepath)
                     elif filename.endswith(('.xlsx', '.xls')):
                         return pd.read_excel(filepath)
                     elif filename.endswith('.json'):
                         return pd.read_json(filepath)
-                    
+            
+            logging.warning(f"File not found in uploads or samples: {filename}")
             return None
         except Exception as e:
             logging.error(f"Failed to load data from {filename}: {e}")

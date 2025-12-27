@@ -11,12 +11,13 @@
 Nexus LLM Analytics is a next-generation data analytics platform that leverages **multi-agent AI architecture** to transform natural language queries into actionable data insights. Built with privacy-first principles, all processing happens locally using **Ollama** for LLM inference.
 
 ### **Key Differentiators**
-- 🤖 **Multi-Agent System**: 5 specialized AI agents working in coordination
-- 🔌 **Plugin Architecture**: Extensible system with 5 specialized analytical agents
+- 🤖 **Multi-Agent System**: 5 core AI agents working in coordination
+- 🔌 **Plugin Architecture**: Extensible system with domain specialist agents (Financial, Statistical, ML, Time-Series, SQL)
 - 🏠 **Local-First**: Complete privacy - no data leaves your machine
 - 🎨 **Modern UI**: React/Next.js interface with real-time updates
-- 📊 **Comprehensive Analytics**: Statistical, financial, ML, and time-series analysis
+- 📊 **Comprehensive Analytics**: Operation-based routing supporting statistical, financial, ML, and time-series analysis
 - 🔍 **File Preview**: Advanced preview system for multiple file formats
+- ⚡ **Performance Optimized**: Data preprocessing optimized for business analytics workloads
 
 ---
 

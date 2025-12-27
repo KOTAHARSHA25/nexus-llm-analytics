@@ -113,8 +113,19 @@ async def analyze_query(request: AnalyzeRequest) -> Dict[str, Any]:
         
         # Return successful analysis result
         # Note: AnalysisService returns a standardized dict, we map it to AnalyzeResponse
+        # CRITICAL: result MUST be a string for FastAPI response validation
+        raw_result = result.get("result", "")
+        
+        # If result is a dict (from statistical/descriptive agents), convert to string
+        if isinstance(raw_result, dict):
+            # Try to get interpretation/summary first, otherwise stringify
+            result_str = result.get("interpretation", "") or str(raw_result)
+            logging.warning(f"Result was dict, converted to string (len={len(result_str)})")
+        else:
+            result_str = str(raw_result)
+        
         return {
-            "result": result.get("result", ""),
+            "result": result_str,
             "visualization": result.get("metadata", {}).get("visualization"),
             "code": result.get("metadata", {}).get("code"),
             "execution_time": result.get("metadata", {}).get("execution_time", 0),

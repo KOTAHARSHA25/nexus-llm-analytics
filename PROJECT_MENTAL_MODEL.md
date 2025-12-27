@@ -1,5 +1,5 @@
 # 🧠 PROJECT MENTAL MODEL - Nexus LLM Analytics
-> **Version:** 1.2 | **Last Updated:** December 22, 2025
+> **Version:** 1.3 | **Last Updated:** December 27, 2025
 > **Purpose:** Authoritative single source of truth for system understanding
 
 ---
@@ -8,12 +8,14 @@
 
 | Document | Purpose | Lines |
 |----------|---------|-------|
-| **[PROJECT_ROADMAP_FOR_RESEARCH.md](PROJECT_ROADMAP_FOR_RESEARCH.md)** | Complete roadmap with AI guide | 1876 |
+| **[PROJECT_UNDERSTANDING.md](PROJECT_UNDERSTANDING.md)** | Complete source of truth (v1.1) | ~900 |
+| **[PROJECT_ROADMAP_NEXT_LEVEL.md](PROJECT_ROADMAP_NEXT_LEVEL.md)** | Actionable roadmap (v1.1) | ~1200 |
+| [PROJECT_ROADMAP_FOR_RESEARCH.md](PROJECT_ROADMAP_FOR_RESEARCH.md) | Legacy roadmap | 1876 |
 | [FILE_MANIFEST.md](FILE_MANIFEST.md) | File inventory | ~300 |
 | [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) | Architecture diagrams | ~450 |
 | [DATA_FLOW_GUIDE.md](DATA_FLOW_GUIDE.md) | Data flow documentation | ~200 |
 
-> **⚠️ FOR AI MODELS**: Start with `PROJECT_ROADMAP_FOR_RESEARCH.md` - it has the "AI MODEL QUICK REFERENCE" and "DEVELOPER'S GUIDE TO MAKING CHANGES" sections.
+> **⚠️ FOR AI MODELS**: Start with `PROJECT_UNDERSTANDING.md` (v1.1) - it has model selection guide and updated scope.
 
 ---
 
@@ -21,15 +23,43 @@
 
 | Date | Version | Changes |
 |------|---------|---------|
+| **Dec 27, 2025** | **1.3** | **Major update**: Archived unused files, model selection guide added, auth removed from scope, LLM code generation recommended |
 | Dec 22, 2025 | 1.2 | Added related documents section, reference to main roadmap |
 | Dec 22, 2025 | 1.1 | Updated documentation, removed CrewAI from optimizers.py, verified all files |
 | Dec 22, 2025 | 1.0 | Initial comprehensive analysis |
 
 ---
 
+## 🆕 VERSION 1.3 UPDATES (December 27, 2025)
+
+### Files Archived
+The following files were moved to `archive/removed_v1.1/`:
+- `intelligent_query_engine.py` - Over-engineered, never integrated
+- `optimized_llm_client.py` - Duplicate functionality
+- `websocket_manager.py` - Disabled, incomplete
+
+### Scope Changes
+- **Authentication** → OUT OF SCOPE (not required)
+- **LLM Code Generation** → IN SCOPE (recommended addition)
+- **Cache Mechanism** → KEEP & ENHANCE
+
+### Model Selection
+See `PROJECT_UNDERSTANDING.md` for complete model-to-task mapping with models:
+- Claude Opus 4.5, Sonnet 4.5, Haiku 4.5
+- GPT-5.1-Codex-Max, GPT-5.2, GPT-5.1
+- Gemini 2.5 Pro, Gemini 3 Pro/Flash
+- Grok Code Fast 1
+
+---
+
 ## 📋 EXECUTIVE SUMMARY
 
-**Nexus LLM Analytics** is a **multi-agent intelligent data analysis system** designed for local-first, privacy-preserving analytics. The system has evolved from a CrewAI-based architecture to a **custom plugin-based agent system** with capability-based routing.
+**Nexus LLM Analytics** is a **multi-agent intelligent data analysis system** designed for local-first, privacy-preserving analytics. The system has **fully transitioned** from CrewAI to a **custom plugin-based agent system** with capability-based routing.
+
+**CrewAI Removal Status:** ✅ Complete (Dec 2025)
+- All production code migrated to custom plugin architecture
+- Legacy CrewAI files archived in `src/backend/archive/`
+- Two unused files remain: `crewai_base.py`, `crewai_import_manager.py` (not imported anywhere)
 
 ### Key Architectural Components
 1. **Plugin System** - Runtime agent discovery with capability-based routing

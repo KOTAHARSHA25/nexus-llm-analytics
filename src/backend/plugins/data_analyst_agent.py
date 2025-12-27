@@ -58,21 +58,21 @@ class DataAnalystAgent(BasePluginAgent):
         if file_type in [".csv", ".json", ".xlsx", ".xls"]:
             confidence = 0.3  # Low base - we're a fallback, not first choice
             
-            # Strongly reduce if query is specialized domain
-            specialized_domains = {
-                "statistical": ["t-test", "correlation", "anova", "chi-square", "regression", 
-                               "hypothesis", "p-value", "significance", "statistical test"],
-                "time_series": ["forecast", "arima", "predict", "trend", "seasonality", 
-                               "seasonal decomposition", "time series"],
-                "financial": ["roi", "profitability", "financial health", "cash flow", 
-                             "break-even", "profit margin", "investment", "returns"],
-                "ml": ["clustering", "k-means", "anomaly detection", "pca", "machine learning",
-                      "dimensionality", "segments", "patterns using"]
+            # Defer to specialized agents based on analytical operations (not domain vocabulary)
+            specialized_operations = {
+                "statistical_tests": ["t-test", "correlation", "anova", "chi-square", "regression", 
+                                     "hypothesis", "p-value", "significance", "statistical test"],
+                "time_series_analysis": ["forecast", "arima", "predict", "trend", "seasonality", 
+                                        "seasonal decomposition", "time series"],
+                "ratio_calculations": ["ratio", "percentage", "proportion", "rate", "margin",
+                                      "per", "relative to"],
+                "ml_operations": ["clustering", "k-means", "anomaly detection", "pca", "machine learning",
+                                 "dimensionality", "segment", "pattern detection"]
             }
             
-            for domain, keywords in specialized_domains.items():
-                if any(keyword in query_lower for keyword in keywords):
-                    logging.debug(f"DataAnalyst: Deferring to specialized agent for {domain}")
+            for operation, patterns in specialized_operations.items():
+                if any(pattern in query_lower for pattern in patterns):
+                    logging.debug(f"DataAnalyst: Deferring to specialized agent for {operation}")
                     return 0.1  # Return very low - let specialist handle it
             
             # HIGH PRIORITY: Summary statistics is DataAnalyst domain
@@ -215,6 +215,11 @@ class DataAnalystAgent(BasePluginAgent):
             if optimized_data['is_optimized']:
                 data_info = optimized_data['preview']
                 available_columns = optimized_data.get('stats', {}).get('columns', [])
+                
+                # Log metadata only - NEVER log data content
+                total_rows = optimized_data.get('stats', {}).get('total_rows', 0)
+                total_cols = optimized_data.get('stats', {}).get('total_columns', 0)
+                logging.info(f"Data optimized: {filename} ({total_rows} rows, {total_cols} cols)")
             else:
                 data_info = optimized_data['preview']
                 available_columns = []

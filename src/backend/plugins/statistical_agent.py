@@ -174,6 +174,32 @@ class StatisticalAgent(BasePluginAgent):
             logging.debug(f"Statistical Agent rejecting document file: {file_type}")
             return 0.0
         
+        # Check if query has statistical context (keywords indicating statistical analysis)
+        statistical_context_keywords = [
+            "correlation", "correlate", "statistical", "statistics", "distribution",
+            "hypothesis", "significance", "p-value", "confidence interval",
+            "variance", "standard deviation", "normality", "outlier detection",
+            "regression", "anova", "t-test", "chi-square", "mean", "median",
+            "skewness", "kurtosis", "percentile", "quartile"
+        ]
+        has_statistical_context = any(keyword in query_lower for keyword in statistical_context_keywords)
+        
+        # CRITICAL: Reject queries asking for specific records/values UNLESS they have statistical context
+        # E.g., "what is the most listened track" → reject (no statistical context)
+        # But "what is the correlation" → accept (has statistical context)
+        if not has_statistical_context:
+            specific_value_patterns = [
+                "which track", "which song", "which item", "which product", "which record",
+                "what is the most", "what is the least", "what is the highest", "what is the lowest",
+                "show me the top", "show me the bottom", "show me the best", "show me the worst",
+                "find the most", "find the least", "find the highest", "find the lowest",
+                "get the top", "get the bottom", "get the first", "get the last"
+            ]
+            if any(pattern in query_lower for pattern in specific_value_patterns):
+                # This is asking for specific values, not statistics
+                logging.debug(f"Statistical Agent rejecting specific value query (no statistical context): {query}")
+                return 0.0
+        
         # File type support - only structured data
         if file_type and file_type.lower() in [".csv", ".xlsx", ".json", ".txt"]:
             confidence += 0.2
@@ -269,18 +295,22 @@ class StatisticalAgent(BasePluginAgent):
         """Load data from file"""
         try:
             # Look for files in uploads and samples directories
-            base_data_dir = Path(__file__).parent.parent / "data"
+            # Project root is 3 levels up from this file (src/backend/plugins)
+            project_root = Path(__file__).parent.parent.parent
+            base_data_dir = project_root / "data"
             
             for subdir in ["uploads", "samples"]:
                 filepath = base_data_dir / subdir / filename
                 if filepath.exists():
+                    logging.info(f"Loading data from: {filepath}")
                     if filename.endswith('.csv'):
                         return pd.read_csv(filepath)
                     elif filename.endswith(('.xlsx', '.xls')):
                         return pd.read_excel(filepath)
                     elif filename.endswith('.json'):
                         return pd.read_json(filepath)
-                    
+            
+            logging.warning(f"File not found in uploads or samples: {filename}")
             return None
         except Exception as e:
             logging.error(f"Failed to load data from {filename}: {e}")
@@ -574,20 +604,22 @@ class StatisticalAgent(BasePluginAgent):
                 modified_z_scores = 0.6745 * (col_data - median) / mad
                 modified_zscore_outliers = col_data[np.abs(modified_z_scores) > 3.5]
                 
+                # CRITICAL: Do NOT store outlier values - only counts/percentages
+                # Storing values creates massive arrays that flood terminal on errors
                 outlier_results[col] = {
                     "iqr_method": {
-                        "outliers": iqr_outliers.tolist(),
+                        # "outliers": iqr_outliers.tolist(),  # REMOVED - prevents terminal data dumps
                         "count": len(iqr_outliers),
                         "percentage": len(iqr_outliers) / len(col_data) * 100,
                         "bounds": {"lower": float(lower_bound), "upper": float(upper_bound)}
                     },
                     "zscore_method": {
-                        "outliers": zscore_outliers.tolist(),
+                        # "outliers": zscore_outliers.tolist(),  # REMOVED - prevents terminal data dumps
                         "count": len(zscore_outliers),
                         "percentage": len(zscore_outliers) / len(col_data) * 100
                     },
                     "modified_zscore_method": {
-                        "outliers": modified_zscore_outliers.tolist(),
+                        # "outliers": modified_zscore_outliers.tolist(),  # REMOVED - prevents terminal data dumps
                         "count": len(modified_zscore_outliers),
                         "percentage": len(modified_zscore_outliers) / len(col_data) * 100
                     }

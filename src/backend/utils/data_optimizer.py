@@ -405,8 +405,8 @@ class DataOptimizer:
             schema[col] = {
                 'type': dtype,
                 'null_count': int(null_count),
-                'unique_values': int(unique_count),
-                'sample_values': df[col].dropna().head(3).tolist() if len(df) > 0 else []
+                'unique_values': int(unique_count)
+                # sample_values removed - prevents data leaking into logs/errors
             }
         
         return schema
@@ -446,43 +446,28 @@ class DataOptimizer:
         return stats
     
     def _generate_sample(self, df: pd.DataFrame) -> List[Dict]:
-        """Generate sample rows"""
-        sample_size = min(self.max_rows, len(df))
-        
-        if len(df) <= sample_size:
-            # Return all rows if small dataset
-            return df.to_dict('records')
-        else:
-            # Sample from beginning, middle, and end
-            start_rows = sample_size // 3
-            mid_rows = sample_size // 3
-            end_rows = sample_size - start_rows - mid_rows
-            
-            mid_index = len(df) // 2
-            
-            sample_df = pd.concat([
-                df.head(start_rows),
-                df.iloc[mid_index:mid_index + mid_rows],
-                df.tail(end_rows)
-            ])
-            
-            return sample_df.to_dict('records')
+        """Generate sample rows - RETURNS EMPTY to prevent data leaks in logs"""
+        # Sample generation disabled - prevents massive data arrays in error logs
+        # LLM gets data via preview text only (limited, safe format)
+        return []
     
     def _generate_preview(self, df: pd.DataFrame, schema: Dict, stats: Dict) -> str:
         """Generate human-readable preview for LLM - adapts to data size and complexity"""
         preview_parts = []
         
-        # Detect if this is a small, simple dataset
-        is_small = len(df) <= 10
+        # ALWAYS limit preview to avoid overwhelming output
+        # Small dataset = show up to 10 rows, Large dataset = show statistical summary
+        MAX_PREVIEW_ROWS = 10
+        is_small = len(df) <= MAX_PREVIEW_ROWS
         is_simple = len(df.columns) <= 5
         has_numeric = len(df.select_dtypes(include=[np.number]).columns) > 0
         
-        # FOR SMALL, SIMPLE DATASETS: Use minimal, clear format
+        # FOR SMALL, SIMPLE DATASETS: Show all rows (up to 10)
         if is_small and is_simple:
             preview_parts.append(f"Data from file (Total: {len(df)} row{'s' if len(df) != 1 else ''}, {len(df.columns)} column{'s' if len(df.columns) != 1 else ''}):")
             preview_parts.append(f"")
             
-            # Show ALL rows for small datasets (not just 3)
+            # Show ALL rows for truly small datasets (≤10 rows)
             preview_parts.append(df.to_string(index=False, max_cols=len(df.columns)))
             preview_parts.append(f"")
             

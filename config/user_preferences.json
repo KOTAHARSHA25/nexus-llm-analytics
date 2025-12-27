@@ -1,14 +1,14 @@
 {
-  "primary_model": "llama3.1:8b",
+  "primary_model": "phi3:mini",
   "review_model": "phi3:mini",
   "embedding_model": "nomic-embed-text:latest",
-  "auto_model_selection": true,
+  "auto_model_selection": false,
   "allow_swap_usage": true,
   "memory_buffer_gb": 0.5,
   "preferred_performance": "balanced",
   "enable_intelligent_routing": false,
   "first_time_setup_complete": true,
-  "last_updated": "2025-12-21T05:33:38.615313",
+  "last_updated": "2025-12-26T17:24:52.147361",
   "model_test_results": {
     "phi3:mini": {
       "success": true,

@@ -1,9 +1,27 @@
 # 📁 Nexus LLM Analytics - Complete File Manifest (VERIFIED)
 
 > **Generated:** December 22, 2025  
-> **Last Updated:** December 22, 2025  
+> **Last Updated:** December 27, 2025  
 > **Analysis Method:** Deep code inspection + import tracing via grep analysis  
 > **Purpose:** Accurately identify which files are ACTUALLY used in production vs. tests vs. dead code
+
+---
+
+## 🆕 VERSION 1.1 UPDATE (December 27, 2025)
+
+### Files Archived in `archive/removed_v1.1/`
+
+| File | Previous Location | Reason | Size |
+|------|------------------|--------|------|
+| `intelligent_query_engine.py` | `src/backend/core/` | Over-engineered, never integrated into main flow | 43KB |
+| `optimized_llm_client.py` | `src/backend/core/` | Duplicate of `llm_client.py`, never imported | 24KB |
+| `websocket_manager.py` | `src/backend/core/` | Disabled in config, incomplete implementation | 11KB |
+
+### Scope Changes
+- **Authentication files** - Not to be created (out of scope)
+- **WebSocket code** - Commented out in `main.py`, archived
+
+---
 
 ## ⚠️ VERIFICATION METHODOLOGY
 
@@ -14,6 +32,7 @@ This manifest is based on **actual import statements** found in the codebase, no
 
 **NOTE:** As of December 2025, the system uses a **Custom Plugin Architecture** (not CrewAI).
 The main orchestration is done via `analysis_service.py` and `plugin_system.py`.
+**CrewAI Status:** ✅ Fully removed from production code (only legacy files remain in archive/)
 
 **Legend:**
 - 🟢 **PRODUCTION** - Imported and used in main application code (main.py, API endpoints, plugins, services)

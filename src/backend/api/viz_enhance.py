@@ -120,7 +120,7 @@ async def edit_visualization(request: ChartEditRequest):
             request.library
         )
         
-        # Build prompt for CrewAI
+        # Build prompt for LLM
         prompt = f"""
         Dataset Summary: {json.dumps(data_summary, indent=2)}
         

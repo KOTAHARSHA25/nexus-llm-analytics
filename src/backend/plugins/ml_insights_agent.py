@@ -286,18 +286,22 @@ class MLInsightsAgent(BasePluginAgent):
     def _load_data(self, filename: str) -> Optional[pd.DataFrame]:
         """Load data from file"""
         try:
-            base_data_dir = Path(__file__).parent.parent / "data"
+            # Project root is 3 levels up from this file (src/backend/plugins)
+            project_root = Path(__file__).parent.parent.parent
+            base_data_dir = project_root / "data"
             
             for subdir in ["uploads", "samples"]:
                 filepath = base_data_dir / subdir / filename
                 if filepath.exists():
+                    logging.info(f"Loading data from: {filepath}")
                     if filename.endswith('.csv'):
                         return pd.read_csv(filepath)
                     elif filename.endswith(('.xlsx', '.xls')):
                         return pd.read_excel(filepath)
                     elif filename.endswith('.json'):
                         return pd.read_json(filepath)
-                    
+            
+            logging.warning(f"File not found in uploads or samples: {filename}")
             return None
         except Exception as e:
             logging.error(f"Failed to load data from {filename}: {e}")

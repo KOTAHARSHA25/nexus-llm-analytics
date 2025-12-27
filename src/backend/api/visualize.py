@@ -172,7 +172,7 @@ def generate_auto_chart(df: pd.DataFrame, columns: List[str] = None) -> Dict[str
 @router.post("/generate")
 async def generate_visualization(request: VisualizationRequest):
     """
-    Generate a visualization using CrewAI or auto-generation
+    Generate a visualization using intelligent agent routing or auto-generation
     """
     logging.info(f"[VISUALIZE] Request: {request.chart_type}, filename: {request.filename}")
     

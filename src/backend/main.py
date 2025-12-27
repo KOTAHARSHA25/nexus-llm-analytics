@@ -207,10 +207,12 @@ async def test_model_on_startup():
         # Don't log as error since it's optional validation
 
 # WebSocket endpoint for real-time updates
-if settings.enable_websockets:
-    from fastapi import WebSocket
-    from backend.core.websocket_manager import websocket_endpoint
-    
-    @app.websocket("/ws/{client_id}")
-    async def websocket_route(websocket: WebSocket, client_id: str):
-        await websocket_endpoint(websocket, client_id)
+# NOTE (v1.1): WebSocket functionality archived - file moved to archive/removed_v1.1/
+# Uncomment and restore websocket_manager.py if real-time updates are needed in future
+# if settings.enable_websockets:
+#     from fastapi import WebSocket
+#     from backend.core.websocket_manager import websocket_endpoint
+#     
+#     @app.websocket("/ws/{client_id}")
+#     async def websocket_route(websocket: WebSocket, client_id: str):
+#         await websocket_endpoint(websocket, client_id)

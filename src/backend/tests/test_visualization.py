@@ -14,13 +14,13 @@ def test_visualizer_capability():
     assert agent.can_handle("Draw a chart") > 0.5
     assert agent.can_handle("Calculate average") == 0.0
 
-@patch("crewai.Crew")
-def test_visualizer_execute(mock_crew_cls):
+@patch("backend.core.llm_client.LLMClient")
+def test_visualizer_execute(mock_llm_cls):
     """Test execution flow"""
-    # Mock Crew instance
-    mock_crew = MagicMock()
-    mock_crew.kickoff.return_value = "import plotly.express as px\nfig = px.bar(...)"
-    mock_crew_cls.return_value = mock_crew
+    # Mock LLM client instance
+    mock_llm = MagicMock()
+    mock_llm.generate.return_value = {"response": "import plotly.express as px\nfig = px.bar(...)"}
+    mock_llm_cls.return_value = mock_llm
     
     agent = VisualizerAgent()
     # Mock initializer (property usage in execute)
