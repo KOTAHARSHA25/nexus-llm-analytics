@@ -1,6 +1,6 @@
 # Data Analyst Agent Plugin
 # Standardizes the core Data Analyst as a system plugin
-# incorporating advanced DataOptimizer and CoT logic.
+# incorporating advanced DataOptimizer, QueryOrchestrator, and CoT logic.
 
 import sys
 import logging
@@ -16,6 +16,7 @@ sys.path.insert(0, str(src_path))
 from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
 from backend.agents.model_initializer import get_model_initializer
 from backend.core.dynamic_planner import get_dynamic_planner
+from backend.core.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
 
 class DataAnalystAgent(BasePluginAgent):
     """
@@ -39,7 +40,40 @@ class DataAnalystAgent(BasePluginAgent):
         self.initializer = get_model_initializer()
         self._cot_engine = None
         self._cot_config = None
+        self._orchestrator = None  # Lazy loaded QueryOrchestrator
         return True
+    
+    def _get_orchestrator(self) -> QueryOrchestrator:
+        """Lazy load the QueryOrchestrator for unified decision making"""
+        if self._orchestrator is None:
+            config = self._load_orchestrator_config()
+            self._orchestrator = QueryOrchestrator(
+                complexity_analyzer=None,  # Uses heuristic
+                config=config
+            )
+        return self._orchestrator
+    
+    def _load_orchestrator_config(self) -> Dict[str, Any]:
+        """Load orchestrator configuration from cot_review_config.json"""
+        cot_config = self._load_cot_config()
+        return {
+            'model_selection': {
+                'simple': 'tinyllama',
+                'medium': 'phi3:mini', 
+                'complex': 'llama3.1:8b',
+                'thresholds': {
+                    'simple_max': 0.3,
+                    'medium_max': 0.7
+                }
+            },
+            'cot_review': {
+                'activation_rules': {
+                    'always_on_complexity': cot_config.get('cot_review', {}).get('complexity_threshold', 0.7),
+                    'optional_range': [0.3, 0.7],
+                    'always_on_code_gen': True
+                }
+            }
+        }
     
     def can_handle(self, query: str, file_type: Optional[str] = None, **kwargs) -> float:
         """
@@ -100,7 +134,7 @@ class DataAnalystAgent(BasePluginAgent):
         return min(confidence, 0.85)  # Cap below specialists
 
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
-        """Execute analysis using DataOptimizer and LLM"""
+        """Execute analysis using QueryOrchestrator for unified decision making"""
         filename = kwargs.get('filename')
         filepath = kwargs.get('filepath')
         
@@ -117,32 +151,42 @@ class DataAnalystAgent(BasePluginAgent):
             # 1. Optimize Data
             data_info, optimized_data, available_columns = self._optimize_data(filepath, filename)
             
-            # 2. Select Model & Complexity
-            selected_model, routing_decision = self._select_model(
-                query, optimized_data, available_columns, filepath, kwargs.get('force_model')
+            # 2. Use QueryOrchestrator for UNIFIED decision making (3-track system)
+            orchestrator = self._get_orchestrator()
+            execution_plan = orchestrator.create_execution_plan(
+                query=query,
+                data=optimized_data,
+                context={'columns': available_columns, 'filepath': filepath}
             )
             
-            complexity_score = self._get_complexity_score(
-                query, optimized_data, available_columns, filepath, routing_decision
-            )
+            # Extract decisions from plan
+            selected_model = kwargs.get('force_model') or execution_plan.model
+            complexity_score = execution_plan.complexity_score
+            execution_method = execution_plan.execution_method
+            review_level = execution_plan.review_level
             
-            # 3. Dynamic Planning
+            logging.info(f"QueryOrchestrator decision: {execution_plan.reasoning}")
+            
+            # 3. Dynamic Planning (optional enhancement)
             try:
                 planner = get_dynamic_planner()
                 analysis_plan = planner.create_plan(query, data_info)
             except Exception:
                 analysis_plan = None
-                
-            # 4. Decide on CoT
-            cot_config = self._load_cot_config()
-            use_cot = (
-                cot_config.get('enabled', False) and
-                cot_config.get('auto_enable_on_routing', True) and
-                complexity_score >= cot_config.get('complexity_threshold', 0.4)
-            )
             
-            # 5. Execute
-            if use_cot:
+            # 4. Determine if Two Friends Model (CoT) should be used based on orchestrator
+            cot_config = self._load_cot_config()
+            use_cot = self._should_use_cot(review_level, cot_config)
+            
+            # 5. Execute based on orchestrator decision
+            if execution_method == ExecutionMethod.CODE_GENERATION:
+                # Future: Code generation path
+                result = self._execute_with_code_gen(
+                    query, data_info, optimized_data, available_columns,
+                    selected_model, filepath
+                )
+                metadata = {"execution_method": "code_generation"}
+            elif use_cot:
                 result, metadata = self._execute_with_cot(
                     query, data_info, optimized_data, available_columns,
                     selected_model, complexity_score, filepath, analysis_plan
@@ -157,6 +201,8 @@ class DataAnalystAgent(BasePluginAgent):
                 "agent": "DataAnalyst",
                 "model": selected_model,
                 "complexity": complexity_score,
+                "execution_method": execution_method.value,
+                "review_level": review_level.value,
                 "method": "CoT" if use_cot else "Direct"
             })
             
@@ -171,6 +217,25 @@ class DataAnalystAgent(BasePluginAgent):
             tb = traceback.format_exc()
             logging.error(f"DataAnalyst execution failed: {e}\n{tb}")
             return {"success": False, "error": str(e), "traceback": tb}
+    
+    def _should_use_cot(self, review_level: ReviewLevel, cot_config: Dict[str, Any]) -> bool:
+        """Determine if CoT (Two Friends Model) should be used based on review level"""
+        if not cot_config.get('cot_review', {}).get('enabled', False):
+            return False
+        
+        if review_level == ReviewLevel.MANDATORY:
+            return True
+        elif review_level == ReviewLevel.OPTIONAL:
+            return cot_config.get('cot_review', {}).get('auto_enable_on_routing', True)
+        else:  # NONE
+            return False
+    
+    def _execute_with_code_gen(self, query, data_info, optimized_data, available_columns, model, filepath) -> str:
+        """Execute using code generation (placeholder for Phase 2)"""
+        # For now, fall back to direct execution
+        # Phase 2 will implement actual code generation
+        logging.info("Code generation selected but not yet implemented - using direct LLM")
+        return self._execute_direct(query, data_info, os.path.basename(filepath), model, None)
 
     # --- Helper Methods ported from AnalysisExecutor ---
 
@@ -229,13 +294,9 @@ class DataAnalystAgent(BasePluginAgent):
             logging.warning(f"Optimization failed: {e}")
             return str(e), {'is_optimized': False}, []
 
-    def _select_model(self, query, optimized_data, available_columns, filepath, force_model=None):
-        if force_model: return force_model, None
-        return self.initializer.primary_llm.model, None
-
-    def _get_complexity_score(self, query, optimized_data, available_columns, filepath, routing_decision):
-        if routing_decision: return routing_decision.complexity_score
-        return 0.5
+    # NOTE: _select_model and _get_complexity_score REMOVED
+    # Model selection and complexity analysis now handled by QueryOrchestrator
+    # See _get_orchestrator() and execute() for unified 3-track decision system
 
     def _execute_direct(self, query, data_info, filename, selected_model, analysis_plan=None):
         # Intelligent context based on data characteristics (not query keywords)

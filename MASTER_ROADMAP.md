@@ -56,8 +56,8 @@ pytest tests/ -v --ignore=tests/archive
 │  ├── 0.6 Run all tests, establish baseline           ⬜ TODO               │
 │  ├── 0.7 Fix Two Friends Model (automated validator) ✅ DONE               │
 │  ├── 0.8 Create QueryOrchestrator (unify 3 tracks)   ✅ DONE               │
-│  ├── 0.9 Integrate orchestrator with agents          ⬜ TODO               │
-│  ├── 0.10 Test unified decision system               ⬜ TODO               │
+│  ├── 0.9 Integrate orchestrator with agents          ✅ DONE               │
+│  ├── 0.10 Test unified decision system               ✅ DONE               │
 │  └── 0.11 ✅ VERIFIED: Two Friends Model Working     ✅ VERIFIED           │
 │       └── Generator-Critic communication PROVEN                            │
 │       └── Enterprise-level tests: 3/3 passed                               │

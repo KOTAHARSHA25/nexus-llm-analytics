@@ -165,28 +165,52 @@ class QueryOrchestrator:
             return self._heuristic_complexity(query, data)
     
     def _heuristic_complexity(self, query: str, data: Any) -> float:
-        """Simple complexity heuristic when analyzer unavailable"""
-        complexity = 0.3  # Base
+        """
+        Simple complexity heuristic when analyzer unavailable.
         
+        Scoring Guide:
+        - < 0.3: Simple (definitions, short questions) → tinyllama
+        - 0.3-0.7: Medium (calculations, filters) → phi3:mini
+        - > 0.7: Complex (multi-step analysis, correlations) → llama3.1:8b
+        """
         query_lower = query.lower()
+        query_len = len(query)
+        
+        # Very short queries are simple regardless of data
+        if query_len < 50:
+            # Check for simple question patterns
+            simple_patterns = ['what is', 'how many', 'show me', 'list', 'get the']
+            if any(p in query_lower for p in simple_patterns):
+                return 0.15  # Definitely simple
+        
+        complexity = 0.1  # Start low
         
         # Length indicates complexity
-        if len(query) > 100:
+        if query_len > 200:
+            complexity += 0.4
+        elif query_len > 120:
+            complexity += 0.3
+        elif query_len > 80:
             complexity += 0.2
-        elif len(query) > 50:
+        elif query_len > 50:
             complexity += 0.1
         
-        # Multiple steps/conditions
-        if any(word in query_lower for word in ['and then', 'after that', 'then', 'where', 'if']):
-            complexity += 0.15
+        # Multi-step indicators (high complexity)
+        multi_step_keywords = ['and then', 'after that', 'then predict', 'then identify',
+                               'then forecast', 'then recommend', 'correlation', 'regression', 
+                               'forecast', 'predict', 'over time', 'trend', 'segment by',
+                               'risk assessment', 'recommend intervention', 'ABC analysis']
+        multi_step_count = sum(1 for word in multi_step_keywords if word in query_lower)
+        complexity += min(multi_step_count * 0.2, 0.5)
         
-        # Aggregations
-        if any(word in query_lower for word in self.code_gen_keywords):
-            complexity += 0.2
+        # Multiple conditions (medium boost)
+        condition_keywords = ['where', 'if', 'when', 'filter by', 'group by', 'for each']
+        condition_count = sum(1 for word in condition_keywords if word in query_lower)
+        complexity += min(condition_count * 0.1, 0.2)
         
-        # Has data
-        if data is not None:
-            complexity += 0.1
+        # Aggregations (medium complexity)
+        agg_count = sum(1 for word in self.code_gen_keywords if word in query_lower)
+        complexity += min(agg_count * 0.05, 0.15)
         
         return min(complexity, 1.0)
     
