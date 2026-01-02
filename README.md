@@ -31,11 +31,21 @@ Nexus LLM Analytics is a next-generation data analytics platform that leverages 
 - **Reporter Agent**: Professional report compilation
 
 ### **🔌 Specialized Plugin Agents**
-1. **📊 Statistical Agent**: Advanced statistical analysis, hypothesis testing, correlation analysis
-2. **📈 Time Series Agent**: ARIMA forecasting, trend analysis, seasonality detection
+1. **📊 Statistical Agent**: Advanced statistical analysis, hypothesis testing, t-tests, ANOVA, correlation
+2. **📈 Time Series Agent**: ARIMA forecasting, trend analysis, seasonality detection, exponential smoothing
 3. **💰 Financial Agent**: Business metrics, profitability analysis, financial health assessment
-4. **🤖 ML Insights Agent**: Machine learning analysis, clustering, anomaly detection, PCA
+4. **🤖 ML Insights Agent**: Machine learning (K-means, Random Forest, PCA), clustering, regression, classification
 5. **🗄️ SQL Agent**: Multi-database support, query generation, schema analysis
+
+### **🤖 Machine Learning & Statistical Capabilities** (NEW!)
+- **Clustering**: K-means, DBSCAN, Hierarchical clustering
+- **Classification**: Random Forest, Logistic Regression, Decision Trees, SVM
+- **Regression**: Linear, Ridge, Lasso, Polynomial regression
+- **Dimensionality Reduction**: PCA, Truncated SVD, Feature importance
+- **Statistical Tests**: T-tests, ANOVA, Chi-square, Pearson/Spearman correlation
+- **Time Series**: ARIMA, Exponential smoothing, Seasonal decomposition
+- **Anomaly Detection**: Z-score method, Isolation Forest
+- **Model Evaluation**: Accuracy, Precision, Recall, F1, ROC curves
 
 ### **📁 File Support**
 - **Structured Data**: CSV, JSON, XLSX, XLS
@@ -152,11 +162,46 @@ Nexus LLM Analytics is a next-generation data analytics platform that leverages 
 
 ## 💡 **Usage Examples**
 
-### **Statistical Analysis**
+### **Basic Statistical Analysis**
 ```
 Query: "Analyze the correlation between sales and marketing spend"
-→ Statistical Agent performs correlation analysis with significance testing
+→ Statistical Agent performs Pearson/Spearman correlation analysis
 → Results include correlation coefficients, p-values, confidence intervals
+```
+
+### **Machine Learning - Clustering**
+```
+Query: "Perform K-means clustering with 3 clusters based on sales and revenue"
+→ ML Insights Agent applies K-means algorithm
+→ Results: Optimal clusters, silhouette scores, cluster centers, visualization
+```
+
+### **Machine Learning - Classification**
+```
+Query: "Build a random forest classifier to predict if revenue > 5000"
+→ ML Insights Agent trains Random Forest model
+→ Results: Accuracy, precision, recall, feature importance, confusion matrix
+```
+
+### **Machine Learning - Dimensionality Reduction**
+```
+Query: "Apply PCA to reduce dimensions of sales, revenue, price to 2 components"
+→ ML Insights Agent performs Principal Component Analysis
+→ Results: Explained variance ratios, component loadings, transformed data
+```
+
+### **Statistical Tests**
+```
+Query: "Run a t-test to compare sales between Region A and Region B"
+→ Statistical Agent performs independent t-test
+→ Results: T-statistic, p-value, means, confidence intervals, significance
+```
+
+### **Time Series Forecasting**
+```
+Query: "Build ARIMA model to forecast next 12 months of sales"
+→ Time Series Agent applies ARIMA modeling with auto-selection
+→ Results: Forecasts with confidence intervals, trend decomposition, accuracy metrics
 ```
 
 ### **Financial Analysis**
@@ -166,18 +211,18 @@ Query: "Calculate our company's financial health metrics"
 → Generates comprehensive financial dashboard
 ```
 
-### **Time Series Forecasting**
+### **Anomaly Detection**
 ```
-Query: "Forecast next quarter's revenue based on historical data"
-→ Time Series Agent applies ARIMA modeling
-→ Provides forecasts with confidence intervals and trend analysis
+Query: "Identify anomalies in revenue using z-score method (threshold 3)"
+→ ML Insights Agent applies z-score anomaly detection
+→ Results: Anomalous data points, z-scores, visualization of outliers
 ```
 
-### **Machine Learning Insights**
+### **Regression Analysis**
 ```
-Query: "Find customer segments in our user data"
-→ ML Insights Agent performs clustering analysis
-→ Identifies distinct customer groups with characteristics
+Query: "Create a linear regression model to predict revenue from sales and price"
+→ ML Insights Agent trains linear regression model
+→ Results: Coefficients, R², p-values, residual plots, prediction intervals
 ```
 
 ---

@@ -131,13 +131,59 @@ class SmartFallbackManager:
         
         logger.info("SmartFallbackManager initialized")
     
+    def _get_installed_model_names(self) -> List[str]:
+        """Fetch installed model names from Ollama dynamically"""
+        try:
+            import requests
+            import os
+            
+            ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+            response = requests.get(f"{ollama_url}/api/tags", timeout=5)
+            
+            if response.status_code == 200:
+                models_data = response.json().get("models", [])
+                # Extract model names, filter out embedding models
+                model_names = []
+                for model in models_data:
+                    name = model.get("name", "")
+                    # Skip embedding models
+                    if "embed" not in name.lower() and "nomic" not in name.lower():
+                        model_names.append(name)
+                
+                # Sort by size (larger = more capable, should be tried first)
+                model_names.sort(
+                    key=lambda m: next(
+                        (model.get("size", 0) for model in models_data if model.get("name") == m),
+                        0
+                    ),
+                    reverse=True
+                )
+                
+                logger.debug(f"Discovered models for fallback: {model_names}")
+                return model_names
+            
+            return []
+        except Exception as e:
+            logger.warning(f"Could not fetch installed models: {e}")
+            return []
+    
     def _init_fallback_chains(self):
-        """Initialize default fallback chains"""
+        """Initialize default fallback chains based on installed models"""
         
-        # Model fallback chain (from most capable to minimal)
+        # Dynamically build model fallback chain from installed models
+        installed_models = self._get_installed_model_names()
+        
+        if installed_models:
+            # Sort by estimated capability (larger models first)
+            model_strategies = installed_models[:4]  # Top 4 models
+        else:
+            # Absolute fallback if no models detected
+            model_strategies = ["llama3.1:8b", "phi3:mini", "tinyllama"]
+            logger.warning("No installed models detected, using default fallback chain")
+        
         self.model_chain = FallbackChain(
             name="model",
-            strategies=["llama3.1:8b", "phi3:mini", "tinyllama", "echo"]
+            strategies=model_strategies + ["echo"]  # 'echo' as last resort
         )
         
         # Execution method fallback chain

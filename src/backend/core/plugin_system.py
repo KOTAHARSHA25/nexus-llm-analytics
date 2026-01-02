@@ -3,6 +3,7 @@
 
 import json
 import logging
+import threading
 import importlib
 import importlib.util
 import inspect
@@ -319,15 +320,19 @@ class AgentRegistry:
             "agent_count": len(self.registered_agents)
         }
 
-# Global registry instance
+# Thread-safe Global registry instance
 _global_registry: Optional[AgentRegistry] = None
+_registry_lock = threading.Lock()
 
 def get_agent_registry(plugins_dir: str = None) -> AgentRegistry:
-    """Get or create the global agent registry"""
+    """Get or create the global agent registry (thread-safe)."""
     global _global_registry
     if _global_registry is None:
-        _global_registry = AgentRegistry(plugins_dir)
-        _global_registry.discover_agents()
+        with _registry_lock:
+            # Double-check pattern for thread safety
+            if _global_registry is None:
+                _global_registry = AgentRegistry(plugins_dir)
+                _global_registry.discover_agents()
     return _global_registry
 
 def initialize_plugin_system(plugins_dir: str = None) -> AgentRegistry:

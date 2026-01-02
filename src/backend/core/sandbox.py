@@ -22,13 +22,14 @@ class EnhancedSandbox:
     - Data isolation with deep copying
     """
     
-    def __init__(self, max_memory_mb: int = 256, max_cpu_seconds: int = 30):
+    def __init__(self, max_memory_mb: int = 512, max_cpu_seconds: int = 120):
         """
         Initialize the enhanced sandbox with security configurations.
+        Increased defaults for ML workloads.
         
         Args:
-            max_memory_mb: Maximum memory usage in MB
-            max_cpu_seconds: Maximum CPU execution time in seconds
+            max_memory_mb: Maximum memory usage in MB (default 512 for ML)
+            max_cpu_seconds: Maximum CPU execution time in seconds (default 120 for ML training)
         """
         self.max_memory_mb = max_memory_mb
         self.max_cpu_seconds = max_cpu_seconds
@@ -51,13 +52,46 @@ class EnhancedSandbox:
         safe_modules = {}
         
         try:
-            # Create restricted pandas with only safe functions
+            # Core data analysis
             import pandas as pd
             import numpy as np
             import json
             import math
             import datetime
             import re
+            
+            # High-performance data processing (if available)
+            try:
+                import polars as pl
+                polars_available = True
+            except ImportError:
+                pl = None
+                polars_available = False
+            
+            # Machine Learning
+            from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+            from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, GradientBoostingRegressor
+            from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge, Lasso, ElasticNet
+            from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+            from sklearn.decomposition import PCA, TruncatedSVD
+            from sklearn.model_selection import train_test_split, cross_val_score
+            from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, r2_score, silhouette_score
+            from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder
+            from sklearn.naive_bayes import GaussianNB
+            from sklearn.svm import SVC, SVR
+            from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+            
+            # Statistical Analysis
+            from scipy import stats
+            from scipy.stats import pearsonr, spearmanr, chi2_contingency, ttest_ind, f_oneway, mannwhitneyu
+            import statsmodels.api as sm
+            from statsmodels.tsa.arima.model import ARIMA
+            from statsmodels.tsa.holtwinters import ExponentialSmoothing
+            from statsmodels.tsa.seasonal import seasonal_decompose
+            from statsmodels.stats.multicomp import pairwise_tukeyhsd
+            from statsmodels.formula.api import ols
+            
+            logging.info({"event": "ml_libraries_loaded", "sklearn": True, "scipy": True, "statsmodels": True})
             
             # Create restricted pandas - only allow DataFrame operations, no file I/O
             class RestrictedPandas:
@@ -70,16 +104,62 @@ class EnhancedSandbox:
                 qcut = pd.qcut
                 crosstab = pd.crosstab
                 get_dummies = pd.get_dummies
+                # Note: melt needs special handling as it's called as pd.melt(frame, ...)
+                # We'll handle it through __getattr__
+                wide_to_long = pd.wide_to_long
+                
+                # Safe transformation methods - these operate on data, not files
+                @staticmethod
+                def _safe_apply(df_or_series, func, *args, **kwargs):
+                    """Safe apply that only allows simple operations"""
+                    return df_or_series.apply(func, *args, **kwargs)
+                
+                @staticmethod
+                def _safe_map(series, func_or_dict):
+                    """Safe map for Series"""
+                    return series.map(func_or_dict)
+                
+                @staticmethod
+                def _safe_transform(df_or_series, func, *args, **kwargs):
+                    """Safe transform operation"""
+                    return df_or_series.transform(func, *args, **kwargs)
+                
+                @staticmethod
+                def _safe_agg(df_or_series, func, *args, **kwargs):
+                    """Safe aggregation"""
+                    return df_or_series.agg(func, *args, **kwargs)
                 
                 # Explicitly block dangerous functions
                 def __getattr__(self, name):
                     dangerous_funcs = {
                         'read_csv', 'read_json', 'read_excel', 'read_sql', 'read_html',
                         'read_xml', 'read_pickle', 'read_parquet', 'read_feather',
-                        'to_pickle', 'read_clipboard', 'read_fwf', 'read_table'
+                        'to_pickle', 'read_clipboard', 'read_fwf', 'read_table',
+                        'to_csv', 'to_json', 'to_excel', 'to_sql', 'to_html'
                     }
                     if name in dangerous_funcs:
                         raise AttributeError(f"Access to pandas.{name} is not allowed for security reasons")
+                    
+                    # Allow safe methods that were missed
+                    safe_methods = {
+                        # Missing/conversion methods
+                        'isna', 'notna', 'isnull', 'notnull', 'fillna', 'dropna',
+                        # Indexing methods  
+                        'sort_values', 'sort_index', 'reset_index', 'set_index',
+                        # Type conversion methods
+                        'to_datetime', 'to_numeric', 'to_string', 'to_dict', 'to_list', 'to_numpy',
+                        # Reshaping methods
+                        'melt', 'pivot', 'stack', 'unstack', 'transpose',
+                        # String operations
+                        'Series', 'Categorical',
+                        # Date/time utilities
+                        'Timedelta', 'Timestamp', 'DatetimeIndex', 'TimedeltaIndex',
+                        # Options
+                        'set_option', 'get_option', 'option_context'
+                    }
+                    if name in safe_methods and hasattr(pd, name):
+                        return getattr(pd, name)
+                    
                     raise AttributeError(f"'{name}' is not available in restricted pandas")
             
             # Create restricted numpy - only mathematical functions
@@ -125,17 +205,112 @@ class EnhancedSandbox:
                         raise AttributeError(f"File operations json.{name} not allowed for security reasons")
                     raise AttributeError(f"'{name}' is not available in restricted json")
             
+            # Polars restricted class (if available)
+            if polars_available:
+                class RestrictedPolars:
+                    """Restricted Polars - safe in-memory operations only"""
+                    DataFrame = pl.DataFrame
+                    col = pl.col
+                    lit = pl.lit
+                    concat = pl.concat
+                    
+                    def __getattr__(self, name):
+                        # Block file I/O
+                        dangerous_funcs = {
+                            'read_csv', 'read_json', 'read_excel', 'read_parquet',
+                            'scan_csv', 'scan_parquet', 'scan_ipc',
+                        }
+                        if name in dangerous_funcs:
+                            raise AttributeError(f"Access to polars.{name} is not allowed for security reasons")
+                        
+                        # Allow safe methods
+                        if hasattr(pl, name):
+                            return getattr(pl, name)
+                        
+                        raise AttributeError(f"'{name}' is not available in restricted polars")
+            
             # Only expose safe, restricted versions
             safe_modules.update({
+                # Core data manipulation
                 'pd': RestrictedPandas(),
+                # Direct pandas access for apply/map (needed by generated code)
+                'pandas': RestrictedPandas(),
                 'np': RestrictedNumpy(),
                 'json': RestrictedJSON(),
-                'math': math,  # Math module is generally safe
-                'datetime': datetime,  # Datetime is safe
-                're': re,  # Regex is safe but could be used for ReDoS - TODO: add pattern validation
+                'math': math,
+                'datetime': datetime,
+                're': re,
+                
+                # Machine Learning - Clustering
+                'KMeans': KMeans,
+                'DBSCAN': DBSCAN,
+                'AgglomerativeClustering': AgglomerativeClustering,
+                
+                # Machine Learning - Classification
+                'RandomForestClassifier': RandomForestClassifier,
+                'GradientBoostingClassifier': GradientBoostingClassifier,
+                'LogisticRegression': LogisticRegression,
+                'DecisionTreeClassifier': DecisionTreeClassifier,
+                'GaussianNB': GaussianNB,
+                'SVC': SVC,
+                'KNeighborsClassifier': KNeighborsClassifier,
+                
+                # Machine Learning - Regression
+                'RandomForestRegressor': RandomForestRegressor,
+                'GradientBoostingRegressor': GradientBoostingRegressor,
+                'LinearRegression': LinearRegression,
+                'Ridge': Ridge,
+                'Lasso': Lasso,
+                'ElasticNet': ElasticNet,
+                'DecisionTreeRegressor': DecisionTreeRegressor,
+                'SVR': SVR,
+                'KNeighborsRegressor': KNeighborsRegressor,
+                
+                # Dimensionality Reduction
+                'PCA': PCA,
+                'TruncatedSVD': TruncatedSVD,
+                
+                # Model Selection & Metrics
+                'train_test_split': train_test_split,
+                'cross_val_score': cross_val_score,
+                'accuracy_score': accuracy_score,
+                'precision_score': precision_score,
+                'recall_score': recall_score,
+                'f1_score': f1_score,
+                'mean_squared_error': mean_squared_error,
+                'r2_score': r2_score,
+                'silhouette_score': silhouette_score,
+                
+                # Preprocessing
+                'StandardScaler': StandardScaler,
+                'MinMaxScaler': MinMaxScaler,
+                'LabelEncoder': LabelEncoder,
+                
+                # Statistical Analysis
+                'stats': stats,
+                'pearsonr': pearsonr,
+                'spearmanr': spearmanr,
+                'chi2_contingency': chi2_contingency,
+                'ttest_ind': ttest_ind,
+                'f_oneway': f_oneway,
+                'mannwhitneyu': mannwhitneyu,
+                'pairwise_tukeyhsd': pairwise_tukeyhsd,
+                'ols': ols,
+                
+                # Time Series
+                'sm': sm,
+                'ARIMA': ARIMA,
+                'ExponentialSmoothing': ExponentialSmoothing,
+                'seasonal_decompose': seasonal_decompose,
             })
             
-            # Try to add plotly for visualizations (if installed)
+            # Add polars if available
+            if polars_available:
+                safe_modules['pl'] = RestrictedPolars()
+                safe_modules['polars'] = RestrictedPolars()
+                logging.info({"event": "polars_loaded"})
+            
+            # Try to add visualization libraries (if installed)
             try:
                 import plotly.express as px
                 import plotly.graph_objects as go
@@ -146,6 +321,41 @@ class EnhancedSandbox:
                 logging.info({"event": "plotly_loaded"})
             except ImportError:
                 logging.info({"event": "plotly_not_available"})
+            
+            # Add matplotlib with restricted pyplot (block file saving)
+            try:
+                import matplotlib
+                matplotlib.use('Agg')  # Non-interactive backend (safer)
+                import matplotlib.pyplot as plt
+                
+                # Instead of class, just expose plt directly but monkey-patch dangerous methods
+                def block_savefig(*args, **kwargs):
+                    raise AttributeError("matplotlib.pyplot.savefig() is not allowed for security reasons")
+                
+                def block_save(*args, **kwargs):
+                    raise AttributeError("matplotlib.pyplot.save() is not allowed for security reasons")
+                
+                # Create a copy of plt module functions without file operations
+                safe_modules.update({
+                    'plt': plt,  # Expose matplotlib.pyplot directly
+                    'matplotlib': matplotlib,
+                })
+                
+                # Monkey-patch the dangerous functions
+                plt.savefig = block_savefig
+                plt.save = block_save
+                
+                logging.info({"event": "matplotlib_loaded"})
+            except ImportError:
+                logging.info({"event": "matplotlib_not_available"})
+            
+            # Add seaborn (statistical visualization)
+            try:
+                import seaborn as sns
+                safe_modules['sns'] = sns
+                logging.info({"event": "seaborn_loaded"})
+            except ImportError:
+                logging.info({"event": "seaborn_not_available"})
             
             logging.info({"event": "safe_modules_loaded", "modules": list(safe_modules.keys())})
             
@@ -371,11 +581,27 @@ class EnhancedSandbox:
             # Deep copy data for complete isolation
             if data is not None:
                 try:
-                    globals_dict['data'] = copy.deepcopy(data)
+                    # Import pandas for isinstance check
+                    import pandas as pd
+                    
+                    data_copy = copy.deepcopy(data)
+                    # Convert DataFrames to RestrictedDataFrame for security
+                    if isinstance(data_copy, pd.DataFrame):
+                        # Monkey-patch the dangerous methods to block them
+                        def block_method(method_name):
+                            def blocked(*args, **kwargs):
+                                raise AttributeError(f"DataFrame.{method_name}() is not allowed for security reasons")
+                            return blocked
+                        
+                        for method in ['to_csv', 'to_json', 'to_excel', 'to_sql', 'to_html',
+                                      'to_pickle', 'to_parquet', 'to_feather', 'to_hdf']:
+                            setattr(data_copy, method, block_method(method))
+                    
+                    globals_dict['data'] = data_copy
                     logging.info({
                         "event": "data_copied",
                         "execution_id": execution_id,
-                        "data_type": type(data).__name__
+                        "data_type": type(data_copy).__name__
                     })
                 except Exception as e:
                     logging.error({

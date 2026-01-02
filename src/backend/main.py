@@ -53,32 +53,44 @@ async def lifespan(app: FastAPI):
     
     # Startup tasks
     logger = logging.getLogger(__name__)
-    logger.debug("Starting Nexus LLM Analytics backend...")
+    logger.info("🚀 Starting Nexus LLM Analytics backend...")
     
-    # Auto-configure models on startup to prevent hardcoded fallbacks
+    # STEP 1: Auto-configure models on startup
     try:
         from backend.core.model_selector import ModelSelector
-        # Trigger model selection to cache results and detect issues early
         primary, review, embedding = ModelSelector.select_optimal_models()
-        logger.debug(f"Startup model selection: Primary={primary}, Review={review}")
+        logger.info(f"✅ Models selected: Primary={primary.split('/')[-1]}, Review={review.split('/')[-1]}")
     except Exception as model_error:
-        logger.warning(f"Model selection warning during startup: {model_error}")
+        logger.warning(f"⚠️ Model selection warning: {model_error}")
     
-    # Start background optimization (non-blocking)
+    # STEP 2: WARM UP PRIMARY MODEL (critical for first-request speed)
+    try:
+        logger.info("🔥 Warming up primary model (this may take 10-30 seconds)...")
+        from backend.core.llm_client import LLMClient
+        warmup_client = LLMClient()
+        warmup_response = warmup_client.generate_primary(
+            prompt="Say 'ready' in one word."
+        )
+        if warmup_response.get('response'):
+            logger.info("✅ Primary model warmed up and ready!")
+        else:
+            logger.warning("⚠️ Model warmup returned empty response")
+    except Exception as warmup_error:
+        logger.warning(f"⚠️ Model warmup skipped: {warmup_error}")
+    
+    # STEP 3: Background optimization (non-blocking)
     try:
         from backend.core.optimizers import optimize_startup
         optimization_result = optimize_startup()
-        logger.info("Backend ready")
     except Exception as opt_error:
-        logger.warning(f"Optimization warning: {opt_error}")
+        logger.debug(f"Optimization note: {opt_error}")
     
-    # Run model test in background to avoid blocking startup (optional validation)
-    asyncio.create_task(test_model_on_startup())
+    logger.info("✅ Backend ready to serve requests!")
     
-    yield  # Application runs here
+    yield  # Application serves requests here - model is already warm
     
     # Shutdown tasks
-    logger.debug("Shutting down Nexus LLM Analytics backend...")
+    logger.info("👋 Shutting down Nexus LLM Analytics backend...")
 
 # Create FastAPI app with settings and lifespan handler
 app = FastAPI(
@@ -226,37 +238,13 @@ async def download_report_direct(filename: str = None):
 
 async def test_model_on_startup():
     """
-    Test the currently configured model on startup (background task).
-    Integrated from src2 for better startup validation.
+    Optional background model validation.
+    Note: Primary warmup now happens in lifespan() before serving.
+    This function is kept for compatibility but is no longer used.
     """
     import logging
-    import asyncio
-    
     logger = logging.getLogger(__name__)
-    
-    # Wait for the server to fully start
-    await asyncio.sleep(5)
-    
-    try:
-        # Check if Ollama is available first
-        from backend.core.llm_client import LLMClient
-        try:
-            llm_client = LLMClient()
-            available_models = llm_client.get_available_models()
-            if not available_models:
-                logger.debug("Skipping startup model test - Ollama not running or no models installed")
-                return
-        except Exception:
-            logger.debug("Skipping startup model test - Ollama not available")
-            return
-        
-        # Test is disabled to reduce startup logs
-        return
-                
-    except Exception as e:
-        # Gracefully handle any errors - don't block startup
-        logger.debug(f"Startup model test skipped: {str(e)[:100]}")
-        # Don't log as error since it's optional validation
+    logger.debug("Startup test disabled - warmup now happens in lifespan()")
 
 # WebSocket endpoint for real-time updates
 # NOTE (v1.1): WebSocket functionality archived - file moved to archive/removed_v1.1/

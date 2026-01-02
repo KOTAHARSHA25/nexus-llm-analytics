@@ -75,11 +75,54 @@ class CodeGenerator:
         
         logger.info("CodeGenerator initialized")
     
-    def _build_dynamic_prompt(self, query: str, df: pd.DataFrame) -> str:
+    def _build_dynamic_prompt(self, query: str, df: pd.DataFrame, model: str = None) -> str:
         """
         Build a dynamic, context-aware prompt based on the user's query and data structure.
-        This replaces the fixed template approach with intelligent prompt generation.
+        Supports both standard analytics and advanced ML/statistical queries.
+        Adapts prompt complexity based on model size for optimal accuracy.
+        
+        Args:
+            query: User's natural language question
+            df: DataFrame to analyze
+            model: LLM model name (e.g., 'phi3:mini', 'llama3.1:8b')
         """
+        # Detect if query requires ML/statistical capabilities (ALWAYS priority)
+        ml_keywords = ['cluster', 'classification', 'classify', 'predict', 'regression', 'pca',
+                       'random forest', 'decision tree', 'logistic', 'machine learning', 'ml',
+                       't-test', 'anova', 'chi-square', 'statistical test', 'significance',
+                       'forecast', 'arima', 'time series', 'seasonal', 'trend analysis',
+                       'anomaly', 'outlier', 'z-score', 'standard deviation test',
+                       'feature importance', 'dimensionality reduction', 'train test split']
+        
+        query_lower = query.lower()
+        is_ml_query = any(keyword in query_lower for keyword in ml_keywords)
+        
+        # ML queries ALWAYS get detailed ML prompts regardless of model size
+        if is_ml_query:
+            logger.info(f"ML query detected - using ML prompt regardless of model size")
+            return self._build_ml_prompt(query, df)
+        
+        # For non-ML queries, detect if this is a small model that needs simplified prompts
+        # Small models: tiny, mini, or 1-3 billion parameters
+        model_name = (model or "").lower()
+        
+        # Check for small model indicators
+        is_tiny = 'tiny' in model_name
+        is_mini = 'mini' in model_name
+        # Match patterns like ':1b', ':2b', ':3b', ':1.5b', ':0.5b' but NOT ':13b', ':70b', ':35b'
+        # The pattern ensures the first digit after separator is 0-3
+        import re
+        small_param_match = re.search(r'[:_\-\s]([0-3](?:\.\d+)?)\s*b\b', model_name)
+        is_small_params = small_param_match is not None
+        
+        is_small_model = is_tiny or is_mini or is_small_params
+        
+        # If small model, use simplified prompt template
+        if is_small_model:
+            logger.info(f"Using simplified prompt for small model: {model}")
+            return self._build_simple_prompt(query, df)
+        
+        # Otherwise use standard analytics prompt
         # Classify query intent first
         intent = self._classify_query_intent(query)
         
@@ -231,6 +274,67 @@ result = ...
         
         return prompt
     
+    def _build_simple_prompt(self, query: str, df: pd.DataFrame) -> str:
+        """
+        Build a simplified prompt for small models (tiny, mini, 1b-3b).
+        Reduces cognitive load with concise instructions and essential info only.
+        
+        Args:
+            query: User's natural language question
+            df: DataFrame to analyze
+        
+        Returns:
+            Simplified prompt optimized for small models
+        """
+        try:
+            # Extract essential data structure
+            data_structure = self._extract_data_structure(df)
+            
+            # Get all columns as a simple comma-separated list
+            all_columns = list(df.columns)
+            columns_list = ", ".join(f"'{col}'" for col in all_columns)
+            
+            # Read simple template
+            template_path = Path(__file__).parent.parent / "prompts" / "code_generation_prompt_simple.txt"
+            
+            if template_path.exists():
+                with open(template_path, 'r', encoding='utf-8') as f:
+                    template = f.read()
+                
+                # Simple substitution - just the essentials
+                prompt = template.format(
+                    columns=columns_list,
+                    query=query
+                )
+            else:
+                # Fallback if template missing
+                logger.warning("Simple prompt template not found, using inline fallback")
+                prompt = f"""Generate Python code to answer: "{query}"
+
+Columns: {columns_list}
+
+Rules:
+1. Use ONLY these columns
+2. Store answer in `result`
+3. No print statements
+
+Output code only:
+```python
+result = ...
+```"""
+            
+            return prompt
+            
+        except Exception as e:
+            logger.error(f"Error building simple prompt: {e}")
+            # Minimal fallback
+            return f"""Generate code for: "{query}"
+Columns: {', '.join(df.columns)}
+Store result in `result` variable.
+```python
+result = ...
+```"""
+    
     def _classify_query_intent(self, query: str) -> Dict[str, Any]:
         """
         Classify the user's query intent for better code generation.
@@ -284,6 +388,73 @@ result = ...
             intent['type'] = 'trend'
         
         return intent
+    
+    def _build_ml_prompt(self, query: str, df: pd.DataFrame) -> str:
+        """
+        Build specialized prompt for ML/statistical queries.
+        Includes examples of clustering, regression, classification, etc.
+        """
+        # Get data structure
+        columns_str = ", ".join(df.columns.tolist())
+        dtypes_str = df.dtypes.to_string()
+        sample_data = df.head(5).to_string(max_rows=5, max_cols=10)
+        
+        numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
+        categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+        
+        # Load ML prompt template
+        from pathlib import Path
+        prompt_file = Path(__file__).parent.parent / 'prompts' / 'ml_code_generation_prompt.txt'
+        
+        if prompt_file.exists():
+            with open(prompt_file, 'r', encoding='utf-8') as f:
+                template = f.read()
+            
+            # Fill in template
+            prompt = template.format(
+                data_preview=sample_data,
+                columns=columns_str,
+                dtypes=dtypes_str,
+                query=query
+            )
+        else:
+            # Fallback inline ML prompt
+            prompt = f"""You are an expert data scientist. Generate Python code for: "{query}"
+
+DATA: {len(df)} rows, {len(df.columns)} columns
+COLUMNS: {columns_str}
+NUMERIC: {', '.join(numeric_cols[:10]) if numeric_cols else 'None'}
+CATEGORICAL: {', '.join(categorical_cols[:10]) if categorical_cols else 'None'}
+
+SAMPLE DATA:
+{sample_data}
+
+AVAILABLE (pre-loaded, do NOT import):
+- KMeans, RandomForestClassifier, LogisticRegression, LinearRegression
+- PCA, StandardScaler, train_test_split, accuracy_score
+- stats, ttest_ind, f_oneway, pearsonr, ARIMA
+
+RULES:
+1. Store result in `result` variable
+2. Handle missing data: df = df.dropna()
+3. Use simple models: max_iter=100, max_depth=5, n_estimators=50
+4. Return dict for ML results: {{'accuracy': ..., 'feature_importance': ...}}
+
+EXAMPLE (K-means):
+```python
+X = df[['col1', 'col2']].dropna()
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+df_clean = df.dropna(subset=['col1', 'col2'])
+df_clean['cluster'] = kmeans.fit_predict(X)
+result = df_clean.groupby('cluster')[['col1', 'col2']].mean()
+```
+
+Generate code:
+```python
+result = ...
+```"""
+        
+        return prompt
     
     def _validate_result_human_readable(self, result: Any, df: pd.DataFrame) -> Tuple[Any, bool, str]:
         """
@@ -440,7 +611,8 @@ result = ...
             
             # Build dynamic prompt based on user query and data structure
             # This is the key improvement - no fixed template, fully dynamic
-            prompt = self._build_dynamic_prompt(query, df)
+            # Adapts prompt complexity based on model size
+            prompt = self._build_dynamic_prompt(query, df, model)
             
             # Extract data structure for logging
             data_structure = self._extract_data_structure(df)

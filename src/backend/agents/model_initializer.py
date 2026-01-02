@@ -8,9 +8,11 @@ Extracted from crew_manager.py for better maintainability.
 import logging
 import os
 from typing import Dict, Any, Optional
+import threading
 
-# Singleton instance
+# Thread-safe Singleton instance
 _model_initializer: Optional['ModelInitializer'] = None
+_initializer_lock = threading.Lock()
 
 
 class ModelInitializer:
@@ -200,8 +202,11 @@ class ModelInitializer:
 
 
 def get_model_initializer() -> ModelInitializer:
-    """Get the singleton ModelInitializer instance."""
+    """Get or create the singleton ModelInitializer instance (thread-safe)."""
     global _model_initializer
     if _model_initializer is None:
-        _model_initializer = ModelInitializer()
+        with _initializer_lock:
+            # Double-check pattern for thread safety
+            if _model_initializer is None:
+                _model_initializer = ModelInitializer()
     return _model_initializer

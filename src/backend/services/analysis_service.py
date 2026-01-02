@@ -2,6 +2,7 @@
 # High-level orchestrator for analysis requests (Service Layer)
 
 import logging
+import threading
 from typing import Dict, Any, Optional
 from pathlib import Path
 import sys
@@ -168,11 +169,16 @@ class AnalysisService:
                 "type": "error"
             }
 
-# Singleton
+# Thread-safe Singleton
 _service_instance = None
+_service_lock = threading.Lock()
 
 def get_analysis_service():
+    """Get or create the singleton AnalysisService instance (thread-safe)."""
     global _service_instance
-    if not _service_instance:
-        _service_instance = AnalysisService()
+    if _service_instance is None:
+        with _service_lock:
+            # Double-check pattern for thread safety
+            if _service_instance is None:
+                _service_instance = AnalysisService()
     return _service_instance
