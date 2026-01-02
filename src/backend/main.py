@@ -151,6 +151,27 @@ app.include_router(history.router, prefix="/api/history", tags=["history"])
 # Mount enhanced visualization router (LIDA-inspired features)
 app.include_router(viz_enhance.router, prefix="/api/viz", tags=["visualization-enhancement"])
 
+# WebSocket support for real-time updates across devices
+from fastapi import WebSocket
+try:
+    from backend.core.websocket_manager import websocket_endpoint, connection_manager
+    
+    @app.websocket("/ws/{client_id}")
+    async def websocket_route(websocket: WebSocket, client_id: str):
+        """WebSocket endpoint for real-time updates"""
+        await websocket_endpoint(websocket, client_id)
+    
+    @app.get("/api/ws/status", tags=["websocket"])
+    def websocket_status():
+        """Get WebSocket connection status"""
+        return {
+            "active_connections": connection_manager.get_connection_count(),
+            "connected_clients": connection_manager.get_connected_clients()
+        }
+except ImportError as e:
+    import logging
+    logging.warning(f"WebSocket manager not available: {e}")
+
 @app.get("/")
 def root():
     return {"message": "Nexus-LLM-Analytics backend is running."}
@@ -163,6 +184,37 @@ def health_check():
         "message": "Backend server is running",
         "models_loaded": False,
         "note": "Models will be loaded on first analysis request"
+    }
+
+# Phase 3.8: Prometheus metrics endpoint
+@app.get("/metrics", tags=["monitoring"])
+async def metrics_endpoint():
+    """
+    Prometheus metrics endpoint for monitoring.
+    
+    Returns metrics in Prometheus text format for scraping by Prometheus server
+    or compatible monitoring systems.
+    """
+    from fastapi.responses import Response
+    from backend.core.metrics import generate_metrics_output, get_metrics_content_type
+    
+    return Response(
+        content=generate_metrics_output(),
+        media_type=get_metrics_content_type()
+    )
+
+@app.get("/metrics/json", tags=["monitoring"])
+async def metrics_json_endpoint():
+    """
+    Get metrics in JSON format for easier debugging and UI integration.
+    """
+    from backend.core.metrics import METRICS
+    from backend.core.advanced_cache import get_cache_status
+    
+    return {
+        "prometheus_available": METRICS.__class__.__name__ != "DummyMetric",
+        "cache_status": get_cache_status(),
+        "fallback_stats": METRICS.get_fallback_stats() if hasattr(METRICS, 'get_fallback_stats') else {}
     }
 
 @app.get("/download-report/")

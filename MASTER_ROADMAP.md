@@ -7,6 +7,141 @@
 
 ---
 
+# 🚨 MANDATORY DEVELOPMENT RULES
+> These rules are strictly enforced to maintain code quality, architectural consistency, scalability, and roadmap integrity.
+
+---
+
+## ✅ Rule 1 — Check Before Creating (ABSOLUTE REQUIREMENT)
+
+Before implementing **ANY** feature, function, class, or module, you MUST:
+
+### 1️⃣ Search the Codebase Thoroughly
+- Perform:
+  - Keyword search (`grep_search`)
+  - Semantic search (`semantic_search`)
+- Review related components and architecture
+
+### 2️⃣ Check for Existing Functionality
+- If similar or related implementation exists:
+  - **Extend / Improve / Generalize** the existing code  
+  - Do NOT duplicate functionality
+
+### 3️⃣ Only Create New Code When Truly Necessary
+New implementation is allowed ONLY IF:
+- No existing reusable implementation exists
+- Functionality is genuinely new and justified
+- Placement follows architectural structure
+
+### 4️⃣ File Creation Rule
+New files are permitted ONLY IF:
+- Functionality is **novel in responsibility**
+- It cannot logically belong to an existing module
+- It follows **Single Responsibility Principle (SRP)**
+
+> Do not create files just because it feels cleaner.  
+> Prove it is architecturally required.
+
+---
+
+## ✅ Rule 2 — No Duplicate / Overlapping Functionality
+
+To prevent fragmentation and maintenance issues:
+
+Before adding ANY:
+- class  
+- function  
+- service  
+- utility  
+- module  
+
+You MUST:
+- Search for similar names / roles
+- Consolidate overlapping logic
+- Prefer extending or merging existing modules
+
+### Module Consolidation Guideline
+If multiple modules serve related purposes → **merge them**  
+Example:  
+`model_selector` consolidates `model_discovery` + `ram_aware_selector`
+
+### Import Hygiene
+- Avoid files existing just to re-export others
+- If that happens → modules likely should be merged
+
+---
+
+## ✅ Rule 3 — Roadmap Alignment (No Scope Creep)
+
+Every change MUST strictly align to the official roadmap.
+
+### Mandatory Requirements:
+- Every PR must reference:
+  - Phase
+  - Task ID
+  - Milestone
+
+If it is **not in the roadmap**, it MUST NOT be built:
+- No speculative features  
+- No “cool idea” distractions  
+- No side experiments in main codebase  
+
+### Completion Discipline
+Once a task is completed:
+- Mark it **DONE**
+- Update roadmap status
+- Maintain traceability
+
+---
+
+## ✅ Rule 4 — Documentation & Naming Discipline
+
+Every meaningful contribution MUST include:
+- Clear, consistent naming
+- Proper docstrings including:
+  - What it does
+  - Why it exists
+  - Where it fits architecturally
+
+Poor naming or missing documentation = **Rejected contribution**
+
+---
+
+## ✅ Rule 5 — Review & Approval Enforcement
+
+A feature CANNOT be merged unless reviewers confirm:
+
+- Rule 1 Search performed
+- Rule 2 No duplication
+- Rule 3 Roadmap alignment verified
+- Architectural consistency maintained
+
+Reviewers are responsible for enforcing discipline.
+
+---
+
+## ✅ Rule 6 — Deprecation & Cleanup
+
+When merging or replacing modules:
+- Remove outdated duplicates
+- Clean unused imports
+- Delete abandoned files
+- Remove dead code
+
+No zombie files. No abandoned logic.
+
+---
+
+## ⭐ Goal
+These rules ensure:
+- A clean, scalable architecture  
+- No duplication hell  
+- Strong roadmap alignment  
+- Professional engineering discipline  
+
+
+---
+
 ## ⚡ QUICK REFERENCE
 
 ### Start Commands
@@ -64,42 +199,74 @@ pytest tests/ -v --ignore=tests/archive
 │       └── Average quality score: 78%                                       │
 │                                                                             │
 │  PHASE 1: UNIFIED INTELLIGENCE (3-TRACK INTEGRATION) [Week 3-4]            │
-│  ├── 1.1 Track 1: Complexity → Model Selection       ⬜ TODO               │
+│  ├── 1.1 Track 1: Complexity → Model Selection       ✅ DONE               │
 │  │   └── Simple→tinyllama, Medium→phi3, Complex→llama3.1                   │
-│  ├── 1.2 Track 2: Query Type → Execution Method      ⬜ TODO               │
+│  ├── 1.2 Track 2: Query Type → Execution Method      ✅ DONE               │
 │  │   └── Computation→Code Gen, Conversational→Direct LLM                  │
-│  ├── 1.3 Track 3: Two Friends Activation Rules       ⬜ TODO               │
+│  ├── 1.3 Track 3: Two Friends Activation Rules       ✅ DONE               │
 │  │   └── Skip for simple, Optional for medium, Mandatory for complex      │
-│  ├── 1.4 Wire QueryOrchestrator to data_analyst      ⬜ TODO               │
-│  └── 1.5 End-to-end integration testing              ⬜ TODO               │
+│  ├── 1.4 Wire QueryOrchestrator to data_analyst      ✅ DONE               │
+│  └── 1.5 End-to-end integration testing              ✅ DONE               │
 │                                                                             │
-│  PHASE 2: LLM CODE GENERATION                        [Week 5-7]            │
-│  ├── 2.1 Code generation prompt templates            ⬜ TODO               │
-│  ├── 2.2 Code validation layer (syntax, security)    ⬜ TODO               │
-│  ├── 2.3 Sandbox hardening & testing                 ⬜ TODO               │
-│  ├── 2.4 Result interpretation prompts               ⬜ TODO               │
-│  ├── 2.5 Integration with existing agents            ⬜ TODO               │
-│  └── 2.6 Error recovery & retry logic                ⬜ TODO               │
+│  PHASE 2: LLM CODE GENERATION                        [Week 5-7]  ✅ DONE   │
+│  ├── 2.1 Code generation prompt templates            ✅ DONE               │
+│  ├── 2.2 Code validation layer (syntax, security)    ✅ DONE               │
+│  ├── 2.3 Sandbox hardening & testing                 ✅ DONE               │
+│  ├── 2.4 Result interpretation prompts               ✅ DONE               │
+│  ├── 2.5 Integration with existing agents            ✅ DONE               │
+│  └── 2.6 Error recovery & retry logic                ✅ DONE               │
 │                                                                             │
-│  PHASE 3: CAPABILITY COMPLETION                      [Week 8-10]           │
-│  ├── 3.1 RAG semantic chunking                       ⬜ TODO               │
-│  ├── 3.2 Hybrid search (vector + keyword)            ⬜ TODO               │
-│  ├── 3.3 Citation tracking in responses              ⬜ TODO               │
-│  ├── 3.4 Visualization execution                     ⬜ TODO               │
-│  ├── 3.5 Add scientific file formats                 ⬜ TODO               │
-│  ├── 3.6 Fix bare exception handlers                 ⬜ TODO               │
-│  ├── 3.7 Enhance cache mechanism (semantic)          ⬜ TODO               │
-│  ├── 3.8 Add Prometheus metrics                      ⬜ TODO               │
-│  └── 3.9 Add structured logging                      ⬜ TODO               │
+│  FUTURE ENHANCEMENTS (Backlog)                                              │
+│  └── FE.1 Frontend execution_method display          ⬜ LATER              │
 │                                                                             │
-│  PHASE 4: RESEARCH READINESS                         [Week 11-13]          │
-│  ├── 4.1 Create benchmark dataset (150+ queries)     ⬜ TODO               │
-│  ├── 4.2 Implement evaluation metrics                ⬜ TODO               │
-│  ├── 4.3 Run baseline comparisons                    ⬜ TODO               │
-│  ├── 4.4 Complete ablation studies                   ⬜ TODO               │
-│  ├── 4.5 Add test coverage measurement               ⬜ TODO               │
-│  ├── 4.6 Set up CI/CD pipeline                       ⬜ TODO               │
-│  └── 4.7 Write research paper                        ⬜ TODO               │
+│  PHASE 3: CAPABILITY COMPLETION                      [Week 8-10] ✅ DONE   │
+│  ├── 3.1 RAG semantic chunking                       ✅ DONE               │
+│  ├── 3.2 Hybrid search (vector + keyword)            ✅ DONE               │
+│  ├── 3.3 Citation tracking in responses              ✅ DONE               │
+│  ├── 3.4 Visualization execution                     ✅ DONE               │
+│  ├── 3.5 Add scientific file formats                 ✅ DONE               │
+│  ├── 3.6 Fix bare exception handlers                 ✅ DONE               │
+│  ├── 3.7 Enhance cache mechanism (semantic)          ✅ DONE               │
+│  ├── 3.8 Add Prometheus metrics                      ✅ DONE               │
+│  └── 3.9 Add structured logging                      ✅ DONE               │
+│                                                                             │
+│  PHASE 4: RESEARCH READINESS                         [Week 11-13] ✅ DONE  │
+│  ├── 4.1 Create benchmark dataset (150+ queries)     ✅ DONE               │
+│  ├── 4.2 Implement evaluation metrics                ✅ DONE               │
+│  ├── 4.3 Run baseline comparisons                    ✅ DONE               │
+│  ├── 4.4 Complete ablation studies                   ✅ DONE               │
+│  ├── 4.5 Add test coverage measurement               ✅ DONE               │
+│  ├── 4.6 Set up CI/CD pipeline                       ✅ DONE               │
+│  └── 4.7 Write research paper                        ✅ DONE               │
+│                                                                             │
+│  PHASE 3+4 ENHANCEMENTS                              [Enhancement Pass]    │
+│  ├── Advanced TF-IDF similarity metrics              ✅ DONE               │
+│  ├── N-gram BLEU scores (BLEU-1 to BLEU-4)           ✅ DONE               │
+│  ├── METEOR score implementation                     ✅ DONE               │
+│  ├── Statistical significance testing (Welch's t)   ✅ DONE               │
+│  ├── Effect size calculation (Cohen's d)            ✅ DONE               │
+│  ├── Bootstrap confidence intervals                  ✅ DONE               │
+│  ├── ASCII visualization for benchmarks              ✅ DONE               │
+│  ├── Matplotlib export for figures                   ✅ DONE               │
+│  ├── Semantic text chunking                          ✅ DONE               │
+│  ├── Integration tests (Phase 3+4)                   ✅ DONE               │
+│  ├── Research benchmark suite runner                 ✅ DONE               │
+│  ├── K-fold cross-validation module                  ✅ DONE               │
+│  ├── Leave-one-out validation                        ✅ DONE               │
+│  ├── Bootstrap resampling validation                 ✅ DONE               │
+│  ├── Learning curve analysis                         ✅ DONE               │
+│  ├── Error analysis & categorization                 ✅ DONE               │
+│  ├── Error pattern detection                         ✅ DONE               │
+│  ├── Hyperparameter sensitivity analysis             ✅ DONE               │
+│  ├── Grid search optimizer                           ✅ DONE               │
+│  ├── Parameter interaction analysis                  ✅ DONE               │
+│  ├── Enhanced RAG pipeline with reranking            ✅ DONE               │
+│  ├── Query expansion with synonyms                   ✅ DONE               │
+│  ├── BM25 sparse retrieval scorer                    ✅ DONE               │
+│  ├── Context compression with citations              ✅ DONE               │
+│  ├── Confidence scoring for RAG                      ✅ DONE               │
+│  ├── LaTeX table generator for papers                ✅ DONE               │
+│  └── 184 total tests passing                         ✅ VERIFIED           │
 │                                                                             │
 │  PHASE 5: PATENT & POLISH                            [Week 14]             │
 │  ├── 5.1 Prior art search                            ⬜ TODO               │

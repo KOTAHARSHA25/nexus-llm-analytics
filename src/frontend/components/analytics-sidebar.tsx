@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { apiUrl } from "@/lib/config";
+import { getEndpoint } from "@/lib/config";
 import { 
   History, Settings, BarChart3, TrendingUp, DollarSign, Activity, Cpu, 
   Sparkles, Clock, MessageSquare, Brain, Database, Target, Zap, Bot,
@@ -269,7 +269,7 @@ export function AnalyticsSidebar({
                 onClick={() => {
                   // Download the most recent report
                   const link = document.createElement("a");
-                  link.href = apiUrl("generate-report/download-report");
+                  link.href = getEndpoint("downloadReport");
                   link.download = "latest_report.pdf";
                   document.body.appendChild(link);
                   link.click();

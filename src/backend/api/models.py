@@ -13,10 +13,8 @@ from backend.services.analysis_service import get_analysis_service
 router = APIRouter()
 
 
-@router.get("/health", summary="Health Check", description="Simple health check that doesn't initialize models")
-async def health_check() -> Dict[str, str]:
-    """Simple health check that doesn't initialize models"""
-    return {"status": "healthy", "message": "Models API is running"}
+# NOTE: /health endpoint removed (Dec 2025) - duplicates /api/health/
+# Use GET /api/health/ for health checks instead
 
 
 class ModelConfig(BaseModel):
@@ -120,24 +118,17 @@ async def get_available_models() -> Dict[str, Any]:
         logging.error(f"Failed to get available models: {e}")
         return {"error": str(e), "models": [], "ollama_running": False}
 
-@router.get("/current")
-async def get_current_models() -> Dict[str, str]:
-    """Get currently selected models"""
-    try:
-        primary, review, embedding = ModelSelector.select_optimal_models()
-        return {
-            "primary_model": primary,
-            "review_model": review,
-            "embedding_model": embedding,
-            "selection_method": "auto" if os.getenv("AUTO_MODEL_SELECTION", "true").lower() == "true" else "manual"
-        }
-    except Exception as e:
-        logging.error(f"Failed to get current models: {e}")
-        return {"error": str(e)}
+# NOTE: /current endpoint removed (Dec 2025) - duplicates /available (current_config field)
+# Use GET /api/models/available for current model config
 
-@router.post("/configure")
+@router.post("/configure", deprecated=True)
 async def configure_models(config: ModelConfig) -> Dict[str, str]:
-    """Configure model preferences (Note: Requires restart to take effect)"""
+    """
+    [DEPRECATED] Configure model preferences via .env format.
+    
+    Prefer using POST /api/models/preferences which saves directly to config.
+    This endpoint is kept for users who prefer manual .env configuration.
+    """
     try:
         # This would typically update environment variables or config file
         # For now, return what would be set
@@ -267,6 +258,56 @@ async def update_user_preferences(config: ModelConfig) -> Dict[str, str]:
 class ModelTestRequest(BaseModel):
     model_name: str
 
+def _is_embedding_model(model_name: str) -> bool:
+    """Check if model is an embedding model (not for text generation)"""
+    embedding_indicators = ['embed', 'nomic-embed', 'bge', 'e5', 'gte', 'embedding']
+    model_lower = model_name.lower()
+    return any(indicator in model_lower for indicator in embedding_indicators)
+
+def _test_embedding_model(model_name: str) -> dict:
+    """Test an embedding model using the embeddings API"""
+    import requests
+    import time
+    
+    url = "http://localhost:11434/api/embeddings"
+    payload = {"model": model_name, "prompt": "test embedding"}
+    
+    start_time = time.time()
+    try:
+        response = requests.post(url, json=payload, timeout=60)
+        response.raise_for_status()
+        data = response.json()
+        end_time = time.time()
+        
+        if "embedding" in data and len(data["embedding"]) > 0:
+            return {
+                "success": True,
+                "response_time": end_time - start_time,
+                "result": f"Embedding generated ({len(data['embedding'])} dimensions)",
+                "error": None
+            }
+        else:
+            return {
+                "success": False,
+                "response_time": end_time - start_time,
+                "result": "",
+                "error": "No embedding returned"
+            }
+    except requests.exceptions.HTTPError as e:
+        return {
+            "success": False,
+            "response_time": time.time() - start_time,
+            "result": "",
+            "error": f"HTTP Error: {e}"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "response_time": time.time() - start_time,
+            "result": "",
+            "error": str(e)
+        }
+
 @router.post("/test-model")
 async def test_model(request: ModelTestRequest) -> Dict[str, Any]:
     """Test a specific model with a simple query"""
@@ -276,36 +317,42 @@ async def test_model(request: ModelTestRequest) -> Dict[str, Any]:
         
         start_time = time.time()
         
-        # Simple test query
-        test_query = "Hello, please respond with 'Model test successful'"
-        
         # Determine model name (strip ollama/ prefix if present for direct API call)
         model_name = request.model_name.replace("ollama/", "")
         
-        # Use LLMClient directly to test the SPECIFIC model requested
-        # Bypassing AnalysisService which routes to agents using their default models
-        initializer = get_model_initializer()
-        initializer.ensure_initialized()
-        
-        # Generate response using the specific model
-        result = initializer.llm_client.generate(
-            prompt=test_query,
-            model=model_name,
-            adaptive_timeout=False # Fast test
-        )
-        
-        end_time = time.time()
-        response_time = end_time - start_time
-        
-        # Parse result
-        success = result.get("success", False)
-        # Check if response contains the expected text or is just non-empty
-        response_text = result.get("response", "")
-        if not response_text:
-            success = False
-            error_msg = "Empty response from model"
+        # Check if this is an embedding model - use different test method
+        if _is_embedding_model(model_name):
+            # Use embeddings API for embedding models
+            test_result = _test_embedding_model(model_name)
+            success = test_result["success"]
+            response_time = test_result["response_time"]
+            response_text = test_result["result"]
+            error_msg = test_result["error"]
         else:
-            error_msg = result.get("error")
+            # Use LLMClient directly to test text generation models
+            test_query = "Hello, please respond with 'Model test successful'"
+            
+            initializer = get_model_initializer()
+            initializer.ensure_initialized()
+            
+            # Generate response using the specific model
+            result = initializer.llm_client.generate(
+                prompt=test_query,
+                model=model_name,
+                adaptive_timeout=False  # Fast test
+            )
+            
+            end_time = time.time()
+            response_time = end_time - start_time
+            
+            # Parse result
+            success = result.get("success", False)
+            response_text = result.get("response", "")
+            if not response_text:
+                success = False
+                error_msg = "Empty response from model"
+            else:
+                error_msg = result.get("error")
         
         # Save test result
         preferences_manager = get_preferences_manager()

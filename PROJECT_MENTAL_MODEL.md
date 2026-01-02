@@ -1,5 +1,5 @@
 # 🧠 PROJECT MENTAL MODEL - Nexus LLM Analytics
-> **Version:** 1.3 | **Last Updated:** December 27, 2025
+> **Version:** 1.4 | **Last Updated:** Phase 2 Audit Complete
 > **Purpose:** Authoritative single source of truth for system understanding
 
 ---
@@ -10,8 +10,9 @@
 |----------|---------|-------|
 | **[PROJECT_UNDERSTANDING.md](PROJECT_UNDERSTANDING.md)** | Complete source of truth (v1.1) | ~900 |
 | **[PROJECT_ROADMAP_NEXT_LEVEL.md](PROJECT_ROADMAP_NEXT_LEVEL.md)** | Actionable roadmap (v1.1) | ~1200 |
-| [PROJECT_ROADMAP_FOR_RESEARCH.md](PROJECT_ROADMAP_FOR_RESEARCH.md) | Legacy roadmap | 1876 |
-| [FILE_MANIFEST.md](FILE_MANIFEST.md) | File inventory | ~300 |
+| **[AUDIT_REPORT.md](AUDIT_REPORT.md)** | Phase 2 integration audit findings | NEW |
+| **[INTEGRATION_MAP.md](INTEGRATION_MAP.md)** | Frontend→Backend→User Value mapping | NEW |
+| [FILE_MANIFEST.md](FILE_MANIFEST.md) | File inventory | ~850 |
 | [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) | Architecture diagrams | ~450 |
 | [DATA_FLOW_GUIDE.md](DATA_FLOW_GUIDE.md) | Data flow documentation | ~200 |
 
@@ -23,10 +24,48 @@
 
 | Date | Version | Changes |
 |------|---------|---------|
-| **Dec 27, 2025** | **1.3** | **Major update**: Archived unused files, model selection guide added, auth removed from scope, LLM code generation recommended |
+| **Phase 2** | **1.4** | **System Integration Audit**: Fixed 4 broken API calls, cataloged 29 orphaned endpoints, created AUDIT_REPORT.md and INTEGRATION_MAP.md |
+| Dec 27, 2025 | 1.3 | Major update: Archived unused files, model selection guide added, auth removed from scope |
 | Dec 22, 2025 | 1.2 | Added related documents section, reference to main roadmap |
 | Dec 22, 2025 | 1.1 | Updated documentation, removed CrewAI from optimizers.py, verified all files |
 | Dec 22, 2025 | 1.0 | Initial comprehensive analysis |
+
+---
+
+## 🆕 VERSION 1.4 UPDATES (Phase 2 System Audit)
+
+### Integration Audit Completed
+
+A comprehensive audit verified every frontend↔backend integration:
+
+| Finding | Count | Status |
+|---------|-------|--------|
+| Backend Endpoints Total | 53 | Documented |
+| Frontend API Calls | 21 | All verified working |
+| Orphaned Endpoints | 29 | Cataloged for action |
+| Broken API Calls | 4 | ✅ Fixed |
+| Duplicate Endpoints | 4 | Marked for removal |
+
+### Frontend Fixes Applied
+
+All API calls now use centralized `getEndpoint()` helper:
+- `page.tsx` - Cancel analysis
+- `file-upload.tsx` - File download
+- `analytics-sidebar.tsx` - Report download
+- `config.ts` - Cleaned unused declarations
+
+### Documentation Artifacts Created
+
+1. **AUDIT_REPORT.md** - Complete audit findings with recommendations
+2. **INTEGRATION_MAP.md** - User-facing feature to backend service mapping
+
+### Certification
+
+After Phase 2 audit:
+- ✅ No cosmetic-only features
+- ✅ No broken integrations  
+- ✅ Orphaned endpoints documented
+- ✅ Execution paths verified
 
 ---
 

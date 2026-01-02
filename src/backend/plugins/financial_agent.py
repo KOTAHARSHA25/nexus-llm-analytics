@@ -389,8 +389,8 @@ class FinancialAgent(BasePluginAgent):
                         "avg_monthly_revenue": float(monthly_data[financial_cols["revenue"][0]].mean()),
                         "avg_monthly_margin": float(monthly_data['margin'].mean())
                     }
-                except:
-                    logging.debug("Operation failed (non-critical) - continuing")
+                except (ValueError, TypeError, KeyError) as e:
+                    logging.debug(f"Monthly trends calculation failed: {e}")
             
             # Profitability benchmarking
             benchmark_analysis = {}
@@ -545,12 +545,15 @@ class FinancialAgent(BasePluginAgent):
             # Financial health assessment
             results["financial_health"] = self._assess_financial_health(data, financial_cols)
             
+            # Generate comprehensive interpretation
+            interpretation = self._generate_comprehensive_interpretation(data, results, query)
+            
             return {
                 "success": True,
                 "result": results,
                 "agent": "FinancialAgent",
                 "operation": "comprehensive_financial_analysis",
-                "interpretation": "Comprehensive financial analysis completed with profitability, growth, and financial health assessment."
+                "interpretation": interpretation
             }
             
         except Exception as e:
@@ -653,6 +656,80 @@ class FinancialAgent(BasePluginAgent):
             recommendations.append("Financial health appears strong - maintain current strategies")
         
         return recommendations
+    
+    def _generate_comprehensive_interpretation(self, data: pd.DataFrame, results: Dict, query: str) -> str:
+        """Generate comprehensive human-readable interpretation of financial analysis"""
+        lines = []
+        query_lower = query.lower()
+        
+        lines.append("## Financial Analysis Summary\n")
+        lines.append(f"**Dataset:** {data.shape[0]:,} records, {data.shape[1]} columns\n")
+        
+        # Summary statistics
+        summary = results.get("summary_statistics", {})
+        if summary:
+            lines.append("### Key Metrics\n")
+            for col, stats in list(summary.items())[:5]:
+                col_display = col.replace('_', ' ').title()
+                lines.append(f"**{col_display}:**")
+                lines.append(f"• Total: {stats['total']:,.2f}")
+                lines.append(f"• Average: {stats['average']:,.2f}")
+                lines.append(f"• Median: {stats['median']:,.2f}")
+                lines.append("")
+        
+        # Financial health
+        health = results.get("financial_health", {})
+        if health:
+            score = health.get("health_score", 0)
+            rating = health.get("health_rating", "unknown")
+            lines.append("### Financial Health\n")
+            lines.append(f"**Overall Score:** {score:.1f}/100 ({rating})")
+            
+            factors = health.get("factors", {})
+            if factors:
+                lines.append("\n**Key Factors:**")
+                for factor, status in factors.items():
+                    factor_display = factor.replace('_', ' ').title()
+                    lines.append(f"• {factor_display}: {status}")
+            
+            recommendations = health.get("recommendations", [])
+            if recommendations:
+                lines.append("\n**Recommendations:**")
+                for rec in recommendations[:3]:
+                    lines.append(f"• {rec}")
+            lines.append("")
+        
+        # Profitability insights
+        profitability = results.get("profitability", {})
+        if profitability:
+            lines.append("### Profitability Analysis\n")
+            for key, data_item in profitability.items():
+                if isinstance(data_item, dict) and "gross_margin_percent" in data_item:
+                    margin = data_item["gross_margin_percent"]
+                    status = data_item.get("profitability_status", "unknown")
+                    revenue = data_item.get("revenue", 0)
+                    profit = data_item.get("gross_profit", 0)
+                    lines.append(f"**{key.replace('_', ' ').title()}:**")
+                    lines.append(f"• Revenue: {revenue:,.2f}")
+                    lines.append(f"• Gross Profit: {profit:,.2f}")
+                    lines.append(f"• Gross Margin: {margin:.1f}%")
+                    lines.append(f"• Status: {status.title()}")
+                    lines.append("")
+        
+        # Growth insights
+        growth = results.get("growth", {})
+        if growth:
+            lines.append("### Growth Analysis\n")
+            for col, growth_data in growth.items():
+                if isinstance(growth_data, dict) and "total_growth_percent" in growth_data:
+                    total_growth = growth_data["total_growth_percent"]
+                    classification = growth_data.get("growth_classification", "unknown")
+                    lines.append(f"**{col.replace('_', ' ').title()}:**")
+                    lines.append(f"• Total Growth: {total_growth:.1f}%")
+                    lines.append(f"• Classification: {classification.replace('_', ' ').title()}")
+                    lines.append("")
+        
+        return "\n".join(lines) if lines else "Financial analysis completed."
     
     def _interpret_profitability(self, results: Dict) -> str:
         """Generate interpretation of profitability analysis"""

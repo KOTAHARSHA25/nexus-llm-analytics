@@ -237,3 +237,241 @@ def log_analysis_complete(query: str, duration_s: float, success: bool):
     query_preview = query[:30] + "..." if len(query) > 30 else query
     emoji = "✅" if success else "❌"
     logging.info(f"{emoji} Analysis complete: \"{query_preview}\" ({duration_s:.1f}s)")
+
+
+# =============================================================================
+# Phase 3.9: Structured Logging Enhancement
+# =============================================================================
+
+class StructuredLogger:
+    """
+    Phase 3.9: Structured logging for production observability.
+    
+    Provides consistent, machine-parseable log output with:
+    - Request/response correlation
+    - Performance timing
+    - Error context
+    - Agent execution traces
+    - LLM interaction logging
+    
+    Example:
+        logger = StructuredLogger("query_processor")
+        with logger.span("process_query", query_id="abc123"):
+            result = process(query)
+            logger.log_event("query_processed", tokens=100, latency_ms=250)
+    """
+    
+    def __init__(self, component: str, log_level: int = logging.INFO):
+        self.component = component
+        self.logger = logging.getLogger(f"nexus.{component}")
+        self.logger.setLevel(log_level)
+        self._context: dict = {}
+    
+    def set_context(self, **kwargs):
+        """Set persistent context that will be included in all logs"""
+        self._context.update(kwargs)
+    
+    def clear_context(self):
+        """Clear the persistent context"""
+        self._context.clear()
+    
+    def _format_structured(self, event: str, level: str, **data) -> dict:
+        """Format a structured log entry"""
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "level": level,
+            "component": self.component,
+            "event": event,
+            **self._context,
+            **data
+        }
+        return entry
+    
+    def log_event(self, event: str, level: str = "INFO", **data):
+        """
+        Log a structured event.
+        
+        Args:
+            event: Event name (e.g., "query_received", "agent_started")
+            level: Log level
+            **data: Additional structured data
+        """
+        entry = self._format_structured(event, level, **data)
+        log_level = getattr(logging, level.upper(), logging.INFO)
+        
+        # Log as JSON for structured parsing
+        self.logger.log(log_level, json.dumps(entry))
+    
+    def info(self, event: str, **data):
+        """Log an INFO level event"""
+        self.log_event(event, "INFO", **data)
+    
+    def debug(self, event: str, **data):
+        """Log a DEBUG level event"""
+        self.log_event(event, "DEBUG", **data)
+    
+    def warning(self, event: str, **data):
+        """Log a WARNING level event"""
+        self.log_event(event, "WARNING", **data)
+    
+    def error(self, event: str, error: Exception = None, **data):
+        """Log an ERROR level event with optional exception details"""
+        if error:
+            data["error_type"] = type(error).__name__
+            data["error_message"] = str(error)
+        self.log_event(event, "ERROR", **data)
+    
+    def log_request(
+        self, 
+        request_id: str,
+        method: str,
+        path: str,
+        status: int,
+        duration_ms: float,
+        **extra
+    ):
+        """Log an HTTP request in structured format"""
+        self.info(
+            "http_request",
+            request_id=request_id,
+            method=method,
+            path=path,
+            status_code=status,
+            duration_ms=round(duration_ms, 2),
+            **extra
+        )
+    
+    def log_agent_execution(
+        self,
+        agent_name: str,
+        action: str,
+        duration_ms: float,
+        success: bool,
+        **extra
+    ):
+        """Log agent execution in structured format"""
+        self.info(
+            "agent_execution",
+            agent=agent_name,
+            action=action,
+            duration_ms=round(duration_ms, 2),
+            success=success,
+            **extra
+        )
+    
+    def log_llm_call(
+        self,
+        model: str,
+        input_tokens: int,
+        output_tokens: int,
+        latency_ms: float,
+        success: bool,
+        **extra
+    ):
+        """Log LLM API call in structured format"""
+        self.info(
+            "llm_call",
+            model=model,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            total_tokens=input_tokens + output_tokens,
+            latency_ms=round(latency_ms, 2),
+            success=success,
+            **extra
+        )
+    
+    def log_cache_event(
+        self,
+        cache_type: str,
+        hit: bool,
+        key_preview: str = None,
+        **extra
+    ):
+        """Log cache hit/miss in structured format"""
+        self.debug(
+            "cache_access",
+            cache_type=cache_type,
+            cache_hit=hit,
+            key_preview=key_preview[:20] if key_preview else None,
+            **extra
+        )
+    
+    def log_rag_query(
+        self,
+        query_preview: str,
+        num_results: int,
+        search_type: str,
+        latency_ms: float,
+        **extra
+    ):
+        """Log RAG query in structured format"""
+        self.info(
+            "rag_query",
+            query_preview=query_preview[:50] if query_preview else None,
+            num_results=num_results,
+            search_type=search_type,
+            latency_ms=round(latency_ms, 2),
+            **extra
+        )
+
+
+class SpanContext:
+    """Context manager for tracing spans"""
+    
+    def __init__(self, logger: StructuredLogger, operation: str, **tags):
+        self.logger = logger
+        self.operation = operation
+        self.tags = tags
+        self.start_time = None
+    
+    def __enter__(self):
+        self.start_time = datetime.now()
+        self.logger.debug(
+            "span_start",
+            operation=self.operation,
+            **self.tags
+        )
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        duration_ms = (datetime.now() - self.start_time).total_seconds() * 1000
+        
+        if exc_type:
+            self.logger.error(
+                "span_end",
+                operation=self.operation,
+                duration_ms=round(duration_ms, 2),
+                success=False,
+                error_type=exc_type.__name__,
+                error_message=str(exc_val),
+                **self.tags
+            )
+        else:
+            self.logger.debug(
+                "span_end",
+                operation=self.operation,
+                duration_ms=round(duration_ms, 2),
+                success=True,
+                **self.tags
+            )
+
+
+def get_structured_logger(component: str) -> StructuredLogger:
+    """
+    Factory function to get a structured logger for a component.
+    
+    Args:
+        component: Component name (e.g., "api", "agent", "rag")
+    
+    Returns:
+        StructuredLogger instance
+    """
+    return StructuredLogger(component)
+
+
+# Pre-configured loggers for common components
+api_logger = StructuredLogger("api")
+agent_logger = StructuredLogger("agent")
+rag_logger = StructuredLogger("rag")
+cache_logger = StructuredLogger("cache")
+llm_logger = StructuredLogger("llm")

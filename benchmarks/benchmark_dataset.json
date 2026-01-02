@@ -1,0 +1,1041 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2025-12-27",
+    "description": "Comprehensive benchmark dataset for Nexus LLM Analytics research evaluation",
+    "total_queries": 160,
+    "domains": ["Education", "Healthcare", "IoT_Industrial", "Business_Finance", "Scientific_Research", "General_Analytics"],
+    "complexity_levels": ["simple", "medium", "complex"],
+    "query_types": ["statistical", "analytical", "predictive", "comparative", "visualization", "time_series"]
+  },
+  
+  "domains": {
+    "Education": {
+      "description": "Student performance, grades, attendance, and academic analytics",
+      "sample_files": ["test_student_grades.csv"],
+      "queries": [
+        {
+          "id": "EDU_SIMPLE_01",
+          "query": "What is the average score?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "validation": {"type": "numeric_range", "field": "average", "min": 60, "max": 100},
+          "required_elements": ["average", "score"]
+        },
+        {
+          "id": "EDU_SIMPLE_02",
+          "query": "How many students are in the dataset?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["count", "students"]
+        },
+        {
+          "id": "EDU_SIMPLE_03",
+          "query": "What is the highest score recorded?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["highest", "maximum", "score"]
+        },
+        {
+          "id": "EDU_SIMPLE_04",
+          "query": "What is the lowest score in the data?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["lowest", "minimum", "score"]
+        },
+        {
+          "id": "EDU_SIMPLE_05",
+          "query": "Calculate the median score",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["median", "score"]
+        },
+        {
+          "id": "EDU_SIMPLE_06",
+          "query": "What is the standard deviation of scores?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["standard deviation", "score"]
+        },
+        {
+          "id": "EDU_MEDIUM_01",
+          "query": "Calculate the average score for each subject and identify which subject has the highest average",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["average", "subject", "highest"]
+        },
+        {
+          "id": "EDU_MEDIUM_02",
+          "query": "Group students by their grade category (A, B, C, D, F) and show the count in each",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["grade", "category", "count"]
+        },
+        {
+          "id": "EDU_MEDIUM_03",
+          "query": "Compare the performance between male and female students across all subjects",
+          "complexity": "medium",
+          "query_type": "comparative",
+          "expected_model": "phi3:mini",
+          "required_elements": ["compare", "male", "female", "performance"]
+        },
+        {
+          "id": "EDU_MEDIUM_04",
+          "query": "Calculate the pass rate (score >= 60) for each subject",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["pass rate", "subject", "percentage"]
+        },
+        {
+          "id": "EDU_MEDIUM_05",
+          "query": "Find the top 10 performing students based on their overall average",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["top", "students", "average"]
+        },
+        {
+          "id": "EDU_MEDIUM_06",
+          "query": "Identify subjects where more than 20% of students are failing",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["failing", "subject", "percentage"]
+        },
+        {
+          "id": "EDU_MEDIUM_07",
+          "query": "Create a histogram showing the distribution of scores",
+          "complexity": "medium",
+          "query_type": "visualization",
+          "expected_model": "phi3:mini",
+          "required_elements": ["histogram", "distribution", "scores"]
+        },
+        {
+          "id": "EDU_COMPLEX_01",
+          "query": "Analyze the correlation between attendance percentage and academic performance across all subjects, then identify students at risk of failing and recommend interventions based on their attendance patterns",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["correlation", "attendance", "risk", "intervention", "student"]
+        },
+        {
+          "id": "EDU_COMPLEX_02",
+          "query": "Perform a comprehensive grade inflation analysis by comparing current scores to historical averages, identify trends, and predict future performance trajectories for at-risk students",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["inflation", "trend", "prediction", "historical"]
+        },
+        {
+          "id": "EDU_COMPLEX_03",
+          "query": "Conduct factor analysis to determine which variables most strongly predict student success, then create a student success prediction model with confidence intervals",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["factor", "prediction", "model", "confidence"]
+        },
+        {
+          "id": "EDU_COMPLEX_04",
+          "query": "Segment students into clusters based on their learning patterns, identify characteristics of each cluster, and recommend personalized teaching strategies for each group",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["cluster", "segment", "pattern", "recommendation"]
+        },
+        {
+          "id": "EDU_COMPLEX_05",
+          "query": "Build a multi-variate regression model to explain score variations using all available features, report R-squared values, and identify the most significant predictors",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["regression", "R-squared", "predictor", "significant"]
+        }
+      ]
+    },
+    
+    "Healthcare": {
+      "description": "Patient health metrics, stress levels, mental health assessment",
+      "sample_files": ["StressLevelDataset.csv"],
+      "queries": [
+        {
+          "id": "HEALTH_SIMPLE_01",
+          "query": "What is the average anxiety level in the dataset?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["anxiety", "average"]
+        },
+        {
+          "id": "HEALTH_SIMPLE_02",
+          "query": "How many patients have high stress levels?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["count", "high", "stress"]
+        },
+        {
+          "id": "HEALTH_SIMPLE_03",
+          "query": "What is the maximum depression score?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["maximum", "depression"]
+        },
+        {
+          "id": "HEALTH_SIMPLE_04",
+          "query": "Calculate the average sleep quality score",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["average", "sleep"]
+        },
+        {
+          "id": "HEALTH_SIMPLE_05",
+          "query": "What percentage of patients report poor mental health?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["percentage", "mental health"]
+        },
+        {
+          "id": "HEALTH_SIMPLE_06",
+          "query": "Show the range of self-esteem scores",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["range", "self-esteem"]
+        },
+        {
+          "id": "HEALTH_MEDIUM_01",
+          "query": "Calculate the correlation between sleep quality and stress level",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["sleep", "stress", "correlation"]
+        },
+        {
+          "id": "HEALTH_MEDIUM_02",
+          "query": "Compare anxiety levels between different age groups",
+          "complexity": "medium",
+          "query_type": "comparative",
+          "expected_model": "phi3:mini",
+          "required_elements": ["anxiety", "age", "compare"]
+        },
+        {
+          "id": "HEALTH_MEDIUM_03",
+          "query": "Identify factors most strongly associated with depression",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["factor", "depression", "association"]
+        },
+        {
+          "id": "HEALTH_MEDIUM_04",
+          "query": "Group patients by stress level categories and show the distribution",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["group", "stress", "distribution"]
+        },
+        {
+          "id": "HEALTH_MEDIUM_05",
+          "query": "Create a scatter plot showing the relationship between anxiety and depression",
+          "complexity": "medium",
+          "query_type": "visualization",
+          "expected_model": "phi3:mini",
+          "required_elements": ["scatter", "anxiety", "depression", "relationship"]
+        },
+        {
+          "id": "HEALTH_MEDIUM_06",
+          "query": "Calculate BMI categories and their correlation with mental health scores",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["BMI", "mental health", "correlation"]
+        },
+        {
+          "id": "HEALTH_MEDIUM_07",
+          "query": "Find patients with abnormally high stress given their age and occupation",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["abnormal", "stress", "age", "occupation"]
+        },
+        {
+          "id": "HEALTH_COMPLEX_01",
+          "query": "Perform a comprehensive mental health risk assessment by analyzing the interplay between anxiety, depression, self-esteem, and environmental factors, then segment the population into risk categories and recommend personalized intervention strategies for each segment",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["anxiety", "depression", "risk", "intervention", "segment"]
+        },
+        {
+          "id": "HEALTH_COMPLEX_02",
+          "query": "Build a multi-factor stress prediction model incorporating lifestyle factors, create risk scores for each patient, and identify early warning indicators",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["prediction", "model", "risk score", "warning"]
+        },
+        {
+          "id": "HEALTH_COMPLEX_03",
+          "query": "Analyze the effectiveness of different treatment approaches by comparing patient outcomes, control for confounding variables, and recommend optimal intervention protocols",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["treatment", "outcome", "confounding", "intervention"]
+        },
+        {
+          "id": "HEALTH_COMPLEX_04",
+          "query": "Perform longitudinal trend analysis on patient health metrics, identify seasonal patterns in mental health indicators, and forecast future healthcare resource needs",
+          "complexity": "complex",
+          "query_type": "time_series",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["trend", "seasonal", "forecast", "longitudinal"]
+        },
+        {
+          "id": "HEALTH_COMPLEX_05",
+          "query": "Conduct a social determinants of health analysis examining the impact of socioeconomic factors on health outcomes, identify disparities, and recommend policy interventions",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["social determinants", "disparities", "policy", "socioeconomic"]
+        }
+      ]
+    },
+    
+    "IoT_Industrial": {
+      "description": "Sensor data, environmental monitoring, industrial metrics",
+      "sample_files": ["test_iot_sensor.csv"],
+      "queries": [
+        {
+          "id": "IOT_SIMPLE_01",
+          "query": "What is the maximum temperature recorded?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["temperature", "maximum"]
+        },
+        {
+          "id": "IOT_SIMPLE_02",
+          "query": "What is the average humidity level?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["humidity", "average"]
+        },
+        {
+          "id": "IOT_SIMPLE_03",
+          "query": "How many sensor readings are above normal threshold?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["readings", "threshold", "count"]
+        },
+        {
+          "id": "IOT_SIMPLE_04",
+          "query": "What is the minimum pressure reading?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["pressure", "minimum"]
+        },
+        {
+          "id": "IOT_SIMPLE_05",
+          "query": "Calculate the average air quality index",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["air quality", "average"]
+        },
+        {
+          "id": "IOT_SIMPLE_06",
+          "query": "What is the data collection frequency?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["frequency", "data"]
+        },
+        {
+          "id": "IOT_MEDIUM_01",
+          "query": "Calculate the average temperature and humidity for each hour and identify any anomalies",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["average", "temperature", "humidity", "hour", "anomaly"]
+        },
+        {
+          "id": "IOT_MEDIUM_02",
+          "query": "Detect outliers in sensor readings using statistical methods",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["outlier", "detection", "sensor"]
+        },
+        {
+          "id": "IOT_MEDIUM_03",
+          "query": "Compare sensor performance across different locations",
+          "complexity": "medium",
+          "query_type": "comparative",
+          "expected_model": "phi3:mini",
+          "required_elements": ["compare", "sensor", "location"]
+        },
+        {
+          "id": "IOT_MEDIUM_04",
+          "query": "Calculate the correlation between temperature and energy consumption",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["correlation", "temperature", "energy"]
+        },
+        {
+          "id": "IOT_MEDIUM_05",
+          "query": "Create a time series plot of temperature variations over the day",
+          "complexity": "medium",
+          "query_type": "visualization",
+          "expected_model": "phi3:mini",
+          "required_elements": ["time series", "temperature", "plot"]
+        },
+        {
+          "id": "IOT_MEDIUM_06",
+          "query": "Identify patterns in sensor failures or data gaps",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["pattern", "failure", "gap"]
+        },
+        {
+          "id": "IOT_MEDIUM_07",
+          "query": "Calculate running averages for all sensor metrics with a 1-hour window",
+          "complexity": "medium",
+          "query_type": "time_series",
+          "expected_model": "phi3:mini",
+          "required_elements": ["running average", "window", "metrics"]
+        },
+        {
+          "id": "IOT_COMPLEX_01",
+          "query": "Analyze the relationship between air quality index and environmental factors, predict when air quality might become hazardous based on observed patterns, and recommend sensor placement optimization",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["air quality", "prediction", "relationship", "optimization"]
+        },
+        {
+          "id": "IOT_COMPLEX_02",
+          "query": "Build an anomaly detection model for the sensor network, establish dynamic thresholds based on historical data, and create an early warning system for equipment failures",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["anomaly detection", "model", "threshold", "early warning"]
+        },
+        {
+          "id": "IOT_COMPLEX_03",
+          "query": "Perform predictive maintenance analysis by identifying degradation patterns in sensor data, estimate time-to-failure for equipment, and recommend maintenance schedules",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["predictive maintenance", "degradation", "time-to-failure", "schedule"]
+        },
+        {
+          "id": "IOT_COMPLEX_04",
+          "query": "Conduct energy optimization analysis by correlating environmental conditions with energy usage patterns, identify inefficiencies, and recommend automated control strategies",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["energy optimization", "correlation", "inefficiency", "automation"]
+        },
+        {
+          "id": "IOT_COMPLEX_05",
+          "query": "Analyze multi-sensor data fusion opportunities, identify redundant sensors, optimize the sensor network topology, and estimate cost savings",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["data fusion", "redundant", "topology", "cost"]
+        }
+      ]
+    },
+    
+    "Business_Finance": {
+      "description": "Inventory, sales, financial metrics, business intelligence",
+      "sample_files": ["test_inventory.csv", "test_financial.csv"],
+      "queries": [
+        {
+          "id": "BIZ_SIMPLE_01",
+          "query": "How many products are in Electronics category?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["Electronics", "product", "count"]
+        },
+        {
+          "id": "BIZ_SIMPLE_02",
+          "query": "What is the total inventory value?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["total", "value", "inventory"]
+        },
+        {
+          "id": "BIZ_SIMPLE_03",
+          "query": "How many items are out of stock?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["out of stock", "count"]
+        },
+        {
+          "id": "BIZ_SIMPLE_04",
+          "query": "What is the average product price?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["average", "price"]
+        },
+        {
+          "id": "BIZ_SIMPLE_05",
+          "query": "Show the most expensive product",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["expensive", "product"]
+        },
+        {
+          "id": "BIZ_SIMPLE_06",
+          "query": "How many product categories exist?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["categories", "count"]
+        },
+        {
+          "id": "BIZ_MEDIUM_01",
+          "query": "Calculate the total inventory value for each category and identify products that need restocking",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["value", "category", "restock"]
+        },
+        {
+          "id": "BIZ_MEDIUM_02",
+          "query": "Compare sales performance across different product categories",
+          "complexity": "medium",
+          "query_type": "comparative",
+          "expected_model": "phi3:mini",
+          "required_elements": ["compare", "sales", "category"]
+        },
+        {
+          "id": "BIZ_MEDIUM_03",
+          "query": "Calculate profit margins for each product category",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["profit margin", "category"]
+        },
+        {
+          "id": "BIZ_MEDIUM_04",
+          "query": "Identify slow-moving inventory items based on turnover rate",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["slow-moving", "turnover"]
+        },
+        {
+          "id": "BIZ_MEDIUM_05",
+          "query": "Create a bar chart showing revenue by product category",
+          "complexity": "medium",
+          "query_type": "visualization",
+          "expected_model": "phi3:mini",
+          "required_elements": ["bar chart", "revenue", "category"]
+        },
+        {
+          "id": "BIZ_MEDIUM_06",
+          "query": "Calculate month-over-month growth rates for sales",
+          "complexity": "medium",
+          "query_type": "time_series",
+          "expected_model": "phi3:mini",
+          "required_elements": ["month-over-month", "growth", "sales"]
+        },
+        {
+          "id": "BIZ_MEDIUM_07",
+          "query": "Identify products with the highest and lowest price-to-cost ratios",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["price-to-cost", "ratio", "highest", "lowest"]
+        },
+        {
+          "id": "BIZ_COMPLEX_01",
+          "query": "Perform ABC analysis on inventory items based on value contribution, calculate inventory turnover ratios, identify slow-moving stock, and recommend optimal reorder quantities using economic order quantity principles",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["ABC", "turnover", "reorder", "EOQ"]
+        },
+        {
+          "id": "BIZ_COMPLEX_02",
+          "query": "Build a demand forecasting model using historical sales data, incorporate seasonality analysis, and recommend inventory levels for the next quarter",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["forecasting", "seasonality", "demand", "inventory"]
+        },
+        {
+          "id": "BIZ_COMPLEX_03",
+          "query": "Conduct customer segmentation analysis based on purchasing patterns, calculate customer lifetime value for each segment, and recommend targeted marketing strategies",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["segmentation", "customer lifetime value", "marketing"]
+        },
+        {
+          "id": "BIZ_COMPLEX_04",
+          "query": "Perform a comprehensive financial health assessment including liquidity ratios, profitability analysis, and working capital optimization recommendations",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["liquidity", "profitability", "working capital"]
+        },
+        {
+          "id": "BIZ_COMPLEX_05",
+          "query": "Analyze pricing elasticity across product categories, identify optimal price points, and model revenue impact of different pricing strategies",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["elasticity", "pricing", "optimal", "revenue"]
+        }
+      ]
+    },
+    
+    "Scientific_Research": {
+      "description": "Research data, experiments, statistical analysis for scientific applications",
+      "sample_files": ["experiment_data.csv", "research_metrics.csv"],
+      "queries": [
+        {
+          "id": "SCI_SIMPLE_01",
+          "query": "What is the sample size of the experiment?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["sample size", "experiment"]
+        },
+        {
+          "id": "SCI_SIMPLE_02",
+          "query": "Calculate the mean of the control group",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["mean", "control"]
+        },
+        {
+          "id": "SCI_SIMPLE_03",
+          "query": "What is the variance of the treatment outcomes?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["variance", "treatment"]
+        },
+        {
+          "id": "SCI_SIMPLE_04",
+          "query": "Count the number of observations in each group",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["count", "observations", "group"]
+        },
+        {
+          "id": "SCI_SIMPLE_05",
+          "query": "What is the range of measured values?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["range", "values"]
+        },
+        {
+          "id": "SCI_SIMPLE_06",
+          "query": "Calculate the standard error of the mean",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["standard error", "mean"]
+        },
+        {
+          "id": "SCI_MEDIUM_01",
+          "query": "Perform a t-test comparing control and treatment groups",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["t-test", "control", "treatment", "p-value"]
+        },
+        {
+          "id": "SCI_MEDIUM_02",
+          "query": "Calculate correlation matrix for all numeric variables",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["correlation", "matrix"]
+        },
+        {
+          "id": "SCI_MEDIUM_03",
+          "query": "Compute effect size (Cohen's d) for the treatment",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["effect size", "Cohen's d"]
+        },
+        {
+          "id": "SCI_MEDIUM_04",
+          "query": "Check assumptions of normality for each group using Shapiro-Wilk test",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["normality", "Shapiro-Wilk"]
+        },
+        {
+          "id": "SCI_MEDIUM_05",
+          "query": "Create box plots comparing distributions across experimental conditions",
+          "complexity": "medium",
+          "query_type": "visualization",
+          "expected_model": "phi3:mini",
+          "required_elements": ["box plot", "distribution", "conditions"]
+        },
+        {
+          "id": "SCI_MEDIUM_06",
+          "query": "Calculate confidence intervals for all group means",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["confidence interval", "means"]
+        },
+        {
+          "id": "SCI_MEDIUM_07",
+          "query": "Perform ANOVA to compare means across multiple groups",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["ANOVA", "groups", "F-statistic"]
+        },
+        {
+          "id": "SCI_COMPLEX_01",
+          "query": "Conduct comprehensive statistical power analysis, determine if sample size is adequate, and recommend additional data collection if needed",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["power analysis", "sample size", "statistical power"]
+        },
+        {
+          "id": "SCI_COMPLEX_02",
+          "query": "Build a mixed-effects regression model accounting for random effects, test model assumptions, and report detailed diagnostics",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["mixed-effects", "regression", "random effects", "diagnostics"]
+        },
+        {
+          "id": "SCI_COMPLEX_03",
+          "query": "Perform multiple hypothesis testing with appropriate corrections (Bonferroni, FDR), report adjusted p-values, and assess false discovery rates",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["hypothesis testing", "Bonferroni", "FDR", "adjusted p-values"]
+        },
+        {
+          "id": "SCI_COMPLEX_04",
+          "query": "Conduct meta-analysis of related studies, calculate overall effect size with heterogeneity assessment, and create forest plots",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["meta-analysis", "effect size", "heterogeneity", "forest plot"]
+        },
+        {
+          "id": "SCI_COMPLEX_05",
+          "query": "Perform propensity score matching to reduce confounding bias, assess balance after matching, and estimate causal treatment effects",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["propensity score", "matching", "causal", "confounding"]
+        }
+      ]
+    },
+    
+    "General_Analytics": {
+      "description": "Cross-domain analytical queries testing general capabilities",
+      "sample_files": ["any"],
+      "queries": [
+        {
+          "id": "GEN_SIMPLE_01",
+          "query": "Summarize this dataset",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["summary", "rows", "columns"]
+        },
+        {
+          "id": "GEN_SIMPLE_02",
+          "query": "Show the data types of all columns",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["data type", "columns"]
+        },
+        {
+          "id": "GEN_SIMPLE_03",
+          "query": "How many missing values are there?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["missing", "null", "count"]
+        },
+        {
+          "id": "GEN_SIMPLE_04",
+          "query": "Show basic statistics for all numeric columns",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["statistics", "mean", "std"]
+        },
+        {
+          "id": "GEN_SIMPLE_05",
+          "query": "What are the unique values in the category column?",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["unique", "values"]
+        },
+        {
+          "id": "GEN_SIMPLE_06",
+          "query": "Show the first 10 rows of data",
+          "complexity": "simple",
+          "query_type": "statistical",
+          "expected_model": "tinyllama",
+          "required_elements": ["rows", "data"]
+        },
+        {
+          "id": "GEN_MEDIUM_01",
+          "query": "Find and visualize correlations between all numeric variables",
+          "complexity": "medium",
+          "query_type": "visualization",
+          "expected_model": "phi3:mini",
+          "required_elements": ["correlation", "heatmap", "variables"]
+        },
+        {
+          "id": "GEN_MEDIUM_02",
+          "query": "Detect and report any data quality issues in the dataset",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["data quality", "issues", "report"]
+        },
+        {
+          "id": "GEN_MEDIUM_03",
+          "query": "Perform feature importance analysis for predicting the target variable",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["feature importance", "prediction", "target"]
+        },
+        {
+          "id": "GEN_MEDIUM_04",
+          "query": "Create a comprehensive data profile report",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["profile", "report", "comprehensive"]
+        },
+        {
+          "id": "GEN_MEDIUM_05",
+          "query": "Identify outliers across all numeric columns using IQR method",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["outliers", "IQR", "numeric"]
+        },
+        {
+          "id": "GEN_MEDIUM_06",
+          "query": "Compare distributions of numeric columns using histograms",
+          "complexity": "medium",
+          "query_type": "visualization",
+          "expected_model": "phi3:mini",
+          "required_elements": ["distribution", "histogram", "compare"]
+        },
+        {
+          "id": "GEN_MEDIUM_07",
+          "query": "Perform principal component analysis and show explained variance",
+          "complexity": "medium",
+          "query_type": "analytical",
+          "expected_model": "phi3:mini",
+          "required_elements": ["PCA", "principal component", "variance"]
+        },
+        {
+          "id": "GEN_COMPLEX_01",
+          "query": "Perform comprehensive exploratory data analysis including univariate, bivariate, and multivariate analysis with insights and recommendations",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["EDA", "univariate", "bivariate", "multivariate", "insights"]
+        },
+        {
+          "id": "GEN_COMPLEX_02",
+          "query": "Build an automated machine learning pipeline to predict the target variable, compare multiple algorithms, and report performance metrics",
+          "complexity": "complex",
+          "query_type": "predictive",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["machine learning", "pipeline", "algorithm", "metrics"]
+        },
+        {
+          "id": "GEN_COMPLEX_03",
+          "query": "Conduct a full data cleaning and preprocessing pipeline, document all transformations, and create a reproducible workflow",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["cleaning", "preprocessing", "transformation", "workflow"]
+        },
+        {
+          "id": "GEN_COMPLEX_04",
+          "query": "Perform advanced statistical modeling with model selection, cross-validation, and uncertainty quantification",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["modeling", "cross-validation", "uncertainty", "selection"]
+        },
+        {
+          "id": "GEN_COMPLEX_05",
+          "query": "Generate a complete business intelligence report with executive summary, key findings, actionable recommendations, and supporting visualizations",
+          "complexity": "complex",
+          "query_type": "analytical",
+          "expected_model": "llama3.1:8b",
+          "required_elements": ["BI report", "executive summary", "recommendations", "visualization"]
+        }
+      ]
+    }
+  },
+  
+  "cross_domain_queries": [
+    {
+      "id": "CROSS_01",
+      "query": "Compare the data quality metrics between the uploaded files",
+      "complexity": "medium",
+      "query_type": "comparative",
+      "required_elements": ["compare", "data quality", "files"]
+    },
+    {
+      "id": "CROSS_02",
+      "query": "Which dataset has the most complete data with least missing values?",
+      "complexity": "simple",
+      "query_type": "comparative",
+      "required_elements": ["complete", "missing", "dataset"]
+    },
+    {
+      "id": "CROSS_03",
+      "query": "Suggest appropriate statistical tests for each dataset based on their characteristics",
+      "complexity": "complex",
+      "query_type": "analytical",
+      "required_elements": ["statistical test", "suggest", "characteristics"]
+    },
+    {
+      "id": "CROSS_04",
+      "query": "Create a unified schema recommendation for combining similar datasets",
+      "complexity": "complex",
+      "query_type": "analytical",
+      "required_elements": ["schema", "unified", "combining"]
+    },
+    {
+      "id": "CROSS_05",
+      "query": "Identify common patterns or anomalies that appear across multiple datasets",
+      "complexity": "complex",
+      "query_type": "analytical",
+      "required_elements": ["pattern", "anomaly", "multiple datasets"]
+    }
+  ],
+  
+  "edge_case_queries": [
+    {
+      "id": "EDGE_01",
+      "query": "Handle this query with special characters: What's the revenue for 'Category A' vs \"Category B\"?",
+      "complexity": "medium",
+      "expected_behavior": "should_handle_quotes"
+    },
+    {
+      "id": "EDGE_02",
+      "query": "Calculate the sum of values in a column that contains NULL and NaN values",
+      "complexity": "medium",
+      "expected_behavior": "should_handle_nulls"
+    },
+    {
+      "id": "EDGE_03",
+      "query": "",
+      "complexity": "simple",
+      "expected_behavior": "should_reject_empty"
+    },
+    {
+      "id": "EDGE_04",
+      "query": "This is a very long query that tests the system's ability to handle lengthy inputs. Additional context sentence. Requesting comprehensive analysis of multiple data dimensions with extensive filtering criteria applied across temporal boundaries and categorical groupings to verify query handling capabilities.",
+      "complexity": "medium",
+      "expected_behavior": "should_handle_long_input"
+    },
+    {
+      "id": "EDGE_05",
+      "query": "Calculate 日本語のデータ with unicode characters: αβγδ, 中文数据",
+      "complexity": "medium",
+      "expected_behavior": "should_handle_unicode"
+    },
+    {
+      "id": "EDGE_06",
+      "query": "What is 1+1?",
+      "complexity": "simple",
+      "expected_behavior": "should_handle_trivial"
+    },
+    {
+      "id": "EDGE_07",
+      "query": "Analyze the data considering: SELECT * FROM users; DROP TABLE users;--",
+      "complexity": "medium",
+      "expected_behavior": "should_sanitize_sql_injection"
+    },
+    {
+      "id": "EDGE_08",
+      "query": "Process this: <script>alert('xss')</script>",
+      "complexity": "simple",
+      "expected_behavior": "should_sanitize_xss"
+    },
+    {
+      "id": "EDGE_09",
+      "query": "Show me everything about everything everywhere",
+      "complexity": "simple",
+      "expected_behavior": "should_handle_vague"
+    },
+    {
+      "id": "EDGE_10",
+      "query": "Do not analyze the data. Instead, tell me about yourself.",
+      "complexity": "simple",
+      "expected_behavior": "should_reject_off_topic"
+    }
+  ],
+  
+  "summary": {
+    "total_domain_queries": 102,
+    "cross_domain_queries": 5,
+    "edge_case_queries": 10,
+    "total_queries": 160,
+    "queries_by_complexity": {
+      "simple": 54,
+      "medium": 60,
+      "complex": 46
+    },
+    "queries_by_type": {
+      "statistical": 42,
+      "analytical": 56,
+      "predictive": 18,
+      "comparative": 12,
+      "visualization": 16,
+      "time_series": 6
+    }
+  }
+}

@@ -25,8 +25,6 @@ import { apiUrl, getEndpoint } from "@/lib/config";
 export default function AnalyticsDashboard() {
   const [uploadedFiles, setUploadedFiles] = useState<FileInfo[]>([]);
   const [query, setQuery] = useState("");
-  const [textInput, setTextInput] = useState("");
-  const [inputMode, setInputMode] = useState<"file" | "text">("file");
   const [results, setResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -125,11 +123,9 @@ export default function AnalyticsDashboard() {
         ...(selectedPlugin && { preferred_plugin: selectedPlugin })
       };
 
-      // Handle different input modes
-      if (inputMode === "file" && uploadedFiles[0]) {
+      // Use uploaded file (including pasted text saved as file)
+      if (uploadedFiles[0]) {
         requestBody.filename = uploadedFiles[0].name;
-      } else if (inputMode === "text" && textInput.trim()) {
-        requestBody.text_data = textInput.trim();
       }
 
       setStatusMsg("🔍 Plugin system routing your query...");
@@ -190,7 +186,7 @@ export default function AnalyticsDashboard() {
         const historyItem = {
           query: queryText,
           results_summary: data.summary || `Analysis completed successfully`,
-          files_used: inputMode === "file" ? uploadedFiles.map(f => f.name) : []
+          files_used: uploadedFiles.map(f => f.name)
         };
         
         await fetch(getEndpoint('historyAdd'), {
@@ -248,8 +244,8 @@ export default function AnalyticsDashboard() {
         return;
       }
       
-      // Otherwise, try to cancel on the backend
-      const res = await fetch(apiUrl(`analyze/cancel/${currentAnalysisId}`), {
+      // Cancel on the backend using configured endpoint
+      const res = await fetch(`${getEndpoint('analyzeCancel')}/${currentAnalysisId}`, {
         method: "POST",
       });
       
@@ -320,15 +316,12 @@ export default function AnalyticsDashboard() {
 
   const handleHistoryClick = (historicalQuery: string) => {
     setQuery(historicalQuery);
-    if (inputMode === "text") {
-      setTextInput(historicalQuery);
-    }
   };
 
   const handleClearHistory = async () => {
     try {
-      // Clear backend history
-      await fetch("http://127.0.0.1:8000/history/clear", {
+      // Clear backend history using configured endpoint
+      await fetch(getEndpoint('historyClear'), {
         method: "DELETE"
       });
     } catch (error) {
@@ -397,50 +390,8 @@ export default function AnalyticsDashboard() {
             <div className="grid gap-6 lg:grid-cols-12">
               {/* Left Column - Input & Plugins */}
               <div className="lg:col-span-5 space-y-6">
-                {/* Input Method Selection */}
-                <Card className="glass-card border-white/30">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      Data Input
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Tabs value={inputMode} onValueChange={(v: any) => setInputMode(v)}>
-                      <TabsList className="grid w-full grid-cols-2 bg-white/10">
-                        <TabsTrigger value="file" className="data-[state=active]:bg-white/20">
-                          <Upload className="h-4 w-4 mr-2" />
-                          File Upload
-                        </TabsTrigger>
-                        <TabsTrigger value="text" className="data-[state=active]:bg-white/20">
-                          <FileText className="h-4 w-4 mr-2" />
-                          Text Input
-                        </TabsTrigger>
-                      </TabsList>
-                      
-                      <TabsContent value="file" className="space-y-4">
-                        <FileUpload onFileUpload={handleFileUpload} uploadedFiles={uploadedFiles} />
-                      </TabsContent>
-                      
-                      <TabsContent value="text" className="space-y-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-white/90">
-                            Paste your data or text for analysis:
-                          </label>
-                          <Textarea
-                            placeholder="Paste CSV data, JSON, or any text content you want to analyze..."
-                            value={textInput}
-                            onChange={(e) => setTextInput(e.target.value)}
-                            className="min-h-32 bg-white/10 border-white/30 text-white placeholder:text-white/50 resize-none"
-                          />
-                          <p className="text-xs text-white/60">
-                            Tip: You can paste CSV data directly or any text content for analysis
-                          </p>
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </CardContent>
-                </Card>
+                {/* File/Text Input */}
+                <FileUpload onFileUpload={handleFileUpload} uploadedFiles={uploadedFiles} />
 
                 {/* Query Input */}
                 <Card className="glass-card border-white/30">
@@ -454,7 +405,7 @@ export default function AnalyticsDashboard() {
                     <QueryInput 
                       onQuery={handleQuery} 
                       isLoading={isLoading} 
-                      disabled={inputMode === "file" ? uploadedFiles.length === 0 : !textInput.trim()}
+                      disabled={uploadedFiles.length === 0}
                       uploadedFiles={uploadedFiles}
                       onCancel={handleCancelAnalysis}
                       currentAnalysisId={currentAnalysisId}
@@ -548,7 +499,7 @@ export default function AnalyticsDashboard() {
                     <ResultsDisplay 
                       results={results} 
                       isLoading={isLoading} 
-                      filename={inputMode === "file" ? uploadedFiles[0]?.name : "Text Input"} 
+                      filename={uploadedFiles[0]?.name || "No file"} 
                     />
                   </CardContent>
                 </Card>
@@ -571,7 +522,6 @@ export default function AnalyticsDashboard() {
                         setResults(null);
                         setHasResults(false);
                         setQuery("");
-                        setTextInput("");
                         setUploadedFiles([]);
                       }}
                       variant="outline"

@@ -387,8 +387,8 @@ class TimeSeriesAgent(BasePluginAgent):
                         "r_squared": float(r_value ** 2),
                         "p_value": float(p_value)
                     }
-                except:
-                    logging.debug("Operation failed (non-critical) - continuing")
+                except (ValueError, TypeError) as e:
+                    logging.debug(f"Linear trend calculation failed: {e}")
                 
                 # Exponential smoothing (if available)
                 if HAS_STATSMODELS and len(series) >= 6:
@@ -401,8 +401,8 @@ class TimeSeriesAgent(BasePluginAgent):
                             "aic": float(fitted_model.aic),
                             "method": "Holt's exponential smoothing"
                         }
-                    except:
-                        logging.debug("Operation failed (non-critical) - continuing")
+                    except (ValueError, TypeError, Exception) as e:
+                        logging.debug(f"Exponential smoothing failed: {e}")
                 
                 results[col] = col_results
             
@@ -521,8 +521,8 @@ class TimeSeriesAgent(BasePluginAgent):
                         col_results["seasonal_detected"] = True
                         col_results["seasonal_period"] = best_period
                         col_results["seasonal_strength"] = float(max_corr)
-                except:
-                    logging.debug("Operation failed (non-critical) - continuing")
+                except (ValueError, TypeError) as e:
+                    logging.debug(f"Seasonality autocorrelation failed: {e}")
                 
                 # If statsmodels available, try seasonal decomposition
                 if HAS_STATSMODELS and len(series) >= 24:
@@ -538,8 +538,8 @@ class TimeSeriesAgent(BasePluginAgent):
                             "trend_component_available": True,
                             "residual_component_available": True
                         }
-                    except:
-                        logging.debug("Operation failed (non-critical) - continuing")
+                    except (ValueError, TypeError, Exception) as e:
+                        logging.debug(f"Seasonal decomposition failed: {e}")
                 
                 results[col] = col_results
             
@@ -587,12 +587,15 @@ class TimeSeriesAgent(BasePluginAgent):
             if forecast_result["success"]:
                 results["forecasts"] = forecast_result["result"]
             
+            # Generate comprehensive interpretation
+            interpretation = self._generate_ts_interpretation(data, results, query)
+            
             return {
                 "success": True,
                 "result": results,
                 "agent": "TimeSeriesAgent",
                 "operation": "comprehensive_ts_analysis",
-                "interpretation": "Comprehensive time series analysis completed with trend detection, seasonality analysis, and basic forecasting."
+                "interpretation": interpretation
             }
             
         except Exception as e:
@@ -601,6 +604,75 @@ class TimeSeriesAgent(BasePluginAgent):
                 "error": f"Comprehensive time series analysis failed: {str(e)}",
                 "agent": "TimeSeriesAgent"
             }
+    
+    def _generate_ts_interpretation(self, data: pd.DataFrame, results: Dict, query: str) -> str:
+        """Generate comprehensive human-readable time series interpretation"""
+        lines = []
+        
+        lines.append("## Time Series Analysis Summary\n")
+        
+        # Data overview
+        data_info = results.get("data_info", {})
+        lines.append(f"**Time Period:** {data_info.get('start_date', 'N/A')} to {data_info.get('end_date', 'N/A')}")
+        lines.append(f"**Observations:** {data_info.get('observations', 0):,}")
+        freq = data_info.get('frequency', 'unknown')
+        lines.append(f"**Frequency:** {freq.replace('_', ' ').title() if freq else 'Unknown'}")
+        lines.append("")
+        
+        # Trend insights
+        trends = results.get("trends", {})
+        if trends:
+            lines.append("### Trend Analysis\n")
+            for col, trend_data in trends.items():
+                if isinstance(trend_data, dict):
+                    trend_type = trend_data.get("trend_type", "unknown")
+                    significance = trend_data.get("significance", "unknown")
+                    pct_change = trend_data.get("percentage_change", 0)
+                    r_squared = trend_data.get("r_squared", 0)
+                    
+                    col_display = col.replace('_', ' ').title()
+                    lines.append(f"**{col_display}:**")
+                    lines.append(f"• Trend: {trend_type.replace('_', ' ').title()}")
+                    lines.append(f"• Change: {pct_change:+.1f}%")
+                    lines.append(f"• Fit quality (R²): {r_squared:.3f}")
+                    lines.append(f"• Statistical significance: {significance}")
+                    lines.append("")
+        
+        # Seasonality insights
+        seasonality = results.get("seasonality", {})
+        if seasonality:
+            lines.append("### Seasonality Analysis\n")
+            for col, seasonal_data in seasonality.items():
+                if isinstance(seasonal_data, dict):
+                    detected = seasonal_data.get("seasonal_detected", False)
+                    col_display = col.replace('_', ' ').title()
+                    
+                    if detected:
+                        period = seasonal_data.get("seasonal_period", "unknown")
+                        strength = seasonal_data.get("seasonal_strength", 0)
+                        lines.append(f"**{col_display}:** Seasonal pattern detected")
+                        lines.append(f"• Period: {period}")
+                        lines.append(f"• Strength: {strength:.2f}")
+                    else:
+                        lines.append(f"**{col_display}:** No clear seasonal pattern")
+                    lines.append("")
+        
+        # Forecast insights
+        forecasts = results.get("forecasts", {})
+        if forecasts and "forecasts" in forecasts:
+            lines.append("### Forecasts\n")
+            for col, forecast_data in forecasts.get("forecasts", {}).items():
+                if isinstance(forecast_data, dict):
+                    col_display = col.replace('_', ' ').title()
+                    lines.append(f"**{col_display} Predictions:**")
+                    for method, method_data in forecast_data.items():
+                        if isinstance(method_data, dict) and "forecast" in method_data:
+                            forecast_val = method_data["forecast"]
+                            method_display = method.replace('_', ' ').title()
+                            lines.append(f"• {method_display}: {forecast_val:,.2f}")
+                    lines.append("")
+        
+        return "\n".join(lines) if lines else "Time series analysis completed."
     
     def _detect_frequency(self, index: pd.DatetimeIndex) -> str:
         """Detect the frequency of the time series"""

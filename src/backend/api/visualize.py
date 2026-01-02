@@ -257,26 +257,9 @@ async def generate_visualization(request: VisualizationRequest):
         logging.error(f"Visualization generation failed: {e}")
         raise HTTPException(status_code=500, detail=f"Visualization failed: {str(e)}")
 
-@router.post("/execute")
-async def execute_chart_code(request: ChartExecutionRequest):
-    """
-    Execute custom Plotly code with provided data
-    """
-    logging.info("[VISUALIZE] Executing custom Plotly code")
-    
-    try:
-        # Convert data dict to DataFrame
-        df = pd.DataFrame(request.data)
-        
-        # Execute the Plotly code
-        result = execute_plotly_code(request.plotly_code, df)
-        
-        logging.info(f"[VISUALIZE] Code execution result: {result.get('success', False)}")
-        return result
-        
-    except Exception as e:
-        logging.error(f"Chart code execution failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Code execution failed: {str(e)}")
+# NOTE: /execute endpoint removed (Dec 2025)
+# Custom Plotly code execution is now handled by the main POST / endpoint
+# or via the sandbox in /api/viz/edit for modifications
 
 def preprocess_visualization_code(code: str, library: str = "plotly") -> str:
     """
@@ -514,7 +497,7 @@ NOW PROCESS THIS QUESTION!"""
                     user_intent_type = 'line'
             
             # Share/Proportion -> PIE
-            elif any(word in question_lower for word in ['share', 'proportion', 'percentage', 'breakdown of']):
+            elif any(word in question_lower for word in ['share', 'proportion', 'percentage', 'breakdown of', 'diversification', 'composition', 'split', 'allocation']):
                 user_intent_type = 'pie'
             
             # STEP 2: Find matching suggestion or use intent

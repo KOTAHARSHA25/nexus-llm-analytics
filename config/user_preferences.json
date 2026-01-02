@@ -8,12 +8,12 @@
   "preferred_performance": "balanced",
   "enable_intelligent_routing": false,
   "first_time_setup_complete": true,
-  "last_updated": "2025-12-26T17:24:52.147361",
+  "last_updated": "2025-12-28T10:06:58.790780",
   "model_test_results": {
     "phi3:mini": {
       "success": true,
-      "timestamp": "2025-12-19T20:24:09.363515",
-      "response_time": 6.186197996139526,
+      "timestamp": "2025-12-28T10:03:38.027071",
+      "response_time": 19.286496877670288,
       "error": null
     },
     "tinyllama": {
@@ -30,20 +30,20 @@
     },
     "llama3.1:8b": {
       "success": true,
-      "timestamp": "2025-12-19T20:28:54.650701",
-      "response_time": 10.164336442947388,
+      "timestamp": "2025-12-28T10:06:58.790766",
+      "response_time": 9.656198740005493,
       "error": null
     },
     "nomic-embed-text:latest": {
-      "success": false,
-      "timestamp": "2025-12-19T20:28:34.770485",
-      "response_time": 2.059377670288086,
-      "error": "Service temporarily unavailable: Service error: 400 Client Error: Bad Request for url: http://localhost:11434/api/generate"
+      "success": true,
+      "timestamp": "2025-12-28T10:06:28.638315",
+      "response_time": 2.722456216812134,
+      "error": null
     },
     "tinyllama:latest": {
       "success": true,
-      "timestamp": "2025-12-19T20:27:08.594875",
-      "response_time": 4.05894136428833,
+      "timestamp": "2025-12-28T10:06:45.240073",
+      "response_time": 13.967378377914429,
       "error": null
     }
   }

@@ -698,12 +698,15 @@ class MLInsightsAgent(BasePluginAgent):
                     "strong_correlations": self._find_strong_correlations(correlation_matrix)
                 }
             
+            # Generate comprehensive interpretation
+            interpretation = self._generate_ml_interpretation(data, results, query)
+            
             return {
                 "success": True,
                 "result": results,
                 "agent": "MLInsightsAgent",
                 "operation": "comprehensive_ml_analysis",
-                "interpretation": "Comprehensive ML analysis completed with clustering, anomaly detection, and dimensionality reduction."
+                "interpretation": interpretation
             }
             
         except Exception as e:
@@ -712,6 +715,92 @@ class MLInsightsAgent(BasePluginAgent):
                 "error": f"Comprehensive ML analysis failed: {str(e)}",
                 "agent": "MLInsightsAgent"
             }
+    
+    def _generate_ml_interpretation(self, data: pd.DataFrame, results: Dict, query: str) -> str:
+        """Generate comprehensive human-readable ML analysis interpretation"""
+        lines = []
+        
+        lines.append("## Machine Learning Analysis Summary\n")
+        
+        # Data overview
+        overview = results.get("data_overview", {})
+        shape = overview.get("shape", (0, 0))
+        lines.append(f"**Dataset:** {shape[0]:,} records, {shape[1]} columns")
+        lines.append(f"• Numeric features: {overview.get('numeric_columns', 0)}")
+        lines.append(f"• Categorical features: {overview.get('categorical_columns', 0)}")
+        if overview.get("missing_values", 0) > 0:
+            lines.append(f"• Missing values: {overview.get('missing_values', 0):,}")
+        lines.append("")
+        
+        # Clustering insights
+        clustering = results.get("clustering", {})
+        if clustering:
+            lines.append("### Clustering Analysis\n")
+            if "kmeans" in clustering:
+                kmeans = clustering["kmeans"]
+                n_clusters = kmeans.get("optimal_clusters", 0)
+                silhouette = kmeans.get("silhouette_score", 0)
+                lines.append(f"**K-Means Clustering:** Identified {n_clusters} distinct groups")
+                lines.append(f"• Cluster quality (silhouette score): {silhouette:.3f}")
+                
+                cluster_analysis = kmeans.get("cluster_analysis", {})
+                for cluster_id, cluster_data in list(cluster_analysis.items())[:3]:
+                    size = cluster_data.get("size", 0)
+                    pct = cluster_data.get("percentage", 0)
+                    lines.append(f"• {cluster_id.replace('_', ' ').title()}: {size:,} records ({pct:.1f}%)")
+                lines.append("")
+            
+            if "dbscan" in clustering:
+                dbscan = clustering["dbscan"]
+                n_clusters = dbscan.get("n_clusters", 0)
+                noise_pct = dbscan.get("noise_percentage", 0)
+                lines.append(f"**DBSCAN Clustering:** Found {n_clusters} natural clusters")
+                lines.append(f"• Noise points: {noise_pct:.1f}%")
+                lines.append("")
+        
+        # Anomaly insights
+        anomalies = results.get("anomalies", {})
+        if anomalies:
+            lines.append("### Anomaly Detection\n")
+            if "isolation_forest" in anomalies:
+                iso = anomalies["isolation_forest"]
+                n_anomalies = iso.get("n_anomalies", 0)
+                pct = iso.get("anomaly_percentage", 0)
+                lines.append(f"**Detected Anomalies:** {n_anomalies:,} records ({pct:.1f}%)")
+                if pct > 5:
+                    lines.append("• ⚠️ Higher than expected anomaly rate - investigate data quality")
+                elif pct < 1:
+                    lines.append("• ✅ Low anomaly rate - data appears consistent")
+                lines.append("")
+        
+        # Dimensionality reduction
+        dim_reduction = results.get("dimensionality_reduction", {})
+        if dim_reduction and "pca" in dim_reduction:
+            pca = dim_reduction["pca"]
+            lines.append("### Dimensionality Analysis\n")
+            components_95 = pca.get("components_for_95_percent", 0)
+            total_variance = pca.get("total_variance_explained", 0)
+            original_dims = overview.get("numeric_columns", 0)
+            lines.append(f"**PCA Results:** {components_95} components capture 95% of variance")
+            lines.append(f"• Dimensionality reduction: {original_dims} → {components_95} features")
+            lines.append(f"• Total variance explained: {total_variance:.1%}")
+            lines.append("")
+        
+        # Correlations
+        correlations = results.get("feature_correlations", {})
+        strong_corrs = correlations.get("strong_correlations", [])
+        if strong_corrs:
+            lines.append("### Key Relationships\n")
+            lines.append("**Strong Correlations Found:**")
+            for corr in strong_corrs[:5]:
+                col1 = corr.get("column1", "")
+                col2 = corr.get("column2", "")
+                r = corr.get("correlation", 0)
+                direction = "positive" if r > 0 else "negative"
+                lines.append(f"• {col1} ↔ {col2}: {abs(r):.3f} ({direction})")
+            lines.append("")
+        
+        return "\n".join(lines) if lines else "ML analysis completed."
     
     def _find_strong_correlations(self, corr_matrix: pd.DataFrame, threshold: float = 0.7) -> List[Dict]:
         """Find strong correlations in the correlation matrix"""

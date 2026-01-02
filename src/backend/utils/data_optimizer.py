@@ -168,8 +168,8 @@ class DataOptimizer:
                         df[col] = pd.to_numeric(df[col], errors='coerce')
                         logging.info(f"✓ Converted currency column: '{col}' → numeric")
                         continue
-                    except:
-                        pass
+                    except (ValueError, TypeError, AttributeError) as e:
+                        logging.debug(f"Currency conversion failed for {col}: {e}")
                 
                 # Check if percentage format (contains % and numbers)
                 if sample_str.str.contains(r'%', regex=True).any():
@@ -180,8 +180,8 @@ class DataOptimizer:
                         df[col] = pd.to_numeric(df[col], errors='coerce')
                         logging.info(f"✓ Converted percentage column: '{col}' → numeric (kept as %)")
                         continue
-                    except:
-                        pass
+                    except (ValueError, TypeError, AttributeError) as e:
+                        logging.debug(f"Percentage conversion failed for {col}: {e}")
                 
                 # Check if date format (already handled by _detect_and_convert_dates, but double-check)
                 if sample_str.str.contains(r'-|/|\d{4}', regex=True).any():
@@ -193,8 +193,8 @@ class DataOptimizer:
                             df[col] = converted
                             logging.info(f"✓ Converted date column: '{col}' → datetime")
                             continue
-                    except:
-                        pass
+                    except (ValueError, TypeError, pd.errors.ParserError) as e:
+                        logging.debug(f"Date conversion failed for {col}: {e}")
         
         return df
     
@@ -380,11 +380,17 @@ class DataOptimizer:
                 # Check if it looks like a date
                 sample_str = str(sample)
                 if any(indicator in sample_str for indicator in ['-', '/', 'T', ':', 'AM', 'PM', 'Z']):
-                    # Try to parse as datetime
-                    df[col] = pd.to_datetime(df[col], errors='ignore', infer_datetime_format=True)
-            except:
+                    # Try to parse as datetime (pandas 2.0+ handles format inference automatically)
+                    try:
+                        converted = pd.to_datetime(df[col], errors='coerce')
+                        # Only apply if majority converted successfully
+                        if converted.notna().sum() / max(len(df), 1) > 0.5:
+                            df[col] = converted
+                    except Exception:
+                        pass  # Keep original if conversion fails
+            except (ValueError, TypeError, IndexError) as e:
                 # If conversion fails, keep original
-                pass
+                logging.debug(f"Date inference failed for {col}: {e}")
         
         return df
     
@@ -516,8 +522,8 @@ class DataOptimizer:
                 preview_parts.append(f"   • AVERAGE (mean): {avg:,.2f}" if isinstance(avg, float) else f"   • AVERAGE (mean): {avg:,}")
                 preview_parts.append(f"   • MINIMUM (smallest single value): {min_val:,.2f}" if isinstance(min_val, float) else f"   • MINIMUM (smallest single value): {min_val:,}")
                 preview_parts.append(f"   • MAXIMUM (largest single value): {max_val:,.2f}" if isinstance(max_val, float) else f"   • MAXIMUM (largest single value): {max_val:,}")
-            except:
-                pass
+            except (ValueError, TypeError) as e:
+                logging.debug(f"Stats generation failed: {e}")
         preview_parts.append(f"")
         
         # DYNAMIC filtering: Identify meaningful numeric columns for detailed stats
@@ -531,8 +537,8 @@ class DataOptimizer:
                 unique_ratio = df[col].nunique() / len(df)
                 if unique_ratio > 0.95:  # 95%+ unique = likely an ID
                     continue
-            except:
-                pass
+            except (ValueError, TypeError, ZeroDivisionError):
+                pass  # Skip on error
             
             # Skip year-only columns (years 1900-2100)
             try:
@@ -540,8 +546,8 @@ class DataOptimizer:
                 col_max = df[col].max()
                 if col_min >= 1900 and col_max <= 2100 and df[col].nunique() <= 200:
                     continue  # Likely year column
-            except:
-                pass
+            except (ValueError, TypeError):
+                pass  # Skip year check on error
             
             meaningful_numeric_cols.append(col)
         
@@ -559,8 +565,8 @@ class DataOptimizer:
                 preview_parts.append(f"   • Minimum: {min_val:,.2f}, Maximum: {max_val:,.2f}" if isinstance(min_val, float) else f"   • Minimum: {min_val}, Maximum: {max_val}")
                 preview_parts.append(f"   • Count: {count:,} values")
                 preview_parts.append(f"")
-            except:
-                pass
+            except (ValueError, TypeError) as e:
+                logging.debug(f"Column stats failed for {col}: {e}")
         
         # Categorical aggregations (counts) - DYNAMIC detection
         categorical_cols = df.select_dtypes(include=['object']).columns
@@ -597,8 +603,8 @@ class DataOptimizer:
                         pct = (count / len(df)) * 100
                         preview_parts.append(f"   • {val}: {count:,} occurrences ({pct:.1f}%)")
                     preview_parts.append(f"")
-            except:
-                pass
+            except (ValueError, TypeError) as e:
+                logging.debug(f"Category stats failed for {col}: {e}")
         
         # GROUPED AGGREGATIONS - DYNAMIC DETECTION (no hardcoded keywords)
         # Detect potential grouping columns based on cardinality and data patterns
@@ -684,8 +690,8 @@ class DataOptimizer:
                                 for rank, (entity, value) in enumerate(top_performers.items(), 1):
                                     preview_parts.append(f"   {rank}. {entity}: {value:,.2f}" if isinstance(value, float) else f"   {rank}. {entity}: {value:,}")
                                 preview_parts.append(f"")
-                        except:
-                            pass
+                        except (ValueError, TypeError, KeyError) as e:
+                            logging.debug(f"Top-N ranking failed: {e}")
                 
                 preview_parts.append(f"")
         
@@ -723,10 +729,10 @@ class DataOptimizer:
                                 preview_parts.append(f"    - Total: {total:,.2f}" if isinstance(total, float) else f"    - Total: {total:,}")
                                 preview_parts.append(f"    - Average: {avg:,.2f}" if isinstance(avg, float) else f"    - Average: {avg:,}")
                                 preview_parts.append(f"    - Count: {count:,} records")
-                        except:
-                            pass
-                except:
-                    pass
+                        except (ValueError, TypeError, KeyError) as e:
+                            logging.debug(f"Grouped stats failed: {e}")
+                except (ValueError, TypeError, KeyError) as e:
+                    logging.debug(f"Grouping failed for {group_col}: {e}")
             
             # ADD QUICK RANKINGS for "highest/lowest by X" questions
             preview_parts.append(f"\n🏆 QUICK RANKINGS (for 'highest', 'lowest', 'best', 'worst' questions):")
@@ -743,8 +749,8 @@ class DataOptimizer:
                             lowest_val = grouped_totals.iloc[-1]
                             preview_parts.append(f"• HIGHEST {mc.upper()} by {group_col.upper()}: {highest_group} = {highest_val:,.0f}")
                             preview_parts.append(f"• LOWEST {mc.upper()} by {group_col.upper()}: {lowest_group} = {lowest_val:,.0f}")
-                        except:
-                            pass
+                        except (ValueError, TypeError, KeyError, IndexError) as e:
+                            logging.debug(f"Quick ranking failed: {e}")
             preview_parts.append(f"")
         
         preview_parts.append(f"{'='*70}")

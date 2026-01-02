@@ -1,5 +1,6 @@
 # RAG Agent Plugin
 # Consolidated Document Analysis Plugin replacing RAGHandler
+# Phase 3+: Now integrates EnhancedRAGPipeline for research-grade features
 
 import sys
 import logging
@@ -18,17 +19,30 @@ from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapa
 from backend.agents.model_initializer import get_model_initializer
 from backend.core.chromadb_client import ChromaDBClient
 
+# Phase 3+: Import enhanced RAG components for better retrieval
+try:
+    from backend.rag import QueryExpander, ConfidenceScorer, CitationTracker, RetrievedChunk
+    ENHANCED_RAG_AVAILABLE = True
+except ImportError:
+    ENHANCED_RAG_AVAILABLE = False
+    logger.warning("Enhanced RAG components not available, using basic RAG")
+
 class RagAgent(BasePluginAgent):
     """
     RAG (Retrieval-Augmented Generation) Agent Plugin.
     Handles unstructured documents: PDF, DOCX, TXT, PPTX.
+    
+    Phase 3+ Enhanced Features:
+    - Query expansion for better recall
+    - Confidence scoring for answer quality
+    - Citation tracking for source attribution
     """
     
     def get_metadata(self) -> AgentMetadata:
         return AgentMetadata(
             name="RagAgent",
-            version="1.0.0",
-            description="Analyzes unstructured documents (PDF, Docs) using RAG techniques",
+            version="2.0.0",  # Bumped for enhanced RAG integration
+            description="Analyzes unstructured documents (PDF, Docs) using enhanced RAG techniques with citations",
             author="Nexus Team",
             capabilities=[AgentCapability.DOCUMENT_PROCESSING, AgentCapability.DATA_ANALYSIS],
             file_types=[".pdf", ".docx", ".txt", ".pptx", ".rtf"],
@@ -38,6 +52,15 @@ class RagAgent(BasePluginAgent):
     
     def initialize(self, **kwargs) -> bool:
         self.initializer = get_model_initializer()
+        # Phase 3+: Initialize enhanced components if available
+        if ENHANCED_RAG_AVAILABLE:
+            self._query_expander = QueryExpander()
+            self._confidence_scorer = ConfidenceScorer()
+            self._citation_tracker = CitationTracker()
+        else:
+            self._query_expander = None
+            self._confidence_scorer = None
+            self._citation_tracker = None
         return True
     
     def can_handle(self, query: str, file_type: Optional[str] = None, **kwargs) -> float:
@@ -53,7 +76,7 @@ class RagAgent(BasePluginAgent):
         return 0.0
 
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
-        """Execute RAG analysis using Vector Search"""
+        """Execute RAG analysis using Vector Search with enhanced features"""
         try:
             self.initializer.ensure_initialized()
             
@@ -63,18 +86,48 @@ class RagAgent(BasePluginAgent):
             # Initialize ChromaDB Client
             chroma_client = ChromaDBClient()
             
+            # Phase 3+: Expand query for better recall
+            queries_to_search = [query]
+            if self._query_expander:
+                queries_to_search = self._query_expander.expand(query, max_expansions=3)
+                logger.info(f"Query expanded to {len(queries_to_search)} variants")
+            
             # 1. Attempt Vector Search (Primary Path)
             logger.info(f"Querying ChromaDB for: {query}")
-            search_results = chroma_client.query(query_text=query, n_results=5)
+            
+            all_chunks = []
+            for q in queries_to_search:
+                search_results = chroma_client.query(query_text=q, n_results=5)
+                if search_results and search_results['documents'] and search_results['documents'][0]:
+                    for i, doc in enumerate(search_results['documents'][0]):
+                        if ENHANCED_RAG_AVAILABLE:
+                            chunk = RetrievedChunk(
+                                chunk_id=f"chunk_{i}",
+                                content=doc,
+                                score=1.0 - (search_results.get('distances', [[]])[0][i] if search_results.get('distances') else 0),
+                                metadata=search_results['metadatas'][0][i] if search_results.get('metadatas') else {},
+                                source=filename or "unknown"
+                            )
+                            all_chunks.append(chunk)
+                        else:
+                            all_chunks.append(doc)
             
             retrieved_context = ""
             source_mode = "vector_db"
+            citations = []
+            confidence = 0.0
             
-            if search_results and search_results['documents'] and search_results['documents'][0]:
+            if all_chunks:
                 # Found documents in vector DB
-                docs = search_results['documents'][0]
-                retrieved_context = "\n\n---\n\n".join(docs)
-                logger.info(f"Retrieved {len(docs)} chunks from ChromaDB")
+                if ENHANCED_RAG_AVAILABLE and isinstance(all_chunks[0], RetrievedChunk):
+                    # Use enhanced chunks with citation tracking
+                    retrieved_context = "\n\n---\n\n".join([c.content for c in all_chunks[:5]])
+                    citations = self._citation_tracker.generate_citations(query, all_chunks[:5]) if self._citation_tracker else []
+                    confidence = self._confidence_scorer.score(query, all_chunks[:5]) if self._confidence_scorer else 0.5
+                else:
+                    retrieved_context = "\n\n---\n\n".join(all_chunks[:5])
+                    confidence = 0.5
+                logger.info(f"Retrieved {len(all_chunks)} chunks from ChromaDB (confidence: {confidence:.2f})")
             else:
                 # Fallback to direct file reading (Secondary Path)
                 logger.warning("No relevant docs found in ChromaDB. Falling back to direct file read.")
@@ -104,8 +157,13 @@ class RagAgent(BasePluginAgent):
                 "result": response,
                 "metadata": {
                     "agent": "RagAgent",
+                    "version": "2.0.0",
                     "source_mode": source_mode,
-                    "context_length": len(retrieved_context)
+                    "context_length": len(retrieved_context),
+                    "enhanced_rag": ENHANCED_RAG_AVAILABLE,
+                    "confidence": confidence,
+                    "citations": [c if isinstance(c, dict) else {"source": str(c)} for c in citations[:3]] if citations else [],
+                    "chunks_retrieved": len(all_chunks) if all_chunks else 0
                 }
             }
             

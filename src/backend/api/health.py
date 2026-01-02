@@ -4,10 +4,22 @@ import logging
 import time
 import psutil
 import os
+import socket
 
 # Health monitoring and system status endpoint
 
 router = APIRouter()
+
+def _get_local_ip() -> str:
+    """Get the local IP address for network access"""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        return local_ip
+    except Exception:
+        return "127.0.0.1"
 
 @router.get("/status")
 async def get_system_status() -> Dict[str, Any]:
@@ -85,6 +97,11 @@ async def get_system_status() -> Dict[str, Any]:
         return {
             "status": overall_health,
             "timestamp": time.time(),
+            "network": {
+                "local_ip": _get_local_ip(),
+                "backend_url": f"http://{_get_local_ip()}:8000",
+                "share_info": "Other devices on the same WiFi can use this URL"
+            },
             "system_resources": {
                 "memory": {
                     "total_gb": round(memory_info.total / (1024**3), 2),
@@ -120,6 +137,23 @@ async def get_system_status() -> Dict[str, Any]:
 async def health_check() -> Dict[str, str]:
     """Simple health check endpoint"""
     return {"status": "ok", "message": "Nexus LLM Analytics is running"}
+
+@router.get("/network-info")
+async def get_network_info() -> Dict[str, Any]:
+    """Get network information for sharing with other devices"""
+    local_ip = _get_local_ip()
+    return {
+        "local_ip": local_ip,
+        "backend_url": f"http://{local_ip}:8000",
+        "websocket_url": f"ws://{local_ip}:8000/ws",
+        "share_instructions": {
+            "step1": "Ensure both devices are on the same WiFi network",
+            "step2": f"On the other device, open Nexus LLM Analytics",
+            "step3": f"In Backend Connection settings, enter: http://{local_ip}:8000",
+            "step4": "Click 'Test' to verify connection, then 'Save'"
+        },
+        "firewall_note": "If connection fails, ensure port 8000 is allowed in your firewall"
+    }
 
 @router.get("/cache-info")
 async def get_cache_info() -> Dict[str, Any]:

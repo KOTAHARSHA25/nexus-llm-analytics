@@ -135,6 +135,18 @@ class EnhancedSandbox:
                 're': re,  # Regex is safe but could be used for ReDoS - TODO: add pattern validation
             })
             
+            # Try to add plotly for visualizations (if installed)
+            try:
+                import plotly.express as px
+                import plotly.graph_objects as go
+                safe_modules.update({
+                    'px': px,
+                    'go': go,
+                })
+                logging.info({"event": "plotly_loaded"})
+            except ImportError:
+                logging.info({"event": "plotly_not_available"})
+            
             logging.info({"event": "safe_modules_loaded", "modules": list(safe_modules.keys())})
             
         except ImportError as e:
@@ -248,6 +260,13 @@ class EnhancedSandbox:
         # Add only the safe modules (already restricted)
         globals_dict.update(self.safe_modules)
         
+        # Add RestrictedPython guards for print and getattr
+        from RestrictedPython.PrintCollector import PrintCollector
+        globals_dict['_print_'] = PrintCollector
+        globals_dict['_getattr_'] = SecurityGuards.safer_getattr
+        globals_dict['_getitem_'] = SecurityGuards.safe_getitem
+        globals_dict['_write_'] = SecurityGuards.guarded_write
+        
         return globals_dict
     
     def _is_safe_type(self, value: Any) -> bool:
@@ -260,6 +279,15 @@ class EnhancedSandbox:
         # Check the type directly
         if type(value) in safe_types:
             return True
+        
+        # Allow pandas DataFrames and Series (core data types for analysis)
+        try:
+            import pandas as pd
+            import numpy as np
+            if isinstance(value, (pd.DataFrame, pd.Series, np.ndarray)):
+                return True
+        except ImportError:
+            pass
         
         # For containers, check contents recursively (but limit depth)
         if isinstance(value, (list, tuple)):

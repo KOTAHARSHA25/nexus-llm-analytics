@@ -1,6 +1,7 @@
-# Data Analyst Agent Plugin
+# Data Analyst Agent Plugin (Phase 1 Enhanced)
 # Standardizes the core Data Analyst as a system plugin
 # incorporating advanced DataOptimizer, QueryOrchestrator, and CoT logic.
+# Phase 1: Smart Fallback integration ensures process never stops
 
 import sys
 import logging
@@ -18,17 +19,37 @@ from backend.agents.model_initializer import get_model_initializer
 from backend.core.dynamic_planner import get_dynamic_planner
 from backend.core.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
 
+# Phase 1 imports
+try:
+    from backend.core.phase1_integration import (
+        get_phase1_coordinator,
+        resilient_llm_call,
+        GracefulDegradation
+    )
+    from backend.core.circuit_breaker import get_circuit_breaker, CircuitState
+    PHASE1_AVAILABLE = True
+except ImportError as e:
+    logging.warning(f"Phase 1 components not available: {e}")
+    PHASE1_AVAILABLE = False
+
 class DataAnalystAgent(BasePluginAgent):
     """
-    Advanced Data Analyst Agent (Plugin Version)
+    Advanced Data Analyst Agent (Plugin Version, Phase 1 Enhanced)
+    
     Handles general-purpose structured data analysis using DataOptimizer and CoT.
+    
+    Phase 1 Enhancements:
+    - Smart fallback: Process never stops completely
+    - Circuit breaker: Resilient LLM calls  
+    - RAM-aware: Adapts to system resources
+    - Dynamic model discovery: Works with any available models
     """
     
     def get_metadata(self) -> AgentMetadata:
         return AgentMetadata(
             name="DataAnalyst",
-            version="2.0.0",
-            description="General-purpose data analyst for structured data (CSV, JSON, Excel) with optimization and self-correction",
+            version="2.1.0",  # Phase 1 version bump
+            description="General-purpose data analyst for structured data with smart fallback and self-correction",
             author="Nexus Team",
             capabilities=[AgentCapability.DATA_ANALYSIS],
             file_types=[".csv", ".json", ".xlsx", ".xls"],
@@ -41,6 +62,7 @@ class DataAnalystAgent(BasePluginAgent):
         self._cot_engine = None
         self._cot_config = None
         self._orchestrator = None  # Lazy loaded QueryOrchestrator
+        self._circuit_name = "data_analyst"  # Phase 1: Circuit breaker name
         return True
     
     def _get_orchestrator(self) -> QueryOrchestrator:
@@ -113,6 +135,18 @@ class DataAnalystAgent(BasePluginAgent):
             if "summary statistics" in query_lower or "summary stats" in query_lower:
                 confidence += 0.5  # Very strong boost
             
+            # HIGH PRIORITY: Queries asking for specific values/records/names
+            # These MUST go to DataAnalyst for code generation, NOT StatisticalAgent
+            specific_value_patterns = [
+                "what is the", "which is the", "find the", "show me the",
+                "who is the", "where is the", "get the",
+                "most", "least", "highest", "lowest", "top", "bottom",
+                "best", "worst", "largest", "smallest", "maximum", "minimum",
+                "with highest", "with lowest", "with most", "with least"
+            ]
+            if any(pattern in query_lower for pattern in specific_value_patterns):
+                confidence += 0.5  # Strong boost - we handle specific value lookups
+            
             # Only boost if query is VERY simple and general
             very_simple_patterns = [
                 "what is the average", "show me the top", "display summary",
@@ -134,7 +168,11 @@ class DataAnalystAgent(BasePluginAgent):
         return min(confidence, 0.85)  # Cap below specialists
 
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
-        """Execute analysis using QueryOrchestrator for unified decision making"""
+        """
+        Execute analysis using QueryOrchestrator for unified decision making.
+        
+        Phase 1 Enhanced: Uses execute_with_fallback for resilient operation.
+        """
         filename = kwargs.get('filename')
         filepath = kwargs.get('filepath')
         
@@ -178,24 +216,38 @@ class DataAnalystAgent(BasePluginAgent):
             cot_config = self._load_cot_config()
             use_cot = self._should_use_cot(review_level, cot_config)
             
-            # 5. Execute based on orchestrator decision
-            if execution_method == ExecutionMethod.CODE_GENERATION:
-                # Future: Code generation path
-                result = self._execute_with_code_gen(
-                    query, data_info, optimized_data, available_columns,
-                    selected_model, filepath
-                )
-                metadata = {"execution_method": "code_generation"}
-            elif use_cot:
-                result, metadata = self._execute_with_cot(
-                    query, data_info, optimized_data, available_columns,
-                    selected_model, complexity_score, filepath, analysis_plan
+            # 5. Execute with Phase 1 fallback protection
+            if PHASE1_AVAILABLE:
+                result, metadata = self._execute_with_phase1_fallback(
+                    query=query,
+                    data_info=data_info,
+                    optimized_data=optimized_data,
+                    available_columns=available_columns,
+                    selected_model=selected_model,
+                    complexity_score=complexity_score,
+                    filepath=filepath,
+                    analysis_plan=analysis_plan,
+                    execution_method=execution_method,
+                    use_cot=use_cot,
+                    execution_plan=execution_plan
                 )
             else:
-                result = self._execute_direct(
-                    query, data_info, filename, selected_model, analysis_plan
-                )
-                metadata = {}
+                # Legacy execution path
+                if execution_method == ExecutionMethod.CODE_GENERATION:
+                    result, metadata = self._execute_with_code_gen(
+                        query, data_info, optimized_data, available_columns,
+                        selected_model, filepath
+                    )
+                elif use_cot:
+                    result, metadata = self._execute_with_cot(
+                        query, data_info, optimized_data, available_columns,
+                        selected_model, complexity_score, filepath, analysis_plan
+                    )
+                else:
+                    result = self._execute_direct(
+                        query, data_info, filename, selected_model, analysis_plan
+                    )
+                    metadata = {}
                 
             metadata.update({
                 "agent": "DataAnalyst",
@@ -203,7 +255,8 @@ class DataAnalystAgent(BasePluginAgent):
                 "complexity": complexity_score,
                 "execution_method": execution_method.value,
                 "review_level": review_level.value,
-                "method": "CoT" if use_cot else "Direct"
+                "method": "CoT" if use_cot else "Direct",
+                "phase1_enabled": PHASE1_AVAILABLE
             })
             
             return {
@@ -216,7 +269,75 @@ class DataAnalystAgent(BasePluginAgent):
             import traceback
             tb = traceback.format_exc()
             logging.error(f"DataAnalyst execution failed: {e}\n{tb}")
+            
+            # Phase 1: Provide graceful degradation instead of failure
+            if PHASE1_AVAILABLE:
+                degraded = GracefulDegradation.generate_degraded_response(
+                    query=query,
+                    context={'filepath': filepath},
+                    error=str(e)
+                )
+                degraded['traceback'] = tb
+                return degraded
+            
             return {"success": False, "error": str(e), "traceback": tb}
+    
+    def _execute_with_phase1_fallback(self, 
+                                      query: str,
+                                      data_info: str,
+                                      optimized_data: Dict,
+                                      available_columns: List,
+                                      selected_model: str,
+                                      complexity_score: float,
+                                      filepath: str,
+                                      analysis_plan: Any,
+                                      execution_method: ExecutionMethod,
+                                      use_cot: bool,
+                                      execution_plan) -> tuple:
+        """
+        Phase 1: Execute with smart fallback through model chain.
+        Process never stops completely.
+        """
+        filename = os.path.basename(filepath) if filepath else "data"
+        
+        def execute_with_model(model: str):
+            """Inner execution function for fallback chain - MUST return dict"""
+            if execution_method == ExecutionMethod.CODE_GENERATION:
+                result, metadata = self._execute_with_code_gen(
+                    query, data_info, optimized_data, available_columns,
+                    model, filepath
+                )
+                return {'success': True, 'result': result, 'metadata': metadata}
+            elif use_cot:
+                result, metadata = self._execute_with_cot(
+                    query, data_info, optimized_data, available_columns,
+                    model, complexity_score, filepath, analysis_plan
+                )
+                return {'success': True, 'result': result, 'metadata': metadata}
+            else:
+                result = self._execute_direct(
+                    query, data_info, filename, model, analysis_plan
+                )
+                return {'success': True, 'result': result, 'metadata': {}}
+        
+        # Use orchestrator's execute_with_fallback
+        orchestrator = self._get_orchestrator()
+        result = orchestrator.execute_with_fallback(
+            plan=execution_plan,
+            execute_func=execute_with_model,
+            max_retries=2
+        )
+        
+        # Check if result is a dict (fallback/degraded response)
+        if isinstance(result, dict):
+            if result.get('degraded'):
+                return result.get('message', str(result)), {
+                    'degraded': True,
+                    'fallback_activated': True
+                }
+            return result.get('result', str(result)), result.get('_execution_metadata', {})
+        
+        return result, {'fallback_activated': False}
     
     def _should_use_cot(self, review_level: ReviewLevel, cot_config: Dict[str, Any]) -> bool:
         """Determine if CoT (Two Friends Model) should be used based on review level"""
@@ -230,12 +351,108 @@ class DataAnalystAgent(BasePluginAgent):
         else:  # NONE
             return False
     
-    def _execute_with_code_gen(self, query, data_info, optimized_data, available_columns, model, filepath) -> str:
-        """Execute using code generation (placeholder for Phase 2)"""
-        # For now, fall back to direct execution
-        # Phase 2 will implement actual code generation
-        logging.info("Code generation selected but not yet implemented - using direct LLM")
-        return self._execute_direct(query, data_info, os.path.basename(filepath), model, None)
+    def _execute_with_code_gen(self, query, data_info, optimized_data, available_columns, model, filepath) -> Dict[str, Any]:
+        """
+        Execute using LLM code generation (Phase 2 implementation).
+        Returns a dict with result, code, and execution metadata.
+        """
+        try:
+            import pandas as pd
+            from backend.core.code_generator import get_code_generator
+            
+            # Validate filepath
+            if not filepath:
+                logging.warning("Code generation: No filepath provided - falling back to direct LLM")
+                fallback_result = self._execute_direct(query, data_info, "data", model, None)
+                return fallback_result, {"execution_method": "direct_llm_fallback", "code_gen_error": "No file path"}
+            
+            # Load the actual data based on file type
+            file_ext = os.path.splitext(filepath)[1].lower()
+            try:
+                if file_ext == '.json':
+                    df = pd.read_json(filepath)
+                elif file_ext in ['.xlsx', '.xls']:
+                    df = pd.read_excel(filepath)
+                elif file_ext == '.csv':
+                    df = pd.read_csv(filepath)
+                else:
+                    # Try CSV as fallback for unknown types
+                    df = pd.read_csv(filepath)
+            except Exception as read_error:
+                logging.warning(f"Failed to read file as {file_ext}: {read_error} - falling back to direct LLM")
+                fallback_result = self._execute_direct(query, data_info, os.path.basename(filepath), model, None)
+                return fallback_result, {"execution_method": "direct_llm_fallback", "code_gen_error": str(read_error)}
+            
+            data_file = os.path.basename(filepath)
+            
+            # Get code generator
+            code_gen = get_code_generator()
+            
+            # Generate and execute code with history tracking
+            result = code_gen.generate_and_execute(
+                query=query,
+                df=df,
+                model=model,
+                max_retries=2,
+                data_file=data_file,
+                save_history=True
+            )
+            
+            if result.success:
+                logging.info(f"Code generation succeeded: {result.execution_time_ms:.1f}ms")
+                
+                # Build structured response with code included
+                # Build metadata with generated code for API response
+                metadata = {
+                    "execution_method": "code_generation",
+                    "generated_code": result.generated_code,  # Original LLM code
+                    "executed_code": result.code,             # Cleaned/executed code
+                    "code": result.code,                      # For API compatibility
+                    "execution_id": result.execution_id,
+                    "execution_time_ms": result.execution_time_ms,
+                    "code_gen_model": model,
+                    "attempt_count": result.attempt_count,
+                    "retry_errors": result.retry_errors
+                }
+                
+                # Format the actual result clearly - THIS IS THE ANSWER, not the code
+                if result.result is not None:
+                    if isinstance(result.result, pd.DataFrame):
+                        # For DataFrame results, format nicely
+                        if len(result.result) <= 20:
+                            display_text = f"## Analysis Result\n\n{result.result.to_markdown()}"
+                        else:
+                            display_text = f"## Analysis Result (Top 20 of {len(result.result)} rows)\n\n{result.result.head(20).to_markdown()}"
+                    elif isinstance(result.result, dict):
+                        # Extract and format dict result
+                        actual_result = result.result.get('result', result.result)
+                        if isinstance(actual_result, (int, float)):
+                            display_text = f"## Answer\n\n**{actual_result:,}**"
+                        else:
+                            display_text = f"## Answer\n\n{actual_result}"
+                    elif isinstance(result.result, (int, float)):
+                        display_text = f"## Answer\n\n**{result.result:,}**"
+                    elif isinstance(result.result, str):
+                        display_text = f"## Answer\n\n{result.result}"
+                    else:
+                        display_text = f"## Answer\n\n{str(result.result)}"
+                else:
+                    display_text = "Analysis completed but no result was returned."
+                
+                # Note: Code is available in metadata for Details tab, not shown in main result
+                # to keep the answer clean and readable
+                
+                return display_text, metadata
+            else:
+                # Fallback to direct LLM on failure
+                logging.warning(f"Code generation failed: {result.error} - falling back to direct LLM")
+                fallback_result = self._execute_direct(query, data_info, os.path.basename(filepath), model, None)
+                return fallback_result, {"execution_method": "direct_llm_fallback", "code_gen_error": result.error}
+                
+        except Exception as e:
+            logging.error(f"Code generation error: {e} - falling back to direct LLM")
+            fallback_result = self._execute_direct(query, data_info, os.path.basename(filepath), model, None)
+            return fallback_result, {"execution_method": "direct_llm_fallback", "code_gen_error": str(e)}
 
     # --- Helper Methods ported from AnalysisExecutor ---
 
@@ -272,6 +489,11 @@ class DataAnalystAgent(BasePluginAgent):
 
     def _optimize_data(self, filepath: str, filename: str) -> tuple:
         try:
+            # Guard against None filepath
+            if not filepath:
+                logging.warning(f"No filepath provided for optimization, filename: {filename}")
+                return f"No file path available for {filename}", {'is_optimized': False}, []
+            
             from backend.utils.data_optimizer import DataOptimizer 
             
             optimizer = DataOptimizer(max_rows=100, max_chars=8000)

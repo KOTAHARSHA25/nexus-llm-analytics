@@ -1,0 +1,81 @@
+{
+  "passed": 14,
+  "failed": 1,
+  "tests": [
+    {
+      "name": "Empty DataFrame - Graceful error",
+      "status": "PASS",
+      "details": "Error: Failed after 3 attempts. Last error: Execution err"
+    },
+    {
+      "name": "All-Null DataFrame",
+      "status": "PASS",
+      "details": "Success: True"
+    },
+    {
+      "name": "Mixed Null Values",
+      "status": "PASS",
+      "details": "Result: {'cleaned_df':    value category\n0    1.0        A\n2    3.0        B, 'result': np.float64(2.0)}"
+    },
+    {
+      "name": "Single Row DataFrame",
+      "status": "PASS",
+      "details": "Result: {'result': np.int64(42)}"
+    },
+    {
+      "name": "Unicode Column Names",
+      "status": "PASS",
+      "details": "Success: True"
+    },
+    {
+      "name": "Long Column Names",
+      "status": "PASS",
+      "details": "Success: False"
+    },
+    {
+      "name": "Empty Query - Returned result",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "name": "Malicious Code - Sanitized",
+      "status": "PASS",
+      "details": "Query processed safely"
+    },
+    {
+      "name": "Large DataFrame",
+      "status": "PASS",
+      "details": "Time: 25.26s, Result: {'df':          value category\n0     0.496714     "
+    },
+    {
+      "name": "Special Characters",
+      "status": "PASS",
+      "details": "Success: True"
+    },
+    {
+      "name": "SmartFallback Edge Cases",
+      "status": "FAIL",
+      "error": "type object 'FallbackReason' has no attribute 'MODEL_ERROR'"
+    },
+    {
+      "name": "Circuit Opens on Single Failure",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "name": "Sandbox Blocked Code",
+      "status": "PASS",
+      "details": "Error: Execution error: __import__ not found"
+    },
+    {
+      "name": "DateTime Columns",
+      "status": "PASS",
+      "details": "Success: True"
+    },
+    {
+      "name": "Duplicate Column Names",
+      "status": "PASS",
+      "details": "Success: True"
+    }
+  ]
+}

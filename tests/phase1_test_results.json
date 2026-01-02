@@ -1,0 +1,220 @@
+{
+  "timestamp": "2025-12-27 17:32:04",
+  "total": 30,
+  "passed": 30,
+  "failed": 0,
+  "success_rate": "100.0%",
+  "duration_seconds": 5.4,
+  "results": [
+    {
+      "name": "SmartFallback: Initialization",
+      "passed": true,
+      "duration_ms": 21.6,
+      "details": "Manager created successfully",
+      "error": null
+    },
+    {
+      "name": "SmartFallback: Model chain",
+      "passed": true,
+      "duration_ms": 0.1,
+      "details": "Fallback: phi3:mini",
+      "error": null
+    },
+    {
+      "name": "SmartFallback: Method chain",
+      "passed": true,
+      "duration_ms": 0.1,
+      "details": "Fallback: direct_llm",
+      "error": null
+    },
+    {
+      "name": "SmartFallback: Adaptive timeout",
+      "passed": true,
+      "duration_ms": 100.5,
+      "details": "Timeout: 180s",
+      "error": null
+    },
+    {
+      "name": "SmartFallback: Statistics",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Total fallbacks: 2",
+      "error": null
+    },
+    {
+      "name": "ModelDiscovery: Initialization",
+      "passed": true,
+      "duration_ms": 223.4,
+      "details": "Discovery initialized",
+      "error": null
+    },
+    {
+      "name": "ModelDiscovery: Discover models",
+      "passed": true,
+      "duration_ms": 2446.6,
+      "details": "Found 4 models: ['llama3.1:8b', 'phi3:mini', 'tinyllama:latest']",
+      "error": null
+    },
+    {
+      "name": "ModelDiscovery: Statistics",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Discovered: 4",
+      "error": null
+    },
+    {
+      "name": "RAMSelector: Initialization",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Selector initialized",
+      "error": null
+    },
+    {
+      "name": "RAMSelector: Memory snapshot",
+      "passed": true,
+      "duration_ms": 73.8,
+      "details": "Available: 3.8GB, Pressure: high",
+      "error": null
+    },
+    {
+      "name": "RAMSelector: Available for model",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Available for model: 1.4GB",
+      "error": null
+    },
+    {
+      "name": "RAMSelector: Model selection",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Selected: tinyllama, Fallback: True",
+      "error": null
+    },
+    {
+      "name": "RAMSelector: Memory trend",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Trend: unknown",
+      "error": null
+    },
+    {
+      "name": "CircuitBreaker: Initialization",
+      "passed": true,
+      "duration_ms": 1.4,
+      "details": "Circuit created, state: closed",
+      "error": null
+    },
+    {
+      "name": "CircuitBreaker: Successful call",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Result: True",
+      "error": null
+    },
+    {
+      "name": "CircuitBreaker: Opens on failures",
+      "passed": true,
+      "duration_ms": 0.1,
+      "details": "State after failures: open",
+      "error": null
+    },
+    {
+      "name": "CircuitBreaker: Health status",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "State: closed",
+      "error": null
+    },
+    {
+      "name": "Orchestrator: Initialization",
+      "passed": true,
+      "duration_ms": 2221.7,
+      "details": "Orchestrator with Phase 1 enhancements",
+      "error": null
+    },
+    {
+      "name": "Orchestrator: Simple query plan",
+      "passed": true,
+      "duration_ms": 100.9,
+      "details": "Model: tinyllama:latest, Complexity: 0.15",
+      "error": null
+    },
+    {
+      "name": "Orchestrator: Complex query plan",
+      "passed": true,
+      "duration_ms": 100.7,
+      "details": "Complexity: 0.85, Review: mandatory",
+      "error": null
+    },
+    {
+      "name": "Orchestrator: Fallback chain",
+      "passed": true,
+      "duration_ms": 100.4,
+      "details": "Fallbacks: []",
+      "error": null
+    },
+    {
+      "name": "Orchestrator: Status",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Phase1 available: True",
+      "error": null
+    },
+    {
+      "name": "Coordinator: Initialization",
+      "passed": true,
+      "duration_ms": 1.8,
+      "details": "Coordinator singleton created",
+      "error": null
+    },
+    {
+      "name": "Coordinator: Best model",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Selected: nomic-embed-text:latest",
+      "error": null
+    },
+    {
+      "name": "Coordinator: Fallback chain",
+      "passed": true,
+      "duration_ms": 0.1,
+      "details": "Chain: ['phi3:mini', 'tinyllama:latest', 'nomic-embed-text:latest']",
+      "error": null
+    },
+    {
+      "name": "Coordinator: Status",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Healthy: True, Score: 75.00%",
+      "error": null
+    },
+    {
+      "name": "DataAnalyst: Initialization",
+      "passed": true,
+      "duration_ms": 4.9,
+      "details": "Version: 2.1.0",
+      "error": null
+    },
+    {
+      "name": "DataAnalyst: Metadata",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Version 2.1.0 with Phase 1",
+      "error": null
+    },
+    {
+      "name": "DataAnalyst: Orchestrator",
+      "passed": true,
+      "duration_ms": 1.0,
+      "details": "Orchestrator loaded",
+      "error": null
+    },
+    {
+      "name": "DataAnalyst: Can handle",
+      "passed": true,
+      "duration_ms": 0.0,
+      "details": "Confidence: 0.75",
+      "error": null
+    }
+  ]
+}

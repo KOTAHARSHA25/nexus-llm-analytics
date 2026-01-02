@@ -124,10 +124,13 @@ skips = ["B101", "B104", "B108"]
 
 [tool.coverage.run]
 source = ["src/backend"]
+branch = true
+parallel = true
 omit = [
     "*/tests/*",
     "*/__pycache__/*",
-    "*/archive/*"
+    "*/archive/*",
+    "*/chroma_db/*"
 ]
 
 [tool.coverage.report]
@@ -136,5 +139,19 @@ exclude_lines = [
     "def __repr__",
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:"
+    "if TYPE_CHECKING:",
+    "except ImportError:",
+    "pass"
 ]
+show_missing = true
+precision = 2
+fail_under = 60
+
+[tool.coverage.html]
+directory = "reports/coverage"
+
+[tool.coverage.xml]
+output = "reports/coverage.xml"
+
+[tool.coverage.json]
+output = "reports/coverage.json"

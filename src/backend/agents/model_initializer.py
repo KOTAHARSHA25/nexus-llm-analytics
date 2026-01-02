@@ -25,6 +25,7 @@ class ModelInitializer:
         self._chroma_client = None
         self._primary_llm = None
         self._review_llm = None
+        self._intelligent_router = None
 
         self._tools = None
         self._query_parser = None
@@ -35,6 +36,14 @@ class ModelInitializer:
         self.cached_models: Dict[str, str] = {}
         
         logging.info("🔧 ModelInitializer created (lazy loading enabled)")
+    
+    @property
+    def intelligent_router(self):
+        """Get or create the intelligent router."""
+        if self._intelligent_router is None:
+            from backend.core.intelligent_router import get_intelligent_router
+            self._intelligent_router = get_intelligent_router()
+        return self._intelligent_router
     
     @property
     def llm_client(self):
@@ -57,12 +66,16 @@ class ModelInitializer:
                 )
                 os.makedirs(persist_dir, exist_ok=True)
                 
-                self._chroma_client = chromadb.Client(Settings(
-                    chroma_db_impl="duckdb+parquet",
-                    persist_directory=persist_dir,
-                    anonymized_telemetry=False
-                ))
-                logging.info("✅ ChromaDB client initialized")
+                # Updated for modern ChromaDB API (v0.4+)
+                # Removed deprecated chroma_db_impl parameter
+                self._chroma_client = chromadb.PersistentClient(
+                    path=persist_dir,
+                    settings=Settings(
+                        anonymized_telemetry=False,
+                        allow_reset=True
+                    )
+                )
+                logging.info("✅ ChromaDB client initialized (PersistentClient)")
             except Exception as e:
                 logging.warning(f"ChromaDB initialization failed: {e}")
                 # Return a mock client for graceful degradation

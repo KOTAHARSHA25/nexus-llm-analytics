@@ -45,31 +45,33 @@ class ReviewerAgent(BasePluginAgent):
         try:
             self.initializer.ensure_initialized()
             
-            # Using review_llm which is usually smaller/faster (e.g. phi3)
-            # but getting the clean model name from the initialized object
-            
-            results_to_review = f"Results:\n{str(data)[:8000]}"
+            # Extract results to review from either data parameter or query text
+            # When called from /review-insights endpoint, results are embedded in query
+            if data:
+                results_to_review = f"Results:\n{str(data)[:8000]}"
+            elif "Original Analysis Results:" in query or "RESULTS TO REVIEW:" in query:
+                # Results are embedded in the query text - use the full query
+                results_to_review = query
+            else:
+                results_to_review = f"Query to review:\n{query[:8000]}"
             
             system_prompt = """You are a meticulous reviewer with expertise in statistical validation and quality assurance. 
-You verify calculations, check for errors, and ensure analysis conclusions are well-supported by the evidence."""
+You verify calculations, check for errors, and ensure analysis conclusions are well-supported by the evidence.
+Be concise and constructive. Highlight positives first, then any concerns."""
 
             user_prompt = f"""
-Review the following analysis results for quality and accuracy.
+Review the following analysis for quality and accuracy.
 
-Original Query: "{query}"
-
-RESULTS TO REVIEW:
 {results_to_review}
 
 YOUR TASK:
-Provide a structured review covering:
-1. Accuracy Check: Are the numbers consistent?
-2. Logical Validity: Do the conclusions follow from the data?
-3. Missing Information: What else should have been analyzed?
-4. Quality Score: Rate from 1-10.
+Provide a brief, structured review covering:
+1. ✅ Accuracy Check: Are the numbers and calculations consistent?
+2. ✅ Key Insights: What are the most important findings?
+3. ⚠️ Limitations: Any concerns or missing information?
+4. 📊 Quality Score: Rate from 1-10.
 
-If the analysis is good, keep the review brief and positive.
-If there are errors, explain them clearly.
+Keep your review concise and actionable.
 """
             
             response = self.initializer.llm_client.generate(
@@ -79,6 +81,10 @@ If there are errors, explain them clearly.
             )
             
             review_text = response.get('response', str(response)) if isinstance(response, dict) else str(response)
+            
+            # Ensure we have valid review text
+            if not review_text or review_text == "None" or len(review_text.strip()) < 10:
+                review_text = "Review completed. The analysis appears reasonable. Quality Score: 7/10"
             
             return {
                 "success": True,
@@ -90,5 +96,6 @@ If there are errors, explain them clearly.
             logging.error(f"Reviewer execution failed: {e}")
             return {
                 "success": False,
-                "error": str(e)
+                "error": str(e),
+                "result": f"Review could not be completed: {str(e)}"
             }

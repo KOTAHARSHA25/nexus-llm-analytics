@@ -84,6 +84,12 @@ class QueryComplexityAnalyzer:
             'hypothesis test', 'hypothesis testing', 'statistical significance',
             'p-value', 'confidence interval testing',
             
+            # Multi-column/comprehensive analysis (complex patterns)
+            'correlation analysis', 'correlation between all',
+            'analyze all columns', 'all numeric columns',
+            'comprehensive analysis', 'full analysis',
+            'cross-correlation', 'multivariate correlation',
+            
             # Predictive Modeling
             'predict', 'prediction', 'predictive',
             'forecast', 'forecasting',
@@ -181,7 +187,12 @@ class QueryComplexityAnalyzer:
         self.MEDIUM_PHRASES = {
             'year-over-year', 'month-over-month', 'quarter-over-quarter',
             'period-over-period', 'moving average', 'rolling average',
-            'growth rate', 'change over time', 'group by'
+            'growth rate', 'change over time', 'group by',
+            # Grouping patterns (indicates aggregation by category)
+            'by region', 'by category', 'by product', 'by customer',
+            'by month', 'by year', 'by quarter', 'by date', 'by week',
+            'per region', 'per category', 'per product', 'per customer',
+            'for each', 'each region', 'each category', 'sales by'
         }
     
     def _has_explicit_negation(self, query: str) -> bool:
@@ -307,7 +318,7 @@ class QueryComplexityAnalyzer:
         1. Explicit negation → FAST (0.15)
         2. Complex ML/stats → FULL (0.90)
         3. Medium analytics → BALANCED (0.50)
-        4. Simple operations → FAST (0.20)
+        4. Simple operations (ONLY if no medium match) → FAST (0.20)
         5. Structure analysis → Fallback scoring
         """
         reasoning = {}
@@ -325,8 +336,12 @@ class QueryComplexityAnalyzer:
                 recommended_tier='fast'
             )
         
-        # RULE 2: Complex operations (second priority)
+        # Pre-detect all tiers to make smarter decisions
         is_complex, complex_matches = self._detect_complex_operations(query)
+        is_medium, medium_matches = self._detect_medium_operations(query)
+        is_simple, simple_matches = self._detect_simple_operations(query)
+        
+        # RULE 2: Complex operations (second priority)
         if is_complex:
             reasoning['decision'] = 'complex_operation'
             reasoning['matched_keywords'] = complex_matches
@@ -341,7 +356,7 @@ class QueryComplexityAnalyzer:
             )
         
         # RULE 3: Medium operations (third priority)
-        is_medium, medium_matches = self._detect_medium_operations(query)
+        # Also triggered if BOTH simple and medium keywords found (medium wins)
         if is_medium:
             reasoning['decision'] = 'medium_operation'
             reasoning['matched_keywords'] = medium_matches
@@ -355,8 +370,7 @@ class QueryComplexityAnalyzer:
                 recommended_tier='balanced'
             )
         
-        # RULE 4: Simple operations (fourth priority)
-        is_simple, simple_matches = self._detect_simple_operations(query)
+        # RULE 4: Simple operations (ONLY if no medium keywords were found)
         if is_simple:
             reasoning['decision'] = 'simple_operation'
             reasoning['matched_keywords'] = simple_matches

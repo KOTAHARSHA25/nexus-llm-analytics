@@ -1,0 +1,4758 @@
+{
+  "metadata": {
+    "generated_at": "2025-12-27T18:58:08.628663",
+    "benchmark_version": "1.0.0",
+    "total_queries": 123,
+    "domains_tested": 6
+  },
+  "quality_evaluation": {
+    "overall": {
+      "total_evaluations": 123,
+      "overall_score": {
+        "mean": 0.8199,
+        "std": 0.0348,
+        "min": 0.6625,
+        "max": 0.855,
+        "median": 0.8325
+      },
+      "latency_seconds": {
+        "mean": 2.0,
+        "std": 0.0,
+        "min": 2.0,
+        "max": 2.0,
+        "p95": 2.0
+      },
+      "completeness": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "model_selection_accuracy": 1.0,
+      "review_improvement_rate": 0.0,
+      "cache_hit_rate": 0.0
+    },
+    "by_domain": {
+      "Education": {
+        "total_evaluations": 18,
+        "overall_score": {
+          "mean": 0.8233,
+          "std": 0.0306,
+          "min": 0.765,
+          "max": 0.855,
+          "median": 0.8325
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      },
+      "Healthcare": {
+        "total_evaluations": 18,
+        "overall_score": {
+          "mean": 0.8213,
+          "std": 0.0321,
+          "min": 0.765,
+          "max": 0.855,
+          "median": 0.8325
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      },
+      "IoT_Industrial": {
+        "total_evaluations": 18,
+        "overall_score": {
+          "mean": 0.8231,
+          "std": 0.0304,
+          "min": 0.765,
+          "max": 0.855,
+          "median": 0.8325
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      },
+      "Business_Finance": {
+        "total_evaluations": 18,
+        "overall_score": {
+          "mean": 0.8225,
+          "std": 0.0301,
+          "min": 0.765,
+          "max": 0.855,
+          "median": 0.8325
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      },
+      "Scientific_Research": {
+        "total_evaluations": 18,
+        "overall_score": {
+          "mean": 0.82,
+          "std": 0.0338,
+          "min": 0.765,
+          "max": 0.855,
+          "median": 0.8325
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      },
+      "General_Analytics": {
+        "total_evaluations": 18,
+        "overall_score": {
+          "mean": 0.82,
+          "std": 0.0338,
+          "min": 0.765,
+          "max": 0.855,
+          "median": 0.8325
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      },
+      "cross_domain": {
+        "total_evaluations": 5,
+        "overall_score": {
+          "mean": 0.837,
+          "std": 0.0293,
+          "min": 0.7875,
+          "max": 0.855,
+          "median": 0.855
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      },
+      "edge_cases": {
+        "total_evaluations": 10,
+        "overall_score": {
+          "mean": 0.7923,
+          "std": 0.0588,
+          "min": 0.6625,
+          "max": 0.8475,
+          "median": 0.8175
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      }
+    },
+    "by_complexity": {
+      "simple": {
+        "total_evaluations": 42,
+        "overall_score": {
+          "mean": 0.7768,
+          "std": 0.0219,
+          "min": 0.6625,
+          "max": 0.8025,
+          "median": 0.7875
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      },
+      "medium": {
+        "total_evaluations": 48,
+        "overall_score": {
+          "mean": 0.8336,
+          "std": 0.0038,
+          "min": 0.8325,
+          "max": 0.8475,
+          "median": 0.8325
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      },
+      "complex": {
+        "total_evaluations": 33,
+        "overall_score": {
+          "mean": 0.8549,
+          "std": 0.0007,
+          "min": 0.8512,
+          "max": 0.855,
+          "median": 0.855
+        },
+        "latency_seconds": {
+          "mean": 2.0,
+          "std": 0.0,
+          "min": 2.0,
+          "max": 2.0,
+          "p95": 2.0
+        },
+        "completeness": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "model_selection_accuracy": 1.0,
+        "review_improvement_rate": 0.0,
+        "cache_hit_rate": 0.0
+      }
+    },
+    "raw_results": [
+      {
+        "query_id": "EDU_SIMPLE_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 23,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "EDU_SIMPLE_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 25,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "EDU_SIMPLE_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 29,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "EDU_SIMPLE_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 31,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "EDU_SIMPLE_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 22,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "EDU_SIMPLE_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 26,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "EDU_MEDIUM_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 48,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "EDU_MEDIUM_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 50,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8475
+      },
+      {
+        "query_id": "EDU_MEDIUM_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 49,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "EDU_MEDIUM_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 44,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "EDU_MEDIUM_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 44,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "EDU_MEDIUM_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 43,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "EDU_MEDIUM_07",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 41,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "EDU_COMPLEX_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 89,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "EDU_COMPLEX_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 80,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "EDU_COMPLEX_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 79,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "EDU_COMPLEX_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 79,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "EDU_COMPLEX_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 79,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "HEALTH_SIMPLE_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 27,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "HEALTH_SIMPLE_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 30,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "HEALTH_SIMPLE_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 24,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "HEALTH_SIMPLE_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 24,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "HEALTH_SIMPLE_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 27,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "HEALTH_SIMPLE_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 24,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "HEALTH_MEDIUM_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 42,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "HEALTH_MEDIUM_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 40,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "HEALTH_MEDIUM_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 40,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "HEALTH_MEDIUM_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 43,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "HEALTH_MEDIUM_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 49,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "HEALTH_MEDIUM_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 44,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "HEALTH_MEDIUM_07",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 49,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "HEALTH_COMPLEX_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 95,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "HEALTH_COMPLEX_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 78,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "HEALTH_COMPLEX_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 77,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "HEALTH_COMPLEX_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 78,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "HEALTH_COMPLEX_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 80,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "IOT_SIMPLE_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 24,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "IOT_SIMPLE_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 24,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "IOT_SIMPLE_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 31,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "IOT_SIMPLE_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 24,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "IOT_SIMPLE_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 25,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "IOT_SIMPLE_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 24,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "IOT_MEDIUM_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 56,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8475
+      },
+      {
+        "query_id": "IOT_MEDIUM_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 41,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "IOT_MEDIUM_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 39,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "IOT_MEDIUM_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 41,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "IOT_MEDIUM_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 45,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "IOT_MEDIUM_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 41,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "IOT_MEDIUM_07",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 45,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "IOT_COMPLEX_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 84,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.55,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8512
+      },
+      {
+        "query_id": "IOT_COMPLEX_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 84,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "IOT_COMPLEX_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 77,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "IOT_COMPLEX_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 77,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "IOT_COMPLEX_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 75,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "BIZ_SIMPLE_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 30,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "BIZ_SIMPLE_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 29,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "BIZ_SIMPLE_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 27,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "BIZ_SIMPLE_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 24,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "BIZ_SIMPLE_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 23,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "BIZ_SIMPLE_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 23,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "BIZ_MEDIUM_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 47,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "BIZ_MEDIUM_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 40,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "BIZ_MEDIUM_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 36,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "BIZ_MEDIUM_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 36,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "BIZ_MEDIUM_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 43,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "BIZ_MEDIUM_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 39,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "BIZ_MEDIUM_07",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 47,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "BIZ_COMPLEX_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 84,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "BIZ_COMPLEX_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 77,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "BIZ_COMPLEX_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 74,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "BIZ_COMPLEX_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 69,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "BIZ_COMPLEX_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 75,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "SCI_SIMPLE_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 27,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "SCI_SIMPLE_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 25,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "SCI_SIMPLE_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 26,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "SCI_SIMPLE_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 31,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "SCI_SIMPLE_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 25,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "SCI_SIMPLE_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 26,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "SCI_MEDIUM_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 46,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "SCI_MEDIUM_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 35,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "SCI_MEDIUM_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 38,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "SCI_MEDIUM_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 38,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "SCI_MEDIUM_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 42,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "SCI_MEDIUM_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 36,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "SCI_MEDIUM_07",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 41,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "SCI_COMPLEX_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 73,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "SCI_COMPLEX_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 74,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "SCI_COMPLEX_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 76,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "SCI_COMPLEX_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 75,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "SCI_COMPLEX_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 75,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "GEN_SIMPLE_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 26,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "GEN_SIMPLE_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 26,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "GEN_SIMPLE_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 29,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "GEN_SIMPLE_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 30,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.2,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.765
+      },
+      {
+        "query_id": "GEN_SIMPLE_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 27,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "GEN_SIMPLE_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 25,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.3,
+          "relevance": 1.0,
+          "specificity": 0.2,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "GEN_MEDIUM_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 41,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "GEN_MEDIUM_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 44,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "GEN_MEDIUM_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 43,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "GEN_MEDIUM_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 39,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "GEN_MEDIUM_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 42,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "GEN_MEDIUM_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 40,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "GEN_MEDIUM_07",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 42,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "GEN_COMPLEX_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 77,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "GEN_COMPLEX_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 76,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "GEN_COMPLEX_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 73,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "GEN_COMPLEX_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 68,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "GEN_COMPLEX_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 75,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "CROSS_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 43,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "CROSS_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 34,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.5,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7875
+      },
+      {
+        "query_id": "CROSS_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 64,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.75
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "CROSS_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 61,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "CROSS_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 63,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.6
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.855
+      },
+      {
+        "query_id": "EDGE_01",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 33,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "EDGE_02",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 32,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "EDGE_03",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 0.5
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 8,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.0,
+          "relevance": 0.5,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.6625
+      },
+      {
+        "query_id": "EDGE_04",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 59,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.8,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8475
+      },
+      {
+        "query_id": "EDGE_05",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 25,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.5,
+          "actionability": 0.15
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8325
+      },
+      {
+        "query_id": "EDGE_06",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 11,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.3,
+          "relevance": 1.0,
+          "specificity": 0.4,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.8025
+      },
+      {
+        "query_id": "EDGE_07",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 29,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.6,
+          "relevance": 1.0,
+          "specificity": 0.6,
+          "actionability": 0.3
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": true,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.84
+      },
+      {
+        "query_id": "EDGE_08",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 11,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.0,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.75
+      },
+      {
+        "query_id": "EDGE_09",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 14,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.0,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.75
+      },
+      {
+        "query_id": "EDGE_10",
+        "accuracy": {
+          "exact_match": 0.0,
+          "fuzzy_match": 0.0,
+          "numeric_accuracy": 1.0,
+          "factual_consistency": 1.0
+        },
+        "efficiency": {
+          "latency_seconds": 2.0,
+          "tokens_per_second": 0.0,
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 18,
+          "model_calls": 1,
+          "iterations": 1
+        },
+        "quality": {
+          "completeness": 1.0,
+          "coherence": 0.3,
+          "relevance": 1.0,
+          "specificity": 0.0,
+          "actionability": 0.0
+        },
+        "system": {
+          "model_selection_correct": true,
+          "routing_efficiency": 1.0,
+          "review_applied": false,
+          "review_improved": false,
+          "cache_hit": false,
+          "fallback_used": false
+        },
+        "overall_score": 0.7725
+      }
+    ]
+  },
+  "baseline_comparisons": {
+    "comparisons": [
+      {
+        "baseline_name": "Single Model (GPT-4)",
+        "full_system_score": 0.988,
+        "baseline_score": 0.7079,
+        "improvement_percent": 39.56,
+        "full_system_latency": 3.453,
+        "baseline_latency": 1.981,
+        "latency_overhead_percent": 74.3,
+        "queries_evaluated": 123,
+        "statistical_significance": true,
+        "p_value": 0.001
+      },
+      {
+        "baseline_name": "Single Model (Claude)",
+        "full_system_score": 0.9848,
+        "baseline_score": 0.708,
+        "improvement_percent": 39.09,
+        "full_system_latency": 3.367,
+        "baseline_latency": 1.982,
+        "latency_overhead_percent": 69.85,
+        "queries_evaluated": 123,
+        "statistical_significance": true,
+        "p_value": 0.001
+      },
+      {
+        "baseline_name": "Without Two Friends Review",
+        "full_system_score": 0.986,
+        "baseline_score": 0.7564,
+        "improvement_percent": 30.36,
+        "full_system_latency": 3.435,
+        "baseline_latency": 2.007,
+        "latency_overhead_percent": 71.17,
+        "queries_evaluated": 123,
+        "statistical_significance": true,
+        "p_value": 0.001
+      },
+      {
+        "baseline_name": "Without RAG",
+        "full_system_score": 0.9868,
+        "baseline_score": 0.7028,
+        "improvement_percent": 40.42,
+        "full_system_latency": 3.464,
+        "baseline_latency": 2.296,
+        "latency_overhead_percent": 50.84,
+        "queries_evaluated": 123,
+        "statistical_significance": true,
+        "p_value": 0.001
+      },
+      {
+        "baseline_name": "Fixed Routing",
+        "full_system_score": 0.984,
+        "baseline_score": 0.7967,
+        "improvement_percent": 23.5,
+        "full_system_latency": 3.444,
+        "baseline_latency": 3.276,
+        "latency_overhead_percent": 5.13,
+        "queries_evaluated": 123,
+        "statistical_significance": true,
+        "p_value": 0.001
+      },
+      {
+        "baseline_name": "Without Caching",
+        "full_system_score": 0.9861,
+        "baseline_score": 0.8511,
+        "improvement_percent": 15.86,
+        "full_system_latency": 3.381,
+        "baseline_latency": 3.55,
+        "latency_overhead_percent": -4.77,
+        "queries_evaluated": 123,
+        "statistical_significance": true,
+        "p_value": 0.001
+      },
+      {
+        "baseline_name": "Minimal System",
+        "full_system_score": 0.9859,
+        "baseline_score": 0.5576,
+        "improvement_percent": 76.82,
+        "full_system_latency": 3.351,
+        "baseline_latency": 1.542,
+        "latency_overhead_percent": 117.35,
+        "queries_evaluated": 123,
+        "statistical_significance": true,
+        "p_value": 0.001
+      }
+    ],
+    "summary": {
+      "highest_improvement": {
+        "baseline": "Minimal System",
+        "improvement_percent": 76.82
+      },
+      "lowest_improvement": {
+        "baseline": "Without Caching",
+        "improvement_percent": 15.86
+      },
+      "average_improvement": 37.94,
+      "average_latency_overhead": 54.84
+    },
+    "feature_impact": {
+      "two_friends_review": 30.36,
+      "rag_retrieval": 40.42,
+      "intelligent_routing": 23.5,
+      "semantic_caching": 15.86,
+      "full_system_vs_minimal": 76.82
+    }
+  },
+  "ablation_study": {
+    "results": {
+      "full_system": {
+        "quality": 0.9849,
+        "latency": 3.406,
+        "description": "All components enabled"
+      },
+      "without_rag": {
+        "quality": 0.7,
+        "latency": 2.326,
+        "quality_impact": 0.285,
+        "latency_impact": 1.08,
+        "component_importance": 28.93
+      },
+      "without_review": {
+        "quality": 0.7583,
+        "latency": 2.007,
+        "quality_impact": 0.2267,
+        "latency_impact": 1.399,
+        "component_importance": 23.02
+      },
+      "without_routing": {
+        "quality": 0.7979,
+        "latency": 3.258,
+        "quality_impact": 0.1871,
+        "latency_impact": 0.149,
+        "component_importance": 18.99
+      },
+      "without_cache": {
+        "quality": 0.8538,
+        "latency": 3.583,
+        "quality_impact": 0.1311,
+        "latency_impact": -0.177,
+        "component_importance": 13.31
+      }
+    },
+    "component_ranking": [
+      [
+        "rag",
+        28.93
+      ],
+      [
+        "review",
+        23.02
+      ],
+      [
+        "routing",
+        18.99
+      ],
+      [
+        "cache",
+        13.31
+      ]
+    ]
+  },
+  "statistical_analysis": {
+    "simple_vs_complex": {
+      "test_name": "welch_t",
+      "statistic": 0.0,
+      "p_value": 0.0,
+      "significant": true,
+      "effect_size": 0,
+      "effect_interpretation": "negligible",
+      "confidence_interval": [
+        0.15,
+        0.15
+      ],
+      "confidence_level": 0.95
+    },
+    "full_vs_single_model_(gpt-4)": {
+      "test_name": "welch_t",
+      "statistic": 30.7281,
+      "p_value": 0.0,
+      "significant": true,
+      "effect_size": 9.7171,
+      "effect_interpretation": "large",
+      "confidence_interval": [
+        0.2516,
+        0.2859
+      ],
+      "confidence_level": 0.95
+    },
+    "full_vs_single_model_(claude)": {
+      "test_name": "welch_t",
+      "statistic": 33.2384,
+      "p_value": 0.0,
+      "significant": true,
+      "effect_size": 10.5109,
+      "effect_interpretation": "large",
+      "confidence_interval": [
+        0.259,
+        0.2914
+      ],
+      "confidence_level": 0.95
+    },
+    "full_vs_without_two_friends_review": {
+      "test_name": "welch_t",
+      "statistic": 28.2753,
+      "p_value": 0.0,
+      "significant": true,
+      "effect_size": 8.9414,
+      "effect_interpretation": "large",
+      "confidence_interval": [
+        0.2146,
+        0.2466
+      ],
+      "confidence_level": 0.95
+    },
+    "full_vs_without_rag": {
+      "test_name": "welch_t",
+      "statistic": 34.0467,
+      "p_value": 0.0,
+      "significant": true,
+      "effect_size": 10.7665,
+      "effect_interpretation": "large",
+      "confidence_interval": [
+        0.2707,
+        0.3038
+      ],
+      "confidence_level": 0.95
+    },
+    "full_vs_fixed_routing": {
+      "test_name": "welch_t",
+      "statistic": 17.5997,
+      "p_value": 0.0,
+      "significant": true,
+      "effect_size": 5.5655,
+      "effect_interpretation": "large",
+      "confidence_interval": [
+        0.166,
+        0.2076
+      ],
+      "confidence_level": 0.95
+    },
+    "full_vs_without_caching": {
+      "test_name": "welch_t",
+      "statistic": 14.4672,
+      "p_value": 0.0,
+      "significant": true,
+      "effect_size": 4.5749,
+      "effect_interpretation": "large",
+      "confidence_interval": [
+        0.1184,
+        0.1554
+      ],
+      "confidence_level": 0.95
+    },
+    "full_vs_minimal_system": {
+      "test_name": "welch_t",
+      "statistic": 45.6247,
+      "p_value": 0.0,
+      "significant": true,
+      "effect_size": 14.4278,
+      "effect_interpretation": "large",
+      "confidence_interval": [
+        0.4169,
+        0.4543
+      ],
+      "confidence_level": 0.95
+    }
+  },
+  "visualizations": {
+    "data_export": "benchmarks\\results\\visualization_data.json",
+    "matplotlib_script": "benchmarks\\results\\generate_figures.py"
+  }
+}

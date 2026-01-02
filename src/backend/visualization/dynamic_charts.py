@@ -40,8 +40,8 @@ class ChartTypeAnalyzer:
                         pd.to_datetime(sample, errors='raise', format='mixed')
                         datetime_cols.append(col)
                         categorical_cols.remove(col)
-                    except:
-                        pass
+                    except (ValueError, TypeError, pd.errors.ParserError):
+                        pass  # Not a valid datetime format
         
         analysis = {
             'numeric_columns': numeric_cols,

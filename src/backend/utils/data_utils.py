@@ -132,6 +132,94 @@ def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     return cleaned_df
 
 
+# Phase 3.5: Scientific file format readers
+def _read_hdf5(file_location: str) -> pd.DataFrame:
+    """
+    Read HDF5 file into DataFrame.
+    Supports both pandas HDF5 format and generic HDF5 datasets.
+    """
+    try:
+        # Try pandas HDF5 format first
+        return pd.read_hdf(file_location)
+    except Exception:
+        # Fallback to h5py for generic HDF5 files
+        try:
+            import h5py
+            with h5py.File(file_location, 'r') as f:
+                # Find the first dataset and convert to DataFrame
+                data = {}
+                def extract_datasets(name, obj):
+                    if isinstance(obj, h5py.Dataset):
+                        try:
+                            data[name.replace('/', '_')] = obj[:]
+                        except Exception:
+                            pass
+                f.visititems(extract_datasets)
+                
+                if data:
+                    # Try to create DataFrame from extracted data
+                    return pd.DataFrame(data)
+                else:
+                    raise ValueError("No readable datasets found in HDF5 file")
+        except ImportError:
+            raise ImportError("h5py package required for reading HDF5 files. Install with: pip install h5py")
+
+
+def _read_netcdf(file_location: str) -> pd.DataFrame:
+    """
+    Read NetCDF file into DataFrame.
+    Commonly used for climate and scientific data.
+    """
+    try:
+        import xarray as xr
+        ds = xr.open_dataset(file_location)
+        return ds.to_dataframe().reset_index()
+    except ImportError:
+        try:
+            # Fallback to netCDF4 library
+            import netCDF4 as nc
+            dataset = nc.Dataset(file_location, 'r')
+            data = {}
+            for var_name in dataset.variables:
+                var = dataset.variables[var_name]
+                if len(var.shape) <= 1:
+                    data[var_name] = var[:]
+            dataset.close()
+            return pd.DataFrame(data)
+        except ImportError:
+            raise ImportError("xarray or netCDF4 package required for reading NetCDF files. Install with: pip install xarray netCDF4")
+
+
+def _read_matlab(file_location: str) -> pd.DataFrame:
+    """
+    Read MATLAB .mat file into DataFrame.
+    Supports both v7.3 (HDF5-based) and older formats.
+    """
+    try:
+        from scipy.io import loadmat
+        mat_data = loadmat(file_location, squeeze_me=True)
+        
+        # Filter out metadata keys
+        data = {}
+        for key, value in mat_data.items():
+            if not key.startswith('__'):
+                if hasattr(value, 'shape'):
+                    if len(value.shape) <= 2:
+                        if len(value.shape) == 1:
+                            data[key] = value
+                        elif len(value.shape) == 2:
+                            # 2D array - add as multiple columns
+                            for i in range(value.shape[1]):
+                                data[f"{key}_{i}"] = value[:, i]
+        
+        if data:
+            return pd.DataFrame(data)
+        else:
+            raise ValueError("No readable arrays found in MATLAB file")
+    except ImportError:
+        raise ImportError("scipy package required for reading MATLAB files. Install with: pip install scipy")
+
+
 def read_dataframe(file_location: str, encoding: str = 'utf-8', sample_size: int = 4500) -> pd.DataFrame:
     """
     Read a dataframe from a given file location and clean its column names.
@@ -165,7 +253,12 @@ def read_dataframe(file_location: str, encoding: str = 'utf-8', sample_size: int
         'parquet': lambda: pd.read_parquet(file_location),
         'feather': lambda: pd.read_feather(file_location),
         'tsv': lambda: pd.read_csv(file_location, sep="\t", encoding=encoding),
-        'txt': lambda: pd.read_csv(file_location, sep="\t", encoding=encoding)
+        'txt': lambda: pd.read_csv(file_location, sep="\t", encoding=encoding),
+        # Phase 3.5: Scientific file formats
+        'hdf5': lambda: _read_hdf5(file_location),
+        'h5': lambda: _read_hdf5(file_location),
+        'nc': lambda: _read_netcdf(file_location),
+        'mat': lambda: _read_matlab(file_location)
     }
 
     if file_extension not in read_funcs:
@@ -459,14 +552,14 @@ def infer_data_types(df: pd.DataFrame) -> pd.DataFrame:
         # Try to convert to numeric
         try:
             df_copy[col] = pd.to_numeric(df_copy[col], errors='ignore')
-        except:
-            logging.debug("Operation failed (non-critical) - continuing")
+        except (ValueError, TypeError) as e:
+            logging.debug(f"Numeric conversion skipped for {col}: {e}")
         
         # Try to convert to datetime
         if df_copy[col].dtype == object:
             try:
                 df_copy[col] = pd.to_datetime(df_copy[col], errors='ignore')
-            except:
-                logging.debug("Operation failed (non-critical) - continuing")
+            except (ValueError, TypeError, pd.errors.ParserError) as e:
+                logging.debug(f"Datetime conversion skipped for {col}: {e}")
     
     return df_copy

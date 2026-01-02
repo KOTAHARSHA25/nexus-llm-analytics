@@ -1,9 +1,46 @@
 # 📁 Nexus LLM Analytics - Complete File Manifest (VERIFIED)
 
 > **Generated:** December 22, 2025  
-> **Last Updated:** December 27, 2025  
+> **Last Updated:** Phase 2 Audit Complete  
 > **Analysis Method:** Deep code inspection + import tracing via grep analysis  
 > **Purpose:** Accurately identify which files are ACTUALLY used in production vs. tests vs. dead code
+
+---
+
+## 🆕 VERSION 1.2 UPDATE (Phase 2 System Audit)
+
+### Integration Audit Completed
+
+A comprehensive frontend↔backend integration audit was performed. See related documents:
+- **AUDIT_REPORT.md** - Detailed findings, broken integrations fixed, orphaned endpoints cataloged
+- **INTEGRATION_MAP.md** - Complete mapping of user features to backend services
+
+### Key Findings
+
+| Metric | Count |
+|--------|-------|
+| Backend Endpoints (Total) | 53 |
+| Frontend API Calls (Verified Working) | 21 |
+| Orphaned Backend Endpoints | 29 (documented) |
+| Broken API Calls Fixed | 4 |
+
+### Frontend Files Modified
+
+| File | Change |
+|------|--------|
+| `src/frontend/lib/config.ts` | Cleaned unused endpoint declarations, organized by category |
+| `src/frontend/app/page.tsx` | Fixed `handleCancelAnalysis` to use `getEndpoint()` |
+| `src/frontend/components/file-upload.tsx` | Fixed `handleDownloadFile` to use `getEndpoint()` |
+| `src/frontend/components/analytics-sidebar.tsx` | Fixed report download to use `getEndpoint()` |
+
+### Backend Endpoints Marked for Removal
+
+| Endpoint | Reason |
+|----------|--------|
+| `GET /api/models/health` | Duplicates `/api/health/` |
+| `GET /api/models/current` | Duplicates `/api/models/status` |
+| `POST /api/models/configure` | Complex unused configuration |
+| `POST /api/visualize/execute` | Merged into `/api/visualize/` |
 
 ---
 

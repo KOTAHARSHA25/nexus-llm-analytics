@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { apiUrl } from "@/lib/config";
+import { apiUrl, getEndpoint } from "@/lib/config";
 import {
   Table,
   TableBody,
@@ -94,7 +94,7 @@ export function FilePreview({ fileName, fileType, isOpen, onClose }: FilePreview
 
     try {
       const response = await fetch(
-        apiUrl(`api/upload/preview-file/${encodeURIComponent(fileName)}`),
+        `${getEndpoint('previewFile')}/${encodeURIComponent(fileName)}`,
         {
           method: "GET",
           headers: {
@@ -403,7 +403,7 @@ export function FilePreview({ fileName, fileType, isOpen, onClose }: FilePreview
             onClick={() => {
               // Create download link
               const link = document.createElement("a");
-              link.href = apiUrl(`api/upload/download-file/${encodeURIComponent(fileName)}`);
+              link.href = `${getEndpoint('downloadFile')}/${encodeURIComponent(fileName)}`;
               link.download = fileName;
               document.body.appendChild(link);
               link.click();

@@ -1,0 +1,35 @@
+
+\begin{table}[h]
+\centering
+\caption{Overall System Performance}
+\begin{tabular}{lc}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Mean Quality Score & 0.8199 \\
+Standard Deviation & 0.0348 \\
+Min Score & 0.6625 \\
+Max Score & 0.8550 \\
+Median Score & 0.8325 \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\begin{table}[h]
+\centering
+\caption{Baseline Comparison Results}
+\begin{tabular}{lccc}
+\hline
+\textbf{Configuration} & \textbf{Baseline} & \textbf{Full System} & \textbf{Improvement} \\
+\hline
+Single Model (GPT-4) & 0.708 & 0.988 & 39.6\% \\
+Single Model (Claude) & 0.708 & 0.985 & 39.1\% \\
+Without Two Friends Review & 0.756 & 0.986 & 30.4\% \\
+Without RAG & 0.703 & 0.987 & 40.4\% \\
+Fixed Routing & 0.797 & 0.984 & 23.5\% \\
+Without Caching & 0.851 & 0.986 & 15.9\% \\
+Minimal System & 0.558 & 0.986 & 76.8\% \\
+\hline
+\end{tabular}
+\end{table}

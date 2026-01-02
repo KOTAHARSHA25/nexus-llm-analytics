@@ -188,12 +188,18 @@ class StatisticalAgent(BasePluginAgent):
         # E.g., "what is the most listened track" → reject (no statistical context)
         # But "what is the correlation" → accept (has statistical context)
         if not has_statistical_context:
+            # Patterns that indicate user wants a specific record/name, not statistics
             specific_value_patterns = [
                 "which track", "which song", "which item", "which product", "which record",
                 "what is the most", "what is the least", "what is the highest", "what is the lowest",
                 "show me the top", "show me the bottom", "show me the best", "show me the worst",
                 "find the most", "find the least", "find the highest", "find the lowest",
-                "get the top", "get the bottom", "get the first", "get the last"
+                "get the top", "get the bottom", "get the first", "get the last",
+                # Added: patterns with "highest/lowest/most/least" anywhere (e.g., "row with highest")
+                "with highest", "with lowest", "with most", "with least",
+                "has the highest", "has the lowest", "has the most", "has the least",
+                "the most popular", "the least popular", "the highest", "the lowest",
+                "the top", "the bottom", "the best", "the worst"
             ]
             if any(pattern in query_lower for pattern in specific_value_patterns):
                 # This is asking for specific values, not statistics
@@ -354,6 +360,7 @@ class StatisticalAgent(BasePluginAgent):
                     col_data = data[col].dropna()
                     results["numeric_summary"][col] = {
                         "count": len(col_data),
+                        "sum": float(col_data.sum()),  # Add total sum
                         "mean": float(col_data.mean()),
                         "median": float(col_data.median()),
                         "std": float(col_data.std()),
@@ -475,33 +482,60 @@ class StatisticalAgent(BasePluginAgent):
         return strong_corr
     
     def _interpret_descriptive_stats(self, results: Dict) -> str:
-        """Generate interpretation of descriptive statistics"""
-        interpretations = []
+        """Generate interpretation of descriptive statistics with actual values"""
+        lines = []
         
         # Dataset overview
         shape = results["data_info"]["shape"]
-        interpretations.append(f"Dataset contains {shape[0]} rows and {shape[1]} columns.")
+        lines.append(f"## Dataset Overview\n")
+        lines.append(f"**Total Records:** {shape[0]:,}")
+        lines.append(f"**Total Columns:** {shape[1]}")
         
         # Missing data analysis
         missing = results["data_info"]["missing_values"]
         total_missing = sum(missing.values())
         if total_missing > 0:
-            interpretations.append(f"Found {total_missing} missing values across the dataset.")
+            lines.append(f"\n**Missing Values:** {total_missing:,}")
         
-        # Numeric variables analysis
-        numeric_summary = results["numeric_summary"]
-        for col, stats in numeric_summary.items():
-            skew = stats["skewness"]
-            if abs(skew) > 1:
-                skew_desc = "highly skewed" if abs(skew) > 2 else "moderately skewed"
-                direction = "right" if skew > 0 else "left"
-                interpretations.append(f"{col} is {skew_desc} to the {direction} (skewness: {skew:.2f}).")
-            
-            cv = stats["cv"]
-            if cv > 1:
-                interpretations.append(f"{col} shows high variability (CV: {cv:.2f}).")
+        # Numeric variables - show actual totals and key stats
+        numeric_summary = results.get("numeric_summary", {})
+        if numeric_summary:
+            lines.append(f"\n## Numeric Column Summary\n")
+            for col, stats in numeric_summary.items():
+                total_val = stats.get('sum', stats['mean'] * shape[0])
+                lines.append(f"### {col}")
+                lines.append(f"• **Total (Sum):** {total_val:,.2f}")
+                lines.append(f"• **Mean:** {stats['mean']:,.2f}")
+                lines.append(f"• **Median:** {stats['median']:,.2f}")
+                lines.append(f"• **Min - Max:** {stats['min']:,.2f} to {stats['max']:,.2f}")
+                lines.append(f"• **Standard Deviation:** {stats['std']:,.2f}")
+                
+                # Add distribution insights
+                skew = stats.get("skewness", 0)
+                if abs(skew) > 1:
+                    skew_desc = "highly skewed" if abs(skew) > 2 else "moderately skewed"
+                    direction = "right (more high values)" if skew > 0 else "left (more low values)"
+                    lines.append(f"• Distribution is {skew_desc} to the {direction}")
+                lines.append("")
         
-        return " ".join(interpretations)
+        # Categorical variables with value breakdowns
+        categorical_summary = results.get("categorical_summary", {})
+        if categorical_summary:
+            lines.append(f"\n## Category Breakdown\n")
+            for col, cat_stats in categorical_summary.items():
+                lines.append(f"### {col}")
+                lines.append(f"• **Unique Values:** {cat_stats['unique_count']}")
+                lines.append(f"• **Most Common:** {cat_stats['most_frequent']} ({cat_stats['most_frequent_count']:,} occurrences)")
+                
+                # Show top values if available
+                value_counts = cat_stats.get('value_counts', {})
+                if value_counts:
+                    lines.append("• **All Values:**")
+                    for val, count in list(value_counts.items())[:10]:
+                        lines.append(f"  - {val}: {count:,}")
+                lines.append("")
+        
+        return "\n".join(lines)
     
     def _interpret_correlations(self, correlation_tests: Dict) -> str:
         """Generate interpretation of correlation results"""
@@ -560,12 +594,15 @@ class StatisticalAgent(BasePluginAgent):
             if normality_result["success"]:
                 results["normality_tests"] = normality_result["result"]
             
+            # Generate comprehensive human-readable interpretation
+            interpretation = self._generate_comprehensive_interpretation(data, query, results)
+            
             return {
                 "success": True,
                 "result": results,
                 "agent": "StatisticalAgent",
                 "operation": "comprehensive_analysis",
-                "interpretation": "Comprehensive statistical analysis completed with descriptive statistics, correlation analysis, outlier detection, and normality testing."
+                "interpretation": interpretation
             }
             
         except Exception as e:
@@ -574,6 +611,76 @@ class StatisticalAgent(BasePluginAgent):
                 "error": f"Comprehensive analysis failed: {str(e)}",
                 "agent": "StatisticalAgent"
             }
+    
+    def _generate_comprehensive_interpretation(self, data: pd.DataFrame, query: str, results: Dict) -> str:
+        """
+        Generate a comprehensive, human-readable interpretation of the analysis.
+        Answers common questions: totals, categories, distributions, etc.
+        """
+        lines = []
+        query_lower = query.lower()
+        
+        # Get column info
+        numeric_cols = data.select_dtypes(include=[np.number]).columns.tolist()
+        categorical_cols = data.select_dtypes(include=['object', 'category']).columns.tolist()
+        
+        # Header
+        lines.append("## Statistical Analysis Summary\n")
+        
+        # Dataset overview
+        lines.append(f"**Dataset:** {data.shape[0]} records, {data.shape[1]} columns")
+        lines.append(f"**Numeric columns:** {', '.join(numeric_cols) if numeric_cols else 'None'}")
+        lines.append(f"**Categorical columns:** {', '.join(categorical_cols) if categorical_cols else 'None'}\n")
+        
+        # Answer specific questions based on query
+        descriptive = results.get("descriptive", {})
+        
+        # Total/sum questions
+        if any(term in query_lower for term in ["total", "sum", "all"]):
+            lines.append("### Totals")
+            for col in numeric_cols:
+                total = data[col].sum()
+                lines.append(f"• **Total {col}:** {total:,.2f}")
+            lines.append("")
+        
+        # Category/region breakdown
+        if categorical_cols:
+            lines.append("### Breakdown by Categories")
+            for cat_col in categorical_cols[:3]:  # Limit to top 3 categorical columns
+                lines.append(f"\n**By {cat_col}:**")
+                for num_col in numeric_cols[:3]:  # Limit to top 3 numeric columns
+                    try:
+                        grouped = data.groupby(cat_col)[num_col].agg(['sum', 'mean', 'count'])
+                        # Find highest
+                        if len(grouped) > 0:
+                            highest_idx = grouped['sum'].idxmax()
+                            highest_val = grouped.loc[highest_idx, 'sum']
+                            lines.append(f"• **Highest {num_col} by {cat_col}:** {highest_idx} ({highest_val:,.2f})")
+                            # Show all values if small number
+                            if len(grouped) <= 6:
+                                for idx, row in grouped.iterrows():
+                                    lines.append(f"  - {idx}: Total={row['sum']:,.2f}, Avg={row['mean']:,.2f}, Count={row['count']:.0f}")
+                    except Exception:
+                        pass
+            lines.append("")
+        
+        # Numeric summary
+        lines.append("### Key Statistics")
+        numeric_summary = descriptive.get("numeric_summary", {})
+        for col, stats in list(numeric_summary.items())[:5]:  # Limit to 5 columns
+            lines.append(f"**{col}:**")
+            lines.append(f"  • Mean: {stats['mean']:,.2f}, Median: {stats['median']:,.2f}")
+            lines.append(f"  • Range: {stats['min']:,.2f} to {stats['max']:,.2f}")
+            lines.append(f"  • Std Dev: {stats['std']:,.2f}")
+        
+        # Correlations (if any significant)
+        correlations = results.get("correlations")
+        if correlations and correlations.get("strong_correlations"):
+            lines.append("\n### Notable Correlations")
+            for corr in correlations["strong_correlations"][:5]:
+                lines.append(f"• {corr}")
+        
+        return "\n".join(lines)
     
     def _outlier_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
         """Detect and analyze outliers using multiple methods"""

@@ -27,7 +27,6 @@ report_manager = EnhancedReportManager()
 
 
 @router.get('/download-log')
-@router.get('/download-log')
 def download_log():
     from backend.core.config import settings
     log_path = settings.get_log_path()

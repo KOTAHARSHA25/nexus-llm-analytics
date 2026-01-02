@@ -74,7 +74,13 @@ class RawTextInput(BaseModel):
 
 # Security Configuration
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB limit
-ALLOWED_EXTENSIONS = {'.csv', '.json', '.pdf', '.txt', '.xlsx', '.xls', '.docx', '.pptx', '.rtf'}
+# Phase 3.5: Added scientific file formats (parquet, feather, hdf5, h5, nc, mat)
+ALLOWED_EXTENSIONS = {
+    # Standard formats
+    '.csv', '.json', '.pdf', '.txt', '.xlsx', '.xls', '.docx', '.pptx', '.rtf',
+    # Scientific formats (Phase 3.5)
+    '.parquet', '.feather', '.hdf5', '.h5', '.nc', '.mat'
+}
 ALLOWED_MIME_TYPES = {
     '.csv': ['text/csv', 'text/plain', 'application/csv'],
     '.json': ['application/json', 'text/plain'],
@@ -84,7 +90,14 @@ ALLOWED_MIME_TYPES = {
     '.xls': ['application/vnd.ms-excel'],
     '.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
     '.pptx': ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
-    '.rtf': ['application/rtf', 'text/rtf']
+    '.rtf': ['application/rtf', 'text/rtf'],
+    # Phase 3.5: Scientific formats MIME types
+    '.parquet': ['application/octet-stream', 'application/x-parquet'],
+    '.feather': ['application/octet-stream', 'application/x-feather'],
+    '.hdf5': ['application/x-hdf5', 'application/octet-stream'],
+    '.h5': ['application/x-hdf5', 'application/octet-stream'],
+    '.nc': ['application/x-netcdf', 'application/octet-stream'],
+    '.mat': ['application/x-matlab-data', 'application/octet-stream']
 }
 
 # Use centralized path resolver
