@@ -870,37 +870,205 @@ class MLInsightsAgent(BasePluginAgent):
     
     # Placeholder methods for other ML analyses
     def _classification_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for classification analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Classification analysis would be implemented here"},
-            "agent": "MLInsightsAgent",
-            "operation": "classification_analysis"
-        }
+        """Perform classification analysis (predict categorical target)"""
+        try:
+            # 1. Identify target column
+            target_col = kwargs.get('target_column')
+            if not target_col:
+                # Naive heuristic: Last column if categorical/integer, or look for "predict [col]"
+                words = query.lower().split()
+                if "predict" in words:
+                    try:
+                        idx = words.index("predict")
+                        if idx + 1 < len(words):
+                            potential_target = words[idx+1]
+                            # Find matching column
+                            for col in data.columns:
+                                if potential_target in col.lower():
+                                    target_col = col
+                                    break
+                    except: pass
+                
+                if not target_col:
+                    # Default to last categorical column
+                    cat_cols = data.select_dtypes(include=['object', 'category', 'int']).columns
+                    if len(cat_cols) > 0:
+                        target_col = cat_cols[-1]
+            
+            if not target_col or target_col not in data.columns:
+                return {"success": False, "error": "Could not identify target column for classification", "agent": "MLInsightsAgent"}
+
+            # 2. Prepare Data
+            X = data.drop(columns=[target_col])
+            y = data[target_col]
+            
+            # Encode non-numeric features in X
+            X = pd.get_dummies(X, drop_first=True)
+            
+            # Encode target if necessary
+            le = LabelEncoder()
+            y_encoded = le.fit_transform(y.astype(str))
+            
+            # 3. Split
+            X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
+            
+            # 4. Train Model (Decision Tree for interpretability)
+            model = DecisionTreeClassifier(max_depth=5, random_state=42)
+            model.fit(X_train, y_train)
+            
+            # 5. Evaluate
+            score = model.score(X_test, y_test)
+            
+            # 6. Feature Importance
+            feature_importance = dict(zip(X.columns, model.feature_importances_))
+            top_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:5]
+            
+            results = {
+                "target_column": target_col,
+                "model_type": "Decision Tree Classifier",
+                "accuracy": float(score),
+                "confusion_matrix_summary": "Top features determining class:",
+                "top_features": {k: float(v) for k, v in top_features},
+                "n_classes": len(le.classes_),
+                "classes": list(le.classes_[:10]) # Limit output
+            }
+            
+            return {
+                "success": True,
+                "result": results,
+                "agent": "MLInsightsAgent",
+                "operation": "classification_analysis",
+                "interpretation": f"Classification Model ({target_col}): Achieved {score:.2%} accuracy. Key drivers: {', '.join([f'{f[0]}' for f in top_features])}."
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Classification failed: {str(e)}", "agent": "MLInsightsAgent"}
     
     def _regression_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for regression analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Regression analysis would be implemented here"},
-            "agent": "MLInsightsAgent",
-            "operation": "regression_analysis"
-        }
+        """Perform regression analysis (predict continuous target)"""
+        try:
+            # 1. Identify target column
+            target_col = kwargs.get('target_column')
+            if not target_col:
+                numeric_cols = data.select_dtypes(include=[np.number]).columns
+                if len(numeric_cols) > 0:
+                    target_col = numeric_cols[-1] # Default to last numeric
+            
+            if not target_col or target_col not in data.columns:
+                 return {"success": False, "error": "Could not identify numeric target for regression", "agent": "MLInsightsAgent"}
+            
+            # 2. Prepare Data
+            X = data.drop(columns=[target_col])
+            
+            # Only use numeric features for simple regression or encode
+            X_numeric = X.select_dtypes(include=[np.number])
+            # If we lost too many columns, maybe try encoding (omitted for safety/speed)
+            if X_numeric.empty and not X.empty:
+                 X = pd.get_dummies(X, drop_first=True)
+            else:
+                 X = X_numeric
+
+            y = data[target_col]
+            if not pd.api.types.is_numeric_dtype(y):
+                 return {"success": False, "error": "Target column must be numeric for regression", "agent": "MLInsightsAgent"}
+
+            # Handle NaNs
+            X = X.fillna(0)
+            y = y.fillna(y.mean())
+
+            # 3. Split
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            
+            # 4. Train (Random Forest for robustness)
+            from sklearn.ensemble import RandomForestRegressor
+            model = RandomForestRegressor(n_estimators=50, max_depth=10, random_state=42)
+            model.fit(X_train, y_train)
+            
+            # 5. Evaluate
+            score = model.score(X_test, y_test) # R^2
+            
+            # 6. Feature Importance
+            feature_importance = dict(zip(X.columns, model.feature_importances_))
+            top_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:5]
+
+            results = {
+                "target_column": target_col,
+                "model_type": "Random Forest Regressor",
+                "r2_score": float(score),
+                "top_features": {k: float(v) for k, v in top_features}
+            }
+
+            return {
+                "success": True,
+                "result": results,
+                "agent": "MLInsightsAgent",
+                "operation": "regression_analysis",
+                "interpretation": f"Regression Model ({target_col}): R² score of {score:.2f}. Key predictive features: {', '.join([f[0] for f in top_features])}."
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Regression failed: {str(e)}", "agent": "MLInsightsAgent"}
     
     def _association_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for association analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Association analysis would be implemented here"},
-            "agent": "MLInsightsAgent",
-            "operation": "association_analysis"
-        }
+        """Perform association/correlation analysis"""
+        try:
+            numeric_data = data.select_dtypes(include=[np.number])
+            if numeric_data.empty:
+                 return {"success": False, "error": "No numeric data for correlation analysis", "agent": "MLInsightsAgent"}
+
+            corr_matrix = numeric_data.corr()
+            strong_corrs = self._find_strong_correlations(corr_matrix, threshold=0.6)
+            
+            results = {
+                "strong_associations": strong_corrs,
+                "n_variables": len(numeric_data.columns)
+            }
+            
+            top_pair = strong_corrs[0] if strong_corrs else None
+            interp = f"Analyzed relationships between {len(numeric_data.columns)} variables."
+            if top_pair:
+                interp += f" Strongest relationship found between {top_pair['feature1']} and {top_pair['feature2']} (Correlation: {top_pair['correlation']:.2f})."
+
+            return {
+                "success": True,
+                "result": results,
+                "agent": "MLInsightsAgent",
+                "operation": "association_analysis",
+                "interpretation": interp
+            }
+        except Exception as e:
+             return {"success": False, "error": f"Association analysis failed: {str(e)}", "agent": "MLInsightsAgent"}
     
     def _feature_importance_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for feature importance analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Feature importance analysis would be implemented here"},
-            "agent": "MLInsightsAgent",
-            "operation": "feature_importance_analysis"
-        }
+        """Identify most important features for a target"""
+        # Reuse regression/classification logic but focus on importance output
+        try:
+            # Heuristic: Try to determine if regression or classification
+            target_col = kwargs.get('target_column')
+            if not target_col:
+                 # Default to last col
+                 target_col = data.columns[-1]
+            
+            is_numeric = pd.api.types.is_numeric_dtype(data[target_col])
+            
+            if is_numeric and data[target_col].nunique() > 20: # Regression
+                sub_res = self._regression_analysis(data, query, target_column=target_col)
+            else: # Classification
+                sub_res = self._classification_analysis(data, query, target_column=target_col)
+            
+            if not sub_res["success"]:
+                return sub_res
+
+            importances = sub_res["result"].get("top_features", {})
+            
+            return {
+                "success": True,
+                "result": {
+                    "target_column": target_col,
+                    "feature_importances": importances,
+                    "method": sub_res["result"].get("model_type", "Model")
+                },
+                "agent": "MLInsightsAgent",
+                "operation": "feature_importance_analysis",
+                "interpretation": f"Feature Importance for '{target_col}': Top driver is {list(importances.keys())[0] if importances else 'None'}."
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Feature importance analysis failed: {str(e)}", "agent": "MLInsightsAgent"}

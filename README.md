@@ -33,9 +33,19 @@ Nexus LLM Analytics is a next-generation data analytics platform that leverages 
 ### **🔌 Specialized Plugin Agents**
 1. **📊 Statistical Agent**: Advanced statistical analysis, hypothesis testing, t-tests, ANOVA, correlation
 2. **📈 Time Series Agent**: ARIMA forecasting, trend analysis, seasonality detection, exponential smoothing
-3. **💰 Financial Agent**: Business metrics, profitability analysis, financial health assessment
-4. **🤖 ML Insights Agent**: Machine learning (K-means, Random Forest, PCA), clustering, regression, classification
-5. **🗄️ SQL Agent**: Multi-database support, query generation, schema analysis
+3. **💰 Financial Agent**: 
+    - **Liquidity & Efficiency**: Current/Quick ratios, Asset/Inventory turnover
+    - **Profitability**: ROI, ROE, ROA calculations
+    - **Forecasting**: Revenue/Profit projections
+    - **Customer Analysis**: CLV proxy, segmentation, churn risk
+4. **🤖 ML Insights Agent**: 
+    - **Classification**: Decision Trees, Random Forest (Auto-detected targets)
+    - **Regression**: Predictive modeling for continuous variables
+    - **Pattern Recognition**: K-means clustering, Association rules, Feature importance ranking
+5. **🗄️ SQL Agent ("Chat with your Data")**: 
+    - **Natural Language to SQL**: Convert questions ("Show top 5 sales") into safe SQL queries
+    - **Format Support**: Upload CSV/Excel and query them immediately via in-memory SQL engine
+    - **External DBs**: Connect to PostgreSQL/MySQL (Safe Mode: Blocks destructive DROP/DELETE ops)
 
 ### **🤖 Machine Learning & Statistical Capabilities** (NEW!)
 - **Clustering**: K-means, DBSCAN, Hierarchical clustering

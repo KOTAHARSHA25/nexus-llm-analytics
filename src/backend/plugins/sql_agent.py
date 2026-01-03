@@ -15,21 +15,25 @@ from datetime import datetime
 import tempfile
 
 # Add src to path for imports
-# Add src to path for imports
 src_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(src_path))
 
 try:
     from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
+    from backend.core.llm_client import LLMClient
 except ImportError as e:
     print(f"Import error: {e}")
-    print("Make sure you're running from the correct directory")
-    raise
+    # Fallback for testing execution where backend.core might not be in path
+    try:
+        from src.backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
+        from src.backend.core.llm_client import LLMClient
+    except ImportError:
+        pass
 
 # Optional imports for enhanced functionality
 try:
     import sqlalchemy
-    from sqlalchemy import create_engine, MetaData, inspect
+    from sqlalchemy import create_engine, MetaData, inspect, text
     HAS_SQLALCHEMY = True
 except ImportError:
     HAS_SQLALCHEMY = False
@@ -48,23 +52,10 @@ class SQLAgent(BasePluginAgent):
     
     Capabilities:
     - Advanced SQL query generation from natural language
+    - "Chat with your Data": Load CSV/Excel into in-memory SQL for querying
     - Comprehensive database schema analysis
     - Intelligent query optimization suggestions
     - Data relationship discovery and mapping
-    - Database performance monitoring
-    - Multi-database support (SQLite, PostgreSQL, MySQL, SQL Server)
-    - Query result visualization recommendations
-    - Database health checks and diagnostics
-    - Automated data profiling and statistics
-    
-    Features:
-    - Smart query parsing and intent recognition
-    - Context-aware SQL generation
-    - Performance prediction and optimization
-    - Security-focused query validation
-    - Result caching and query history
-    - Database connection pooling
-    - Error handling and recovery
     """
     
     def get_metadata(self) -> AgentMetadata:
@@ -72,7 +63,7 @@ class SQLAgent(BasePluginAgent):
         return AgentMetadata(
             name="EnhancedSQLAgent",
             version="2.0.0", 
-            description="Comprehensive SQL database analysis, query generation, and optimization agent with multi-database support",
+            description="Comprehensive SQL database analysis, query generation, and optimization agent with 'Talk to Data' support",
             author="Nexus LLM Analytics Team",
             capabilities=[
                 AgentCapability.SQL_QUERYING,
@@ -80,102 +71,57 @@ class SQLAgent(BasePluginAgent):
                 AgentCapability.VISUALIZATION,
                 AgentCapability.REPORTING
             ],
-            file_types=[".sql", ".db", ".sqlite", ".sqlite3", ".mysql", ".psql"],
+            file_types=[".sql", ".db", ".sqlite", ".sqlite3", ".mysql", ".psql", ".csv", ".xlsx", ".json"],
             dependencies=["sqlite3", "sqlalchemy", "pandas"],
             min_ram_mb=512,
             max_timeout_seconds=300,
-            priority=85  # High priority for SQL files
+            priority=85 
         )
     
     def initialize(self, **kwargs) -> bool:
-        """Initialize the enhanced SQL agent with comprehensive database support"""
+        """Initialize the enhanced SQL agent"""
         try:
+            # Database connections - Init these FIRST so they exist even if LLM fails
+            self.connections = {}
+            self.engines = {} 
+            self.connections = {}
+            self.active_db_type = "sqlite"
+            self.active_connection_id = "default"
+
             # Configuration
-            self.database_url = self.config.get("database_url", "sqlite:///data/analysis.db")
+            self.database_url = self.config.get("database_url", "sqlite:///:memory:") 
             self.query_timeout = self.config.get("query_timeout", 60)
             self.max_results = self.config.get("max_results", 10000)
-            self.cache_enabled = self.config.get("cache_enabled", True)
-            self.explain_queries = self.config.get("explain_queries", True)
             
-            # Database connections
-            self.connections = {}  # Multiple database support
-            self.engines = {}      # SQLAlchemy engines
-            self.inspectors = {}   # Schema inspectors
+            # Initialize LLM Client (Optional - for graceful degradation)
+            try:
+                self.llm_client = LLMClient()
+                logging.debug("SQLAgent: LLM Client initialized")
+            except Exception as e:
+                logging.warning(f"SQLAgent: LLM Client failed to init ({e}). SQL generation will be disabled.")
+                self.llm_client = None
             
-            # Query cache and history
-            self.query_cache = {}
-            self.query_history = []
-            self.schema_cache = {}
+            # Initialize default in-memory SQLite connection for "Chat with Data"
+            self._init_memory_connection()
             
-            # Advanced SQL query patterns with confidence scoring
-            self.query_patterns = {
-                "schema_analysis": {
-                    "patterns": ["schema", "structure", "tables", "columns", "describe", "info", "show tables"],
-                    "confidence_boost": 0.3
-                },
-                "aggregation": {
-                    "patterns": ["sum", "count", "average", "avg", "max", "min", "total", "group by"],
-                    "confidence_boost": 0.25
-                },
-                "filtering": {
-                    "patterns": ["where", "filter", "select", "find", "search", "condition"],
-                    "confidence_boost": 0.2
-                },
-                "joining": {
-                    "patterns": ["join", "relationship", "relate", "connect", "merge", "combine"],
-                    "confidence_boost": 0.25
-                },
-                "temporal": {
-                    "patterns": ["trend", "over time", "timeline", "date", "time series", "daily", "monthly"],
-                    "confidence_boost": 0.2
-                },
-                "ranking": {
-                    "patterns": ["top", "bottom", "rank", "order by", "sort", "best", "worst", "highest", "lowest"],
-                    "confidence_boost": 0.2
-                },
-                "comparison": {
-                    "patterns": ["compare", "vs", "versus", "difference", "between", "against"],
-                    "confidence_boost": 0.15
-                },
-                "optimization": {
-                    "patterns": ["optimize", "performance", "slow", "fast", "index", "explain", "plan"],
-                    "confidence_boost": 0.2
-                }
-            }
-            
-            # SQL keywords for natural language processing
-            self.sql_keywords = {
-                "select_keywords": ["select", "get", "show", "display", "list", "find"],
-                "aggregate_keywords": ["count", "sum", "average", "avg", "max", "min", "total"],
-                "filter_keywords": ["where", "filter", "condition", "criteria"],
-                "sort_keywords": ["order", "sort", "rank", "arrange"],
-                "group_keywords": ["group", "category", "type", "kind"],
-                "join_keywords": ["join", "merge", "combine", "relate"]
-            }
-            
-            # Common SQL functions and operations
-            self.sql_functions = {
-                "string": ["CONCAT", "SUBSTRING", "LENGTH", "UPPER", "LOWER", "TRIM"],
-                "date": ["NOW", "DATE", "YEAR", "MONTH", "DAY", "DATEDIFF"],
-                "math": ["ROUND", "CEIL", "FLOOR", "ABS", "POWER", "SQRT"],
-                "aggregate": ["COUNT", "SUM", "AVG", "MAX", "MIN", "GROUP_CONCAT"],
-                "window": ["ROW_NUMBER", "RANK", "DENSE_RANK", "LAG", "LEAD"]
-            }
-            
-            # Initialize default SQLite connection for demo/testing
-            self._init_default_connection()
-            
-            # Performance monitoring
-            self.query_stats = {
-                "total_queries": 0,
-                "successful_queries": 0,
-                "failed_queries": 0,
-                "avg_execution_time": 0.0,
-                "cache_hits": 0
-            }
+            # Initialize External Connection if configured
+            if self.database_url and "sqlite:///:memory:" not in self.database_url:
+                if HAS_SQLALCHEMY:
+                    try:
+                        engine = create_engine(self.database_url)
+                        self.engines['external'] = engine
+                        self.connections['external'] = engine.connect()
+                        self.active_connection_id = "external" # Default to external if configured
+                        logging.info(f"SQLAgent: Connected to external DB: {self.database_url}")
+                    except Exception as e:
+                        logging.error(f"SQLAgent: Failed to connect to external DB: {e}")
+                        # Fallback to memory
+                        self.active_connection_id = "default"
+                else:
+                    logging.warning("SQLAgent: External DB configured but SQLAlchemy missing.")
             
             self.initialized = True
-            logging.debug(f"SQLAgent initialized: timeout={self.query_timeout}s, max_results={self.max_results}")
+            logging.debug(f"SQLAgent initialized: timeout={self.query_timeout}s")
             
             return True
             
@@ -183,33 +129,24 @@ class SQLAgent(BasePluginAgent):
             logging.error(f"SQLAgent initialization failed: {e}")
             return False
             
-    def _init_default_connection(self):
-        """Initialize default SQLite connection"""
+    def _init_memory_connection(self):
+        """Initialize default in-memory SQLite connection"""
         try:
             if HAS_SQLALCHEMY:
-                engine = create_engine(self.database_url, echo=False)
+                engine = create_engine("sqlite:///:memory:", echo=False)
                 self.engines['default'] = engine
-                self.inspectors['default'] = inspect(engine)
-                logging.debug("SQLAlchemy engine initialized")
+                self.connections['default'] = engine.connect()
+                logging.debug("In-memory SQLite engine initialized")
             else:
-                # Fallback to sqlite3
-                if 'sqlite' in self.database_url.lower():
-                    db_path = self.database_url.replace('sqlite:///', '')
-                    # Create database directory if needed
-                    os.makedirs(os.path.dirname(db_path) if os.path.dirname(db_path) else 'data', exist_ok=True)
-                    self.connections['default'] = sqlite3.connect(db_path, check_same_thread=False)
-                    logging.debug("SQLite connection initialized")
-                    
+                self.connections['default'] = sqlite3.connect(":memory:", check_same_thread=False)
+                logging.debug("In-memory SQLite connection initialized")
         except Exception as e:
             logging.warning(f"Default connection setup failed: {e}")
-            # Continue without database connection for schema analysis of uploaded files
-    
+
     def can_handle(self, query: str, file_type: Optional[str] = None, **kwargs) -> float:
         """
-        Enhanced query handling assessment with sophisticated pattern matching
-        
-        CRITICAL: SQL Agent should ONLY handle explicit SQL/database queries
-        Returns confidence score 0.0-1.0
+        Determine if this agent can handle the query.
+        Handles explicit SQL queries AND 'Ask data' queries if CSV/Excel provided.
         """
         if not self.initialized:
             return 0.0
@@ -217,93 +154,61 @@ class SQLAgent(BasePluginAgent):
         confidence = 0.0
         query_lower = query.lower()
         
-        # Normalize file_type (handle both "sql" and ".sql")
-        if file_type and not file_type.startswith('.'):
-            file_type = '.' + file_type
-        
-        # CRITICAL FIX: Reject non-SQL file types immediately
-        supported_extensions = [".sql", ".db", ".sqlite", ".sqlite3", ".mysql", ".psql"]
-        non_sql_extensions = [".pdf", ".docx", ".txt", ".pptx", ".rtf", ".csv", ".json", ".xlsx", ".xls"]
-        
-        # If file_type is provided and it's NOT a SQL file, return LOW confidence
+        # Explicit SQL Intent
+        explicit_sql = ["sql", "database", "query", "select *", "join tables"]
+        if any(x in query_lower for x in explicit_sql):
+            confidence += 0.4
+
+        # File Handling
         if file_type:
-            if file_type.lower() in non_sql_extensions:
-                # Only proceed if query EXPLICITLY mentions SQL/database
-                explicit_sql = ["sql", "database", "query database", "generate sql", "write sql"]
-                if not any(keyword in query_lower for keyword in explicit_sql):
-                    logging.debug(f"SQL Agent rejecting non-SQL file without explicit SQL mention: {file_type}")
-                    return 0.0
-                # If explicit SQL mention with CSV/JSON, give moderate confidence
-                confidence = 0.3
-            elif file_type.lower() in supported_extensions:
-                confidence += 0.4
-                if file_type.lower() == ".sql":
-                    confidence += 0.1
+            ft = file_type.lower()
+            if not ft.startswith('.'): ft = '.' + ft
+            
+            if ft in [".sql", ".db", ".sqlite"]:
+                 confidence += 0.5
+            elif ft in [".csv", ".xlsx", ".json"]:
+                 # If CSV/Excel, only handle if query looks like a specific data question
+                 # that requires SQL-like aggregation (Count, Sum, Group By)
+                 agg_terms = ["count", "sum", "average", "group by", "how many", "total"]
+                 if any(x in query_lower for x in agg_terms):
+                     confidence += 0.2
         
-        # Require EXPLICIT SQL/database keywords for high confidence
-        explicit_sql_keywords = [
-            "sql", "database", "query database", "generate sql", 
-            "write sql", "create table", "alter table", "drop table"
-        ]
-        has_explicit_sql = any(keyword in query_lower for keyword in explicit_sql_keywords)
-        
-        # Check for SQL statements
-        sql_statement_patterns = ["select ", "insert ", "update ", "delete ", "create ", "alter ", "drop "]
-        has_sql_statement = any(pattern in query_lower for pattern in sql_statement_patterns)
-        
-        # Require at least one of these for non-SQL files
-        if not file_type or file_type.lower() in non_sql_extensions:
-            if not (has_sql_statement or has_explicit_sql):
-                logging.debug(f"SQL Agent: No explicit SQL content in query - returning 0.0")
-                return 0.0
-            else:
-                # Has explicit SQL keywords
-                confidence += 0.5
-        
-        # Core SQL keywords (only boost if already showing SQL intent)
-        if confidence > 0:
-            core_sql_keywords = ["query", "table", "select", "insert", "update", "delete", "join"]
-            core_matches = sum(1 for keyword in core_sql_keywords if keyword in query_lower)
-            confidence += min(core_matches * 0.05, 0.15)
-        
-        # Advanced SQL keywords (only if base confidence exists)
-        if confidence > 0:
-            advanced_sql_keywords = ["join", "group by", "order by", "having", "union", "subquery", "index"]
-            advanced_matches = sum(1 for keyword in advanced_sql_keywords if keyword in query_lower)
-            confidence += min(advanced_matches * 0.06, 0.2)
-        
-        # Pattern-based analysis (only if showing SQL intent)
-        if confidence > 0:
-            for pattern_type, pattern_data in self.query_patterns.items():
-                patterns = pattern_data["patterns"]
-                boost = pattern_data["confidence_boost"]
-                
-                matches = sum(1 for pattern in patterns if pattern in query_lower)
-                if matches > 0:
-                    confidence += min(matches * boost * 0.5, boost * 0.5)  # Reduced boost
-        
-        # Cap confidence to prevent over-confidence on ambiguous queries
-        return min(confidence, 0.95)
-    
+        return min(confidence, 0.9) # Cap at 0.9 to let specialized agents (Financial) take precedence if very specific
+
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
-        """
-        Execute SQL analysis based on the query
-        """
+        """Execute SQL analysis"""
         try:
-            # Parse the query intent
+            if not self.initialized and not self.initialize():
+                 return {"success": False, "error": "SQL Agent failed to initialize", "agent": "SQLAgent"}
+
+            # 1. Load Data into SQL if provided (and not already a SQL DB)
+            table_name = "analyzed_data"
+            if data is not None and HAS_PANDAS and isinstance(data, pd.DataFrame):
+                self._load_dataframe_to_sql(data, table_name)
+            
+            filename = kwargs.get('filename', 'data')
+            
+            # 2. Parse Intent
             intent = self._parse_query_intent(query)
             
-            # Handle different types of requests
             if intent == "schema":
-                return self._analyze_schema(**kwargs)
-            elif intent == "generate_query":
-                return self._generate_sql_query(query, **kwargs)
-            elif intent == "execute_query":
-                return self._execute_sql_query(query, **kwargs)
+                return self._analyze_schema(table_name)
             elif intent == "optimize":
-                return self._optimize_query(query, **kwargs)
+                return self._optimize_query(query)
             else:
-                return self._general_analysis(query, **kwargs)
+                # Default: Generate and Execute SQL
+                # Step 1: Generate SQL from Natural Language
+                # If query is already SQL, skip generation
+                if self._is_raw_sql(query):
+                    sql_query = query
+                else:
+                    generation_result = self._generate_sql_query(query, table_name, data)
+                    if not generation_result["success"]:
+                        return generation_result
+                    sql_query = generation_result["result"]["generated_sql"]
+
+                # Step 2: Execute SQL
+                return self._execute_sql_query(sql_query)
             
         except Exception as e:
             return {
@@ -312,217 +217,185 @@ class SQLAgent(BasePluginAgent):
                 "agent": "SQLAgent"
             }
     
+    def _load_dataframe_to_sql(self, df: pd.DataFrame, table_name: str):
+        """Load a DataFrame into the in-memory SQLite database"""
+        try:
+            # ALWAYS load uploaded data into the memory connection, to avoid polluting external DBs
+            conn = self.connections['default'] # Force 'default' (memory)
+            
+            if HAS_SQLALCHEMY:
+                df.to_sql(table_name, con=self.engines['default'], if_exists='replace', index=False)
+            else:
+                df.to_sql(table_name, con=conn, if_exists='replace', index=False)
+            
+            # Switch active context to memory since we are working with uploaded data
+            self.active_connection_id = 'default' 
+            logging.info(f"Loaded DataFrame into SQL table '{table_name}' (Memory Context)")
+        except Exception as e:
+            logging.error(f"Failed to load DF to SQL: {e}")
+            raise
+
+    def _is_raw_sql(self, query: str) -> bool:
+        """Check if query is likely raw SQL"""
+        q = query.strip().upper()
+        return q.startswith("SELECT") or q.startswith("WITH") or q.startswith("PRAGMA")
+
     def _parse_query_intent(self, query: str) -> str:
-        """Parse the user's intent from the query"""
-        query_lower = query.lower()
-        
-        if any(word in query_lower for word in ["schema", "structure", "tables", "columns"]):
-            return "schema"
-        elif any(word in query_lower for word in ["generate", "create", "write"]):
-            return "generate_query"
-        elif any(word in query_lower for word in ["execute", "run", "perform"]):
-            return "execute_query"
-        elif any(word in query_lower for word in ["optimize", "improve", "performance"]):
-            return "optimize"
-        else:
-            return "general_analysis"
-    
-    def _analyze_schema(self, **kwargs) -> Dict[str, Any]:
+        q = query.lower()
+        if "schema" in q or "describe table" in q: return "schema"
+        if "optimize" in q or "explain query" in q: return "optimize"
+        return "query"
+
+    def _analyze_schema(self, table_name: str = None) -> Dict[str, Any]:
         """Analyze database schema"""
         try:
-            # This is a demo implementation
-            # In a real implementation, you'd connect to the actual database
-            
-            sample_schema = {
-                "tables": [
-                    {
-                        "name": "users", 
-                        "columns": ["id", "name", "email", "created_at"],
-                        "row_count": 1500
-                    },
-                    {
-                        "name": "orders", 
-                        "columns": ["id", "user_id", "product", "amount", "order_date"],
-                        "row_count": 5200
-                    },
-                    {
-                        "name": "products", 
-                        "columns": ["id", "name", "category", "price"],
-                        "row_count": 350
-                    }
-                ],
-                "relationships": [
-                    {"from": "orders.user_id", "to": "users.id", "type": "foreign_key"}
-                ]
-            }
-            
+            schema_info = {}
+            if HAS_SQLALCHEMY:
+                inspector = inspect(self.engines['default'])
+                tables = inspector.get_table_names()
+                for table in tables:
+                    columns = inspector.get_columns(table)
+                    schema_info[table] = [{"name": c["name"], "type": str(c["type"])} for c in columns]
+            else:
+                # SQLite fallback
+                cur = self.connections['default'].cursor()
+                cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+                tables = cur.fetchall()
+                for table in tables:
+                    t_name = table[0]
+                    cur.execute(f"PRAGMA table_info({t_name})")
+                    columns = cur.fetchall()
+                    schema_info[t_name] = [{"name": c[1], "type": c[2]} for c in columns]
+
             return {
                 "success": True,
                 "result": {
-                    "schema_analysis": sample_schema,
-                    "summary": f"Database contains {len(sample_schema['tables'])} tables with {len(sample_schema['relationships'])} relationships",
-                    "recommendations": [
-                        "Consider adding indexes on frequently queried columns",
-                        "Review foreign key constraints for data integrity",
-                        "Consider partitioning large tables for better performance"
-                    ]
+                    "schema": schema_info,
+                    "summary": f"Database contains {len(schema_info)} tables."
                 },
                 "agent": "SQLAgent",
                 "operation": "schema_analysis"
             }
-            
         except Exception as e:
-            return {
-                "success": False,
-                "error": f"Schema analysis failed: {str(e)}",
-                "agent": "SQLAgent"
-            }
-    
-    def _generate_sql_query(self, query: str, **kwargs) -> Dict[str, Any]:
-        """Generate SQL query based on natural language request"""
+             return {"success": False, "error": f"Schema analysis failed: {str(e)}", "agent": "SQLAgent"}
+
+    def _generate_sql_query(self, query: str, table_name: str, data: Any) -> Dict[str, Any]:
+        """Generate SQL query using an LLM"""
         try:
-            # Parse the request to understand what SQL to generate
-            query_lower = query.lower()
-            
-            # Simple pattern matching for demo
-            if "count" in query_lower and "users" in query_lower:
-                generated_sql = "SELECT COUNT(*) as user_count FROM users;"
-                explanation = "Counts the total number of users in the database"
-            elif "average" in query_lower and "orders" in query_lower:
-                generated_sql = "SELECT AVG(amount) as average_order_value FROM orders;"
-                explanation = "Calculates the average order value"
-            elif "top" in query_lower and "products" in query_lower:
-                generated_sql = """
-SELECT p.name, COUNT(o.id) as order_count 
-FROM products p 
-JOIN orders o ON p.id = o.product_id 
-GROUP BY p.id, p.name 
-ORDER BY order_count DESC 
-LIMIT 10;
-                """
-                explanation = "Gets the top 10 most ordered products"
-            else:
-                # Generic query generation
-                generated_sql = "-- SQL query would be generated based on natural language analysis"
-                explanation = f"Generated SQL for: {query}"
-            
-            return {
-                "success": True,
-                "result": {
-                    "generated_sql": generated_sql.strip(),
-                    "explanation": explanation,
-                    "estimated_complexity": "medium",
-                    "estimated_execution_time": "< 1 second"
-                },
-                "agent": "SQLAgent",
-                "operation": "query_generation"
-            }
-            
-        except Exception as e:
-            return {
-                "success": False,
-                "error": f"Query generation failed: {str(e)}",
-                "agent": "SQLAgent"
-            }
-    
-    def _execute_sql_query(self, query: str, **kwargs) -> Dict[str, Any]:
-        """Execute SQL query (demo implementation)"""
-        try:
-            # Extract SQL from query if present
-            sql_match = re.search(r"```sql\n(.*?)\n```", query, re.DOTALL)
-            if sql_match:
-                sql_query = sql_match.group(1)
-            else:
-                # Simple SQL detection
-                if query.strip().upper().startswith(('SELECT', 'INSERT', 'UPDATE', 'DELETE')):
-                    sql_query = query
-                else:
-                    return {
-                        "success": False,
-                        "error": "No valid SQL query found in request",
-                        "agent": "SQLAgent"
-                    }
-            
-            # SECURITY VALIDATION
-            dangerous_keywords = ['DROP', 'TRUNCATE', 'ALTER', 'GRANT', 'EXEC']
-            query_upper = sql_query.upper()
-            if any(keyword in query_upper for keyword in dangerous_keywords) and not "SELECT" in query_upper:
-                # Allow strictly SELECT or non-destructive operations
-                # (Note: Simple keyword matching is not perfect but covers basic injection)
-                return {
-                    "success": False,
-                    "error": "Security Alert: Destructive DDL queries (DROP, ALTER, etc.) are blocked.",
+            if not self.llm_client:
+                 return {
+                    "success": False, 
+                    "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
                     "agent": "SQLAgent"
                 }
+
+            # 1. Get Schema Context
+            if data is not None and isinstance(data, pd.DataFrame):
+                columns = ", ".join([f"{col} ({dtype})" for col, dtype in data.dtypes.items()])
+                schema_context = f"Table '{table_name}' has columns: {columns}"
+            else:
+                # Try to fetch from DB
+                schema_res = self._analyze_schema()
+                schema_context = f"Database Schema: {schema_res.get('result', {}).get('schema', 'Unknown')}"
+
+            # 2. Construct Prompt
+            prompt = f"""
+            You are an expert SQL generator. Convert the following natural language request into a valid SQL query (SQLite dialect).
             
-            # Demo execution (in real implementation, would execute against actual DB)
-            sample_results = [
-                {"id": 1, "name": "John Doe", "email": "john@example.com"},
-                {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
-                {"id": 3, "name": "Bob Johnson", "email": "bob@example.com"}
-            ]
+            Context:
+            {schema_context}
+            
+            Request: "{query}"
+            
+            Rules:
+            1. Return ONLY the raw SQL query. No markdown, no explanation.
+            2. Use SQLite syntax.
+            3. Do not use potentially dangerous commands (DROP, DELETE, UPDATE). SELECT only.
+            """
+            
+            # 3. Call LLM
+            response = self.llm_client.generate_response(prompt, temperature=0.1)
+            
+            # 4. Clean formatting
+            sql = response.replace("```sql", "").replace("```", "").strip()
             
             return {
                 "success": True,
                 "result": {
-                    "sql_query": sql_query,
-                    "results": sample_results,
-                    "row_count": len(sample_results),
-                    "execution_time_ms": 45,
-                    "columns": list(sample_results[0].keys()) if sample_results else []
+                    "generated_sql": sql,
+                    "explanation": "Generated from natural language request."
+                },
+                "agent": "SQLAgent"
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Query generation failed: {str(e)}", "agent": "SQLAgent"}
+
+    def _execute_sql_query(self, query: str, **kwargs) -> Dict[str, Any]:
+        """Execute SQL query safely"""
+        try:
+            # Security Check
+            # Security Check - BLOCK DESTRUCTIVE OPERATIONS ONLY
+            # User requirement: Allow operations except those that "harm" (delete/remove) the DB.
+            forbidden = ["DROP ", "DELETE ", "TRUNCATE "]
+            q_upper = query.upper()
+            if any(cmd in q_upper for cmd in forbidden):
+                 return {"success": False, "error": "Security Alert: Destructive operations (DROP, DELETE, TRUNCATE) are prohibited.", "agent": "SQLAgent"}
+
+            # Determine connection to use
+            # If we recently loaded data, active_connection_id might be 'default' (memory)
+            # If default is 'external' but we are querying uploaded data, we must ensure we look at memory.
+            # But the query context usually implies intent.
+            
+            target_conn_id = self.active_connection_id
+            
+            # Safe execution
+            if target_conn_id in self.connections:
+                conn = self.connections[target_conn_id]
+            else:
+                conn = self.connections['default'] # Fallback
+            
+            # Additional check: If using external DB, ensure read-only transaction if possible
+            # (Difficult to enforce strictly at driver level without user permissions, but regex catch is first line of defense)
+            
+            if HAS_PANDAS:
+                df_result = pd.read_sql_query(query, conn)
+                results = df_result.to_dict(orient='records')
+                columns = list(df_result.columns)
+            else:
+                cur = conn.cursor()
+                cur.execute(query)
+                columns = [description[0] for description in cur.description]
+                results = [dict(zip(columns, row)) for row in cur.fetchall()]
+            
+            return {
+                "success": True,
+                "result": {
+                    "sql_query": query,
+                    "results": results[:100], # Limit return size
+                    "row_count": len(results),
+                    "columns": columns
                 },
                 "agent": "SQLAgent",
                 "operation": "query_execution"
             }
-            
         except Exception as e:
-            return {
-                "success": False,
-                "error": f"Query execution failed: {str(e)}",
-                "agent": "SQLAgent"
-            }
-    
+            return {"success": False, "error": f"Query execution failed: {str(e)}", "agent": "SQLAgent"}
+
     def _optimize_query(self, query: str, **kwargs) -> Dict[str, Any]:
-        """Provide query optimization suggestions"""
+        """Provide optimization suggestions (stub - can use LLM later)"""
+        # Could call LLM here too, but simple rules are fast
+        suggestions = []
+        if "SELECT *" in query.upper():
+            suggestions.append("Select specific columns instead of * to reduce load.")
+        if "LIKE '%...%'" in query.upper():
+            suggestions.append("Leading wildcards prevent index usage.")
+            
         return {
             "success": True,
             "result": {
                 "original_query": query,
-                "optimization_suggestions": [
-                    "Add appropriate indexes on WHERE clause columns",
-                    "Consider using LIMIT for large result sets",
-                    "Use specific column names instead of SELECT *",
-                    "Consider query result caching for frequently accessed data"
-                ],
-                "estimated_improvement": "2-5x performance improvement possible"
+                "suggestions": suggestions if suggestions else ["Query looks reasonable."]
             },
             "agent": "SQLAgent",
             "operation": "query_optimization"
         }
-    
-    def _general_analysis(self, query: str, **kwargs) -> Dict[str, Any]:
-        """Handle general SQL-related analysis requests"""
-        return {
-            "success": True,
-            "result": {
-                "query": query,
-                "analysis_type": "general_sql_analysis",
-                "capabilities": [
-                    "Schema analysis and documentation",
-                    "Natural language to SQL conversion",
-                    "Query performance optimization",
-                    "Data relationship mapping",
-                    "Database health monitoring"
-                ],
-                "next_steps": [
-                    "Specify database connection details",
-                    "Provide schema information",
-                    "Define specific analysis requirements"
-                ]
-            },
-            "agent": "SQLAgent",
-            "operation": "general_analysis"
-        }
-
-# This agent will be automatically discovered and loaded by the plugin system
-# No additional registration code needed - just drop this file in the plugins/ folder!
