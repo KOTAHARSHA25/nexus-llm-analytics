@@ -13,6 +13,9 @@ import logging
 class Settings(BaseSettings):
     """Application settings with validation and defaults"""
     
+    # Define Project Root (src/backend/core/config.py -> core -> backend -> src -> root)
+    PROJECT_ROOT: Path = Path(__file__).parent.parent.parent.parent
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -50,11 +53,11 @@ class Settings(BaseSettings):
         default="csv,json,txt,pdf,xlsx,xls",
         env="ALLOWED_FILE_EXTENSIONS"
     )
-    upload_directory: str = Field(default="./data/uploads", env="UPLOAD_DIRECTORY")
+    upload_directory: str = Field(default=str(PROJECT_ROOT / "data" / "uploads"), env="UPLOAD_DIRECTORY")
     
     # Database settings
     chromadb_persist_directory: str = Field(
-        default="./chroma_db",
+        default=str(PROJECT_ROOT / "chroma_db"),
         env="CHROMADB_PERSIST_DIRECTORY"
     )
     chromadb_collection_name: str = Field(
@@ -94,7 +97,7 @@ class Settings(BaseSettings):
     
     # Logging settings
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
-    log_file: Optional[str] = Field(default="logs/nexus.log", env="LOG_FILE")
+    log_file: Optional[str] = Field(default=str(PROJECT_ROOT / "logs" / "nexus.log"), env="LOG_FILE")
     log_format: str = Field(
         default="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         env="LOG_FORMAT"
@@ -118,7 +121,7 @@ class Settings(BaseSettings):
     
     # Report generation settings
     report_template_path: str = Field(default="templates/report.html", env="REPORT_TEMPLATE")
-    reports_directory: str = Field(default="./reports", env="REPORTS_DIRECTORY")
+    reports_directory: str = Field(default=str(PROJECT_ROOT / "reports"), env="REPORTS_DIRECTORY")
     max_report_size_mb: int = Field(default=50, env="MAX_REPORT_SIZE_MB")
     
     # API documentation

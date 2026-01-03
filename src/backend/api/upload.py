@@ -387,7 +387,7 @@ async def upload_document(file: UploadFile = File(...)):
             
             # Step 11: Invalidate cache for this filename to prevent stale data
             try:
-                from backend.core.advanced_cache import _query_cache, _file_analysis_cache
+                from backend.infra.advanced_cache import _query_cache, _file_analysis_cache
                 
                 # Clear ALL caches for this filename using multiple strategies
                 # Strategy 1: Tag-based invalidation
@@ -798,6 +798,7 @@ async def upload_raw_text(raw_text: RawTextInput):
         if not safe_title:
             safe_title = "raw_text_input"
         
+
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{safe_title}_{timestamp}.txt"
         

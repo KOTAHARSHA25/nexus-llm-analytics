@@ -6,7 +6,10 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 
 # Add src to path so we can import backend modules
-sys.path.append(str(Path(__file__).parent.parent.parent))
+# root/tests/conftest.py -> parent=tests -> parent=root
+root_dir = Path(__file__).parent.parent
+src_dir = root_dir / "src"
+sys.path.insert(0, str(src_dir))
 
 from backend.main import app
 from backend.core.llm_client import LLMClient
@@ -60,14 +63,14 @@ def sample_csv_file(tmp_path):
 @pytest.fixture(autouse=True)
 def mock_model_selector():
     """Mock ModelSelector to avoid real OLLAMA calls"""
-    with patch("backend.core.model_selector.ModelSelector.select_optimal_models") as mock_sel:
+    with patch("backend.core.engine.model_selector.ModelSelector.select_optimal_models") as mock_sel:
         mock_sel.return_value = ("phi3:mini", "phi3:mini", "nomic-embed-text")
         yield mock_sel
 
 @pytest.fixture(scope="session", autouse=True)
 def mock_ollama_llm():
     """Mock LLM initialization to prevent any network calls"""
-    with patch("backend.agents.model_initializer.ModelInitializer._initialize_llms", autospec=True) as mock_init:
+    with patch("backend.agents.model_manager.ModelManager._initialize_llms", autospec=True) as mock_init:
         # Mock the side effects of initialization
         def side_effect(self):
             # Create mocks for LLMs

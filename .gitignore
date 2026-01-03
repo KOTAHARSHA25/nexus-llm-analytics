@@ -80,3 +80,6 @@ archive/
 
 # Broken folder
 broken/
+
+# Whitelist frontend lib
+!src/frontend/lib/

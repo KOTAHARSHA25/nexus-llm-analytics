@@ -25,9 +25,9 @@ def _get_local_ip() -> str:
 async def get_system_status() -> Dict[str, Any]:
     """Get comprehensive system health status"""
     try:
-        from backend.core.circuit_breaker import get_all_circuit_breaker_status
-        from backend.core.advanced_cache import get_cache_status
-        from backend.core.model_selector import ModelSelector
+        from backend.infra.circuit_breaker import get_all_circuit_breaker_status
+        from backend.infra.advanced_cache import get_cache_status
+        from backend.core.engine.model_selector import ModelSelector
         
         # System resources
         memory_info = psutil.virtual_memory()
@@ -133,7 +133,7 @@ async def get_system_status() -> Dict[str, Any]:
             "error": str(e)
         }
 
-@router.get("/health")
+@router.get("/")
 async def health_check() -> Dict[str, str]:
     """Simple health check endpoint"""
     return {"status": "ok", "message": "Nexus LLM Analytics is running"}
@@ -159,7 +159,7 @@ async def get_network_info() -> Dict[str, Any]:
 async def get_cache_info() -> Dict[str, Any]:
     """Get detailed cache information"""
     try:
-        from backend.core.advanced_cache import get_cache_status
+        from backend.infra.advanced_cache import get_cache_status
         return get_cache_status()
     except Exception as e:
         return {"error": str(e)}
@@ -168,7 +168,7 @@ async def get_cache_info() -> Dict[str, Any]:
 async def clear_cache() -> Dict[str, str]:
     """Clear all system caches"""
     try:
-        from backend.core.advanced_cache import clear_all_caches
+        from backend.infra.advanced_cache import clear_all_caches
         clear_all_caches()
         return {"status": "success", "message": "All caches cleared"}
     except Exception as e:

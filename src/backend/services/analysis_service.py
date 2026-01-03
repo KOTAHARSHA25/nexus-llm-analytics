@@ -11,8 +11,9 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from backend.core.plugin_system import get_agent_registry
-from backend.core.user_preferences import get_preferences_manager
-from backend.core.result_interpreter import interpret_result, ResultInterpreter
+from backend.core.engine.user_preferences import get_preferences_manager
+from backend.io.result_interpreter import interpret_result, ResultInterpreter
+from backend.core.semantic_mapper import get_semantic_mapper
 
 
 class AnalysisService:
@@ -25,47 +26,42 @@ class AnalysisService:
     
     def __init__(self):
         self.registry = get_agent_registry()
-        self._intelligent_router = None
+        self._orchestrator = None
         # Ensure plugins are loaded
         # self.registry.discover_agents() # This is usually done on import or app startup
         logging.info("AnalysisService initialized")
     
     @property
-    def intelligent_router(self):
-        """Get intelligent router (lazy loaded)"""
-        if self._intelligent_router is None:
-            from backend.core.intelligent_router import get_intelligent_router
-            self._intelligent_router = get_intelligent_router()
-        return self._intelligent_router
+    def orchestrator(self):
+        """Get query orchestrator (lazy loaded)"""
+        if self._orchestrator is None:
+            from backend.core.engine.query_orchestrator import QueryOrchestrator
+            self._orchestrator = QueryOrchestrator()
+        return self._orchestrator
     
     def _get_model_for_query(self, query: str, context: Dict[str, Any]) -> Optional[str]:
         """
-        Get optimal model for query using intelligent routing.
+        Get optimal model for query using QueryOrchestrator.
         Returns None if routing is disabled or unavailable.
         """
         try:
-            prefs = get_preferences_manager().load_preferences()
-            if not prefs.enable_intelligent_routing:
-                return None
+            # Create execution plan using QueryOrchestrator
+            plan = self.orchestrator.create_execution_plan(
+                query=query,
+                data=context.get('dataframe'),
+                context=context
+            )
             
-            # Build data info for routing
-            data_info = {}
-            if context.get('data_info'):
-                data_info = context['data_info']
-            elif context.get('rows') and context.get('columns'):
-                data_info = {
-                    'rows': context['rows'],
-                    'columns': context['columns']
-                }
+            # Log the brain's reasoning
+            logging.info(f"🧠 QueryOrchestrator Decision: {plan.model}")
+            logging.info(f"   Reasoning: {plan.reasoning}")
+            if plan.user_override:
+                logging.info(f"   ⚠️ USER OVERRIDE: User explicitly chose this model")
             
-            # Route the query
-            decision = self.intelligent_router.route(query, data_info)
-            logging.info(f"🧠 Intelligent routing: {decision.selected_tier.value} -> {decision.selected_model}")
-            
-            return decision.selected_model
+            return plan.model
             
         except Exception as e:
-            logging.warning(f"Intelligent routing failed, using default: {e}")
+            logging.warning(f"QueryOrchestrator failed, using default: {e}")
             return None
 
     async def analyze(self, 
@@ -96,7 +92,17 @@ class AnalysisService:
         
         logging.info(f"AnalysisService received query: {query} (file: {filename})")
         
-        # 0. Intelligent model routing (if enabled)
+        # 0a. Apply semantic layer to enhance query (Fix 8)
+        if context.get('dataframe') is not None:
+            try:
+                mapper = get_semantic_mapper()
+                enhanced_query = mapper.enhance_query_context(query, context['dataframe'])
+                logging.debug(f"🔍 Query enhanced with semantic concepts")
+                query = enhanced_query  # Use enhanced version
+            except Exception as e:
+                logging.warning(f"Semantic enhancement failed, using original query: {e}")
+        
+        # 0b. Intelligent model routing (if enabled)
         selected_model = self._get_model_for_query(query, context)
         if selected_model:
             context['selected_model'] = selected_model
@@ -119,9 +125,16 @@ class AnalysisService:
         
         # 2. Execute analysis
         try:
-            # We pass the query and full context to the agent
-            # The agent is responsible for its own execution logic (optimization, etc.)
-            result = agent.execute(query, **context)
+            # Check if agent has async execute method
+            if hasattr(agent, 'execute_async'):
+                logging.debug(f"Using async execution for {agent.metadata.name}")
+                result = await agent.execute_async(query, **context)
+            else:
+                # Fallback to sync execution (run in thread pool to avoid blocking)
+                import asyncio
+                logging.debug(f"Using sync execution for {agent.metadata.name}")
+                loop = asyncio.get_event_loop()
+                result = await loop.run_in_executor(None, lambda: agent.execute(query, **context))
             
             # 3. Generate human-readable interpretation if not provided
             interpretation = result.get("interpretation")

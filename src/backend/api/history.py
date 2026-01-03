@@ -444,7 +444,7 @@ async def replay_code_execution(request: CodeReplayRequest) -> CodeReplayRespons
     """
     try:
         import pandas as pd
-        from backend.core.code_generator import get_code_generator
+        from backend.io.code_generator import get_code_generator
         from backend.core.code_execution_history import get_execution_history
         from backend.core.config import settings
         

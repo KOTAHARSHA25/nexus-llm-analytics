@@ -327,7 +327,7 @@ class Phase1TestSuite:
         # Test 5.1: Initialization
         start = time.time()
         try:
-            from backend.core.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
+            from backend.core.engine.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
             
             config = {
                 'model_selection': {

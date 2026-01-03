@@ -18,7 +18,7 @@ import base64
 import io
 import matplotlib.pyplot as plt
 
-from backend.core.sandbox import EnhancedSandbox
+from backend.core.security.sandbox import EnhancedSandbox
 from backend.utils.data_utils import read_dataframe, create_data_summary, clean_code_snippet
 from backend.visualization.dynamic_charts import ChartTypeAnalyzer, DynamicChartGenerator
 

@@ -7,6 +7,7 @@ import sys
 import logging
 import os
 import json
+import asyncio
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 
@@ -15,9 +16,9 @@ src_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(src_path))
 
 from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
-from backend.agents.model_initializer import get_model_initializer
+from backend.agents.model_manager import get_model_manager
 from backend.core.dynamic_planner import get_dynamic_planner
-from backend.core.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
+from backend.core.engine.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
 
 # Phase 1 imports
 try:
@@ -26,7 +27,7 @@ try:
         resilient_llm_call,
         GracefulDegradation
     )
-    from backend.core.circuit_breaker import get_circuit_breaker, CircuitState
+    from backend.infra.circuit_breaker import get_circuit_breaker, CircuitState
     PHASE1_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"Phase 1 components not available: {e}")
@@ -58,7 +59,7 @@ class DataAnalystAgent(BasePluginAgent):
         )
     
     def initialize(self, **kwargs) -> bool:
-        self.initializer = get_model_initializer()
+        self.initializer = get_model_manager()
         self._cot_engine = None
         self._cot_config = None
         self._orchestrator = None  # Lazy loaded QueryOrchestrator
@@ -66,36 +67,87 @@ class DataAnalystAgent(BasePluginAgent):
         return True
     
     def _get_orchestrator(self) -> QueryOrchestrator:
-        """Lazy load the QueryOrchestrator for unified decision making"""
+        """
+        Lazy load the QueryOrchestrator for unified decision making.
+        
+        STREAMLINED: No config needed - orchestrator loads from cot_review_config.json automatically
+        """
         if self._orchestrator is None:
-            config = self._load_orchestrator_config()
-            self._orchestrator = QueryOrchestrator(
-                complexity_analyzer=None,  # Uses heuristic
-                config=config
-            )
+            self._orchestrator = QueryOrchestrator()  # Auto-loads config
         return self._orchestrator
     
-    def _load_orchestrator_config(self) -> Dict[str, Any]:
-        """Load orchestrator configuration from cot_review_config.json"""
-        cot_config = self._load_cot_config()
+    def _get_planner_config(self) -> Dict[str, Any]:
+        """
+        Load DynamicPlanner configuration from cot_review_config.json.
+        Returns planner settings with safe defaults.
+        """
+        try:
+            import json
+            from pathlib import Path
+            config_path = Path(__file__).parent.parent.parent.parent / "config" / "cot_review_config.json"
+            if config_path.exists():
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                    return config.get('dynamic_planner', {'enabled': True})
+            else:
+                logging.debug("cot_review_config.json not found, using planner defaults")
+        except Exception as e:
+            logging.warning(f"Failed to load planner config: {e}")
+        
+        # Safe defaults
         return {
-            'model_selection': {
-                'simple': 'tinyllama',
-                'medium': 'phi3:mini', 
-                'complex': 'llama3.1:8b',
-                'thresholds': {
-                    'simple_max': 0.3,
-                    'medium_max': 0.7
-                }
-            },
-            'cot_review': {
-                'activation_rules': {
-                    'always_on_complexity': cot_config.get('cot_review', {}).get('complexity_threshold', 0.7),
-                    'optional_range': [0.3, 0.7],
-                    'always_on_code_gen': True
-                }
-            }
+            'enabled': True,
+            'inject_into_prompts': True,
+            'max_steps': 10,
+            'skip_fallback_plans': True
         }
+    
+    def _get_circuit_breaker_config(self, circuit_name: str) -> Dict[str, Any]:
+        """
+        Load circuit breaker configuration from cot_review_config.json.
+        Returns circuit-specific settings with safe defaults.
+        
+        Enterprise Enhancement: Configuration-driven circuit breaker parameters
+        """
+        try:
+            import json
+            from pathlib import Path
+            config_path = Path(__file__).parent.parent.parent.parent / "config" / "cot_review_config.json"
+            if config_path.exists():
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                    cb_config = config.get('circuit_breaker', {})
+                    
+                    if not cb_config.get('enabled', True):
+                        logging.info("Circuit breaker disabled in configuration")
+                        return None
+                    
+                    # Get circuit-specific config
+                    circuit_settings = cb_config.get('circuits', {}).get(circuit_name, {})
+                    
+                    if circuit_settings:
+                        logging.debug(f"Loaded circuit breaker config for {circuit_name}: {circuit_settings}")
+                        return circuit_settings
+            else:
+                logging.debug("cot_review_config.json not found, using circuit breaker defaults")
+        except Exception as e:
+            logging.warning(f"Failed to load circuit breaker config: {e}")
+        
+        # Safe defaults if config not found
+        return {
+            'failure_threshold': 3,
+            'recovery_timeout': 60,
+            'success_threshold': 2,
+            'timeout': 30
+        }
+    
+    def _load_orchestrator_config(self) -> Dict[str, Any]:
+        """
+        DEPRECATED: Config now loaded directly by orchestrator from cot_review_config.json
+        Kept for backward compatibility but not used anymore.
+        """
+        cot_config = self._load_cot_config()
+        return cot_config
     
     def can_handle(self, query: str, file_type: Optional[str] = None, **kwargs) -> float:
         """
@@ -205,11 +257,19 @@ class DataAnalystAgent(BasePluginAgent):
             
             logging.info(f"QueryOrchestrator decision: {execution_plan.reasoning}")
             
-            # 3. Dynamic Planning (optional enhancement)
+            # 3. Dynamic Planning (optional enhancement - respects config)
+            analysis_plan = None
             try:
-                planner = get_dynamic_planner()
-                analysis_plan = planner.create_plan(query, data_info)
-            except Exception:
+                # Load config to check if dynamic planning is enabled
+                planner_config = self._get_planner_config()
+                if planner_config.get('enabled', True):  # Enabled by default
+                    planner = get_dynamic_planner()
+                    analysis_plan = planner.create_plan(query, data_info)
+                    logging.debug("DynamicPlanner invoked for analysis strategy")
+                else:
+                    logging.debug("DynamicPlanner disabled by configuration")
+            except Exception as plan_error:
+                logging.warning(f"DynamicPlanner failed (continuing without plan): {plan_error}")
                 analysis_plan = None
             
             # 4. Determine if Two Friends Model (CoT) should be used based on orchestrator
@@ -236,7 +296,7 @@ class DataAnalystAgent(BasePluginAgent):
                 if execution_method == ExecutionMethod.CODE_GENERATION:
                     result, metadata = self._execute_with_code_gen(
                         query, data_info, optimized_data, available_columns,
-                        selected_model, filepath
+                        selected_model, filepath, analysis_plan
                     )
                 elif use_cot:
                     result, metadata = self._execute_with_cot(
@@ -248,6 +308,92 @@ class DataAnalystAgent(BasePluginAgent):
                         query, data_info, filename, selected_model, analysis_plan
                     )
                     metadata = {}
+            
+            # Return successful result
+            metadata.update({
+                "agent": "DataAnalyst",
+                "model": selected_model,
+                "complexity": complexity_score,
+                "execution_method": execution_method.value if hasattr(execution_method, 'value') else str(execution_method),
+                "review_level": review_level.value if hasattr(review_level, 'value') else str(review_level)
+            })
+            
+            return {
+                "success": True,
+                "result": result,
+                "metadata": metadata
+            }
+            
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            logging.error(f"DataAnalyst execution failed: {e}\n{tb}")
+            return {"success": False, "error": str(e), "traceback": tb}
+
+    async def execute_async(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
+        """
+        Async version of execute for non-blocking operation.
+        Mirrors execute() but uses async LLM calls where possible.
+        """
+        filename = kwargs.get('filename')
+        filepath = kwargs.get('filepath')
+        
+        if filename and not filepath:
+             filepath = self._resolve_filepath(filename)
+             
+        if not filepath and not data:
+            return {"success": False, "error": "No file provided"}
+            
+        try:
+            self.initializer.ensure_initialized()
+            
+            # 1. Optimize Data (sync - file I/O)
+            data_info, optimized_data, available_columns = self._optimize_data(filepath, filename)
+            
+            # 2. Use QueryOrchestrator
+            orchestrator = self._get_orchestrator()
+            execution_plan = orchestrator.create_execution_plan(
+                query=query,
+                data=optimized_data,
+                context={'columns': available_columns, 'filepath': filepath}
+            )
+            
+            selected_model = kwargs.get('force_model') or execution_plan.model
+            complexity_score = execution_plan.complexity_score
+            execution_method = execution_plan.execution_method
+            review_level = execution_plan.review_level
+            
+            logging.info(f"QueryOrchestrator decision (async): {execution_plan.reasoning}")
+            
+            # 3. Dynamic Planning
+            try:
+                planner = get_dynamic_planner()
+                analysis_plan = planner.create_plan(query, data_info)
+            except Exception:
+                analysis_plan = None
+            
+            # 4. Determine if CoT should be used
+            cot_config = self._load_cot_config()
+            use_cot = self._should_use_cot(review_level, cot_config)
+            
+            # 5. Execute - use async LLM calls for direct execution
+            # Note: Code generation and CoT are still sync for now (future enhancement)
+            if execution_method == ExecutionMethod.CODE_GENERATION:
+                result, metadata = self._execute_with_code_gen(
+                    query, data_info, optimized_data, available_columns,
+                    selected_model, filepath
+                )
+            elif use_cot:
+                result, metadata = self._execute_with_cot(
+                    query, data_info, optimized_data, available_columns,
+                    selected_model, complexity_score, filepath, analysis_plan
+                )
+            else:
+                # Use async LLM call for direct execution
+                result = await self._execute_direct_async(
+                    query, data_info, filename, selected_model, analysis_plan
+                )
+                metadata = {}
                 
             metadata.update({
                 "agent": "DataAnalyst",
@@ -351,14 +497,14 @@ class DataAnalystAgent(BasePluginAgent):
         else:  # NONE
             return False
     
-    def _execute_with_code_gen(self, query, data_info, optimized_data, available_columns, model, filepath) -> Dict[str, Any]:
+    def _execute_with_code_gen(self, query, data_info, optimized_data, available_columns, model, filepath, analysis_plan=None) -> Dict[str, Any]:
         """
         Execute using LLM code generation (Phase 2 implementation).
         Returns a dict with result, code, and execution metadata.
         """
         try:
             import pandas as pd
-            from backend.core.code_generator import get_code_generator
+            from backend.io.code_generator import get_code_generator
             
             # Validate filepath
             if not filepath:
@@ -388,6 +534,39 @@ class DataAnalystAgent(BasePluginAgent):
             # Get code generator
             code_gen = get_code_generator()
             
+            # Build analysis context from plan if available (with validation)
+            analysis_context = None
+            if analysis_plan:
+                try:
+                    if hasattr(analysis_plan, 'summary'):
+                        summary = str(analysis_plan.summary).strip()
+                        # Skip fallback plans (they don't add value)
+                        if summary and summary != "Fallback analysis due to planning error":
+                            analysis_context = {'strategy': summary}
+                            logging.info(f"✅ DynamicPlanner strategy for code gen: {summary[:80]}...")
+                            
+                            # Add steps with validation
+                            if hasattr(analysis_plan, 'steps') and analysis_plan.steps:
+                                try:
+                                    validated_steps = []
+                                    for step in analysis_plan.steps:
+                                        if hasattr(step, 'description'):
+                                            step_text = str(step.description).strip()
+                                        else:
+                                            step_text = str(step).strip()
+                                        if step_text and len(step_text) < 500:
+                                            validated_steps.append(step_text)
+                                    if validated_steps:
+                                        analysis_context['steps'] = validated_steps[:10]  # Max 10 steps
+                                        logging.debug(f"Added {len(validated_steps)} validated steps")
+                                except Exception as step_error:
+                                    logging.warning(f"Step validation failed: {step_error}")
+                        else:
+                            logging.debug("Skipping fallback plan for code generation")
+                except Exception as context_error:
+                    logging.warning(f"Failed to build analysis_context: {context_error}")
+                    analysis_context = None  # Fail gracefully
+            
             # Generate and execute code with history tracking
             result = code_gen.generate_and_execute(
                 query=query,
@@ -395,7 +574,8 @@ class DataAnalystAgent(BasePluginAgent):
                 model=model,
                 max_retries=2,
                 data_file=data_file,
-                save_history=True
+                save_history=True,
+                analysis_context=analysis_context
             )
             
             if result.success:
@@ -528,18 +708,189 @@ class DataAnalystAgent(BasePluginAgent):
             # Large dataset detected by optimizer - add minimal guidance
             hint = "Note: Use the pre-calculated statistics provided below.\n\n"
         
+        # Add analysis plan if available (DynamicPlanner's strategy)
+        plan_context = ""
+        if analysis_plan:
+            try:
+                # Validate and sanitize analysis_plan structure
+                if hasattr(analysis_plan, 'summary'):
+                    summary = str(analysis_plan.summary).strip()
+                    if summary and summary != "Fallback analysis due to planning error":
+                        plan_context = f"\n\n📋 ANALYSIS STRATEGY:\n{summary}\n"
+                        logging.info(f"✅ DynamicPlanner strategy injected (direct execution): {summary[:80]}...")
+                        
+                        # Add steps if available and valid
+                        if hasattr(analysis_plan, 'steps') and analysis_plan.steps:
+                            try:
+                                steps_list = []
+                                for i, step in enumerate(analysis_plan.steps):
+                                    # Handle both string and AnalysisStep objects
+                                    if hasattr(step, 'description'):
+                                        step_text = str(step.description).strip()
+                                    else:
+                                        step_text = str(step).strip()
+                                    
+                                    if step_text and len(step_text) < 500:  # Safety: max 500 chars per step
+                                        steps_list.append(f"{i+1}. {step_text}")
+                                
+                                if steps_list:
+                                    steps_text = "\n".join(steps_list[:10])  # Safety: max 10 steps
+                                    plan_context += f"\nSTEPS:\n{steps_text}\n"
+                                    logging.debug(f"Added {len(steps_list)} steps to prompt")
+                            except Exception as step_error:
+                                logging.warning(f"Failed to process steps: {step_error}")
+                    else:
+                        logging.debug("DynamicPlanner returned fallback plan, skipping injection")
+            except Exception as plan_error:
+                logging.warning(f"Failed to inject analysis plan: {plan_error}")
+                plan_context = ""  # Fail gracefully
+        
         # Clean, direct prompt - query unchanged
         prompt = f"""{hint}Question: {query}
 
 Data from: {filename}
 
-{data_info}
+{data_info}{plan_context}
 
 Answer:"""
         
-        response = self.initializer.llm_client.generate(prompt, model=selected_model)
-        if isinstance(response, dict): return response.get('response', str(response))
-        return str(response)
+        # FIX 12 (ENTERPRISE): Circuit Breaker Protection with Configuration
+        try:
+            if PHASE1_AVAILABLE:
+                # Load circuit-specific configuration
+                cb_config = self._get_circuit_breaker_config(self._circuit_name)
+                
+                if cb_config is None:
+                    # Circuit breaker disabled in config
+                    response = self.initializer.llm_client.generate(prompt, model=selected_model)
+                    if isinstance(response, dict): return response.get('response', str(response))
+                    return str(response)
+                
+                # Create circuit breaker with config
+                from backend.infra.circuit_breaker import CircuitBreakerConfig
+                config = CircuitBreakerConfig(
+                    failure_threshold=cb_config.get('failure_threshold', 3),
+                    recovery_timeout=cb_config.get('recovery_timeout', 60.0),
+                    success_threshold=cb_config.get('success_threshold', 2),
+                    timeout=cb_config.get('timeout', 30.0)
+                )
+                circuit = get_circuit_breaker(self._circuit_name, config)
+                
+                # Wrap LLM call in circuit breaker for graceful degradation
+                def llm_call():
+                    response = self.initializer.llm_client.generate(prompt, model=selected_model)
+                    # Format response to circuit breaker expected format
+                    if isinstance(response, dict):
+                        return {"success": True, "response": response.get('response', str(response))}
+                    return {"success": True, "response": str(response)}
+                
+                result = circuit.call(llm_call)
+                
+                if result.get("fallback_used"):
+                    logging.warning(f"⚠️ Circuit breaker fallback used for {self._circuit_name}")
+                else:
+                    logging.debug(f"✅ Circuit breaker call successful for {self._circuit_name}")
+                
+                return result.get("response", result.get("result", str(result)))
+            else:
+                # Fallback if Phase 1 not available
+                response = self.initializer.llm_client.generate(prompt, model=selected_model)
+                if isinstance(response, dict): return response.get('response', str(response))
+                return str(response)
+        except Exception as e:
+            logging.error(f"LLM call failed: {e}")
+            return f"Analysis failed: {str(e)}. Please check if Ollama is running and models are available."
+
+    async def _execute_direct_async(self, query, data_info, filename, selected_model, analysis_plan=None):
+        """Async version of _execute_direct for non-blocking LLM calls."""
+        hint = ""
+        if 'PRE-CALCULATED STATISTICS' in data_info:
+            hint = "Note: Use the pre-calculated statistics provided below.\n\n"
+        
+        # Add analysis plan if available (DynamicPlanner's strategy)
+        plan_context = ""
+        if analysis_plan:
+            try:
+                # Validate and sanitize analysis_plan structure
+                if hasattr(analysis_plan, 'summary'):
+                    summary = str(analysis_plan.summary).strip()
+                    if summary and summary != "Fallback analysis due to planning error":
+                        plan_context = f"\n\n📋 ANALYSIS STRATEGY:\n{summary}\n"
+                        logging.info(f"✅ DynamicPlanner strategy injected (async direct): {summary[:80]}...")
+                        
+                        if hasattr(analysis_plan, 'steps') and analysis_plan.steps:
+                            try:
+                                steps_list = []
+                                for i, step in enumerate(analysis_plan.steps):
+                                    if hasattr(step, 'description'):
+                                        step_text = str(step.description).strip()
+                                    else:
+                                        step_text = str(step).strip()
+                                    if step_text and len(step_text) < 500:
+                                        steps_list.append(f"{i+1}. {step_text}")
+                                if steps_list:
+                                    steps_text = "\n".join(steps_list[:10])
+                                    plan_context += f"\nSTEPS:\n{steps_text}\n"
+                            except Exception as step_error:
+                                logging.warning(f"Failed to process steps: {step_error}")
+            except Exception as plan_error:
+                logging.warning(f"Failed to inject analysis plan: {plan_error}")
+                plan_context = ""
+        
+        prompt = f"""{hint}Question: {query}
+
+Data from: {filename}
+
+{data_info}{plan_context}
+
+Answer:"""
+        
+        # FIX 12 (ENTERPRISE): Circuit Breaker Protection for async LLM calls
+        try:
+            if PHASE1_AVAILABLE:
+                # Load circuit-specific configuration
+                cb_config = self._get_circuit_breaker_config(self._circuit_name)
+                
+                if cb_config is None:
+                    # Circuit breaker disabled in config
+                    response = await self.initializer.llm_client.generate_async(prompt, model=selected_model)
+                    if isinstance(response, dict): return response.get('response', str(response))
+                    return str(response)
+                
+                # Create circuit breaker with config
+                from backend.infra.circuit_breaker import CircuitBreakerConfig
+                config = CircuitBreakerConfig(
+                    failure_threshold=cb_config.get('failure_threshold', 3),
+                    recovery_timeout=cb_config.get('recovery_timeout', 60.0),
+                    success_threshold=cb_config.get('success_threshold', 2),
+                    timeout=cb_config.get('timeout', 30.0)
+                )
+                circuit = get_circuit_breaker(self._circuit_name, config)
+                
+                # Wrap async LLM call in circuit breaker
+                async def async_llm_call():
+                    response = await self.initializer.llm_client.generate_async(prompt, model=selected_model)
+                    if isinstance(response, dict):
+                        return {"success": True, "response": response.get('response', str(response))}
+                    return {"success": True, "response": str(response)}
+                
+                # Note: Circuit breaker.call() is sync, but we can wrap it
+                result = circuit.call(lambda: asyncio.run(async_llm_call()))
+                
+                if result.get("fallback_used"):
+                    logging.warning(f"⚠️ Circuit breaker fallback used for async {self._circuit_name}")
+                else:
+                    logging.debug(f"✅ Circuit breaker async call successful for {self._circuit_name}")
+                
+                return result.get("response", result.get("result", str(result)))
+            else:
+                # Fallback if Phase 1 not available
+                response = await self.initializer.llm_client.generate_async(prompt, model=selected_model)
+                if isinstance(response, dict): return response.get('response', str(response))
+                return str(response)
+        except Exception as e:
+            logging.error(f"Async LLM call failed: {e}")
+            return f"Analysis failed: {str(e)}. Please check if Ollama is running and models are available."
 
     def _execute_with_cot(self, query, data_info, optimized_data, available_columns, selected_model, complexity, filepath, plan):
         cot_engine = self._ensure_cot_engine()
@@ -558,6 +909,7 @@ Answer:"""
             query=query,
             data_context=data_context,
             generator_model=selected_model,
-            critic_model=critic_model
+            critic_model=critic_model,
+            analysis_plan=plan
         )
         return result.final_output, {"cot_iterations": result.total_iterations}

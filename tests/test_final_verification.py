@@ -62,7 +62,7 @@ def run_verification():
     
     # 5. Query Orchestrator
     try:
-        from backend.core.query_orchestrator import QueryOrchestrator
+        from backend.core.engine.query_orchestrator import QueryOrchestrator
         config = {
             'model_selection': {'simple': 'tinyllama', 'medium': 'phi3:mini', 'complex': 'llama3.1:8b'},
             'cot_review': {'enabled': True}

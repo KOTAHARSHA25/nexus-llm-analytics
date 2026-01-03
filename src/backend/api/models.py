@@ -4,8 +4,8 @@ from typing import List, Dict, Any, Optional
 import logging
 import os
 import time
-from backend.core.model_selector import ModelSelector
-from backend.core.user_preferences import get_preferences_manager
+from backend.core.engine.model_selector import ModelSelector
+from backend.core.engine.user_preferences import get_preferences_manager
 from backend.services.analysis_service import get_analysis_service
 
 # API endpoint for model management and selection
@@ -61,7 +61,9 @@ async def get_available_models() -> Dict[str, Any]:
         memory_info = ModelSelector.get_system_memory()
         
         # Fetch actual models from Ollama
-        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        from backend.core.config import get_settings
+        settings = get_settings()
+        ollama_url = settings.ollama_base_url
         
         try:
             response = requests.get(f"{ollama_url}/api/tags", timeout=5)
@@ -313,7 +315,7 @@ async def test_model(request: ModelTestRequest) -> Dict[str, Any]:
     """Test a specific model with a simple query"""
     try:
         import time
-        from backend.agents.model_initializer import get_model_initializer
+        from backend.agents.model_manager import get_model_manager
         
         start_time = time.time()
         
@@ -332,7 +334,7 @@ async def test_model(request: ModelTestRequest) -> Dict[str, Any]:
             # Use LLMClient directly to test text generation models
             test_query = "Hello, please respond with 'Model test successful'"
             
-            initializer = get_model_initializer()
+            initializer = get_model_manager()
             initializer.ensure_initialized()
             
             # Generate response using the specific model

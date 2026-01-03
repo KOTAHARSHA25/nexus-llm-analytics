@@ -107,7 +107,7 @@ class BenchmarkRunner:
     def _init_system(self):
         """Initialize system components"""
         try:
-            from backend.core.query_orchestrator import QueryOrchestrator
+            from backend.core.engine.query_orchestrator import QueryOrchestrator
             from backend.core.llm_client import LLMClient
             
             self.llm_client = LLMClient()

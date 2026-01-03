@@ -303,11 +303,55 @@ class AgentRegistry:
     
     def reload_agent(self, agent_name: str) -> bool:
         """Hot-reload a specific agent"""
-        # Implementation for hot-reloading
-        # This would unregister, reload module, and re-register
         logging.debug(f"Hot-reloading agent: {agent_name}")
-        # TODO: Implement hot-reload logic
-        return True
+        
+        # 1. Get existing agent
+        old_agent = self.registered_agents.get(agent_name)
+        if not old_agent:
+            logging.warning(f"Cannot reload unknown agent: {agent_name}")
+            return False
+            
+        try:
+            # 2. Find source file
+            file_path = inspect.getfile(old_agent.__class__)
+            plugin_file = Path(file_path)
+            
+            if not plugin_file.exists():
+                logging.error(f"Source file for agent {agent_name} not found: {file_path}")
+                return False
+                
+            # 3. Clean up indexes before reloading
+            # Remove from registered_agents
+            del self.registered_agents[agent_name]
+            
+            # Remove from capability index
+            for cap, agents in self.capability_index.items():
+                if agent_name in agents:
+                    agents.remove(agent_name)
+                    
+            # Remove from file type index
+            for ft, agents in self.file_type_index.items():
+                if agent_name in agents:
+                    agents.remove(agent_name)
+            
+            # 4. Reload from file
+            # This creates a new module and re-registers the agent(s) found in it
+            agents_loaded = self._load_agent_from_file(plugin_file)
+            
+            if agents_loaded > 0 and agent_name in self.registered_agents:
+                logging.info(f"Successfully hot-reloaded agent: {agent_name}")
+                return True
+            else:
+                logging.warning(f"Reloaded file but agent {agent_name} was not re-registered")
+                return False
+                
+        except Exception as e:
+            logging.error(f"Failed to hot-reload agent {agent_name}: {e}")
+            # Try to restore old agent if simple unregister happened
+            if agent_name not in self.registered_agents:
+                self.registered_agents[agent_name] = old_agent
+                # Note: Indexes might be inconsistent now, but better than losing the agent entirely
+            return False
     
     def get_system_resources(self) -> Dict[str, Any]:
         """Get current system resource availability"""

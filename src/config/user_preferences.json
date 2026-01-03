@@ -1,0 +1,13 @@
+{
+  "primary_model": "llama3.1:8b",
+  "review_model": "phi3:mini",
+  "embedding_model": "nomic-embed-text",
+  "auto_model_selection": true,
+  "allow_swap_usage": true,
+  "memory_buffer_gb": 0.5,
+  "preferred_performance": "balanced",
+  "enable_intelligent_routing": false,
+  "first_time_setup_complete": false,
+  "last_updated": "2026-01-03T17:31:18.728611",
+  "model_test_results": {}
+}

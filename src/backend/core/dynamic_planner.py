@@ -10,8 +10,81 @@ import logging
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 import json
+import re
 
-from backend.agents.model_initializer import get_model_initializer
+from backend.agents.model_manager import get_model_manager
+
+
+def repair_json(malformed_json: str) -> Optional[dict]:
+    """
+    Attempt to repair common JSON malformations from LLMs.
+    
+    Common issues:
+    - Trailing commas
+    - Single quotes instead of double
+    - Unquoted keys
+    - Missing closing brackets
+    """
+    text = malformed_json.strip()
+    
+    # Try direct parse first
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    
+    # Repair attempt 1: Extract JSON from markdown code block
+    match = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
+    if match:
+        try:
+            return json.loads(match.group(1).strip())
+        except json.JSONDecodeError:
+            text = match.group(1).strip()
+    
+    # Repair attempt 2: Remove trailing commas (before quote conversion)
+    text = re.sub(r',\s*}', '}', text)
+    text = re.sub(r',\s*]', ']', text)
+    
+    # Repair attempt 3: Replace single quotes with double quotes
+    text = re.sub(r"'([^']*)':", r'"\1":', text)
+    text = re.sub(r":\s*'([^']*)'", r': "\1"', text)
+    
+    # Try parsing after quotes and commas fix
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    
+    # Repair attempt 4: Add missing closing brackets
+    # Try to intelligently place brackets by checking what's missing
+    open_braces = text.count('{') - text.count('}')
+    open_brackets = text.count('[') - text.count(']')
+    
+    if open_braces > 0 or open_brackets > 0:
+        # Strategy: Try adding brackets in different orders
+        # Most common case: missing ] before final }
+        attempts = [
+            text + ']' * open_brackets + '}' * open_braces,  # Brackets first (common)
+            text + '}' * open_braces + ']' * open_brackets,  # Braces first
+        ]
+        
+        for attempt in attempts:
+            try:
+                return json.loads(attempt)
+            except json.JSONDecodeError:
+                continue
+    
+    return None
+
+
+def safe_json_parse(text: str, default: Any = None) -> Any:
+    """
+    Safely parse JSON with automatic repair.
+    Returns default if parsing fails completely.
+    """
+    result = repair_json(text)
+    return result if result is not None else default
+
 
 @dataclass
 class AnalysisStep:
@@ -35,7 +108,7 @@ class DynamicPlanner:
     """
     
     def __init__(self):
-        self._initializer = get_model_initializer()
+        self._initializer = get_model_manager()
         
     @property
     def llm(self):
@@ -126,12 +199,20 @@ Provide ONLY the JSON output.
 """
 
     def _parse_plan(self, llm_output: str) -> AnalysisPlan:
-        """Parse LLM JSON output into AnalysisPlan object"""
+        """Parse LLM JSON output into AnalysisPlan object with automatic repair"""
+        # Use repair_json for robust parsing
+        plan_dict = repair_json(llm_output)
+        
+        if plan_dict is None:
+            logging.warning("Failed to parse planning JSON after repair attempts. Using fallback.")
+            return AnalysisPlan(
+                domain="General",
+                summary="Direct Analysis",
+                steps=[AnalysisStep(1, llm_output[:200], "general_analysis", "JSON repair failed")],
+                confidence=0.1
+            )
+        
         try:
-            # Clean generic markdown if present
-            cleaned = llm_output.replace("```json", "").replace("```", "").strip()
-            plan_dict = json.loads(cleaned)
-            
             steps = [
                 AnalysisStep(
                     step_id=s.get('id', i),
@@ -148,13 +229,12 @@ Provide ONLY the JSON output.
                 steps=steps,
                 confidence=float(plan_dict.get('confidence', 0.5))
             )
-            
-        except json.JSONDecodeError:
-            logging.warning("Failed to parse planning JSON. Using raw output as single step.")
+        except Exception as e:
+            logging.warning(f"Failed to construct AnalysisPlan from parsed dict: {e}")
             return AnalysisPlan(
                 domain="General",
                 summary="Direct Analysis",
-                steps=[AnalysisStep(1, llm_output[:200], "general_analysis", "Parsing failed")],
+                steps=[AnalysisStep(1, llm_output[:200], "general_analysis", "Plan construction failed")],
                 confidence=0.1
             )
              

@@ -12,7 +12,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.backend.core.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
+from src.backend.core.engine.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
 
 
 def test_orchestrator_decisions():

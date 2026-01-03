@@ -11,6 +11,9 @@ import pandas as pd
 # Import the enhanced report manager
 from backend.core.enhanced_reports import EnhancedReportManager, ReportTemplate
 
+# FIX 17: Import enterprise PDF generator
+from backend.io.pdf_generator import PDFReportGenerator, generate_pdf_report
+
 router = APIRouter()
 
 class ReportGenerationRequest(BaseModel):
@@ -49,8 +52,112 @@ def download_audit():
     return Response(content=content, media_type='application/json', headers={'Content-Disposition': 'attachment; filename="audit_log.jsonl"'})
 
 
+# =============================================================================
+# FIX 17: ENTERPRISE PDF REPORT GENERATION ENDPOINT
+# =============================================================================
 
-# Enhanced report generation endpoint
+class PDFReportRequest(BaseModel):
+    """Request model for Fix 17 PDF generation"""
+    analysis_result: Dict[str, Any] = Field(..., description="Single analysis result to generate PDF for")
+    include_raw_data: bool = Field(True, description="Include raw data in appendix")
+    custom_filename: Optional[str] = Field(None, description="Custom filename (without extension)")
+
+
+@router.post("/pdf")
+async def generate_pdf_report_endpoint(request: PDFReportRequest):
+    """
+    FIX 17: Generate enterprise-grade PDF report from analysis results.
+    
+    Features:
+    - Professional title page with metadata
+    - Table of contents
+    - Executive summary
+    - Query analysis section
+    - AI interpretation
+    - Orchestrator reasoning (if available)
+    - Key findings
+    - Detailed results
+    - Data insights
+    - Generated code (if available)
+    - Visualizations (if available)
+    - Methodology section
+    - Technical details
+    - Raw data appendix (optional)
+    - Professional headers/footers with page numbers
+    - Zero wasted space - comprehensive content
+    
+    Returns:
+        Success response with download path or error details
+    """
+    logging.info("[FIX17] Generating enterprise PDF report")
+    
+    try:
+        # Generate custom output path if filename provided
+        output_path = None
+        if request.custom_filename:
+            from pathlib import Path
+            from backend.core.config import settings
+            reports_dir = settings.get_reports_path()
+            
+            # Sanitize filename
+            safe_filename = "".join(c for c in request.custom_filename if c.isalnum() or c in (' ', '-', '_'))
+            output_path = str(reports_dir / f"{safe_filename}.pdf")
+        
+        # Generate PDF using enterprise generator
+        pdf_path = generate_pdf_report(
+            analysis_result=request.analysis_result,
+            output_path=output_path,
+            include_raw_data=request.include_raw_data
+        )
+        
+        # Extract filename
+        filename = os.path.basename(pdf_path)
+        
+        logging.info(f"[FIX17] PDF report generated successfully: {filename}")
+        
+        return {
+            "success": True,
+            "message": "Enterprise PDF report generated successfully",
+            "report_path": filename,
+            "format": "pdf",
+            "download_url": f"/api/report/download-report?filename={filename}",
+            "features": [
+                "Professional title page",
+                "Table of contents",
+                "Executive summary",
+                "Query analysis",
+                "AI interpretation",
+                "Orchestrator reasoning",
+                "Key findings",
+                "Detailed results",
+                "Data insights",
+                "Generated code",
+                "Visualizations",
+                "Methodology",
+                "Technical details",
+                "Raw data appendix" if request.include_raw_data else "No appendix"
+            ],
+            "metadata": {
+                "query": request.analysis_result.get('query', 'N/A')[:100],
+                "model": request.analysis_result.get('model_used', 'Unknown'),
+                "agent": request.analysis_result.get('agent', 'Unknown'),
+                "pages": "Multiple",
+                "file_size": f"{os.path.getsize(pdf_path) / 1024:.1f} KB"
+            }
+        }
+        
+    except Exception as e:
+        logging.error(f"[FIX17] PDF generation failed: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": f"PDF generation failed: {str(e)}",
+            "suggestion": "Check the analysis result format. Ensure it contains 'query' and result data."
+        }
+
+
+# =============================================================================
+# ORIGINAL ENDPOINTS (Enhanced Report Manager)
+# =============================================================================
 @router.post("/")
 async def generate_report(request: ReportGenerationRequest):
     """

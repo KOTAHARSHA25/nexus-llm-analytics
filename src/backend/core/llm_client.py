@@ -1,6 +1,8 @@
 # Handles communication with local Ollama LLM server
 
 import requests
+import httpx
+import asyncio
 import logging
 from typing import Dict, Any, Optional, Union
 
@@ -127,7 +129,9 @@ class LLMClient:
             required_ram = model_requirements.get("min_ram_gb", 2.0)
             
             # If using swap memory, increase timeout significantly
-            allow_swap = os.getenv("ALLOW_SWAP_USAGE", "false").lower() == "true"
+            from backend.core.config import get_settings
+            settings = get_settings()
+            allow_swap = settings.allow_swap_usage
             if allow_swap and available_ram < required_ram:
                 # Using swap - increase timeout by 3x
                 adaptive_timeout = base_timeout * 3
@@ -153,3 +157,89 @@ class LLMClient:
     def generate_review(self, prompt: str) -> Dict[str, Any]:
         """Generate response using the review model."""
         return self.generate(prompt, model=self.review_model)
+
+    async def generate_async(
+        self, 
+        prompt: str, 
+        model: Optional[str] = None, 
+        system: Optional[str] = None,
+        adaptive_timeout: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Async version of generate for non-blocking LLM calls.
+        Use this in async endpoints for better throughput.
+        """
+        from .circuit_breaker import get_circuit_breaker, CircuitBreakerConfig
+        
+        if model is None:
+            model = self.primary_model
+        
+        # Check if model is available
+        if "model_not_available" in model:
+            return {
+                "model": model,
+                "prompt": prompt,
+                "response": "Model not available. Please install a compatible model.",
+                "error": "No suitable models are installed.",
+                "user_action_required": True,
+                "suggestions": [
+                    "Install tinyllama for low memory systems: ollama pull tinyllama",
+                    "Install phi3:mini for better performance: ollama pull phi3:mini", 
+                    "Install llama3.1:8b for best results (requires 8GB+ RAM): ollama pull llama3.1:8b"
+                ]
+            }
+        
+        # Calculate timeout
+        timeout = self._calculate_adaptive_timeout(model) if adaptive_timeout else 300
+        
+        url = f"{self.base_url}/api/generate"
+        payload = {"model": model, "prompt": prompt, "stream": False}
+        if system:
+            payload["system"] = system
+        
+        try:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(timeout)) as client:
+                response = await client.post(url, json=payload)
+                response.raise_for_status()
+                
+                data = response.json()
+                if "response" in data:
+                    return {
+                        "model": model, 
+                        "prompt": prompt, 
+                        "response": data["response"].strip(), 
+                        "success": True
+                    }
+                else:
+                    return {
+                        "model": model,
+                        "prompt": prompt,
+                        "response": "",
+                        "error": "Empty response from LLM"
+                    }
+                    
+        except httpx.TimeoutException:
+            logging.warning(f"Async LLM call timed out after {timeout}s for model {model}")
+            return {
+                "model": model,
+                "prompt": prompt,
+                "response": "",
+                "error": f"Request timed out after {timeout}s",
+                "timeout": True
+            }
+        except Exception as e:
+            logging.error(f"Async LLM call failed: {e}")
+            return {
+                "model": model,
+                "prompt": prompt,
+                "response": "",
+                "error": str(e)
+            }
+
+    async def generate_primary_async(self, prompt: str) -> Dict[str, Any]:
+        """Async generate using the primary model."""
+        return await self.generate_async(prompt, model=self.primary_model)
+
+    async def generate_review_async(self, prompt: str) -> Dict[str, Any]:
+        """Async generate using the review model."""
+        return await self.generate_async(prompt, model=self.review_model)

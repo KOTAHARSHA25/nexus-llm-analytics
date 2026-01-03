@@ -22,7 +22,7 @@ try:
     
     # Auto-configure models on startup (quiet mode - details go to log file)
     try:
-        from backend.core.model_selector import ModelSelector
+        from backend.core.engine.model_selector import ModelSelector
         primary, review, embedding = ModelSelector.select_optimal_models()
         # Print minimal startup info
         print(f"[AI] Models: {primary.replace('ollama/', '')}, {review.replace('ollama/', '')}")
@@ -57,7 +57,7 @@ async def lifespan(app: FastAPI):
     
     # STEP 1: Auto-configure models on startup
     try:
-        from backend.core.model_selector import ModelSelector
+        from backend.core.engine.model_selector import ModelSelector
         primary, review, embedding = ModelSelector.select_optimal_models()
         logger.info(f"✅ Models selected: Primary={primary.split('/')[-1]}, Review={review.split('/')[-1]}")
     except Exception as model_error:

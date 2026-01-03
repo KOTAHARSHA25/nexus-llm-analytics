@@ -14,11 +14,9 @@ Key Components:
 # Lazy imports to avoid circular dependencies and speed up startup
 # Import specific modules as needed:
 #   from backend.core.llm_client import LLMClient
-#   from backend.core.intelligent_router import IntelligentRouter
 #   from backend.core.advanced_cache import AdvancedCache
 
 __all__ = [
     'LLMClient',
-    'IntelligentRouter', 
     'AdvancedCache',
 ]

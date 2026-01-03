@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar('T')
 
 # Import all Phase 1 components
-from .smart_fallback import (
+from .engine.smart_fallback import (
     SmartFallbackManager,
     get_fallback_manager,
     FallbackReason,
@@ -36,7 +36,7 @@ from .smart_fallback import (
 )
 
 # Model discovery and RAM-aware selection now consolidated in model_selector
-from .model_selector import (
+from .engine.model_selector import (
     DynamicModelDiscovery,
     get_model_discovery,
     ModelInfo,
@@ -48,7 +48,7 @@ from .model_selector import (
     ModelSelectionResult
 )
 
-from .circuit_breaker import (
+from ..infra.circuit_breaker import (
     CircuitBreaker,
     get_circuit_breaker,
     circuit_breaker_protected,
@@ -56,7 +56,7 @@ from .circuit_breaker import (
     get_all_circuit_breaker_status
 )
 
-from .query_orchestrator import (
+from .engine.query_orchestrator import (
     QueryOrchestrator,
     ExecutionPlan,
     ExecutionMethod,

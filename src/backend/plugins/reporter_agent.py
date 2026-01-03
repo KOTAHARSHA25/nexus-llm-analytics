@@ -10,7 +10,7 @@ src_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(src_path))
 
 from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
-from backend.agents.model_initializer import get_model_initializer
+from backend.agents.model_manager import get_model_manager
 
 class ReporterAgent(BasePluginAgent):
     """
@@ -31,7 +31,7 @@ class ReporterAgent(BasePluginAgent):
         )
     
     def initialize(self, **kwargs) -> bool:
-        self.initializer = get_model_initializer()
+        self.initializer = get_model_manager()
         return True
     
     def can_handle(self, query: str, file_type: Optional[str] = None, **kwargs) -> float:

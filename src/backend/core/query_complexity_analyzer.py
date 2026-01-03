@@ -75,6 +75,14 @@ class QueryComplexityAnalyzer:
             'lstm', 'gru', 'rnn', 'transformer',
             'bert', 'gpt', 'word2vec', 'word embedding',
             
+            # Machine Learning Abbreviations (FIX 7)
+            'rf', 'svc', 'svr',  # Random Forest, Support Vector Classifier/Regression
+            'knn', 'k-nn',  # K-Nearest Neighbors
+            'lda',  # Linear Discriminant Analysis
+            'gmm',  # Gaussian Mixture Model
+            'em algorithm',
+            'bagging', 'boosting',
+            
             # Statistical Tests (hypothesis testing)
             't-test', 'ttest', 't test',
             'anova', 'analysis of variance',
@@ -83,6 +91,12 @@ class QueryComplexityAnalyzer:
             'shapiro-wilk', 'kolmogorov-smirnov',
             'hypothesis test', 'hypothesis testing', 'statistical significance',
             'p-value', 'confidence interval testing',
+            
+            # Statistical Test Abbreviations (FIX 7)
+            'f-test', 'ftest', 'z-test', 'ztest',
+            'paired t', 'two-sample',
+            'mcnemar', 'fisher exact',
+            'levene', 'bartlett',
             
             # Multi-column/comprehensive analysis (complex patterns)
             'correlation analysis', 'correlation between all',
@@ -104,6 +118,11 @@ class QueryComplexityAnalyzer:
             'constraint optimization', 'constrained optimization',
             'objective function', 'maximize with constraint', 'minimize with constraint',
             'genetic algorithm', 'simulated annealing', 'particle swarm',
+            
+            # Optimization Abbreviations (FIX 7)
+            'lp', 'qp',  # Linear/Quadratic Programming
+            'convex optimization',
+            'sgd', 'adam',  # Optimizers
             
             # Advanced Analytics
             'segmentation algorithm', 'customer segmentation',
@@ -140,6 +159,13 @@ class QueryComplexityAnalyzer:
             'variance', 'std dev', 'standard deviation',
             'covariance', 'percentile', 'quartile',
             'distribution', 'histogram',
+            
+            # Statistical Abbreviations (FIX 7)
+            'std', 'stdev', 'var',  # Standard deviation, variance
+            'corr', 'cov',  # Correlation, covariance
+            'avg', 'med',  # Average, median
+            'ci', 'conf int',  # Confidence interval
+            'iqr',  # Interquartile range
             
             # Filtering and sorting
             'filter', 'filtered', 'where',

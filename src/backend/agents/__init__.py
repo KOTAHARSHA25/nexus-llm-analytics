@@ -1,8 +1,8 @@
 """Agents module initialization."""
 
-from .model_initializer import ModelInitializer, get_model_initializer
+from .model_manager import ModelManager, get_model_manager
 
 __all__ = [
-    'ModelInitializer',
-    'get_model_initializer'
+    'ModelManager',
+    'get_model_manager'
 ]

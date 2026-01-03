@@ -1,10 +1,99 @@
 {
+  "model_selection": {
+    "simple": "tinyllama",
+    "medium": "phi3:mini",
+    "complex": "llama3.1:8b",
+    "thresholds": {
+      "simple_max": 0.3,
+      "medium_max": 0.7
+    },
+    "comment": "Model tiers for intelligent routing based on query complexity"
+  },
+  
+  "query_analysis": {
+    "code_generation_keywords": [
+      "calculate", "compute", "sum", "average", "mean", "total",
+      "count", "group by", "aggregate", "filter", "sort", "rank",
+      "correlation", "percentage", "ratio", "compare", "maximum",
+      "minimum", "median", "standard deviation", "variance",
+      "top", "bottom", "highest", "lowest", "by region", "by category",
+      "per", "each", "distribution", "breakdown", "what is", "which",
+      "find the", "show me", "list all", "get the"
+    ],
+    "multi_step_keywords": [
+      "and then", "after that", "then predict", "correlation", 
+      "forecast", "trend", "then identify", "then recommend"
+    ],
+    "condition_keywords": [
+      "where", "if", "when", "filter", "group by", "for each"
+    ],
+    "simple_query_patterns": [
+      "what is", "show", "list", "get", "tell me"
+    ],
+    "comment": "Domain-agnostic query analysis patterns - customize for your domain"
+  },
+  
+  "dynamic_planner": {
+    "enabled": true,
+    "inject_into_prompts": true,
+    "max_steps": 10,
+    "max_strategy_length": 1000,
+    "max_step_length": 300,
+    "skip_fallback_plans": true,
+    "comment": "DynamicPlanner configuration - generates step-by-step analysis strategies"
+  },
+  
+  "circuit_breaker": {
+    "enabled": true,
+    "circuits": {
+      "data_analyst": {
+        "failure_threshold": 3,
+        "recovery_timeout": 60,
+        "success_threshold": 2,
+        "timeout": 30,
+        "comment": "Main data analysis LLM calls"
+      },
+      "code_generator": {
+        "failure_threshold": 2,
+        "recovery_timeout": 45,
+        "success_threshold": 2,
+        "timeout": 45,
+        "comment": "Code generation operations (may be slower)"
+      },
+      "cot_engine": {
+        "failure_threshold": 3,
+        "recovery_timeout": 60,
+        "success_threshold": 2,
+        "timeout": 40,
+        "comment": "Chain-of-thought correction loops"
+      },
+      "visualization": {
+        "failure_threshold": 2,
+        "recovery_timeout": 30,
+        "success_threshold": 1,
+        "timeout": 20,
+        "comment": "Visualization generation"
+      }
+    },
+    "expose_health_endpoint": true,
+    "log_circuit_changes": true,
+    "metrics_enabled": true,
+    "comment": "Circuit breaker protection for all LLM operations - prevents cascade failures"
+  },
+  
   "cot_review": {
     "enabled": true,
     "auto_enable_on_routing": true,
     "complexity_threshold": 0.5,
     "max_iterations": 2,
     "timeout_per_iteration_seconds": 30,
+    
+    "activation_rules": {
+      "always_on_complexity": 0.7,
+      "optional_range": [0.3, 0.7],
+      "always_on_code_gen": true,
+      "comment": "When to activate Two Friends Model (Generator + Critic review)"
+    },
     
     "tags": {
       "reasoning_start": "[REASONING]",

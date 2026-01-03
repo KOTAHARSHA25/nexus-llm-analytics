@@ -1,6 +1,7 @@
 def test_health_check(client):
     """Verify that the health check endpoint returns 200 OK"""
-    response = client.get("/api/health")
+    print(f"\nDEBUG: App Routes: {[r.path for r in client.app.routes]}")
+    response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"

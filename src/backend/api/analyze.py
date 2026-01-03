@@ -1,7 +1,10 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 import logging
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
+import asyncio
+import json
 from backend.services.analysis_service import get_analysis_service
 from backend.core.analysis_manager import analysis_manager, check_cancellation
 
@@ -205,6 +208,134 @@ async def analyze_query(request: AnalyzeRequest) -> Dict[str, Any]:
         }
 
 
+@router.post("/stream", responses={
+    200: {"description": "Streaming analysis with progress updates"},
+    400: {"description": "Invalid request parameters"},
+    503: {"description": "AI service unavailable"}
+})
+async def analyze_stream(request: AnalyzeRequest):
+    """
+    Streaming analysis endpoint using Server-Sent Events (SSE).
+    Returns real-time progress updates as the analysis proceeds.
+    
+    This provides better UX by showing users what's happening instead of a blank loading screen.
+    """
+    async def generate_updates():
+        analysis_id = None
+        try:
+            # Step 1: Initialization
+            yield f"data: {json.dumps({'step': 'init', 'message': 'Initializing analysis...', 'progress': 0})}\n\n"
+            await asyncio.sleep(0.1)
+            
+            # Get service
+            service = get_analysis_service()
+            analysis_id = analysis_manager.start_analysis(request.session_id)
+            
+            # Step 2: Validation
+            yield f"data: {json.dumps({'step': 'validation', 'message': 'Validating request...', 'progress': 10})}\n\n"
+            
+            # Validate inputs (same as non-streaming endpoint)
+            if not request.query:
+                yield f"data: {json.dumps({'step': 'error', 'message': 'Query is required', 'error': 'Query is required'})}\n\n"
+                return
+            
+            # Determine files
+            files = None
+            if request.filenames:
+                files = request.filenames
+            elif request.filename:
+                files = [request.filename]
+            elif request.text_data:
+                files = None
+            else:
+                yield f"data: {json.dumps({'step': 'error', 'message': 'File required', 'error': 'Either filename, filenames, or text_data required'})}\n\n"
+                return
+            
+            # Step 3: Loading data
+            yield f"data: {json.dumps({'step': 'loading', 'message': 'Loading data file(s)...', 'progress': 30, 'files': files})}\n\n"
+            await asyncio.sleep(0.2)
+            
+            # Prepare context
+            context = {
+                "filename": files[0] if files else None,
+                "filenames": files,
+                "text_data": request.text_data,
+                "column": request.column,
+                "value": request.value,
+                "analysis_id": analysis_id
+            }
+            
+            # Step 4: Analyzing
+            yield f"data: {json.dumps({'step': 'analyzing', 'message': 'Running analysis with LLM...', 'progress': 50})}\n\n"
+            
+            # Execute analysis
+            result = await service.analyze(query=request.query.strip()[:1000], context=context)
+            
+            # Step 5: Formatting results
+            yield f"data: {json.dumps({'step': 'formatting', 'message': 'Formatting results...', 'progress': 90})}\n\n"
+            await asyncio.sleep(0.1)
+            
+            # Format result (same logic as non-streaming)
+            raw_result = result.get("result", "")
+            if isinstance(raw_result, dict):
+                interpretation = result.get("interpretation")
+                if interpretation:
+                    result_str = interpretation
+                else:
+                    result_str = _format_dict_result(raw_result)
+            else:
+                result_str = str(raw_result)
+            
+            # Step 6: Complete
+            response_data = {
+                "step": "complete",
+                "message": "Analysis complete!",
+                "progress": 100,
+                "result": {
+                    "result": result_str,
+                    "visualization": result.get("metadata", {}).get("visualization"),
+                    "code": result.get("metadata", {}).get("code") or result.get("metadata", {}).get("executed_code"),
+                    "generated_code": result.get("metadata", {}).get("generated_code"),
+                    "execution_id": result.get("metadata", {}).get("execution_id"),
+                    "execution_time": result.get("metadata", {}).get("execution_time", 0),
+                    "execution_method": result.get("metadata", {}).get("execution_method"),
+                    "query": request.query,
+                    "filename": files[0] if files and len(files) == 1 else None,
+                    "filenames": files,
+                    "analysis_id": analysis_id,
+                    "status": "success" if result.get("success") else "error",
+                    "error": result.get("error")
+                }
+            }
+            
+            yield f"data: {json.dumps(response_data)}\n\n"
+            
+            if analysis_id:
+                analysis_manager.complete_analysis(analysis_id)
+            
+        except HTTPException as e:
+            # Cancelled analysis
+            if analysis_id:
+                analysis_manager.complete_analysis(analysis_id)
+            yield f"data: {json.dumps({'step': 'error', 'message': str(e.detail), 'error': str(e.detail)})}\n\n"
+            
+        except Exception as e:
+            logging.error(f"[STREAM] Error in streaming analysis: {e}", exc_info=True)
+            if analysis_id:
+                analysis_manager.complete_analysis(analysis_id)
+            yield f"data: {json.dumps({'step': 'error', 'message': f'Analysis failed: {str(e)}', 'error': str(e)})}\n\n"
+    
+    return StreamingResponse(
+        generate_updates(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
+        }
+    )
+
+
 @router.post("/cancel/{analysis_id}")
 async def cancel_analysis(analysis_id: str):
     """Cancel a running analysis"""
@@ -251,9 +382,9 @@ async def generate_review_insights(request: ReviewInsightsRequest):
         
         if not reviewer:
             logging.warning("[REVIEW] ReviewerAgent not found, falling back to LLM")
-            from backend.agents.model_initializer import get_model_initializer
-            initializer = get_model_initializer()
-            initializer.ensure_initialized()
+            from backend.agents.model_manager import get_model_manager
+            manager = get_model_manager()
+            manager.ensure_initialized()
             
             # Direct LLM fallback
             review_prompt = f"""Review the following data analysis results:
@@ -266,9 +397,9 @@ Provide:
 3. ⚠️ Limitations: Any concerns?
 4. 📊 Quality Score: Rate 1-10."""
             
-            response = initializer.llm_client.generate(
+            response = manager.llm_client.generate(
                 prompt=review_prompt,
-                model=request.review_model or initializer.review_llm.model
+                model=request.review_model or manager.review_llm.model
             )
             result_text = response.get('response', str(response)) if isinstance(response, dict) else str(response)
             
@@ -344,12 +475,12 @@ async def get_routing_statistics():
     Get intelligent routing statistics
     """
     try:
-        from backend.agents.model_initializer import get_model_initializer
-        initializer = get_model_initializer()
+        from backend.agents.model_manager import get_model_manager
+        manager = get_model_manager()
         
-        # Access intelligent router statistics directly
-        if hasattr(initializer, 'intelligent_router'):
-            stats = initializer.intelligent_router.get_statistics()
+        # Access intelligent router statistics directly via property
+        if manager.orchestrator:
+            stats = manager.orchestrator.get_statistics()
             return {
                 "status": "success",
                 "statistics": stats,
