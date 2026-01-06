@@ -215,16 +215,62 @@ class Settings(BaseSettings):
         return data
     
     def setup_logging(self):
-        """Configure logging based on settings using enhanced logging module."""
-        from backend.core.enhanced_logging import setup_enhanced_logging
+        """Configure standard Python logging based on settings."""
+        import logging.handlers
         
-        # Use the new enhanced logging
-        log_path = self.get_log_path() if self.log_file else None
-        setup_enhanced_logging(
-            level=self.log_level,
-            log_file=log_path,
-            use_colors=True
-        )
+        # Get or create root logger - Set to WARNING to suppress library noise
+        logger = logging.getLogger()
+        logger.setLevel(logging.WARNING)
+        
+        # Clear existing handlers
+        logger.handlers.clear()
+        
+        # Console handler - Use minimal format for clean, attractive output
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(getattr(logging, self.log_level)) # Allow configured level (INFO/DEBUG)
+        
+        try:
+            import colorlog
+            # Define colors for different levels
+            console_formatter = colorlog.ColoredFormatter(
+                "%(log_color)s%(message)s",
+                log_colors={
+                    'DEBUG':    'cyan',
+                    'INFO':     'green',
+                    'WARNING':  'yellow',
+                    'ERROR':    'red',
+                    'CRITICAL': 'red,bg_white',
+                }
+            )
+        except ImportError:
+            # Fallback if colorlog is missing (though it is in requirements)
+            console_formatter = logging.Formatter("%(message)s")
+            
+        console_handler.setFormatter(console_formatter)
+        logger.addHandler(console_handler)
+        
+        # File handler if log file specified
+        if self.log_file:
+            log_path = self.get_log_path()
+            file_handler = logging.handlers.RotatingFileHandler(
+                log_path,
+                maxBytes=self.log_max_bytes,
+                backupCount=self.log_backup_count,
+                encoding='utf-8' # Force UTF-8 for file logs too
+            )
+            file_handler.setLevel(getattr(logging, self.log_level))
+            file_formatter = logging.Formatter(self.log_format)
+            file_handler.setFormatter(file_formatter)
+            logger.addHandler(file_handler)
+            
+        # Silence specific noisy libraries
+        for noisy_lib in ["uvicorn", "uvicorn.access", "watchfiles", "multipart", "httpcore", "httpx"]:
+            logging.getLogger(noisy_lib).setLevel(logging.WARNING)
+            
+        # Explicitly set backend logger to configured level (INFO/DEBUG)
+        # This ensures our app logs show up even if root is WARNING
+        logging.getLogger("backend").setLevel(getattr(logging, self.log_level))
+        logging.getLogger("src.backend").setLevel(getattr(logging, self.log_level))
         
         logging.info(f"Logging configured: level={self.log_level}, file={self.log_file}")
     

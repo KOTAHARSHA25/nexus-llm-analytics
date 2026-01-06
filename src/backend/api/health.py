@@ -25,8 +25,14 @@ def _get_local_ip() -> str:
 async def get_system_status() -> Dict[str, Any]:
     """Get comprehensive system health status"""
     try:
-        from backend.infra.circuit_breaker import get_all_circuit_breaker_status
-        from backend.infra.advanced_cache import get_cache_status
+        try:
+            from backend.infra.circuit_breaker import get_all_circuit_breaker_status
+        except ImportError:
+            get_all_circuit_breaker_status = None
+        try:
+            from backend.core.advanced_cache import get_cache_status
+        except ImportError:
+            get_cache_status = None
         from backend.core.engine.model_selector import ModelSelector
         
         # System resources
@@ -159,7 +165,10 @@ async def get_network_info() -> Dict[str, Any]:
 async def get_cache_info() -> Dict[str, Any]:
     """Get detailed cache information"""
     try:
-        from backend.infra.advanced_cache import get_cache_status
+        try:
+            from backend.core.advanced_cache import get_cache_status
+        except ImportError:
+            return {"error": "Cache module not available"}
         return get_cache_status()
     except Exception as e:
         return {"error": str(e)}
@@ -168,7 +177,10 @@ async def get_cache_info() -> Dict[str, Any]:
 async def clear_cache() -> Dict[str, str]:
     """Clear all system caches"""
     try:
-        from backend.infra.advanced_cache import clear_all_caches
+        try:
+            from backend.core.advanced_cache import clear_all_caches
+        except ImportError:
+            return {"status": "error", "error": "Cache module not available"}
         clear_all_caches()
         return {"status": "success", "message": "All caches cleared"}
     except Exception as e:

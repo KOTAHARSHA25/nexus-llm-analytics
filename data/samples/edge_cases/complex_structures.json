@@ -1,0 +1,51 @@
+{
+  "metrics": {
+    "performance": 0.95,
+    "availability": 0.999,
+    "errors": {
+      "count": 5,
+      "types": ["timeout", "validation", "timeout", "network", "validation"]
+    }
+  },
+  "data": [1, 2, 3, [4, 5, [6, 7, [8, 9, [10]]]]],
+  "nested": {
+    "level1": {
+      "level2": {
+        "level3": {
+          "level4": {
+            "level5": {
+              "level6": {
+                "value": "deeply nested value",
+                "array": [1, 2, 3]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "mixed_array": [
+    {"id": 1, "value": 100},
+    {"id": 2, "value": null},
+    {"id": 3},
+    {"id": "4", "value": "200"},
+    [5, 6, 7],
+    "plain string",
+    123,
+    true,
+    null
+  ],
+  "timestamps": {
+    "created": "2024-01-15T10:30:00Z",
+    "updated": "2024-01-15T14:45:30Z",
+    "invalid": "not-a-date",
+    "epoch": 1705320600
+  },
+  "special_chars": "Test with 'quotes', \"double quotes\", and unicode: café résumé 日本語 🚀",
+  "empty_structures": {
+    "empty_object": {},
+    "empty_array": [],
+    "null_value": null,
+    "empty_string": ""
+  }
+}

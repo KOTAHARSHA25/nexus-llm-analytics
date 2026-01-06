@@ -704,7 +704,12 @@ result = ...
             try:
                 # Try to use circuit breaker if Phase 1 available
                 try:
-                    from backend.infra.circuit_breaker import get_circuit_breaker, CircuitBreakerConfig
+                    try:
+                        from backend.infra.circuit_breaker import get_circuit_breaker, CircuitBreakerConfig
+                    except ImportError:
+                        # Circuit breaker not available, continue without it
+                        logging.debug("Circuit breaker not available for code generator")
+                        raise
                     from backend.core.phase1_integration import PHASE1_AVAILABLE
                     
                     if PHASE1_AVAILABLE:

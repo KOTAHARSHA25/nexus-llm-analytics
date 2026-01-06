@@ -235,6 +235,14 @@ Query: "Create a linear regression model to predict revenue from sales and price
 → Results: Coefficients, R², p-values, residual plots, prediction intervals
 ```
 
+### **SQL Analysis (Chat with Data)**
+```
+Query: "Show top 5 customers by total revenue from the uploaded data"
+→ SQL Agent loads CSV/Excel into secure in-memory database
+→ Generates safe SQL: `SELECT customer_id, SUM(revenue) FROM analyzed_data GROUP BY customer_id ORDER BY 2 DESC LIMIT 5`
+→ Returns exact results directly from your file
+```
+
 ---
 
 ## 🔧 **Advanced Features**

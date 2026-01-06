@@ -387,7 +387,11 @@ async def upload_document(file: UploadFile = File(...)):
             
             # Step 11: Invalidate cache for this filename to prevent stale data
             try:
-                from backend.infra.advanced_cache import _query_cache, _file_analysis_cache
+                try:
+                    from backend.core.advanced_cache import _query_cache, _file_analysis_cache
+                except ImportError:
+                    logging.debug("Cache module not available for clearing")
+                    return
                 
                 # Clear ALL caches for this filename using multiple strategies
                 # Strategy 1: Tag-based invalidation

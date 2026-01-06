@@ -52,7 +52,9 @@ class SecurityGuards:
         # Additional checks for dangerous patterns
         dangerous_names = {
             'subclasses', 'bases', 'mro', 'globals', 'code', 'func', 'self',
-            'import', 'builtins', 'file', 'open'
+            'import', 'builtins', 'file', 'open',
+            'to_csv', 'to_json', 'to_excel', 'to_sql', 'to_pickle',
+            'read_csv', 'read_json', 'read_excel', 'read_sql', 'read_pickle'
         }
         
         if any(dangerous in name.lower() for dangerous in dangerous_names):

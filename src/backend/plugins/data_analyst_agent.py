@@ -27,11 +27,18 @@ try:
         resilient_llm_call,
         GracefulDegradation
     )
-    from backend.infra.circuit_breaker import get_circuit_breaker, CircuitState
     PHASE1_AVAILABLE = True
 except ImportError as e:
-    logging.warning(f"Phase 1 components not available: {e}")
+    logging.debug(f"Phase 1 integration not available: {e}")
     PHASE1_AVAILABLE = False
+
+# Circuit breaker (optional)
+try:
+    from backend.infra.circuit_breaker import get_circuit_breaker, CircuitState
+    CIRCUIT_BREAKER_AVAILABLE = True
+except ImportError:
+    CIRCUIT_BREAKER_AVAILABLE = False
+    logging.debug("Circuit breaker module not available")
 
 class DataAnalystAgent(BasePluginAgent):
     """

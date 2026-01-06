@@ -14,20 +14,20 @@ sys.path.insert(0, str(src_dir))
 backend_dir = Path(__file__).parent
 sys.path.insert(0, str(backend_dir))
 
+# FORCE UTF-8 ENCODING FOR WINDOWS CONSOLES (Fixes emoji crashes)
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+
 try:
     from backend.api import analyze, upload, report, visualize, models, health, viz_enhance
     from backend.core.config import get_settings, validate_config
     from backend.core.rate_limiter import RateLimitMiddleware, global_rate_limiter
     from backend.core.error_handling import error_handler
     
-    # Auto-configure models on startup (quiet mode - details go to log file)
-    try:
-        from backend.core.engine.model_selector import ModelSelector
-        primary, review, embedding = ModelSelector.select_optimal_models()
-        # Print minimal startup info
-        print(f"[AI] Models: {primary.replace('ollama/', '')}, {review.replace('ollama/', '')}")
-    except Exception as model_error:
-        print(f"[!] Model selection warning: {model_error}")
+    
+    # Auto-configure models on startup is now handled in lifespan (see below)
+    # This prevents double-loading and ensures logging is configured first
         
 except ImportError as e:
     print(f"Import error: {e}")
@@ -53,6 +53,7 @@ async def lifespan(app: FastAPI):
     
     # Startup tasks
     logger = logging.getLogger(__name__)
+    
     logger.info("🚀 Starting Nexus LLM Analytics backend...")
     
     # STEP 1: Auto-configure models on startup

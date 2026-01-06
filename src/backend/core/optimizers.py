@@ -761,9 +761,9 @@ def main():
     # Show startup status
     startup = report["startup_status"]
     status = "✅ Ready" if startup["ready_for_requests"] else "⏳ Loading"
-    print(f"\nStartup Status: {status}")
+    logging.info(f"Startup Status: {status}")
     if startup.get("load_duration"):
-        print(f"  Load time: {startup['load_duration']:.1f}s")
+        logging.info(f"  Load time: {startup['load_duration']:.1f}s")
 
 
 if __name__ == "__main__":

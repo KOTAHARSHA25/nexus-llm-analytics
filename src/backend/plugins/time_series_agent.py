@@ -199,11 +199,12 @@ class TimeSeriesAgent(BasePluginAgent):
         temporal_terms = [
             "forecast", "predict", "trend", "seasonal", "periodic",
             "daily", "weekly", "monthly", "yearly", "quarterly",
-            "lag", "autocorrelation", "arima", "exponential smoothing"
+            "lag", "autocorrelation", "arima", "exponential smoothing",
+            "next month", "next year", "next quarter", "future"
         ]
         
         temporal_matches = sum(1 for term in temporal_terms if term in query_lower)
-        confidence += min(temporal_matches * 0.1, 0.3)
+        confidence += min(temporal_matches * 0.15, 0.45)
         
         # Date/time references
         datetime_refs = [

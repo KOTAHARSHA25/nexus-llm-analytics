@@ -1,0 +1,1245 @@
+{
+  "src/backend/plugins/data_analyst_agent.py": {
+    "functions": [
+      "get_metadata",
+      "initialize",
+      "_get_orchestrator",
+      "_get_planner_config",
+      "_get_circuit_breaker_config",
+      "_load_orchestrator_config",
+      "can_handle",
+      "execute",
+      "_execute_with_phase1_fallback",
+      "_should_use_cot",
+      "_execute_with_code_gen",
+      "_load_cot_config",
+      "_ensure_cot_engine",
+      "_resolve_filepath",
+      "_optimize_data",
+      "_execute_direct",
+      "_execute_with_cot",
+      "execute_with_model",
+      "llm_call"
+    ],
+    "classes": [
+      "DataAnalystAgent"
+    ],
+    "critical_risks": [
+      "Call to open at line 96",
+      "Call to open at line 124",
+      "Call to open at line 650"
+    ]
+  },
+  "src/backend/plugins/financial_agent.py": {
+    "functions": [
+      "get_metadata",
+      "initialize",
+      "can_handle",
+      "execute",
+      "_load_data",
+      "_parse_financial_intent",
+      "_identify_financial_columns",
+      "_profitability_analysis",
+      "_growth_analysis",
+      "_classify_growth",
+      "_comprehensive_financial_analysis",
+      "_assess_financial_health",
+      "_grade_financial_health",
+      "_generate_health_recommendations",
+      "_generate_comprehensive_interpretation",
+      "_interpret_profitability",
+      "_interpret_growth",
+      "_liquidity_analysis",
+      "_efficiency_analysis",
+      "_roi_analysis",
+      "_cost_analysis",
+      "_customer_analysis",
+      "_financial_forecast",
+      "get_val",
+      "get_val",
+      "get_val",
+      "segment_customer"
+    ],
+    "classes": [
+      "FinancialAgent"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/plugins/ml_insights_agent.py": {
+    "functions": [
+      "get_metadata",
+      "initialize",
+      "can_handle",
+      "execute",
+      "_load_data",
+      "_parse_ml_intent",
+      "_preprocess_data",
+      "_clustering_analysis",
+      "_anomaly_detection",
+      "_dimensionality_reduction",
+      "_get_top_pca_features",
+      "_comprehensive_ml_analysis",
+      "_generate_ml_interpretation",
+      "_find_strong_correlations",
+      "_interpret_clustering",
+      "_interpret_anomalies",
+      "_interpret_pca",
+      "_classification_analysis",
+      "_regression_analysis",
+      "_association_analysis",
+      "_feature_importance_analysis"
+    ],
+    "classes": [
+      "MLInsightsAgent"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/plugins/rag_agent.py": {
+    "functions": [
+      "get_metadata",
+      "initialize",
+      "can_handle",
+      "execute",
+      "_resolve_path",
+      "_extract_text",
+      "_extract_pdf_text",
+      "_extract_docx_text",
+      "_extract_pptx_text",
+      "_extract_rtf_text",
+      "_generate_rag_response"
+    ],
+    "classes": [
+      "RagAgent"
+    ],
+    "critical_risks": [
+      "Call to open at line 210",
+      "Call to open at line 245",
+      "Call to open at line 195",
+      "Call to open at line 201"
+    ]
+  },
+  "src/backend/plugins/reporter_agent.py": {
+    "functions": [
+      "get_metadata",
+      "initialize",
+      "can_handle",
+      "execute"
+    ],
+    "classes": [
+      "ReporterAgent"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/plugins/reviewer_agent.py": {
+    "functions": [
+      "get_metadata",
+      "initialize",
+      "can_handle",
+      "execute"
+    ],
+    "classes": [
+      "ReviewerAgent"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/plugins/sql_agent.py": {
+    "functions": [
+      "get_metadata",
+      "initialize",
+      "_init_memory_connection",
+      "can_handle",
+      "execute",
+      "_load_dataframe_to_sql",
+      "_is_raw_sql",
+      "_parse_query_intent",
+      "_analyze_schema",
+      "_generate_sql_query",
+      "_execute_sql_query",
+      "_optimize_query"
+    ],
+    "classes": [
+      "SQLAgent"
+    ],
+    "critical_risks": [
+      "Call to connect at line 138",
+      "Call to connect at line 141",
+      "Call to execute at line 262",
+      "Call to execute at line 366",
+      "Call to execute at line 266",
+      "Call to connect at line 113"
+    ]
+  },
+  "src/backend/plugins/statistical_agent.py": {
+    "functions": [
+      "get_metadata",
+      "initialize",
+      "can_handle",
+      "execute",
+      "_load_data",
+      "_parse_statistical_intent",
+      "_descriptive_statistics",
+      "_correlation_analysis",
+      "_identify_strong_correlations",
+      "_interpret_descriptive_stats",
+      "_interpret_correlations",
+      "_correlation_strength",
+      "_comprehensive_analysis",
+      "_generate_comprehensive_interpretation",
+      "_outlier_analysis",
+      "_normality_test",
+      "_interpret_outliers",
+      "_interpret_normality",
+      "_t_test_analysis",
+      "_interpret_cohens_d",
+      "_interpret_t_test",
+      "_anova_analysis",
+      "_interpret_eta_squared",
+      "_interpret_anova",
+      "_regression_analysis",
+      "_interpret_regression",
+      "_chi_square_analysis",
+      "_interpret_cramers_v",
+      "_interpret_chi_square"
+    ],
+    "classes": [
+      "StatisticalAgent"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/plugins/time_series_agent.py": {
+    "functions": [
+      "get_metadata",
+      "initialize",
+      "can_handle",
+      "execute",
+      "_load_data",
+      "_prepare_time_series_data",
+      "_parse_ts_intent",
+      "_forecast_analysis",
+      "_trend_analysis",
+      "_seasonality_analysis",
+      "_comprehensive_ts_analysis",
+      "_generate_ts_interpretation",
+      "_detect_frequency",
+      "_interpret_forecasts",
+      "_interpret_trends",
+      "_interpret_seasonality",
+      "_decomposition_analysis",
+      "_interpret_decomposition",
+      "_stationarity_analysis",
+      "_interpret_stationarity",
+      "_anomaly_detection",
+      "_interpret_anomalies",
+      "_correlation_analysis",
+      "_interpret_correlations"
+    ],
+    "classes": [
+      "TimeSeriesAgent"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/plugins/visualizer_agent.py": {
+    "functions": [
+      "__init__",
+      "get_metadata",
+      "initialize",
+      "_get_sandbox",
+      "can_handle",
+      "_generate_viz_code",
+      "execute"
+    ],
+    "classes": [
+      "VisualizerAgent"
+    ],
+    "critical_risks": [
+      "Call to execute at line 151"
+    ]
+  },
+  "src/backend/core/analysis_manager.py": {
+    "functions": [
+      "check_cancellation",
+      "__init__",
+      "start_analysis",
+      "update_analysis_stage",
+      "is_cancelled",
+      "cancel_analysis",
+      "complete_analysis",
+      "get_analysis_status",
+      "get_running_analyses",
+      "cleanup_old_analyses"
+    ],
+    "classes": [
+      "AnalysisManager"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/automated_validation.py": {
+    "functions": [
+      "to_feedback_text",
+      "__init__",
+      "validate",
+      "_check_calculations",
+      "_check_logic_errors",
+      "_check_reasoning_quality",
+      "_check_query_alignment",
+      "_check_data_consistency",
+      "_extract_keywords",
+      "_check_causation_errors",
+      "_check_formula_errors",
+      "_check_time_period_errors",
+      "_check_aggregation_errors",
+      "_check_percentage_format"
+    ],
+    "classes": [
+      "ValidationIssue",
+      "AutomatedValidationResult",
+      "AutomatedValidator"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/chromadb_client.py": {
+    "functions": [
+      "chunk_text",
+      "embed_text",
+      "to_dict",
+      "to_dict",
+      "__init__",
+      "add_document",
+      "query",
+      "hybrid_query",
+      "_extract_keywords",
+      "_keyword_overlap",
+      "query_with_citations",
+      "format_context_with_citations",
+      "list_collections"
+    ],
+    "classes": [
+      "CitedSource",
+      "RAGResponse",
+      "ChromaDBClient"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/code_execution_history.py": {
+    "functions": [
+      "get_execution_history",
+      "to_dict",
+      "from_dict",
+      "__init__",
+      "_load_history",
+      "_save_history",
+      "_generate_execution_id",
+      "_get_result_preview",
+      "_get_result_type",
+      "save_execution",
+      "get_execution",
+      "get_recent_executions",
+      "get_successful_executions",
+      "search_executions",
+      "get_execution_summary",
+      "clear_history",
+      "export_execution",
+      "get_code_for_replay"
+    ],
+    "classes": [
+      "CodeExecutionRecord",
+      "CodeExecutionHistory"
+    ],
+    "critical_risks": [
+      "Call to open at line 131",
+      "Call to open at line 112"
+    ]
+  },
+  "src/backend/core/config.py": {
+    "functions": [
+      "get_settings",
+      "apply_environment_preset",
+      "validate_config",
+      "parse_cors_origins",
+      "parse_file_extensions",
+      "parse_cors_list",
+      "validate_log_level",
+      "get_upload_path",
+      "get_reports_path",
+      "get_chromadb_path",
+      "get_log_path",
+      "to_dict",
+      "get_safe_dict",
+      "setup_logging",
+      "validate_environment"
+    ],
+    "classes": [
+      "Settings"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/document_indexer.py": {
+    "functions": [
+      "fix_rag_indexing_issue",
+      "to_dict",
+      "__init__",
+      "chunk",
+      "_split_into_semantic_units",
+      "_split_by_sentences",
+      "_extract_code_blocks",
+      "_extract_tables",
+      "_remove_special_elements",
+      "_create_chunk",
+      "_get_overlap_text",
+      "_detect_code_language",
+      "__init__",
+      "_generate_document_id",
+      "_optimized_chunking",
+      "index_extracted_documents",
+      "__del__"
+    ],
+    "classes": [
+      "ChunkType",
+      "SemanticChunk",
+      "SemanticChunker",
+      "OptimizedDocumentIndexer"
+    ],
+    "critical_risks": [
+      "Call to open at line 537"
+    ]
+  },
+  "src/backend/core/dynamic_planner.py": {
+    "functions": [
+      "repair_json",
+      "safe_json_parse",
+      "get_dynamic_planner",
+      "__init__",
+      "llm",
+      "create_plan",
+      "_build_planning_prompt",
+      "_parse_plan"
+    ],
+    "classes": [
+      "AnalysisStep",
+      "AnalysisPlan",
+      "DynamicPlanner"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/enhanced_cache_integration.py": {
+    "functions": [
+      "enhanced_cached",
+      "get_enhanced_cache_manager",
+      "__post_init__",
+      "is_expired",
+      "touch",
+      "get_access_frequency",
+      "__init__",
+      "_build_pattern_index",
+      "record_access",
+      "_extract_pattern",
+      "__init__",
+      "_start_background_tasks",
+      "_generate_optimized_key",
+      "_fast_hash_args",
+      "_fallback_key_generation",
+      "_update_pattern_index",
+      "get_comprehensive_stats",
+      "decorator",
+      "sync_wrapper"
+    ],
+    "classes": [
+      "CacheLevel",
+      "EnhancedCacheEntry",
+      "SmartCacheWarmer",
+      "EnhancedCacheManager"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/enhanced_logging.py": {
+    "functions": [
+      "setup_enhanced_logging",
+      "format",
+      "format"
+    ],
+    "classes": [
+      "JsonFormatter",
+      "ColoredFormatter"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/enhanced_reports.py": {
+    "functions": [
+      "generate_report",
+      "__init__",
+      "showPage",
+      "save",
+      "_draw_header_footer",
+      "__init__",
+      "__init__",
+      "_setup_professional_styles",
+      "generate_report",
+      "_create_canvas",
+      "_create_title_page",
+      "_create_table_of_contents",
+      "_create_executive_summary",
+      "_create_key_findings",
+      "_create_analysis_section",
+      "_save_chart",
+      "_create_statistical_summary",
+      "_create_data_quality_section",
+      "_create_methodology_section",
+      "_create_glossary_and_references",
+      "_create_appendix",
+      "__init__",
+      "generate_report",
+      "_create_summary_sheet",
+      "_create_results_sheets",
+      "_create_data_sheet",
+      "__init__",
+      "generate_report"
+    ],
+    "classes": [
+      "ColorPalette",
+      "NumberedCanvas",
+      "ReportTemplate",
+      "PDFReportGenerator",
+      "ExcelReportGenerator",
+      "EnhancedReportManager"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/error_handling.py": {
+    "functions": [
+      "handle_errors",
+      "validate_required_fields",
+      "validate_file_extension",
+      "safe_json_parse",
+      "create_error_response",
+      "__init__",
+      "_get_user_friendly_message",
+      "to_dict",
+      "__init__",
+      "__init__",
+      "__init__",
+      "__init__",
+      "__init__",
+      "handle_error",
+      "_log_error",
+      "_track_error",
+      "_store_error",
+      "get_error_statistics",
+      "clear_statistics",
+      "decorator",
+      "wrapper"
+    ],
+    "classes": [
+      "ErrorSeverity",
+      "ErrorCategory",
+      "NexusError",
+      "ValidationError",
+      "DataProcessingError",
+      "ModelExecutionError",
+      "FileOperationError",
+      "ErrorHandler"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/llm_client.py": {
+    "functions": [
+      "__init__",
+      "generate",
+      "_calculate_adaptive_timeout",
+      "generate_primary",
+      "generate_review",
+      "_make_llm_call"
+    ],
+    "classes": [
+      "LLMClient"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/memory_optimizer.py": {
+    "functions": [
+      "main",
+      "get_memory_usage",
+      "get_top_memory_processes",
+      "estimate_available_after_cleanup",
+      "get_optimization_plan",
+      "clear_system_cache"
+    ],
+    "classes": [
+      "MemoryOptimizer"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/optimized_data_structures.py": {
+    "functions": [
+      "__init__",
+      "is_end_of_word",
+      "is_end_of_word",
+      "__init__",
+      "size",
+      "insert",
+      "search",
+      "search_prefix",
+      "get_stats",
+      "__hash__",
+      "__init__",
+      "_hash",
+      "_resize",
+      "put",
+      "get",
+      "delete",
+      "__init__",
+      "_update_freq",
+      "get",
+      "put",
+      "__init__",
+      "batch_process_queries",
+      "_process_batch",
+      "_process_single_query",
+      "_fast_tokenize",
+      "_build_query_graph",
+      "__init__",
+      "fast_fuzzy_match",
+      "optimize_query_plan",
+      "parallel_merge_sort",
+      "create_optimized_index",
+      "create_processor",
+      "__init__",
+      "start_timer",
+      "end_timer",
+      "get_average_time",
+      "get_performance_report",
+      "count_nodes"
+    ],
+    "classes": [
+      "TrieNode",
+      "OptimizedTrie",
+      "QueryNode",
+      "HighPerformanceHashMap",
+      "LRUCache",
+      "OptimizedDataProcessor",
+      "OptimizedConnectionPool",
+      "OptimizedAlgorithms",
+      "DataStructureFactory",
+      "PerformanceMonitor"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/optimizers.py": {
+    "functions": [
+      "_get_optimization_suggestions",
+      "_estimate_processing_time",
+      "_estimate_memory_requirement",
+      "should_increase_timeout_for_low_ram",
+      "main",
+      "get_memory_usage",
+      "get_top_memory_processes",
+      "estimate_available_after_cleanup",
+      "get_optimization_plan",
+      "clear_system_cache",
+      "__init__",
+      "optimize_query_processing",
+      "monitor_system_resources",
+      "optimize_data_processing",
+      "__init__",
+      "optimized_execute",
+      "_execute_operation",
+      "get_performance_metrics",
+      "__init__",
+      "calculate_optimal_timeout",
+      "record_operation_time",
+      "optimize_startup",
+      "check_optimization_status",
+      "wait_for_optimization_completion",
+      "__init__",
+      "get_system_optimization_report",
+      "_generate_unified_recommendations",
+      "optimize_for_model"
+    ],
+    "classes": [
+      "MemoryOptimizer",
+      "PerformanceOptimizer",
+      "OptimizedAgentMixin",
+      "AdaptiveTimeoutManager",
+      "StartupOptimizer",
+      "UnifiedOptimizer"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/phase1_integration.py": {
+    "functions": [
+      "get_phase1_coordinator",
+      "resilient_llm_call",
+      "to_dict",
+      "__init__",
+      "get_best_model_for_query",
+      "get_model_fallback_chain",
+      "execute_with_resilience",
+      "get_status",
+      "refresh_models",
+      "reset_all_circuits",
+      "shutdown",
+      "decorator",
+      "wrapper"
+    ],
+    "classes": [
+      "Phase1Status",
+      "Phase1Coordinator"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/plugin_system.py": {
+    "functions": [
+      "get_agent_registry",
+      "initialize_plugin_system",
+      "__init__",
+      "get_metadata",
+      "initialize",
+      "can_handle",
+      "execute",
+      "validate_dependencies",
+      "get_resource_requirements",
+      "__init__",
+      "discover_agents",
+      "_load_agent_from_file",
+      "_load_agent_configs",
+      "register_agent",
+      "get_agent",
+      "route_query",
+      "find_best_agent",
+      "get_agents_by_capability",
+      "list_agents",
+      "reload_agent",
+      "get_system_resources"
+    ],
+    "classes": [
+      "AgentCapability",
+      "AgentMetadata",
+      "BasePluginAgent",
+      "AgentRegistry"
+    ],
+    "critical_risks": [
+      "Call to open at line 411",
+      "Call to open at line 194"
+    ]
+  },
+  "src/backend/core/query_complexity_analyzer.py": {
+    "functions": [
+      "__init__",
+      "_has_explicit_negation",
+      "_detect_complex_operations",
+      "_detect_medium_operations",
+      "_detect_simple_operations",
+      "_analyze_query_structure",
+      "analyze",
+      "get_complexity_report"
+    ],
+    "classes": [
+      "ComplexityScore",
+      "QueryComplexityAnalyzer"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/query_parser.py": {
+    "functions": [
+      "classify_intent",
+      "extract_columns",
+      "extract_conditions",
+      "__init__",
+      "parse_query",
+      "_llm_enhanced_parsing",
+      "_extract_additional_params",
+      "generate_analysis_plan"
+    ],
+    "classes": [
+      "QueryIntent",
+      "DataType",
+      "QueryParams",
+      "IntentClassifier",
+      "ColumnExtractor",
+      "AdvancedQueryParser"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/rate_limiter.py": {
+    "functions": [
+      "rate_limit",
+      "__init__",
+      "__init__",
+      "__init__",
+      "__init__",
+      "_create_limiter",
+      "_update_stats",
+      "get_stats",
+      "reset_stats",
+      "cleanup_old_limiters",
+      "__init__",
+      "decorator",
+      "sync_wrapper"
+    ],
+    "classes": [
+      "RateLimitStrategy",
+      "RateLimitExceeded",
+      "TokenBucket",
+      "SlidingWindowCounter",
+      "RateLimiter",
+      "RateLimitMiddleware"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/semantic_mapper.py": {
+    "functions": [
+      "get_semantic_mapper",
+      "__init__",
+      "infer_column_concepts",
+      "get_columns_for_concept",
+      "get_concept_confidence",
+      "validate_mappings",
+      "enhance_query_context",
+      "suggest_operations"
+    ],
+    "classes": [
+      "SemanticMapper"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/utils.py": {
+    "functions": [
+      "log_data_version",
+      "setup_logging",
+      "friendly_error",
+      "format",
+      "__init__",
+      "register",
+      "get"
+    ],
+    "classes": [
+      "JsonFormatter",
+      "AgentRegistry"
+    ],
+    "critical_risks": [
+      "Call to open at line 29"
+    ]
+  },
+  "src/backend/core/websocket_manager.py": {
+    "functions": [
+      "__init__",
+      "disconnect",
+      "_queue_message",
+      "get_connection_count",
+      "get_connected_clients",
+      "__init__"
+    ],
+    "classes": [
+      "MessageType",
+      "ConnectionManager",
+      "AnalysisProgressTracker"
+    ],
+    "critical_risks": [
+      "Call to connect at line 322"
+    ]
+  },
+  "src/backend/core/engine/intelligent_router.py": {
+    "functions": [
+      "get_intelligent_router",
+      "to_dict",
+      "__init__",
+      "_refresh_model_tiers",
+      "_select_model_for_tier",
+      "route",
+      "_record_decision",
+      "get_statistics",
+      "reset_statistics"
+    ],
+    "classes": [
+      "ModelTier",
+      "RoutingDecision",
+      "IntelligentRouter"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/engine/model_selector.py": {
+    "functions": [
+      "get_model_discovery",
+      "get_ram_selector",
+      "size_gb",
+      "to_dict",
+      "to_dict",
+      "to_dict",
+      "_get_installed_models",
+      "get_system_memory",
+      "select_optimal_models",
+      "_select_best_model",
+      "validate_model_compatibility",
+      "get_model_info",
+      "recommend_system_config",
+      "__init__",
+      "discover_models_sync",
+      "_analyze_model",
+      "_extract_param_count",
+      "_extract_family",
+      "_extract_quantization",
+      "_estimate_ram_requirement",
+      "_detect_capabilities",
+      "_calculate_complexity_score",
+      "get_model_for_complexity",
+      "get_model_chain",
+      "get_statistics",
+      "__init__",
+      "get_memory_snapshot",
+      "get_available_ram_for_model",
+      "can_load_model",
+      "select_model",
+      "get_memory_trend",
+      "start_background_monitoring",
+      "stop_background_monitoring",
+      "_monitoring_loop",
+      "get_statistics"
+    ],
+    "classes": [
+      "ModelCapability",
+      "MemoryPressureLevel",
+      "ModelInfo",
+      "MemorySnapshot",
+      "ModelSelectionResult",
+      "ModelSelector",
+      "DynamicModelDiscovery",
+      "RAMAwareSelector"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/engine/query_orchestrator.py": {
+    "functions": [
+      "to_dict",
+      "__init__",
+      "_load_config",
+      "_try_load_advanced_components",
+      "_is_embedding_model",
+      "create_execution_plan",
+      "_get_user_preferences",
+      "_analyze_complexity",
+      "_select_model_intelligent",
+      "_select_execution_method",
+      "_select_review_level",
+      "_build_fallback_chain",
+      "_explain_plan",
+      "get_status"
+    ],
+    "classes": [
+      "ExecutionMethod",
+      "ReviewLevel",
+      "ExecutionPlan",
+      "QueryOrchestrator"
+    ],
+    "critical_risks": [
+      "Call to open at line 139"
+    ]
+  },
+  "src/backend/core/engine/self_correction_engine.py": {
+    "functions": [
+      "__init__",
+      "_load_prompt_template",
+      "run_correction_loop",
+      "_build_generator_prompt",
+      "_build_critic_prompt",
+      "_format_data_context",
+      "_log_iteration_details",
+      "_calculate_confidence_score",
+      "_validate_safety",
+      "_learn_from_correction",
+      "get_learned_patterns"
+    ],
+    "classes": [
+      "CorrectionIteration",
+      "CorrectionResult",
+      "SelfCorrectionEngine"
+    ],
+    "critical_risks": [
+      "Call to open at line 69",
+      "Call to open at line 492",
+      "Call to open at line 512"
+    ]
+  },
+  "src/backend/core/engine/smart_fallback.py": {
+    "functions": [
+      "get_fallback_manager",
+      "to_dict",
+      "current",
+      "next",
+      "reset",
+      "has_fallback",
+      "__init__",
+      "_get_installed_model_names",
+      "_init_fallback_chains",
+      "get_model_fallback",
+      "get_method_fallback",
+      "get_review_fallback",
+      "get_adaptive_timeout",
+      "_record_fallback",
+      "mark_recovered",
+      "mark_exhausted",
+      "reset_chains",
+      "get_stats",
+      "with_fallback",
+      "generate_degraded_response",
+      "get_minimal_analysis",
+      "wrapper"
+    ],
+    "classes": [
+      "FallbackReason",
+      "FallbackEvent",
+      "FallbackChain",
+      "SmartFallbackManager",
+      "GracefulDegradation"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/core/engine/user_preferences.py": {
+    "functions": [
+      "get_preferences_manager",
+      "__init__",
+      "load_preferences",
+      "save_preferences",
+      "update_preferences",
+      "get_model_config",
+      "set_model_config",
+      "mark_setup_complete",
+      "is_first_time_user",
+      "save_model_test_result",
+      "save_test_result",
+      "get_model_test_results",
+      "reset_preferences",
+      "export_preferences",
+      "import_preferences"
+    ],
+    "classes": [
+      "UserPreferences",
+      "UserPreferencesManager"
+    ],
+    "critical_risks": [
+      "Call to open at line 71",
+      "Call to open at line 43"
+    ]
+  },
+  "src/backend/core/security/sandbox.py": {
+    "functions": [
+      "__init__",
+      "_initialize_safe_modules",
+      "validate_code",
+      "_analyze_code_safety",
+      "_create_restricted_globals",
+      "_is_safe_type",
+      "execute",
+      "__init__",
+      "_safe_apply",
+      "_safe_map",
+      "_safe_transform",
+      "_safe_agg",
+      "__getattr__",
+      "__getattr__",
+      "__getattr__",
+      "block_savefig",
+      "block_save",
+      "__getattr__",
+      "block_method",
+      "blocked"
+    ],
+    "classes": [
+      "EnhancedSandbox",
+      "Sandbox",
+      "RestrictedPandas",
+      "RestrictedNumpy",
+      "RestrictedJSON",
+      "RestrictedPolars"
+    ],
+    "critical_risks": [
+      "Call to exec at line 665"
+    ]
+  },
+  "src/backend/core/security/security_guards.py": {
+    "functions": [
+      "safer_getattr",
+      "safe_getitem",
+      "guarded_write",
+      "guarded_import",
+      "safe_print",
+      "safer_setattr",
+      "safer_delattr",
+      "guarded_import",
+      "guarded_write",
+      "create_safe_builtins",
+      "limit_resources",
+      "validate_ast",
+      "validate_code_patterns",
+      "timeout_handler",
+      "signal_timeout_handler"
+    ],
+    "classes": [
+      "SecurityGuards",
+      "ResourceManager",
+      "CodeValidator"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/api/analyze.py": {
+    "functions": [
+      "_format_dict_result"
+    ],
+    "classes": [
+      "AnalyzeRequest",
+      "AnalyzeResponse",
+      "ReviewInsightsRequest",
+      "Config"
+    ],
+    "critical_risks": [
+      "Call to execute at line 434"
+    ]
+  },
+  "src/backend/api/feedback.py": {
+    "functions": [],
+    "classes": [
+      "FeedbackRequest",
+      "FeedbackResponse",
+      "FeedbackStats"
+    ],
+    "critical_risks": [
+      "Call to open at line 88",
+      "Call to open at line 136",
+      "Call to open at line 210"
+    ]
+  },
+  "src/backend/api/health.py": {
+    "functions": [
+      "_get_local_ip",
+      "_generate_recommendations"
+    ],
+    "classes": [],
+    "critical_risks": [
+      "Call to connect at line 17"
+    ]
+  },
+  "src/backend/api/history.py": {
+    "functions": [
+      "_get_history_file",
+      "ensure_history_dir",
+      "load_history",
+      "save_history"
+    ],
+    "classes": [
+      "QueryHistoryItem",
+      "QueryHistoryResponse",
+      "CodeExecutionItem",
+      "CodeExecutionHistoryResponse",
+      "CodeReplayRequest",
+      "CodeReplayResponse"
+    ],
+    "critical_risks": [
+      "Call to open at line 50",
+      "Call to open at line 70"
+    ]
+  },
+  "src/backend/api/models.py": {
+    "functions": [
+      "_is_embedding_model",
+      "_test_embedding_model"
+    ],
+    "classes": [
+      "ModelConfig",
+      "ModelInfo",
+      "AvailableModelsResponse",
+      "ModelTestRequest"
+    ],
+    "critical_risks": []
+  },
+  "src/backend/api/report.py": {
+    "functions": [
+      "download_log",
+      "download_audit",
+      "_generate_csv_export",
+      "download_report"
+    ],
+    "classes": [
+      "ReportGenerationRequest",
+      "PDFReportRequest"
+    ],
+    "critical_risks": [
+      "Call to open at line 40",
+      "Call to open at line 50"
+    ]
+  },
+  "src/backend/api/upload.py": {
+    "functions": [
+      "validate_filename",
+      "validate_file_size",
+      "validate_file_extension",
+      "validate_file_content",
+      "sanitize_extracted_text",
+      "secure_file_path",
+      "preview_csv_file",
+      "preview_excel_file",
+      "preview_json_file",
+      "preview_pdf_file",
+      "preview_text_file"
+    ],
+    "classes": [
+      "RawTextInput"
+    ],
+    "critical_risks": [
+      "Call to open at line 480",
+      "Call to open at line 743",
+      "Call to open at line 819",
+      "Call to open at line 985",
+      "Call to open at line 1020",
+      "Call to open at line 318",
+      "Call to open at line 736",
+      "Call to open at line 926",
+      "Call to open at line 1052",
+      "Call to open at line 354",
+      "Call to open at line 518",
+      "Call to open at line 1066"
+    ]
+  },
+  "src/backend/api/visualize.py": {
+    "functions": [
+      "_debug_print",
+      "execute_plotly_code",
+      "generate_auto_chart",
+      "preprocess_visualization_code",
+      "execute_matplotlib_code",
+      "convert_numpy_to_list",
+      "extract_columns_from_question"
+    ],
+    "classes": [
+      "VisualizationRequest",
+      "ChartExecutionRequest",
+      "GoalBasedVisualizationRequest"
+    ],
+    "critical_risks": [
+      "Call to exec at line 80",
+      "Call to exec at line 296",
+      "Call to execute at line 217",
+      "Call to execute at line 420",
+      "Call to eval at line 444"
+    ]
+  },
+  "src/backend/api/viz_enhance.py": {
+    "functions": [
+      "get_data_path",
+      "preprocess_code"
+    ],
+    "classes": [
+      "ChartEditRequest",
+      "ChartExplainRequest",
+      "ChartEvaluateRequest",
+      "ChartRepairRequest",
+      "ChartRecommendRequest",
+      "PersonaGoalsRequest"
+    ],
+    "critical_risks": [
+      "Call to execute at line 159",
+      "Call to execute at line 227",
+      "Call to execute at line 322",
+      "Call to execute at line 437",
+      "Call to execute at line 537",
+      "Call to execute at line 637"
+    ]
+  }
+}

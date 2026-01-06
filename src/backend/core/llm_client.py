@@ -15,7 +15,7 @@ class LLMClient:
         primary_model: Optional[str] = None, 
         review_model: Optional[str] = None
     ) -> None:
-        from .model_selector import ModelSelector
+        from backend.core.engine.model_selector import ModelSelector
         
         self.base_url = base_url
         
@@ -38,7 +38,7 @@ class LLMClient:
         system: Optional[str] = None,
         adaptive_timeout: bool = True
     ) -> Dict[str, Any]:
-        from .circuit_breaker import get_circuit_breaker, CircuitBreakerConfig
+        from backend.infra.circuit_breaker import get_circuit_breaker, CircuitBreakerConfig
         
         if model is None:
             model = self.primary_model
@@ -105,7 +105,7 @@ class LLMClient:
     def _calculate_adaptive_timeout(self, model: str) -> int:
         """Calculate timeout based on model requirements and system resources."""
         try:
-            from .model_selector import ModelSelector
+            from backend.core.engine.model_selector import ModelSelector
             import os
             
             # Get system memory info
@@ -135,11 +135,11 @@ class LLMClient:
             if allow_swap and available_ram < required_ram:
                 # Using swap - increase timeout by 3x
                 adaptive_timeout = base_timeout * 3
-                print(f"🐌 Using swap memory - Extended timeout to {adaptive_timeout}s for {clean_model}")
+                logging.warning(f"🐌 Using swap memory - Extended timeout to {adaptive_timeout}s for {clean_model}")
             elif available_ram < required_ram + 1.0:  # Close to memory limit
                 # Tight memory - increase timeout by 1.5x
                 adaptive_timeout = int(base_timeout * 1.5)
-                print(f"⚠️ Low memory - Extended timeout to {adaptive_timeout}s for {clean_model}")
+                logging.warning(f"⚠️ Low memory - Extended timeout to {adaptive_timeout}s for {clean_model}")
             else:
                 # Normal operation
                 adaptive_timeout = base_timeout
@@ -169,7 +169,7 @@ class LLMClient:
         Async version of generate for non-blocking LLM calls.
         Use this in async endpoints for better throughput.
         """
-        from .circuit_breaker import get_circuit_breaker, CircuitBreakerConfig
+        from backend.infra.circuit_breaker import get_circuit_breaker, CircuitBreakerConfig
         
         if model is None:
             model = self.primary_model
@@ -189,8 +189,39 @@ class LLMClient:
                 ]
             }
         
+        # Use circuit breaker for LLM calls
+        cb_config = CircuitBreakerConfig(
+            failure_threshold=2,  # Open after 2 failures
+            recovery_timeout=30.0,  # Try again after 30 seconds
+            success_threshold=1,   # Close after 1 success
+            timeout=self._calculate_adaptive_timeout(model) if adaptive_timeout else 300
+        )
+        
+        circuit_breaker = get_circuit_breaker(f"llm_{model}", cb_config)
+        
+        # Async wrapper for the circuit breaker (CircuitBreaker currently supports synchronous calls, 
+        # so we wrap the specific async logic or use it for state check/fallback only)
+        # Note: Ideally CircuitBreaker should support async calls, but for now we'll check state 
+        # and manually update it or wrap in a sync function if the library supports it.
+        # Since our recreated CircuitBreaker is simple, we will expand it or use it carefully.
+        
+        # Simple Async Implementation matching the synchronous pattern:
+        if circuit_breaker.state == "OPEN": # using string access or import constant if available
+             # But we can access the property directly
+             pass
+
+        # To keep it robust using the provided class:
+        # We'll check state first
+        if circuit_breaker.state.value == "OPEN":
+             return {
+                "fallback_used": True,
+                "error": "Circuit is OPEN due to repeated failures",
+                "result": "[!] Service temporarily unavailable. Please try again later.",
+                "success": False
+            }
+
         # Calculate timeout
-        timeout = self._calculate_adaptive_timeout(model) if adaptive_timeout else 300
+        timeout = cb_config.timeout
         
         url = f"{self.base_url}/api/generate"
         payload = {"model": model, "prompt": prompt, "stream": False}
@@ -198,12 +229,14 @@ class LLMClient:
             payload["system"] = system
         
         try:
+            circuit_breaker._total_calls += 1
             async with httpx.AsyncClient(timeout=httpx.Timeout(timeout)) as client:
                 response = await client.post(url, json=payload)
                 response.raise_for_status()
                 
                 data = response.json()
                 if "response" in data:
+                    circuit_breaker._handle_success()
                     return {
                         "model": model, 
                         "prompt": prompt, 
@@ -211,14 +244,10 @@ class LLMClient:
                         "success": True
                     }
                 else:
-                    return {
-                        "model": model,
-                        "prompt": prompt,
-                        "response": "",
-                        "error": "Empty response from LLM"
-                    }
+                    raise Exception("Empty response from LLM")
                     
         except httpx.TimeoutException:
+            circuit_breaker._handle_failure(Exception(f"Timeout after {timeout}s"))
             logging.warning(f"Async LLM call timed out after {timeout}s for model {model}")
             return {
                 "model": model,
@@ -228,6 +257,7 @@ class LLMClient:
                 "timeout": True
             }
         except Exception as e:
+            circuit_breaker._handle_failure(e)
             logging.error(f"Async LLM call failed: {e}")
             return {
                 "model": model,
