@@ -31,7 +31,10 @@ class DataPathResolver:
             # data_utils.py is in: src/backend/utils/
             # Project root is: ../../../ from here
             backend_dir = Path(__file__).parent.parent
-            cls._project_root = backend_dir.parent
+            # backend_dir is src/backend
+            # backend_dir.parent is src
+            # backend_dir.parent.parent is project root
+            cls._project_root = backend_dir.parent.parent
         return cls._project_root
     
     @classmethod

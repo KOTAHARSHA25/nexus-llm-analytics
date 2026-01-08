@@ -122,9 +122,44 @@ app.add_middleware(
 )
 
 # Add global error handling
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from backend.core.error_handling import NexusError
+
+# Custom exception handler for validation errors (Pydantic)
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle Pydantic validation errors with normalized format"""
+    # Extract details from Pydantic error
+    details = exc.errors()
+    # Create simple error message
+    error_msg = f"Validation error: {details[0].get('msg')}" if details else "Validation error"
+    
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "error": error_msg,
+            "status": "error",
+            "details": details,
+            "code": "validation_error"
+        }
+    )
+
+# Custom exception handler for FastAPI/Starlette HTTP exceptions (404, 403, etc)
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle standard HTTP exceptions with normalized format"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": str(exc.detail),
+            "status": "error", 
+            "code": f"http_{exc.status_code}"
+        }
+    )
+
 
 @app.exception_handler(NexusError)
 async def nexus_error_handler(request: Request, exc: NexusError):

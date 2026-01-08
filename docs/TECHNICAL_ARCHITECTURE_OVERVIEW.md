@@ -1,8 +1,8 @@
 # Nexus LLM Analytics - Technical Architecture Overview
 
-**Version**: 1.0.0  
-**Date**: September 16, 2025  
-**Author**: Senior Software Architect Analysis  
+**Version**: 2.1.0  
+**Date**: January 2026  
+**Author**: Nexus Development Team  
 **Repository**: [nexus-llm-analytics](https://github.com/KOTAHARSHA25/nexus-llm-analytics)
 
 ---
@@ -49,65 +49,45 @@
 
 ### Core Design Philosophy
 
-The platform follows a **microservices architecture** with clear separation of concerns:
+The platform follows a **modular multi-agent architecture** with an intelligent routing layer:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Frontend Layer                          │
 │    Next.js 14 + React 18 + TypeScript + Tailwind CSS         │
 └─────────────────────┬───────────────────────────────────────────┘
-                      │ HTTP/REST API
+                      │ REST API
 ┌─────────────────────▼───────────────────────────────────────────┐
 │                      Backend Layer                             │
 │            FastAPI + Uvicorn + Pydantic                       │
 ├─────────────────────┬───────────────────────┬───────────────────┤
-│   API Endpoints     │    Core Services      │   File Processing │
-│   • /analyze/       │    • Model Selector   │   • PDF Extract   │
-│   • /upload/        │    • Query Parser     │   • CSV Process   │
-│   • /visualize/     │    • Memory Optimizer │   • JSON Handle   │
+│   API Endpoints     │    Brain (Core)       │   File Processing │
+│   • /analyze/       │    • QueryOrchestrator|   • PDF Extract   │
+│   • /upload/        │    • DynamicPlanner   │   • CSV Process   │
+│   • /visualize/     │    • CoT Loop         │   • JSON Handle   │
 │   • /report/        │    • Security Guards  │   • TXT Process   │
 └─────────────────────┼───────────────────────┼───────────────────┘
-                      │                       │
+                      │ Routes Query
 ┌─────────────────────▼───────────────────────▼───────────────────┐
 │                    Multi-Agent System                          │
-│            Custom Plugin Architecture (10 Agents)              │
+│                                                                │
 ├─────────────┬──────────────┬──────────────┬──────────────┬─────┤
 │DataAnalyst  │RAG Agent     │Statistical   │Financial     │ML   │
-│Agent        │              │Agent         │Agent         │Agent│
-├─────────────┼──────────────┼──────────────┼──────────────┼─────┤
-│TimeSeries   │SQL Agent     │Visualizer    │Reporter      │Revw │
-│Agent        │              │Agent         │Agent         │Agent│
-└─────────────┴──────────────┴──────────────┴──────────────┴─────┘
-                      │
-┌─────────────────────▼───────────────────────────────────────────┐
-│                     AI/ML Layer                                │
-│    Ollama (Local) + LLM Models + Embedding Models             │
-├─────────────────────┬───────────────────────┬───────────────────┤
-│  Primary Models     │    Review Models      │  Embedding Models │
-│  • Llama 3.1 8B    │    • Phi-3-mini      │  • nomic-embed    │
-│  • Phi-3-mini      │    • Llama 3.1 8B    │                   │
-└─────────────────────┼───────────────────────┼───────────────────┘
-                      │                       │
-┌─────────────────────▼───────────────────────▼───────────────────┐
-│                    Data Layer                                  │
-├─────────────────────┬───────────────────────┬───────────────────┤
-│  Vector Storage     │  File Storage         │  Analytics Engine │
-│  • ChromaDB         │  • Local Files        │  • Pandas         │
-│  • Embeddings       │  • Upload Directory   │  • Polars         │
-│  • RAG Documents    │  • Processed Data     │  • NumPy/SciPy    │
-└─────────────────────┴───────────────────────┴───────────────────┘
+│Agent        │              │Plugin        │Plugin        │Plugin
+├───┬─────────┴──────────────┴──────────────┴──────────────┴─────┤
+│   │ Dynamic Planning Loop (for complex coding tasks)           │
+│   │ Generator Agent <--> Critic Agent                          │
+│   └────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ### Architecture Patterns Implemented
 
-1. **Multi-Agent Pattern**: Specialized AI agents for different analytical tasks via Plugin System
-2. **Microservices Architecture**: Modular, independently deployable services
-3. **Event-Driven Processing**: Asynchronous task handling with status updates
-4. **Secure Sandbox Pattern**: Isolated code execution environment
-5. **Strategy Pattern**: Dynamic model selection based on system resources
-6. **Repository Pattern**: Data access abstraction with ChromaDB
-7. **Observer Pattern**: Real-time status updates and progress tracking
-8. **Self-Correction Pattern**: Generator→Critic→Feedback loop for quality assurance
+1.  **Orchestrator Pattern**: `QueryOrchestrator` determines the execution path (Agent vs. Planner).
+2.  **Chain-of-Thought (CoT)**: `DynamicPlanner` uses a generator-critic loop for self-correcting code generation.
+3.  **Plugin Architecture**: Specialized agents (Statistical, Financial) are hot-loadable.
+4.  **Secure Sandbox**: `RestrictedPython` execution environment for all generated code.
+5.  **Repository Pattern**: Abstracted data access for ChromaDB and Local Storage.
 
 ---
 

@@ -1,154 +1,121 @@
-# Project Structure - Post Restructure & Optimization
+# 📂 Project Structure
 
-This document outlines the reorganized project structure after Phase 1 restructure and Phase 2 performance optimization.
+**Version 2.1** - Updated for "Phase 2 Refactoring & Cleanup"
 
-## 📁 Root Directory Structure
-
-```
-nexus-llm-analytics/
-├── 📁 src/                          # Source code
-│   ├── 📁 backend/                  # Backend FastAPI application
-│   └── 📁 frontend/                 # Frontend application
-├── 📁 tests/                        # Test suites
-│   ├── 📁 performance/              # Performance testing & profiling
-│   ├── 📁 backend/                  # Backend unit tests
-│   ├── 📁 security/                 # Security tests
-│   └── 📁 upload_validation/        # Upload functionality tests
-├── 📁 docs/                         # Documentation & reports
-├── 📁 scripts/                      # Utility & deployment scripts
-├── 📁 config/                       # Configuration files
-├── 📁 data/                         # Data storage & samples
-├── 📁 logs/                         # Application logs
-├── 📁 reports/                      # Generated reports
-├── 📁 chroma_db/                    # Vector database storage
-├── 📁 env/                          # Python virtual environment
-└── 📁 _ARCHIVED_STALE_CODE/         # Archived legacy code
-```
-
-## 📁 Key Directories Detail
-
-### 🔧 `src/backend/`
-```
-src/backend/
-├── main.py                          # FastAPI application entry point
-├── 📁 api/                          # API endpoints
-├── 📁 core/                         # Core utilities & optimizations
-│   ├── crewai_import_manager.py     # CrewAI import optimization (NEW)
-│   ├── startup_optimizer.py        # Application startup optimization (NEW)
-│   ├── model_selector.py           # Enhanced with caching (OPTIMIZED)
-│   └── ...
-├── 📁 agents/                       # AI agents
-│   ├── crew_manager.py             # Optimized with singleton pattern (OPTIMIZED)
-│   └── ...
-└── 📁 database/                     # Database components
-```
-
-### 🧪 `tests/performance/` (NEW)
-```
-tests/performance/
-├── README.md                        # Performance testing guide
-├── simple_profiler.py              # Basic bottleneck identification
-├── performance_profiler.py         # Comprehensive profiling
-├── bottleneck_detective.py         # Step-by-step analysis
-├── cache_validation_test.py        # Caching optimization validation
-├── import_optimization_test.py     # CrewAI import optimization test
-├── performance_validator.py        # Post-optimization validation
-└── focused_performance_test.py     # Targeted optimization tests
-```
-
-### 📚 `docs/` (ENHANCED)
-```
-docs/
-├── README.md                        # Main documentation
-├── QUICK_START.md                   # Quick start guide
-├── TECHNICAL_ARCHITECTURE_OVERVIEW.md # Architecture overview
-├── PHASE_1_COMPLETION_REPORT.md     # Phase 1 restructure report (NEW)
-├── PHASE_2_COMPLETION_REPORT.md     # Phase 2 optimization report (NEW)
-├── PHASE_2_PRE_OPTIMIZATION_REPORT.md # Pre-optimization analysis (NEW)
-├── CREWAI_BOTTLENECK_FIXED_REPORT.md # CrewAI bottleneck fix report (NEW)
-├── DEVELOPMENT_NOTES.md             # Development notes
-├── PRODUCTION_README.md             # Production deployment
-├── SECURITY_CHECKLIST.md           # Security guidelines
-├── SMART_MODEL_SELECTION.md        # Model selection documentation
-└── TECH_STACK.md                   # Technology stack details
-```
-
-### 🛠️ `scripts/` (ENHANCED)
-```
-scripts/
-├── README.md                        # Scripts documentation (NEW)
-├── launch.py                        # Application launcher
-└── verify_improvements.py          # System verification utility (MOVED)
-```
-
-## 🔄 Files Reorganized
-
-### ✅ Moved to `tests/performance/`
-- `bottleneck_detective.py` → `tests/performance/bottleneck_detective.py`
-- `cache_validation_test.py` → `tests/performance/cache_validation_test.py`
-- `focused_performance_test.py` → `tests/performance/focused_performance_test.py`
-- `import_optimization_test.py` → `tests/performance/import_optimization_test.py`
-- `performance_profiler.py` → `tests/performance/performance_profiler.py`
-- `performance_validator.py` → `tests/performance/performance_validator.py`
-- `simple_profiler.py` → `tests/performance/simple_profiler.py`
-
-### ✅ Moved to `docs/`
-- `CREWAI_BOTTLENECK_FIXED_REPORT.md` → `docs/CREWAI_BOTTLENECK_FIXED_REPORT.md`
-- `PHASE_1_COMPLETION_REPORT.md` → `docs/PHASE_1_COMPLETION_REPORT.md`
-- `PHASE_2_COMPLETION_REPORT.md` → `docs/PHASE_2_COMPLETION_REPORT.md`
-- `PHASE_2_PRE_OPTIMIZATION_REPORT.md` → `docs/PHASE_2_PRE_OPTIMIZATION_REPORT.md`
-
-### ✅ Moved to `scripts/`
-- `tests/verify_improvements.py` → `scripts/verify_improvements.py`
-
-## 🆕 New Optimization Files
-
-### Core Optimizations
-- `src/backend/core/crewai_import_manager.py` - CrewAI import optimization (97.8% improvement)
-- `src/backend/core/startup_optimizer.py` - Application startup optimization
-- Enhanced `src/backend/core/model_selector.py` - Caching system (99.6% improvement)
-- Enhanced `src/backend/agents/crew_manager.py` - Singleton pattern implementation
-
-### Documentation
-- `tests/performance/README.md` - Performance testing guide
-- `scripts/README.md` - Utility scripts documentation
-
-## 📊 Optimization Results
-
-### Performance Improvements Achieved
-- **CrewAI Import**: 97.8% improvement (33.89s → 0.742s)
-- **ModelSelector Caching**: 99.6% improvement (225x speedup)
-- **Application Startup**: <1 second (was 40+ seconds)
-- **Memory Access**: Sub-millisecond performance
-
-### Quality Assurance
-- ✅ Zero functional regressions
-- ✅ All existing features preserved
-- ✅ Production-ready performance
-- ✅ Comprehensive test coverage
-
-## 🎯 Benefits of Reorganization
-
-### Developer Experience
-- **Clear separation** of concerns (tests, docs, scripts, source)
-- **Easy navigation** - related files grouped together
-- **Comprehensive documentation** - all reports and guides in docs/
-- **Organized testing** - performance tests in dedicated directory
-
-### Maintenance & Deployment
-- **Standardized structure** - follows Python project best practices
-- **Easy deployment** - scripts directory for deployment utilities
-- **Performance monitoring** - dedicated performance testing suite
-- **Documentation completeness** - all optimization reports preserved
-
-### Project Scalability
-- **Modular organization** - easy to add new components
-- **Clear boundaries** - source vs tests vs documentation
-- **Optimization tracking** - performance improvements documented
-- **Future enhancements** - structure supports Phase 3 additions
+This document outlines the current file organization of the Nexus LLM Analytics platform.
 
 ---
 
-**Project Structure Updated**: Post Phase 2 Optimization  
-**Status**: ✅ **FULLY ORGANIZED**  
-**Structure Quality**: ✅ **PRODUCTION-READY**
+## 🏗️ high-Level Directory Map
+
+```
+nexus-llm-analytics/
+├── 📁 src/                          # Source Code
+│   ├── 📁 backend/                  # FastAPI Backend
+│   └── 📁 frontend/                 # Next.js Frontend
+├── 📁 plugins/                      # 🔌 Specialized Agent Plugins
+├── 📁 tests/                        # 🧪 Centralized Test Suite
+├── 📁 scripts/                      # 🛠️ Utility & Debug Scripts
+├── 📁 docs/                         # 📚 Documentation
+├── 📁 data/                         # 💾 Local Data Storage
+├── 📁 logs/                         # 📝 Application Logs
+├── 📁 chroma_db/                    # 🧠 Vector Database Storage
+└── 📄 requirements.txt              # Project Dependencies
+```
+
+---
+
+## 🔧 Detailed Breakdown
+
+### 1. Backend (`src/backend/`)
+The brain of the operation.
+
+```
+src/backend/
+├── main.py                          # Application Entry Point
+├── 📁 api/                          # REST API Endpoints
+│   ├── analyze.py                   # Main Analysis Endpoint
+│   ├── upload.py                    # File Upload Handling
+│   └── ...
+├── 📁 core/                         # Core Engine Components
+│   ├── 📁 engine/                   # Query Execution Engine
+│   │   ├── query_orchestrator.py    # Intelligent Routing
+│   │   └── self_correction_engine.py# CoT / Dynamic Planner
+│   ├── 📁 security/                 # Security & Sandbox
+│   │   ├── sandbox.py               # RestrictedPython Environment
+│   │   └── security_guards.py       # Input Validation
+│   ├── 📁 system/                   # System-Level Utilities
+│   │   ├── llm_client.py            # Ollama Client
+│   │   └── model_selector.py        # Resource-Aware Model Selection
+│   └── config.py                    # Global Configuration
+├── 📁 agents/                       # Base Agent Definitions
+│   └── agent_interface.py           # Abstract Base Class for Agents
+└── 📁 services/                     # Business Logic Layers
+    └── analysis_service.py          # Coordinate Analysis Flow
+```
+
+### 2. Plugins (`plugins/`)
+Specialized agents that extend the core capabilities.
+
+```
+plugins/
+├── statistical_agent.py             # Advanced Statistics (ANOVA, t-tests)
+├── time_series_agent.py             # ARIMA Forecasting
+├── financial_agent.py               # Financial Ratios & Metrics
+├── ml_insights_agent.py             # Clustering & Classification
+└── sql_agent.py                     # Database Interaction
+```
+
+### 3. Frontend (`src/frontend/`)
+The user interface.
+
+```
+src/frontend/
+├── 📁 app/                          # Next.js App Router
+├── 📁 components/                   # React Components
+│   ├── 📁 ui/                       # Reusable UI Elements (Shadcn/Radix)
+│   ├── analysis-display.tsx         # Results Visualization
+│   └── query-input.tsx              # Natural Language Input
+└── 📁 lib/                          # Frontend Utilities
+```
+
+### 4. Tests (`tests/`)
+Comprehensive testing suite.
+
+```
+tests/
+├── 📁 benchmarks/                   # Accuracy & Speed Benchmarks
+├── 📁 verification/                 # Feature Verification Scripts
+├── 📁 unit/                         # Unit Tests
+└── 📁 data/                         # Test Datasets
+```
+
+### 5. Scripts (`scripts/`)
+Helper tools for developers.
+
+```
+scripts/
+├── 📁 debug/                        # Debugging Tools
+│   └── debug_cot_isolated.py        # CoT Logic Tester
+└── 📁 utils/                        # Maintenance Utilities
+    └── verify_requirements.py       # Dependency Checker
+```
+
+### 6. Data (`data/`)
+Local storage for user data (Privacy First!).
+
+```
+data/
+├── 📁 uploads/                      # Raw Uploaded Files
+└── 📁 exports/                      # Generated Reports (PDF/Excel)
+```
+
+---
+
+## 🔄 Key Changes in v2.1
+*   **Moved Tests**: All backend tests moved from `src/backend/tests` to root `tests/`.
+*   **Cleaned Root**: Removed clutter, moved scripts to `scripts/` folder.
+*   **Core Engine**: `src/backend/core` now contains the `engine` sub-directory for the Dynamic Planner.
+*   **Plugins**: Specialized agents are now clearly separated in `plugins/`.
+
+---

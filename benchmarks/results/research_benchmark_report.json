@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-12-27T18:58:08.628663",
+    "generated_at": "2026-01-08T17:25:53.702349",
     "benchmark_version": "1.0.0",
     "total_queries": 123,
     "domains_tested": 6
@@ -4487,84 +4487,84 @@
     "comparisons": [
       {
         "baseline_name": "Single Model (GPT-4)",
-        "full_system_score": 0.988,
-        "baseline_score": 0.7079,
-        "improvement_percent": 39.56,
-        "full_system_latency": 3.453,
-        "baseline_latency": 1.981,
-        "latency_overhead_percent": 74.3,
+        "full_system_score": 0.984,
+        "baseline_score": 0.7084,
+        "improvement_percent": 38.89,
+        "full_system_latency": 3.431,
+        "baseline_latency": 2.013,
+        "latency_overhead_percent": 70.39,
         "queries_evaluated": 123,
         "statistical_significance": true,
         "p_value": 0.001
       },
       {
         "baseline_name": "Single Model (Claude)",
-        "full_system_score": 0.9848,
-        "baseline_score": 0.708,
-        "improvement_percent": 39.09,
-        "full_system_latency": 3.367,
-        "baseline_latency": 1.982,
-        "latency_overhead_percent": 69.85,
+        "full_system_score": 0.9851,
+        "baseline_score": 0.7048,
+        "improvement_percent": 39.76,
+        "full_system_latency": 3.364,
+        "baseline_latency": 2.022,
+        "latency_overhead_percent": 66.35,
         "queries_evaluated": 123,
         "statistical_significance": true,
         "p_value": 0.001
       },
       {
         "baseline_name": "Without Two Friends Review",
-        "full_system_score": 0.986,
-        "baseline_score": 0.7564,
-        "improvement_percent": 30.36,
-        "full_system_latency": 3.435,
-        "baseline_latency": 2.007,
-        "latency_overhead_percent": 71.17,
+        "full_system_score": 0.9874,
+        "baseline_score": 0.758,
+        "improvement_percent": 30.26,
+        "full_system_latency": 3.469,
+        "baseline_latency": 2.015,
+        "latency_overhead_percent": 72.18,
         "queries_evaluated": 123,
         "statistical_significance": true,
         "p_value": 0.001
       },
       {
         "baseline_name": "Without RAG",
-        "full_system_score": 0.9868,
-        "baseline_score": 0.7028,
-        "improvement_percent": 40.42,
-        "full_system_latency": 3.464,
-        "baseline_latency": 2.296,
-        "latency_overhead_percent": 50.84,
+        "full_system_score": 0.9827,
+        "baseline_score": 0.6991,
+        "improvement_percent": 40.56,
+        "full_system_latency": 3.339,
+        "baseline_latency": 2.284,
+        "latency_overhead_percent": 46.2,
         "queries_evaluated": 123,
         "statistical_significance": true,
         "p_value": 0.001
       },
       {
         "baseline_name": "Fixed Routing",
-        "full_system_score": 0.984,
-        "baseline_score": 0.7967,
-        "improvement_percent": 23.5,
-        "full_system_latency": 3.444,
-        "baseline_latency": 3.276,
-        "latency_overhead_percent": 5.13,
+        "full_system_score": 0.9868,
+        "baseline_score": 0.7972,
+        "improvement_percent": 23.78,
+        "full_system_latency": 3.456,
+        "baseline_latency": 3.266,
+        "latency_overhead_percent": 5.84,
         "queries_evaluated": 123,
         "statistical_significance": true,
         "p_value": 0.001
       },
       {
         "baseline_name": "Without Caching",
-        "full_system_score": 0.9861,
-        "baseline_score": 0.8511,
-        "improvement_percent": 15.86,
-        "full_system_latency": 3.381,
-        "baseline_latency": 3.55,
-        "latency_overhead_percent": -4.77,
+        "full_system_score": 0.985,
+        "baseline_score": 0.8505,
+        "improvement_percent": 15.82,
+        "full_system_latency": 3.413,
+        "baseline_latency": 3.581,
+        "latency_overhead_percent": -4.69,
         "queries_evaluated": 123,
         "statistical_significance": true,
         "p_value": 0.001
       },
       {
         "baseline_name": "Minimal System",
-        "full_system_score": 0.9859,
-        "baseline_score": 0.5576,
-        "improvement_percent": 76.82,
-        "full_system_latency": 3.351,
-        "baseline_latency": 1.542,
-        "latency_overhead_percent": 117.35,
+        "full_system_score": 0.9846,
+        "baseline_score": 0.5508,
+        "improvement_percent": 78.76,
+        "full_system_latency": 3.42,
+        "baseline_latency": 1.562,
+        "latency_overhead_percent": 118.92,
         "queries_evaluated": 123,
         "statistical_significance": true,
         "p_value": 0.001
@@ -4573,75 +4573,75 @@
     "summary": {
       "highest_improvement": {
         "baseline": "Minimal System",
-        "improvement_percent": 76.82
+        "improvement_percent": 78.76
       },
       "lowest_improvement": {
         "baseline": "Without Caching",
-        "improvement_percent": 15.86
+        "improvement_percent": 15.82
       },
-      "average_improvement": 37.94,
-      "average_latency_overhead": 54.84
+      "average_improvement": 38.26,
+      "average_latency_overhead": 53.6
     },
     "feature_impact": {
-      "two_friends_review": 30.36,
-      "rag_retrieval": 40.42,
-      "intelligent_routing": 23.5,
-      "semantic_caching": 15.86,
-      "full_system_vs_minimal": 76.82
+      "two_friends_review": 30.26,
+      "rag_retrieval": 40.56,
+      "intelligent_routing": 23.78,
+      "semantic_caching": 15.82,
+      "full_system_vs_minimal": 78.76
     }
   },
   "ablation_study": {
     "results": {
       "full_system": {
-        "quality": 0.9849,
-        "latency": 3.406,
+        "quality": 0.9839,
+        "latency": 3.439,
         "description": "All components enabled"
       },
       "without_rag": {
-        "quality": 0.7,
-        "latency": 2.326,
-        "quality_impact": 0.285,
-        "latency_impact": 1.08,
-        "component_importance": 28.93
+        "quality": 0.7034,
+        "latency": 2.321,
+        "quality_impact": 0.2806,
+        "latency_impact": 1.118,
+        "component_importance": 28.52
       },
       "without_review": {
-        "quality": 0.7583,
-        "latency": 2.007,
-        "quality_impact": 0.2267,
-        "latency_impact": 1.399,
-        "component_importance": 23.02
+        "quality": 0.7604,
+        "latency": 2.024,
+        "quality_impact": 0.2235,
+        "latency_impact": 1.414,
+        "component_importance": 22.72
       },
       "without_routing": {
-        "quality": 0.7979,
-        "latency": 3.258,
-        "quality_impact": 0.1871,
-        "latency_impact": 0.149,
-        "component_importance": 18.99
+        "quality": 0.8024,
+        "latency": 3.255,
+        "quality_impact": 0.1816,
+        "latency_impact": 0.184,
+        "component_importance": 18.45
       },
       "without_cache": {
-        "quality": 0.8538,
-        "latency": 3.583,
-        "quality_impact": 0.1311,
-        "latency_impact": -0.177,
-        "component_importance": 13.31
+        "quality": 0.8502,
+        "latency": 3.594,
+        "quality_impact": 0.1338,
+        "latency_impact": -0.155,
+        "component_importance": 13.59
       }
     },
     "component_ranking": [
       [
         "rag",
-        28.93
+        28.52
       ],
       [
         "review",
-        23.02
+        22.72
       ],
       [
         "routing",
-        18.99
+        18.45
       ],
       [
         "cache",
-        13.31
+        13.59
       ]
     ]
   },
@@ -4661,92 +4661,92 @@
     },
     "full_vs_single_model_(gpt-4)": {
       "test_name": "welch_t",
-      "statistic": 30.7281,
+      "statistic": 27.9524,
       "p_value": 0.0,
       "significant": true,
-      "effect_size": 9.7171,
+      "effect_size": 8.8393,
       "effect_interpretation": "large",
       "confidence_interval": [
-        0.2516,
-        0.2859
+        0.2496,
+        0.2872
       ],
       "confidence_level": 0.95
     },
     "full_vs_single_model_(claude)": {
       "test_name": "welch_t",
-      "statistic": 33.2384,
+      "statistic": 30.6222,
       "p_value": 0.0,
       "significant": true,
-      "effect_size": 10.5109,
+      "effect_size": 9.6836,
       "effect_interpretation": "large",
       "confidence_interval": [
-        0.259,
-        0.2914
+        0.2575,
+        0.2927
       ],
       "confidence_level": 0.95
     },
     "full_vs_without_two_friends_review": {
       "test_name": "welch_t",
-      "statistic": 28.2753,
+      "statistic": 27.2221,
       "p_value": 0.0,
       "significant": true,
-      "effect_size": 8.9414,
+      "effect_size": 8.6084,
       "effect_interpretation": "large",
       "confidence_interval": [
-        0.2146,
-        0.2466
+        0.2026,
+        0.2341
       ],
       "confidence_level": 0.95
     },
     "full_vs_without_rag": {
       "test_name": "welch_t",
-      "statistic": 34.0467,
+      "statistic": 33.0282,
       "p_value": 0.0,
       "significant": true,
-      "effect_size": 10.7665,
+      "effect_size": 10.4444,
       "effect_interpretation": "large",
       "confidence_interval": [
-        0.2707,
-        0.3038
+        0.2806,
+        0.316
       ],
       "confidence_level": 0.95
     },
     "full_vs_fixed_routing": {
       "test_name": "welch_t",
-      "statistic": 17.5997,
+      "statistic": 17.1031,
       "p_value": 0.0,
       "significant": true,
-      "effect_size": 5.5655,
+      "effect_size": 5.4085,
       "effect_interpretation": "large",
       "confidence_interval": [
-        0.166,
-        0.2076
+        0.1586,
+        0.1996
       ],
       "confidence_level": 0.95
     },
     "full_vs_without_caching": {
       "test_name": "welch_t",
-      "statistic": 14.4672,
+      "statistic": 13.4901,
       "p_value": 0.0,
       "significant": true,
-      "effect_size": 4.5749,
+      "effect_size": 4.2659,
       "effect_interpretation": "large",
       "confidence_interval": [
-        0.1184,
-        0.1554
+        0.0964,
+        0.1292
       ],
       "confidence_level": 0.95
     },
     "full_vs_minimal_system": {
       "test_name": "welch_t",
-      "statistic": 45.6247,
+      "statistic": 52.4728,
       "p_value": 0.0,
       "significant": true,
-      "effect_size": 14.4278,
+      "effect_size": 16.5934,
       "effect_interpretation": "large",
       "confidence_interval": [
-        0.4169,
-        0.4543
+        0.4063,
+        0.4378
       ],
       "confidence_level": 0.95
     }

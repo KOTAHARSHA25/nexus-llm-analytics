@@ -391,12 +391,20 @@ async def upload_document(file: UploadFile = File(...)):
                     from backend.core.advanced_cache import _query_cache, _file_analysis_cache
                 except ImportError:
                     logging.debug("Cache module not available for clearing")
-                    return
+                    # allow execution to continue even if cache clearing fails
+                    pass
                 
                 # Clear ALL caches for this filename using multiple strategies
                 # Strategy 1: Tag-based invalidation
-                _query_cache.invalidate_by_tags({'structured_data', filename})
-                _query_cache.invalidate_by_tags({'rag_data', filename})
+                try:
+                    _query_cache.invalidate_by_tags({'structured_data', filename})
+                except Exception as e:
+                    logging.warning(f"Failed to clear structured_data cache: {e}")
+
+                try:
+                    _query_cache.invalidate_by_tags({'rag_data', filename})
+                except Exception:
+                    pass
                 _file_analysis_cache.invalidate_by_tags({'file_analysis', filename})
                 
                 # Strategy 2: Direct key invalidation - remove ALL entries containing this filename

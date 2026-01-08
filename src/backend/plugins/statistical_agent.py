@@ -256,9 +256,23 @@ class StatisticalAgent(BasePluginAgent):
         """Execute statistical analysis based on the query"""
         try:
             # Load data if filename provided
+            filepath = kwargs.get('filepath')
             filename = kwargs.get('filename')
-            if filename and not data:
-                data = self._load_data(filename)
+            
+            if not data:
+                if filepath and os.path.exists(filepath):
+                    try:
+                        if str(filepath).endswith('.csv'):
+                            data = pd.read_csv(filepath)
+                        elif str(filepath).endswith(('.xlsx', '.xls')):
+                            data = pd.read_excel(filepath)
+                        elif str(filepath).endswith('.json'):
+                            data = pd.read_json(filepath)
+                    except Exception as e:
+                        logging.error(f"Failed to load from filepath {filepath}: {e}")
+
+                if data is None and filename:
+                    data = self._load_data(filename)
             
             if data is None:
                 return {
@@ -569,13 +583,32 @@ class StatisticalAgent(BasePluginAgent):
     def _comprehensive_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
         """Perform comprehensive statistical analysis"""
         try:
+            # Handle nested data (common in JSON)
+            if any(isinstance(x, (dict, list)) for x in data.iloc[0].values if isinstance(x, (dict, list))):
+                try:
+                    # Attempt to flatten
+                    import pandas as pd
+                    # Convert to records and normalize
+                    records = data.to_dict(orient='records')
+                    data = pd.json_normalize(records)
+                    logging.info("Flattened nested data for analysis")
+                except Exception as e:
+                    logging.warning(f"Failed to flatten nested data: {e}")
+
             # Combine multiple analyses
             results = {
-                "descriptive": self._descriptive_statistics(data, query, **kwargs)["result"],
+                "descriptive": {},
                 "correlations": None,
                 "outliers": None,
                 "normality_tests": None
             }
+            
+            # Descriptive stats
+            desc_result = self._descriptive_statistics(data, query, **kwargs)
+            if desc_result["success"]:
+                results["descriptive"] = desc_result["result"]
+            else:
+                logging.warning(f"Descriptive stats failed: {desc_result.get('error')}")
             
             # Add correlation analysis if enough numeric columns
             numeric_cols = data.select_dtypes(include=[np.number]).columns

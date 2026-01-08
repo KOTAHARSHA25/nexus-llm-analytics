@@ -223,9 +223,23 @@ class TimeSeriesAgent(BasePluginAgent):
         """Execute time series analysis based on the query"""
         try:
             # Load data if filename provided
+            filepath = kwargs.get('filepath')
             filename = kwargs.get('filename')
-            if filename and not data:
-                data = self._load_data(filename)
+            
+            if not data:
+                if filepath and os.path.exists(filepath):
+                    try:
+                        if str(filepath).endswith('.csv'):
+                            data = pd.read_csv(filepath)
+                        elif str(filepath).endswith(('.xlsx', '.xls')):
+                            data = pd.read_excel(filepath)
+                        elif str(filepath).endswith('.json'):
+                            data = pd.read_json(filepath)
+                    except Exception as e:
+                        logging.error(f"Failed to load from filepath {filepath}: {e}")
+
+                if data is None and filename:
+                    data = self._load_data(filename)
             
             if data is None:
                 return {

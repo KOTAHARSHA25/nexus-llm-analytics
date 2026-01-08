@@ -21,7 +21,7 @@ from backend.core.chromadb_client import ChromaDBClient
 
 # Phase 3+: Import enhanced RAG components for better retrieval
 try:
-    from backend.rag import QueryExpander, ConfidenceScorer, CitationTracker, RetrievedChunk
+    from backend.rag.enhanced_rag_pipeline import create_enhanced_rag_pipeline, EnhancedRAGPipeline
     ENHANCED_RAG_AVAILABLE = True
 except ImportError:
     ENHANCED_RAG_AVAILABLE = False
@@ -53,14 +53,20 @@ class RagAgent(BasePluginAgent):
     def initialize(self, **kwargs) -> bool:
         self.initializer = get_model_manager()
         # Phase 3+: Initialize enhanced components if available
+        # Phase 3+: Initialize enhanced components if available
         if ENHANCED_RAG_AVAILABLE:
-            self._query_expander = QueryExpander()
-            self._confidence_scorer = ConfidenceScorer()
-            self._citation_tracker = CitationTracker()
+            try:
+                self.pipeline = create_enhanced_rag_pipeline(
+                    max_context_tokens=4000,
+                    rerank_top_k=5,
+                    min_confidence=0.3
+                )
+                logger.info("EnhancedRAGPipeline initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to init EnhancedRAGPipeline: {e}")
+                self.pipeline = None
         else:
-            self._query_expander = None
-            self._confidence_scorer = None
-            self._citation_tracker = None
+            self.pipeline = None
         return True
     
     def can_handle(self, query: str, file_type: Optional[str] = None, **kwargs) -> float:
@@ -86,48 +92,64 @@ class RagAgent(BasePluginAgent):
             # Initialize ChromaDB Client
             chroma_client = ChromaDBClient()
             
-            # Phase 3+: Expand query for better recall
-            queries_to_search = [query]
-            if self._query_expander:
-                queries_to_search = self._query_expander.expand(query, max_expansions=3)
-                logger.info(f"Query expanded to {len(queries_to_search)} variants")
-            
             # 1. Attempt Vector Search (Primary Path)
             logger.info(f"Querying ChromaDB for: {query}")
             
-            all_chunks = []
+            # Use pipeline to expand query if available, otherwise just use original
+            queries_to_search = [query]
+            if self.pipeline:
+                queries_to_search = self.pipeline.query_expander.expand(query, max_expansions=3)
+                logger.info(f"Query expanded to {len(queries_to_search)} variants")
+
+            # Collect dense results from Chroma
+            dense_results = []
+            seen_ids = set()
+            
             for q in queries_to_search:
                 search_results = chroma_client.query(query_text=q, n_results=5)
                 if search_results and search_results['documents'] and search_results['documents'][0]:
                     for i, doc in enumerate(search_results['documents'][0]):
-                        if ENHANCED_RAG_AVAILABLE:
-                            chunk = RetrievedChunk(
-                                chunk_id=f"chunk_{i}",
-                                content=doc,
-                                score=1.0 - (search_results.get('distances', [[]])[0][i] if search_results.get('distances') else 0),
-                                metadata=search_results['metadatas'][0][i] if search_results.get('metadatas') else {},
-                                source=filename or "unknown"
-                            )
-                            all_chunks.append(chunk)
-                        else:
-                            all_chunks.append(doc)
+                        doc_id = search_results['ids'][0][i] if search_results.get('ids') else f"chunk_{i}"
+                        if doc_id in seen_ids:
+                            continue
+                        seen_ids.add(doc_id)
+                        
+                        dense_results.append({
+                            'id': doc_id,
+                            'content': doc,
+                            'score': 1.0 - (search_results.get('distances', [[]])[0][i] if search_results.get('distances') else 0),
+                            'metadata': search_results['metadatas'][0][i] if search_results.get('metadatas') else {},
+                            'source': filename or "unknown"
+                        })
             
-            retrieved_context = ""
-            source_mode = "vector_db"
+            # Execute Pipeline OR Fallback
+            result_answer = ""
             citations = []
             confidence = 0.0
+            source_mode = "vector_db"
+            context_len = 0
             
-            if all_chunks:
-                # Found documents in vector DB
-                if ENHANCED_RAG_AVAILABLE and isinstance(all_chunks[0], RetrievedChunk):
-                    # Use enhanced chunks with citation tracking
-                    retrieved_context = "\n\n---\n\n".join([c.content for c in all_chunks[:5]])
-                    citations = self._citation_tracker.generate_citations(query, all_chunks[:5]) if self._citation_tracker else []
-                    confidence = self._confidence_scorer.score(query, all_chunks[:5]) if self._confidence_scorer else 0.5
-                else:
-                    retrieved_context = "\n\n---\n\n".join(all_chunks[:5])
-                    confidence = 0.5
-                logger.info(f"Retrieved {len(all_chunks)} chunks from ChromaDB (confidence: {confidence:.2f})")
+            if dense_results and self.pipeline:
+                # Optimized Path: Use Enhanced RAG Pipeline
+                rag_result = self.pipeline.process(
+                    query=query,
+                    dense_results=dense_results,
+                    generate_fn=None # Default uses internal logic or we could pass self.initializer.llm_client.generate
+                )
+                
+                result_answer = rag_result.answer
+                citations = rag_result.citations
+                confidence = rag_result.confidence
+                context_len = rag_result.metadata.get('context_length', 0)
+                logger.info(f"Enhanced RAG completed (confidence: {confidence:.2f})")
+                
+            elif dense_results and not self.pipeline:
+                # Standard Path (Fallback if pipeline init failed but RAG OK)
+                retrieved_context = "\n\n---\n\n".join([r['content'] for r in dense_results[:5]])
+                result_answer = self._generate_rag_response(query, retrieved_context)
+                confidence = 0.5
+                context_len = len(retrieved_context)
+                
             else:
                 # Fallback to direct file reading (Secondary Path)
                 logger.warning("No relevant docs found in ChromaDB. Falling back to direct file read.")
@@ -147,23 +169,24 @@ class RagAgent(BasePluginAgent):
                         "success": False,
                         "error": "Could not extract text from document (fallback)"
                     }
-                retrieved_context = doc_text
+                
+                # Generate from full text
+                result_answer = self._generate_rag_response(query, doc_text)
+                confidence = 1.0 # Source is the file itself
+                context_len = len(doc_text)
 
-            # 2. Generate Response
-            response = self._generate_rag_response(query, retrieved_context)
-            
             return {
                 "success": True,
-                "result": response,
+                "result": result_answer,
                 "metadata": {
                     "agent": "RagAgent",
-                    "version": "2.0.0",
+                    "version": "2.1.0",
                     "source_mode": source_mode,
-                    "context_length": len(retrieved_context),
-                    "enhanced_rag": ENHANCED_RAG_AVAILABLE,
+                    "context_length": context_len,
+                    "enhanced_rag": self.pipeline is not None,
                     "confidence": confidence,
-                    "citations": [c if isinstance(c, dict) else {"source": str(c)} for c in citations[:3]] if citations else [],
-                    "chunks_retrieved": len(all_chunks) if all_chunks else 0
+                    "citations": citations,
+                    "chunks_retrieved": len(dense_results)
                 }
             }
             

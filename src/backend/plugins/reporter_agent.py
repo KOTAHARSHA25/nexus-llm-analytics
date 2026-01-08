@@ -11,6 +11,7 @@ sys.path.insert(0, str(src_path))
 
 from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
 from backend.agents.model_manager import get_model_manager
+from backend.core.enhanced_reports import PDFReportGenerator, ReportTemplate
 
 class ReporterAgent(BasePluginAgent):
     """
@@ -25,13 +26,14 @@ class ReporterAgent(BasePluginAgent):
             description="Compiles comprehensive business reports",
             author="Nexus Team",
             capabilities=[AgentCapability.REPORTING],
-            file_types=[],
-            dependencies=[],
+            file_types=[".pdf", ".md", ".txt"],
+            dependencies=["reportlab"],
             priority=20
         )
     
     def initialize(self, **kwargs) -> bool:
         self.initializer = get_model_manager()
+        self.pdf_generator = PDFReportGenerator()
         return True
     
     def can_handle(self, query: str, file_type: Optional[str] = None, **kwargs) -> float:
@@ -89,13 +91,53 @@ FORMATTING INSTRUCTIONS:
                 model=self.initializer.primary_llm.model # Using clean model name (no ollama/ prefix needed)
             )
             
-            # Extract text from response (handle dict or str return)
             report_text = response.get('response', str(response)) if isinstance(response, dict) else str(response)
+            
+            # Check if PDF output is requested (via kwargs or query inference)
+            output_format = kwargs.get('format', 'markdown').lower()
+            
+            # Auto-detect PDF request from query if not explicitly set
+            if output_format == 'markdown' and ('pdf' in query.lower() or 'portable document' in query.lower()):
+                output_format = 'pdf'
+                
+            result_payload = {"report_text": report_text}
+            
+            if output_format == 'pdf':
+                try:
+                    # Create a report template
+                    title = kwargs.get('title', f"Analysis Report - {query[:30]}...")
+                    template = ReportTemplate(
+                        title=title,
+                    )
+                    # Apply customization if provided in kwargs
+                    if 'company_name' in kwargs:
+                        template.company_name = kwargs['company_name']
+                    
+                    self.pdf_generator.template = template
+
+                    # Construct a result object that PDFReportGenerator expects
+                    # The generator expects a list of analysis results
+                    analysis_data = {
+                        'query': query,
+                        'result': report_text,
+                        'success': True,
+                        'execution_time': kwargs.get('execution_time', 0),
+                        'filename': kwargs.get('filename', 'Generated Report'),
+                        'type': 'Detailed Analysis'
+                    }
+                    
+                    # Generate PDF using the full report pipeline
+                    pdf_path = self.pdf_generator.generate_report([analysis_data])
+                    result_payload['pdf_path'] = pdf_path
+                    logging.info(f"PDF Report generated at: {pdf_path}")
+                except Exception as pdf_error:
+                    logging.error(f"PDF generation failed: {pdf_error}")
+                    result_payload['pdf_error'] = str(pdf_error)
             
             return {
                 "success": True,
-                "result": report_text,
-                "metadata": {"agent": "Reporter", "mode": "direct_generation"}
+                "result": result_payload if output_format == 'pdf' else report_text,
+                "metadata": {"agent": "Reporter", "mode": "direct_generation", "format": output_format}
             }
             
         except Exception as e:

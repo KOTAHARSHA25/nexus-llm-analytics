@@ -23,7 +23,7 @@ export function getBackendUrl(): string {
   }
 
   // Development default
-  return 'http://127.0.0.1:8000';
+  return 'http://localhost:8000';
 }
 
 /**
@@ -61,7 +61,7 @@ export const config = {
   },
   endpoints: {
     // ========== HEALTH & SYSTEM ==========
-    health: '/api/health/health',
+    health: '/api/health/status',
     healthStatus: '/api/health/status',
     networkInfo: '/api/health/network-info',
     cacheInfo: '/api/health/cache-info',

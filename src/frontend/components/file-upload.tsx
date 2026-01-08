@@ -61,7 +61,7 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
     fileName: string;
     fileType: string;
   } | null>(null);
-  
+
   // Paste text feature state
   const [pasteTitle, setPasteTitle] = useState("");
   const [pasteText, setPasteText] = useState("");
@@ -145,9 +145,9 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
         body: formData,
       });
       const data = await res.json();
-      if (!res.ok || data.error) {
+      if (!res.ok || !data || data.error) {
         setUploadStatus("error");
-        setErrorMsg(data.error || "Upload failed");
+        setErrorMsg(data?.error || "Upload failed");
         return null;
       }
       setUploadStatus("success");
@@ -162,7 +162,7 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
       };
     } catch (e) {
       setUploadStatus("error");
-      setErrorMsg("Network error");
+      setErrorMsg(`Network error: ${e instanceof Error ? e.message : String(e)}`);
       return null;
     }
   };
@@ -216,10 +216,10 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
       setErrorMsg("Please enter some text to upload");
       return;
     }
-    
+
     setIsPastingText(true);
     setErrorMsg(null);
-    
+
     try {
       const response = await fetch(getEndpoint('uploadRawText'), {
         method: 'POST',
@@ -232,15 +232,15 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
           description: pasteDescription || 'Text pasted directly'
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok || data.error) {
         setErrorMsg(data.error || 'Failed to upload text');
         setIsPastingText(false);
         return;
       }
-      
+
       // Add to uploaded files list
       const newFileInfo: FileInfo = {
         name: data.filename,
@@ -249,15 +249,15 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
         id: crypto.randomUUID(),
         uploadedAt: Date.now()
       };
-      
+
       onFileUpload([...uploadedFiles, newFileInfo]);
-      
+
       // Clear form
       setPasteTitle("");
       setPasteText("");
       setPasteDescription("");
       setUploadStatus("success");
-      
+
     } catch (error) {
       setErrorMsg(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
@@ -293,49 +293,49 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
               Paste Text
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="upload" className="mt-4">
             <div
               className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${isDragOver
-                  ? "border-purple-400 bg-gradient-to-br from-purple-500/20 to-blue-500/20 shadow-lg shadow-purple-500/25"
-                  : "border-purple-300/50 hover:border-purple-400/70 hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-blue-500/10"
+                ? "border-purple-400 bg-gradient-to-br from-purple-500/20 to-blue-500/20 shadow-lg shadow-purple-500/25"
+                : "border-purple-300/50 hover:border-purple-400/70 hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-blue-500/10"
                 }`}
               onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          {uploadStatus === "uploading" ? (
-            <div className="space-y-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto"></div>
-              <p className="text-sm text-gray-300">Uploading...</p>
-              <Progress value={uploadProgress} className="w-full max-w-xs mx-auto bg-gray-700" />
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Upload className="h-12 w-12 text-purple-300 mx-auto" />
-              <p className="font-medium text-white">Drop files here or click to browse</p>
-              <p className="text-xs text-gray-400">Supports PDF, CSV, JSON, TXT, XLSX</p>
-              <input
-                type="file"
-                multiple
-                accept=".pdf,.csv,.json,.txt,.xlsx,.xls"
-                onChange={handleFileSelect}
-                className="hidden"
-                id="file-upload"
-              />
-              <Button
-                asChild
-                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
-              >
-                <label htmlFor="file-upload" className="cursor-pointer">
-                  Choose Files
-                </label>
-              </Button>
-            </div>
-          )}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              {uploadStatus === "uploading" ? (
+                <div className="space-y-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto"></div>
+                  <p className="text-sm text-gray-300">Uploading...</p>
+                  <Progress value={uploadProgress} className="w-full max-w-xs mx-auto bg-gray-700" />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Upload className="h-12 w-12 text-purple-300 mx-auto" />
+                  <p className="font-medium text-white">Drop files here or click to browse</p>
+                  <p className="text-xs text-gray-400">Supports PDF, CSV, JSON, TXT, XLSX</p>
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.csv,.json,.txt,.xlsx,.xls"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <Button
+                    asChild
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
+                  >
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      Choose Files
+                    </label>
+                  </Button>
+                </div>
+              )}
             </div>
           </TabsContent>
-          
+
           <TabsContent value="paste" className="mt-4 space-y-4">
             <div className="space-y-3">
               <div>

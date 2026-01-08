@@ -18,8 +18,13 @@ ollama pull nomic-embed-text # Embeddings (274MB)
 
 ### Step 3: Launch the Platform
 ```bash
-# One command to rule them all!
-python nexus_startup.py
+# Backend (Terminal 1)
+cd src/backend
+python -m uvicorn main:app --reload
+
+# Frontend (Terminal 2)
+cd src/frontend
+npm run dev
 ```
 
 That's it! Your platform will be available at:
@@ -50,23 +55,7 @@ Try these examples:
 
 ---
 
-## 🛠️ Manual Setup (If Needed)
 
-### Backend Only
-```bash
-cd backend
-pip install -r ../requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-### Frontend Only
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
----
 
 ## 🆘 Quick Troubleshooting
 
@@ -108,4 +97,4 @@ pip install --user -r requirements.txt
 
 ---
 
-**Ready to revolutionize your data analysis? Launch `python nexus_startup.py` now!** 🚀
+**Ready to revolutionize your data analysis? Launch the platform now!** 🚀

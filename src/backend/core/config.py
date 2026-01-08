@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     
     # CORS settings - use str and parse in validator
     cors_allowed_origins: Union[str, List[str]] = Field(
-        default="http://localhost:3000",
+        default="*",
         env="CORS_ALLOWED_ORIGINS"
     )
     cors_allow_credentials: bool = Field(default=True, env="CORS_ALLOW_CREDENTIALS")
@@ -86,7 +86,7 @@ class Settings(BaseSettings):
     
     # Security settings
     enable_code_sandbox: bool = Field(default=True, env="ENABLE_CODE_SANDBOX")
-    sandbox_timeout: int = Field(default=30, env="SANDBOX_TIMEOUT")  # seconds
+    sandbox_timeout: int = Field(default=60, env="SANDBOX_TIMEOUT")  # seconds
     sandbox_max_memory_mb: int = Field(default=256, env="SANDBOX_MAX_MEMORY_MB")
     enable_rate_limiting: bool = Field(default=True, env="ENABLE_RATE_LIMITING")
     
@@ -112,7 +112,7 @@ class Settings(BaseSettings):
     
     # Performance settings
     max_concurrent_analyses: int = Field(default=3, env="MAX_CONCURRENT_ANALYSES")
-    analysis_timeout_seconds: int = Field(default=300, env="ANALYSIS_TIMEOUT")  # 5 minutes
+    analysis_timeout_seconds: int = Field(default=600, env="ANALYSIS_TIMEOUT")  # 10 minutes
     enable_memory_optimization: bool = Field(default=True, env="ENABLE_MEMORY_OPTIMIZATION")
     
     # LLM timeout settings

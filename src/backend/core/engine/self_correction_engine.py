@@ -63,7 +63,7 @@ class SelfCorrectionEngine:
     def _load_prompt_template(self, filename: str) -> str:
         """Load prompt template from file"""
         prompt_path = os.path.join(
-            os.path.dirname(__file__), '..', 'prompts', filename
+            os.path.dirname(__file__), '..', '..', 'prompts', filename
         )
         try:
             with open(prompt_path, 'r', encoding='utf-8') as f:

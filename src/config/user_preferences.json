@@ -1,19 +1,37 @@
 {
   "primary_model": "phi3:mini",
   "review_model": "phi3:mini",
-  "embedding_model": "nomic-embed-text",
-  "auto_model_selection": true,
+  "embedding_model": "nomic-embed-text:latest",
+  "auto_model_selection": false,
   "allow_swap_usage": true,
   "memory_buffer_gb": 0.5,
   "preferred_performance": "balanced",
   "enable_intelligent_routing": false,
   "first_time_setup_complete": true,
-  "last_updated": "2026-01-04T14:36:25.234054",
+  "last_updated": "2026-01-08T22:54:28.693925",
   "model_test_results": {
     "phi3:mini": {
       "success": true,
-      "timestamp": "2026-01-04T14:35:26.835606",
-      "response_time": 32.4728639125824,
+      "timestamp": "2026-01-08T20:20:08.318169",
+      "response_time": 5.928908586502075,
+      "error": null
+    },
+    "nomic-embed-text:latest": {
+      "success": true,
+      "timestamp": "2026-01-08T20:19:41.154643",
+      "response_time": 2.756531000137329,
+      "error": null
+    },
+    "tinyllama:latest": {
+      "success": true,
+      "timestamp": "2026-01-08T20:19:46.823686",
+      "response_time": 4.089386463165283,
+      "error": null
+    },
+    "llama3.1:8b": {
+      "success": true,
+      "timestamp": "2026-01-08T20:19:59.573303",
+      "response_time": 10.946776390075684,
       "error": null
     }
   }

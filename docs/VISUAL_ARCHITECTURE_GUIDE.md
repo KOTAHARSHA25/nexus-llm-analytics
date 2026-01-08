@@ -44,15 +44,16 @@
                               │
                               │
 ┌─────────────────────────────▼──────────────────────────────────────────────┐
-│                       CREWMANAGER (The Brain)                               │
-│                        "Agent Orchestrator"                                 │
+│                    QUERY ORCHESTRATOR (The Brain)                           │
+│                     "Intelligent Routing Engine"                            │
 │                                                                              │
 │  ┌────────────────────────────────────────────────────────────┐            │
 │  │  1. Receives your question                                 │            │
-│  │  2. Understands what you need                               │            │
-│  │  3. Picks the best agent(s) for the job                    │            │
-│  │  4. Coordinates multiple agents to work together            │            │
-│  │  5. Combines results and returns answer                     │            │
+│  │  2. Analyzes Complexity (Simple vs. Complex Logic)         │            │
+│  │  3. ROUTING DECISION:                                      │            │
+│  │     a) Standard Task -> Route to Specialized Agent         │            │
+│  │     b) Coding Task -> Route to Dynamic Planner (CoT Loop)  │            │
+│  │  4. Manages execution and validation                       │            │
 │  └────────────────────────────────────────────────────────────┘            │
 └────────────────┬──────────────┬──────────────┬──────────────┬─────────────┘
                  │              │              │              │
@@ -156,12 +157,12 @@ Step 3: BACKEND RECEIVES
 └──────────────┬───────────────────────┘
                │
                ▼
-Step 4: CREWMANAGER ANALYZES
+Step 4: QUERY ORCHESTRATOR ANALYZES
 ┌──────────────────────────────────────┐
 │  • Detects: CSV file                 │
 │  • Intent: Statistical calculation   │
 │  • Decision: Use Data Analyst Agent  │
-│  • Backup: Statistical Plugin ready  │
+│  • (Logic is simple, no CoT needed)  │
 └──────────────┬───────────────────────┘
                │
                ▼
@@ -320,7 +321,7 @@ Step 6: RESPONSE WITH SOURCES
 
 Step 1: SYSTEM STARTUP
 ┌──────────────────────────────────────┐
-│  CrewManager scans plugins/          │
+│  QueryOrchestrator scans plugins/    │
 │  ├─ statistical_agent.py             │
 │  ├─ time_series_agent.py             │
 │  ├─ financial_agent.py               │
@@ -347,7 +348,7 @@ Step 3: USER QUERY
                ▼
 Step 4: INTELLIGENT ROUTING
 ┌──────────────────────────────────────┐
-│  CrewManager asks each plugin:       │
+│  QueryOrchestrator asks each plugin: │
 │                                       │
 │  Statistical: "Can you handle this?" │
 │  → Score: 0.3 (can do basic stats)   │

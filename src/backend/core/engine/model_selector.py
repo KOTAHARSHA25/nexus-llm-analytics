@@ -157,7 +157,8 @@ class ModelSelector:
         try:
             settings = get_settings()
             ollama_url = settings.ollama_base_url
-            response = requests.get(f"{ollama_url}/api/tags", timeout=5)
+            # Increased timeout to 10s for stability under load
+            response = requests.get(f"{ollama_url}/api/tags", timeout=10)
             models_data = response.json().get("models", [])
             
             models_info = {}
@@ -401,20 +402,51 @@ class ModelSelector:
         })
     
     @staticmethod
+    def _detect_gpu_info() -> Dict[str, Any]:
+        """Detect GPU information for optimization advice"""
+        gpu_info = {"name": "Unknown", "is_integrated": False, "vendor": "Unknown"}
+        try:
+            import subprocess
+            if os.name == 'nt':
+                # Windows GPU detection
+                cmd = "wmic path win32_videocontroller get name"
+                result = subprocess.check_output(cmd, shell=True).decode().strip().split('\n')
+                if len(result) > 1:
+                    gpu_name = result[1].strip()
+                    gpu_info["name"] = gpu_name
+                    gpu_info["vendor"] = "Intel" if "Intel" in gpu_name else ("NVIDIA" if "NVIDIA" in gpu_name else "AMD")
+                    gpu_info["is_integrated"] = "Intel" in gpu_name or "Radeon(TM) Graphics" in gpu_name
+        except Exception as e:
+            logging.debug(f"GPU detection failed: {e}")
+        return gpu_info
+
+    @staticmethod
     def recommend_system_config() -> Dict[str, any]:
         """Provide system configuration recommendations"""
         memory_info = ModelSelector.get_system_memory()
         total_ram = memory_info["total_gb"]
         available_ram = memory_info["available_gb"]
+        gpu_info = ModelSelector._detect_gpu_info()
         
         recommendations = {
             "current_config": {
                 "total_ram_gb": total_ram,
                 "available_ram_gb": available_ram,
+                "gpu": gpu_info["name"],
                 "optimal_models": ModelSelector.select_optimal_models()
             },
             "recommendations": []
         }
+        
+        # GPU Recommendations
+        if gpu_info["is_integrated"] and "Intel" in gpu_info["vendor"]:
+             recommendations["recommendations"].append({
+                "type": "hardware_config",
+                "priority": "info",
+                "message": f"Integrated GPU detected ({gpu_info['name']}). Using CPU mode is correct/stable for this hardware.",
+                "current": "CPU Mode (Stable)",
+                "recommended": "Keep CPU Mode"
+            })
         
         if total_ram < 8:
             recommendations["recommendations"].append({

@@ -51,6 +51,7 @@ data/uploads/
 data/reports/
 data/samples/*.pdf
 data/samples/*.csv
+!data/samples/MultiAgent_Demo_Data.csv
 *.pdf
 *.docx
 

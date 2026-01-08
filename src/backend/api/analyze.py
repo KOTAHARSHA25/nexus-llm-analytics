@@ -65,6 +65,8 @@ class AnalyzeRequest(BaseModel):
     column: Optional[str] = Field(None, description="Specific column to filter on")
     value: Optional[str] = Field(None, description="Value to filter the column by")
     session_id: Optional[str] = Field(None, description="Session identifier for tracking related queries")
+    force_refresh: Optional[bool] = Field(False, description="Bypass cache and force fresh analysis")
+    review_level: Optional[str] = Field(None, description="Force review level: none, optional, mandatory")
 
     class Config:
         json_schema_extra = {
@@ -90,6 +92,7 @@ class AnalyzeResponse(BaseModel):
     status: str = Field(..., description="Status of the analysis: success, error, cancelled")
     error: Optional[str] = Field(None, description="Error message if analysis failed")
     execution_method: Optional[str] = Field(None, description="How the query was executed: code_generation, direct_llm, etc.")
+    agent: Optional[str] = Field(None, description="Agent that executed the request")
 
 
 @router.post("/", response_model=AnalyzeResponse, responses={
@@ -103,7 +106,7 @@ async def analyze_query(request: AnalyzeRequest) -> Dict[str, Any]:
         service = get_analysis_service()
     except Exception as e:
         logging.error(f"Failed to initialize AnalysisService: {e}")
-        return {"error": f"Failed to initialize AI system: {str(e)}", "status": "error"}
+        return {"error": f"Failed to initialize AI system: {str(e)}", "status": "error", "query": request.query, "analysis_id": "init_failed"}
     
     # Start analysis tracking
     analysis_id = analysis_manager.start_analysis(request.session_id)
@@ -114,7 +117,7 @@ async def analyze_query(request: AnalyzeRequest) -> Dict[str, Any]:
         # Input validation - support both single and multiple files
         if not request.query:
             analysis_manager.complete_analysis(analysis_id)
-            return {"error": "Query is required", "status": "error"}
+            return {"error": "Query is required", "status": "error", "query": "", "analysis_id": analysis_id}
         
         # Determine files to analyze
         files = None
@@ -122,15 +125,15 @@ async def analyze_query(request: AnalyzeRequest) -> Dict[str, Any]:
             files = request.filenames
             if not files:
                 analysis_manager.complete_analysis(analysis_id)
-                return {"error": "At least one filename required", "status": "error"}
+                return {"error": "At least one filename required", "status": "error", "query": request.query, "analysis_id": analysis_id}
         elif request.filename:
             files = [request.filename]
         elif request.text_data:
             # Handle text input directly via service (text_data in context)
             files = None
         else:
-            analysis_manager.complete_analysis(analysis_id)
-            return {"error": "Either filename, filenames, or text_data required", "status": "error"}
+            # Allow logic/math/code queries without files
+            files = None
         
         # Check if cancelled before starting
         check_cancellation(analysis_id)
@@ -149,7 +152,9 @@ async def analyze_query(request: AnalyzeRequest) -> Dict[str, Any]:
             "text_data": request.text_data,
             "column": request.column,
             "value": request.value,
-            "analysis_id": analysis_id
+            "analysis_id": analysis_id,
+            "force_refresh": request.force_refresh,
+            "review_level": request.review_level
         }
         
         # Execute analysis using AnalysisService
@@ -190,21 +195,27 @@ async def analyze_query(request: AnalyzeRequest) -> Dict[str, Any]:
             "filename": files[0] if files and len(files) == 1 else None,  # Backward compatibility
             "filenames": files,  # Multi-file support
             "analysis_id": analysis_id,
+            "analysis_id": analysis_id,
             "status": "success" if result.get("success") else "error",
-            "error": result.get("error")
+            "error": result.get("error"),
+            "agent": result.get("agent")
         }
     except HTTPException as e:
         # Analysis was cancelled
         analysis_manager.complete_analysis(analysis_id)
         raise e
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"CRITICAL ERROR IN ANALYZE: {e}")
         logging.error(f"[ANALYZE] Error in analysis {analysis_id}: {e}", exc_info=True)
         analysis_manager.complete_analysis(analysis_id)
         return {
             "error": f"Analysis failed: {str(e)}",
             "status": "error", 
             "analysis_id": analysis_id,
-            "retry_possible": True
+            "retry_possible": True,
+            "query": request.query
         }
 
 

@@ -12,6 +12,7 @@ from pathlib import Path
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
+from backend.core.optimizers import OptimizedAgentMixin
 
 class AgentCapability(Enum):
     """Enumeration of agent capabilities"""
@@ -39,14 +40,16 @@ class AgentMetadata:
     max_timeout_seconds: int = 300
     priority: int = 50  # Higher = higher priority when multiple agents match
 
-class BasePluginAgent(ABC):
+class BasePluginAgent(ABC, OptimizedAgentMixin):
     """
     Abstract base class for all plugin agents
     
     This defines the contract that all plugin agents must implement
+    Now includes OptimizedAgentMixin for automatic performance tracking.
     """
     
     def __init__(self, config: Dict[str, Any] = None):
+        OptimizedAgentMixin.__init__(self)  # Initialize optimization mixin
         self.config = config or {}
         self.metadata = self.get_metadata()
         self.initialized = False
