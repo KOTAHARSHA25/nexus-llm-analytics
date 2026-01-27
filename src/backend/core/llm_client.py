@@ -77,12 +77,18 @@ class LLMClient:
             if system:
                 payload["system"] = system
             
+            # [ADDED] Log input for visibility
+            logging.info(f"\n{'='*20} [LLM INPUT] {'='*20}\nModel: {model}\nPrompt Preview: {prompt[:200]}...\nFull Prompt Length: {len(prompt)}\n{'='*52}")
+            
             response = requests.post(url, json=payload, timeout=timeout)
             response.raise_for_status()
             
             data = response.json()
             if "response" in data:
-                return {"model": model, "prompt": prompt, "response": data["response"].strip(), "success": True}
+                resp_text = data["response"].strip()
+                # [ADDED] Log output for visibility
+                logging.info(f"\n{'='*20} [LLM OUTPUT] {'='*20}\n{resp_text}\n{'='*53}")
+                return {"model": model, "prompt": prompt, "response": resp_text, "success": True}
             else:
                 raise Exception("Empty response from LLM")
         
