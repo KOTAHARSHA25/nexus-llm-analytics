@@ -6,7 +6,7 @@ Tests error severity, categories, custom exceptions, and error handler.
 import pytest
 import logging
 from unittest.mock import MagicMock, patch
-from src.backend.core.error_handling import (
+from backend.core.error_handling import (
     ErrorSeverity, ErrorCategory, NexusError,
     ValidationError, DataProcessingError, ModelExecutionError, FileOperationError,
     ErrorHandler, handle_errors, validate_required_fields, validate_file_extension,

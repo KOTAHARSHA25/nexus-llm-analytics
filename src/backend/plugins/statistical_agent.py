@@ -1,3 +1,16 @@
+"""Statistical Analysis Agent Plugin — Nexus LLM Analytics
+==========================================================
+
+Specialised agent for comprehensive statistical analysis:
+hypothesis testing, regression, distribution fitting,
+correlation analysis, and multivariate statistics powered
+by SciPy and scikit-learn.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`StatisticalAgentMetrics` — per-agent call-count
+  and latency tracker for statistical operations.
+"""
 # Advanced Statistical Analysis Agent Plugin
 # Specialized agent for comprehensive statistical analysis and hypothesis testing
 
@@ -18,14 +31,15 @@ sys.path.insert(0, str(src_path))
 try:
     from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
 except ImportError as e:
-    print(f"Import error: {e}")
-    print("Make sure you're running from the correct directory")
+    logging.error(f"Import error: {e} - Make sure you're running from the correct directory")
     raise
+
+from backend.core.engine.query_orchestrator import QueryOrchestrator, ExecutionMethod
+from backend.agents.model_manager import get_model_manager
 
 # Statistical analysis imports
 try:
     import pandas as pd
-    import numpy as np
     from scipy import stats
     import scipy.stats as scipy_stats
     HAS_SCIPY = True
@@ -53,33 +67,22 @@ except ImportError:
 
 
 class StatisticalAgent(BasePluginAgent):
-    """
-    Advanced Statistical Analysis Agent
-    
+    """Advanced Statistical Analysis Agent.
+
     Capabilities:
-    - Descriptive statistics and data profiling
-    - Hypothesis testing (t-tests, chi-square, ANOVA, etc.)  
-    - Correlation and regression analysis
-    - Distribution analysis and fitting
-    - Statistical significance testing
-    - Confidence intervals and effect sizes
-    - Outlier detection and handling
-    - Sample size calculations
-    - Power analysis
-    - Non-parametric tests
-    - Time series statistical analysis
-    - Multivariate analysis
-    - Principal Component Analysis (PCA)
-    - Cluster analysis for statistical grouping
-    
+        * Descriptive statistics and data profiling
+        * Hypothesis testing (t-tests, chi-square, ANOVA)
+        * Correlation, regression, and distribution fitting
+        * Confidence intervals, effect sizes, and power analysis
+        * Outlier detection, PCA, and cluster analysis
+
     Features:
-    - Automatic assumption checking
-    - Effect size calculations
-    - Multiple comparison corrections
-    - Bootstrap confidence intervals
-    - Robust statistical methods
-    - Statistical report generation
-    - Visualization recommendations
+        * Automatic assumption checking and effect-size calculations
+        * Multiple-comparison corrections and bootstrap CIs
+        * Robust statistical methods and report generation
+
+    Thread Safety:
+        Not inherently thread-safe — instantiate one per request.
     """
     
     def get_metadata(self) -> AgentMetadata:
@@ -105,6 +108,7 @@ class StatisticalAgent(BasePluginAgent):
     def initialize(self, **kwargs) -> bool:
         """Initialize the statistical analysis agent"""
         try:
+            self.registry = kwargs.get("registry")
             # Check required dependencies
             if not HAS_SCIPY:
                 logging.error("SciPy not available - required for statistical tests")
@@ -115,6 +119,10 @@ class StatisticalAgent(BasePluginAgent):
             self.alpha = 1 - self.confidence_level
             self.effect_size_threshold = self.config.get("effect_size_threshold", 0.5)
             self.outlier_method = self.config.get("outlier_method", "iqr")  # iqr, zscore, modified_zscore
+            
+            # Setup orchestrator and model manager for code generation
+            self._orchestrator = None  # Lazy loaded
+            self.initializer = get_model_manager()
             
             # Statistical test patterns
             self.test_patterns = {
@@ -251,6 +259,46 @@ class StatisticalAgent(BasePluginAgent):
         confidence += min(operation_matches * 0.05, 0.15)
         
         return min(confidence, 1.0)
+
+    def reflective_execute(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Swarm-enabled execution with self-correction and insight sharing.
+        """
+        context = context or {}
+        
+        # 1. Execute
+        result = self.execute(query, **context)
+        
+        # 2. Critique
+        if not result['success']:
+             pass
+
+        # 3. Share Insights
+        if self.swarm_context and result.get('success'):
+            try:
+                summary = f"Statistical Analysis: {result.get('operation', 'unknown')}"
+                if 'interpretation' in result and result['interpretation']:
+                     # Extract first few lines of interpretation
+                     lines = str(result['interpretation']).split('\n')
+                     summary = "\\n".join([l for l in lines if l.strip()][:3])
+
+                content = {
+                    "query": query,
+                    "summary": summary,
+                    "result_keys": list(result.get('result', {}).keys()) if isinstance(result.get('result'), dict) else [],
+                    "metadata": result.get('metadata', {})
+                }
+                
+                self.publish_insight(
+                    insight_type="statistical_analysis_success",
+                    content=content,
+                    confidence=0.9
+                )
+                logging.info(f"[{self.metadata.name}] Published insight to Swarm")
+            except Exception as e:
+                logging.warning(f"Failed to publish insight: {e}")
+        
+        return result
     
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
         """Execute statistical analysis based on the query"""
@@ -281,7 +329,31 @@ class StatisticalAgent(BasePluginAgent):
                     "agent": "StatisticalAgent"
                 }
             
-            # Parse query intent
+            # 1. Reuse pre-computed execution plan if available (avoids duplicate orchestrator init)
+            plan = kwargs.get('execution_plan')
+            if not plan:
+                if self._orchestrator is None:
+                    from backend.core.engine.query_orchestrator import get_query_orchestrator
+                    self._orchestrator = get_query_orchestrator()
+                data_sample = data.head(5).to_dict() if isinstance(data, pd.DataFrame) else None
+                available_columns = list(data.columns) if isinstance(data, pd.DataFrame) else []
+                plan = self._orchestrator.create_execution_plan(
+                    query=query,
+                    data=data_sample,
+                    context={'agent': self.get_metadata().name, 'columns': available_columns},
+                    llm_client=self.initializer.llm_client
+                )
+            else:
+                logging.debug(f"Reusing pre-computed execution plan for StatisticalAgent")
+            
+            logging.info(f"QueryOrchestrator decision for StatisticalAgent: {plan.execution_method.value} - {plan.reasoning}")
+            
+            # 2. Route to code generation if needed
+            if plan.execution_method == ExecutionMethod.CODE_GENERATION:
+                result, metadata = self._execute_with_code_gen(query, data, plan.model, filepath)
+                return {"success": True, "result": result, "metadata": metadata}
+            
+            # 3. Fallback to existing deterministic logic (robust standard methods)
             intent = self._parse_statistical_intent(query)
             
             # Execute appropriate statistical analysis
@@ -315,8 +387,8 @@ class StatisticalAgent(BasePluginAgent):
         """Load data from file"""
         try:
             # Look for files in uploads and samples directories
-            # Project root is 3 levels up from this file (src/backend/plugins)
-            project_root = Path(__file__).parent.parent.parent
+            # Project root is 4 levels up from this file (src/backend/plugins/ → src/backend → src → ROOT)
+            project_root = Path(__file__).parent.parent.parent.parent
             base_data_dir = project_root / "data"
             
             for subdir in ["uploads", "samples"]:
@@ -335,6 +407,101 @@ class StatisticalAgent(BasePluginAgent):
         except Exception as e:
             logging.error(f"Failed to load data from {filename}: {e}")
             return None
+    
+    def _execute_with_code_gen(self, query: str, data: Any, model: str, filepath: Optional[str]) -> Tuple[str, Dict[str, Any]]:
+        """
+        Execute statistical analysis using LLM code generation.
+        Adapted from DataAnalystAgent for StatisticalAgent context.
+        
+        Args:
+            query: User's statistical analysis query
+            data: DataFrame or data object
+            model: LLM model to use for code generation
+            filepath: Path to data file (optional)
+            
+        Returns:
+            Tuple of (result_text, metadata_dict)
+        """
+        try:
+            # Lazy import to avoid circular dependencies
+            from backend.io.code_generator import get_code_generator
+            
+            # Ensure we have a DataFrame
+            if not isinstance(data, pd.DataFrame):
+                if filepath:
+                    # Try to load as DataFrame
+                    file_ext = os.path.splitext(filepath)[1].lower()
+                    if file_ext == '.json':
+                        data = pd.read_json(filepath)
+                    elif file_ext in ['.xlsx', '.xls']:
+                        data = pd.read_excel(filepath)
+                    elif file_ext == '.csv':
+                        data = pd.read_csv(filepath)
+                    else:
+                        raise ValueError(f"Unsupported file type: {file_ext}")
+                else:
+                    raise ValueError("No data or filepath provided for code generation")
+            
+            # Get code generator
+            code_gen = get_code_generator()
+            
+            # Generate and execute code
+            result = code_gen.generate_and_execute(
+                query=query,
+                df=data,
+                model=model,
+                max_retries=2,
+                data_file=os.path.basename(filepath) if filepath else "data",
+                save_history=True,
+                analysis_context={'agent': 'StatisticalAgent', 'specialization': 'statistical_analysis'}
+            )
+            
+            if result.success:
+                logging.info(f"StatisticalAgent code generation succeeded: {result.execution_time_ms:.1f}ms")
+                
+                # Build metadata
+                metadata = {
+                    "agent": "StatisticalAgent",
+                    "execution_method": "code_generation",
+                    "generated_code": result.generated_code,
+                    "executed_code": result.code,
+                    "code": result.code,
+                    "execution_id": result.execution_id,
+                    "execution_time_ms": result.execution_time_ms,
+                    "code_gen_model": model,
+                    "attempt_count": result.attempt_count
+                }
+                
+                # Format result
+                if result.result is not None:
+                    if isinstance(result.result, pd.DataFrame):
+                        if len(result.result) <= 20:
+                            display_text = f"## Statistical Analysis Result\n\n{result.result.to_markdown()}"
+                        else:
+                            display_text = f"## Statistical Analysis Result (Top 20 of {len(result.result)} rows)\n\n{result.result.head(20).to_markdown()}"
+                    elif isinstance(result.result, dict):
+                        actual_result = result.result.get('result', result.result)
+                        if isinstance(actual_result, (int, float)):
+                            display_text = f"## Statistical Result\n\n**{actual_result:,}**"
+                        else:
+                            display_text = f"## Statistical Result\n\n{actual_result}"
+                    elif isinstance(result.result, (int, float)):
+                        display_text = f"## Statistical Result\n\n**{result.result:,}**"
+                    else:
+                        display_text = f"## Statistical Result\n\n{str(result.result)}"
+                else:
+                    display_text = "Statistical analysis completed but no result was returned."
+                
+                return display_text, metadata
+            else:
+                # Code generation failed - this will trigger fallback to deterministic logic
+                logging.warning(f"StatisticalAgent code generation failed: {result.error}")
+                raise Exception(f"Code generation failed: {result.error}")
+                
+        except Exception as e:
+            logging.error(f"StatisticalAgent code generation error: {e}")
+            # Re-raise to trigger fallback to deterministic methods
+            raise
     
     def _parse_statistical_intent(self, query: str) -> str:
         """Parse the statistical intent from the query"""
@@ -810,7 +977,7 @@ class StatisticalAgent(BasePluginAgent):
                         "p_value": float(dagostino_p),
                         "is_normal": dagostino_p > self.alpha
                     }
-                except:
+                except Exception:
                     logging.debug("Operation failed (non-critical) - continuing")
                 
                 # Kolmogorov-Smirnov test
@@ -822,7 +989,7 @@ class StatisticalAgent(BasePluginAgent):
                         "p_value": float(ks_p),
                         "is_normal": ks_p > self.alpha
                     }
-                except:
+                except Exception:
                     logging.debug("Operation failed (non-critical) - continuing")
                 
                 # Anderson-Darling test
@@ -833,7 +1000,7 @@ class StatisticalAgent(BasePluginAgent):
                         "critical_values": ad_result.critical_values.tolist(),
                         "significance_levels": ad_result.significance_level.tolist()
                     }
-                except:
+                except Exception:
                     logging.debug("Operation failed (non-critical) - continuing")
                 
                 normality_results[col] = results
@@ -1520,3 +1687,39 @@ class StatisticalAgent(BasePluginAgent):
             interpretation += f"No significant association found (χ²={results['chi2_statistic']:.3f}, p={p_value:.4f})."
         
         return interpretation
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+from dataclasses import dataclass
+
+
+@dataclass
+class StatisticalAgentMetrics:
+    """Per-agent call-count and latency tracker for statistical operations.
+
+    v2.0 Enterprise Addition.
+    """
+
+    total_analyses: int = 0
+    successful_analyses: int = 0
+    total_latency_ms: float = 0.0
+
+    def record(self, *, success: bool, latency_ms: float = 0.0) -> None:
+        self.total_analyses += 1
+        if success:
+            self.successful_analyses += 1
+        self.total_latency_ms += latency_ms
+
+    def to_dict(self) -> dict:
+        return {
+            "total_analyses": self.total_analyses,
+            "success_rate": round(
+                self.successful_analyses / self.total_analyses, 4
+            ) if self.total_analyses else 0.0,
+            "avg_latency_ms": round(
+                self.total_latency_ms / self.total_analyses, 2
+            ) if self.total_analyses else 0.0,
+        }

@@ -3,7 +3,7 @@ import json
 import pytest
 from io import StringIO
 from pathlib import Path
-from src.backend.core.enhanced_logging import JsonFormatter, ColoredFormatter, setup_enhanced_logging
+from backend.core.enhanced_logging import JsonFormatter, ColoredFormatter, setup_enhanced_logging
 
 def test_json_formatter():
     formatter = JsonFormatter()

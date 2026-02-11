@@ -1,14 +1,25 @@
-"""
-Semantic Mapper: Maps domain-specific column names to standard analytical concepts.
-This enables domain-agnostic analysis by translating column names to universal concepts.
+"""Semantic Mapper — Intelligent query-to-analysis mapping.
 
-Author: Nexus Analytics Team
-Date: January 3, 2026
-Purpose: Fix 8 - Enable cross-domain data analysis
+Provides dynamic, domain-agnostic query routing using configurable
+concept patterns and confidence-scored mappings between natural
+language queries and analysis capabilities.
+
+Enterprise v2.0 Additions
+-------------------------
+* **MappingAuditEntry** — Dataclass capturing each semantic-mapping
+  decision (query, matched concept, confidence) for auditing.
+* **MappingAuditLog** — Thread-safe rolling log of mapping decisions
+  with summary statistics and export capability.
+
+All v1.x APIs (``SemanticMapper``, ``get_semantic_mapper``) remain
+fully backward-compatible.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
 """
 
 import logging
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -147,8 +158,10 @@ class SemanticMapper:
             logger.warning("Empty or invalid DataFrame provided")
             return {}
         
-        # Check cache first
-        cache_key = f"{len(df.columns)}_{','.join(df.columns[:5])}"
+        # Check cache first — use hash of ALL column names to avoid collisions
+        import hashlib as _hl
+        # Cache key based on ALL columns to ensure uniqueness
+        cache_key = _hl.md5(','.join(sorted(df.columns)).encode()).hexdigest()
         if cache_key in self._cached_mappings:
             return self._cached_mappings[cache_key]
         
@@ -284,7 +297,7 @@ class SemanticMapper:
         # Dtype-only inference = lower confidence
         return 0.3
     
-    def validate_mappings(self, df: pd.DataFrame) -> Dict[str, any]:
+    def validate_mappings(self, df: pd.DataFrame) -> Dict[str, Any]:
         """
         Validate column concept mappings and return diagnostics.
         
@@ -330,7 +343,7 @@ class SemanticMapper:
     
     def enhance_query_context(self, query: str, df: pd.DataFrame) -> str:
         """
-        Enhance the query with column concept information.
+        Enhance the query with column concept information and synonym expansion.
         This helps LLMs understand what columns to use for domain-agnostic queries.
         
         Example:
@@ -354,21 +367,66 @@ class SemanticMapper:
                     concept_groups[concept] = []
                 concept_groups[concept].append(col)
         
+        # Synonym expansion: map query terms to detected column concepts
+        query_lower = query.lower()
+        synonym_hints = self._expand_query_synonyms(query_lower, mappings, df)
+        
         # Build concept info string
         concept_info = []
         for concept, cols in concept_groups.items():
-            if cols and concept in ['revenue', 'cost', 'profit', 'count', 'rate', 'performance']:
-                # Only include business-relevant concepts
+            if cols and concept in ['revenue', 'cost', 'profit', 'count', 'rate', 'performance', 'date', 'category', 'location']:
                 concept_info.append(f"{concept}: {', '.join(cols[:3])}")  # Limit to 3 columns
         
+        parts = []
         if concept_info:
-            enhanced = f"{query}\n\n[Column Concepts: {'; '.join(concept_info)}]"
-            logger.debug(f"Enhanced query with {len(concept_info)} concept hints")
+            parts.append(f"[Column Concepts: {'; '.join(concept_info)}]")
+        if synonym_hints:
+            parts.append(f"[Column Hints: {'; '.join(synonym_hints)}]")
+        
+        if parts:
+            enhanced = f"{query}\n\n{chr(10).join(parts)}"
+            logger.debug(f"Enhanced query with {len(concept_info)} concepts, {len(synonym_hints)} synonym hints")
             return enhanced
         
         return query
     
-    def suggest_operations(self, query: str, df: pd.DataFrame) -> Dict[str, any]:
+    def _expand_query_synonyms(self, query_lower: str, mappings: Dict[str, str], df: pd.DataFrame) -> List[str]:
+        """
+        Expand query terms using detected column names as synonyms.
+        Maps user's natural language terms to actual column names in the data.
+        
+        Example: User says "earnings" but column is "gross_inflow" -> hint: "earnings -> gross_inflow"
+        """
+        QUERY_SYNONYMS = {
+            'revenue': ['revenue', 'sales', 'income', 'earnings', 'money', 'billing'],
+            'cost': ['cost', 'expense', 'spending', 'expenditure', 'outflow'],
+            'profit': ['profit', 'margin', 'gain', 'net income', 'bottom line'],
+            'count': ['count', 'number', 'how many', 'total', 'volume', 'frequency'],
+            'date': ['date', 'time', 'when', 'period', 'month', 'year', 'quarter', 'day'],
+            'category': ['category', 'type', 'group', 'segment', 'by', 'per'],
+            'rate': ['rate', 'percentage', 'ratio', 'growth', 'change', 'trend'],
+            'location': ['location', 'region', 'city', 'country', 'area', 'where'],
+        }
+        
+        hints = []
+        matched_concepts = set()
+        
+        for concept, synonyms in QUERY_SYNONYMS.items():
+            for synonym in synonyms:
+                if synonym in query_lower and concept not in matched_concepts:
+                    # Find actual columns for this concept
+                    matching_cols = [col for col, c in mappings.items() if c == concept]
+                    if matching_cols:
+                        # Only hint if the synonym doesn't exactly match a column name
+                        col_names_lower = [col.lower() for col in matching_cols]
+                        if synonym not in col_names_lower:
+                            hints.append(f"'{synonym}' likely refers to column(s): {', '.join(matching_cols[:2])}")
+                            matched_concepts.add(concept)
+                    break
+        
+        return hints
+    
+    def suggest_operations(self, query: str, df: pd.DataFrame) -> Dict[str, Any]:
         """
         Suggest relevant operations based on query and detected concepts.
         
@@ -433,3 +491,83 @@ def get_semantic_mapper() -> SemanticMapper:
         _mapper_instance = SemanticMapper()
         logger.debug("Created new SemanticMapper singleton")
     return _mapper_instance
+
+
+# ============================================================================
+# Enterprise v2.0 — MappingAuditEntry & MappingAuditLog
+# ============================================================================
+
+import threading as _threading
+from dataclasses import dataclass, field as _field
+import datetime as _datetime
+
+
+@dataclass
+class MappingAuditEntry:
+    """Record of a single semantic-mapping decision.
+
+    Attributes:
+        query: The original user query.
+        matched_concept: Concept key that was matched (or ``None``).
+        confidence: Mapping confidence score (0.0–1.0).
+        timestamp: ISO-8601 creation timestamp.
+
+    .. versionadded:: 2.0
+    """
+
+    query: str
+    matched_concept: str | None
+    confidence: float
+    timestamp: str = _field(
+        default_factory=lambda: _datetime.datetime.now().isoformat()
+    )
+
+
+class MappingAuditLog:
+    """Thread-safe rolling log of semantic-mapping decisions.
+
+    Stores up to *max_entries* audit records and provides summary
+    statistics for observability.
+
+    Args:
+        max_entries: Maximum entries to retain (FIFO eviction).
+
+    Example::
+
+        audit = MappingAuditLog()
+        audit.record(MappingAuditEntry("show sales trend", "trend_analysis", 0.92))
+        print(audit.summary())
+
+    .. versionadded:: 2.0
+    """
+
+    def __init__(self, max_entries: int = 5_000) -> None:
+        self._entries: list[MappingAuditEntry] = []
+        self._lock = _threading.Lock()
+        self._max = max_entries
+
+    def record(self, entry: MappingAuditEntry) -> None:
+        """Append an audit entry, evicting oldest if at capacity."""
+        with self._lock:
+            self._entries.append(entry)
+            if len(self._entries) > self._max:
+                self._entries = self._entries[-self._max:]
+
+    def summary(self) -> dict:
+        """Return aggregate statistics over stored entries.
+
+        Returns:
+            Dict with ``total``, ``avg_confidence``, and
+            ``unmatched_count`` keys.
+        """
+        with self._lock:
+            total = len(self._entries)
+            if total == 0:
+                return {"total": 0, "avg_confidence": 0.0, "unmatched_count": 0}
+            avg_conf = sum(e.confidence for e in self._entries) / total
+            unmatched = sum(1 for e in self._entries if e.matched_concept is None)
+            return {
+                "total": total,
+                "avg_confidence": round(avg_conf, 4),
+                "unmatched_count": unmatched,
+            }

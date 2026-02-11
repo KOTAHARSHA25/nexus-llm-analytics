@@ -1,5 +1,5 @@
 import pytest
-from src.backend.core.automated_validation import AutomatedValidator, AutomatedValidationResult, ValidationIssue
+from backend.core.automated_validation import AutomatedValidator, AutomatedValidationResult, ValidationIssue
 
 @pytest.fixture
 def validator():

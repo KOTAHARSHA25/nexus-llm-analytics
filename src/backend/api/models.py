@@ -1,15 +1,46 @@
-from fastapi import APIRouter
-from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
+"""Models API — LLM Model Management & Configuration Endpoints
+==============================================================
+
+Exposes model discovery, configuration, testing, preference management,
+and recommendation endpoints. Serves the frontend’s Model Settings page
+and provides the backend’s model hot-swap capability.
+
+Endpoints
+---------
+``GET  /available``
+    Query Ollama for all installed models with metadata.
+``GET  /recommendations``
+    RAM-aware model configuration suggestions.
+``POST /preferences``
+    Persist user model choices to config and apply at runtime.
+``GET  /preferences``
+    Read current user model preferences.
+``POST /test-model``
+    Send a probe prompt to verify a specific model responds.
+``POST /configure`` *(deprecated)*
+    Legacy ``.env`` configuration method.
+``POST /setup-complete``
+    Mark first-time wizard as finished.
+``GET  /test-results``
+    Retrieve saved model test outcomes.
+"""
+
+from __future__ import annotations
+
 import logging
 import os
 import time
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter
+from pydantic import BaseModel, Field
+
+import requests
+
 from backend.core.engine.model_selector import ModelSelector
 from backend.core.engine.user_preferences import get_preferences_manager
-from backend.services.analysis_service import get_analysis_service
 
-# API endpoint for model management and selection
-
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -18,7 +49,16 @@ router = APIRouter()
 
 
 class ModelConfig(BaseModel):
-    """Configuration for model selection."""
+    """User-submitted model configuration.
+
+    Attributes:
+        primary_model:              Preferred primary analysis LLM tag.
+        review_model:               Preferred secondary review LLM tag.
+        embedding_model:            Embedding model for vector search.
+        auto_selection:             Let the system override choices based on RAM.
+        allow_swap:                 Permit swap-backed model loading.
+        enable_intelligent_routing: Route queries by complexity (experimental).
+    """
     primary_model: str = Field(..., description="Primary LLM for analysis tasks", example="llama3.1:8b")
     review_model: str = Field(..., description="Secondary LLM for review/validation", example="phi3:mini")
     embedding_model: str = Field(..., description="Model for generating embeddings", example="nomic-embed-text:latest")
@@ -28,7 +68,7 @@ class ModelConfig(BaseModel):
 
 
 class ModelInfo(BaseModel):
-    """Information about a single model."""
+    """Metadata for a single Ollama-installed model."""
     name: str = Field(..., description="Model name as registered in Ollama")
     size_gb: float = Field(..., description="Model size in gigabytes")
     description: str = Field(..., description="Human-readable model description")
@@ -38,7 +78,7 @@ class ModelInfo(BaseModel):
 
 
 class AvailableModelsResponse(BaseModel):
-    """Response containing available models and system information."""
+    """Response payload listing installed models with system context."""
     models: List[Dict[str, Any]] = Field(..., description="List of installed models")
     total_models: int = Field(..., description="Total number of models")
     system_memory: Dict[str, float] = Field(..., description="System memory information")
@@ -53,10 +93,13 @@ class AvailableModelsResponse(BaseModel):
     description="Get all models installed on user's Ollama (not hardcoded)"
 )
 async def get_available_models() -> Dict[str, Any]:
-    """Get all models installed on user's Ollama (not hardcoded)"""
+    """Query Ollama for every installed model and return structured metadata.
+
+    Returns:
+        Dict with ``models`` list, ``total_models`` count, ``system_memory``
+        snapshot, ``ollama_running`` bool, and ``current_config``.
+    """
     try:
-        import requests
-        
         # Get system info
         memory_info = ModelSelector.get_system_memory()
         
@@ -66,10 +109,13 @@ async def get_available_models() -> Dict[str, Any]:
         ollama_url = settings.ollama_base_url
         
         try:
-            response = requests.get(f"{ollama_url}/api/tags", timeout=5)
+            import asyncio
+            response = await asyncio.to_thread(
+                lambda: requests.get(f"{ollama_url}/api/tags", timeout=5)
+            )
             ollama_models = response.json().get("models", [])
         except Exception as e:
-            logging.warning(f"Could not fetch Ollama models: {e}")
+            logger.warning("Could not fetch Ollama models: %s", e)
             ollama_models = []
         
         # Process actual models from user's Ollama
@@ -117,7 +163,7 @@ async def get_available_models() -> Dict[str, Any]:
             }
         }
     except Exception as e:
-        logging.error(f"Failed to get available models: {e}")
+        logger.error("Failed to get available models: %s", e, exc_info=True)
         return {"error": str(e), "models": [], "ollama_running": False}
 
 # NOTE: /current endpoint removed (Dec 2025) - duplicates /available (current_config field)
@@ -146,12 +192,12 @@ async def configure_models(config: ModelConfig) -> Dict[str, str]:
             "note": "Add these to your .env file and restart the server"
         }
     except Exception as e:
-        logging.error(f"Failed to configure models: {e}")
+        logger.error("Failed to configure models: %s", e, exc_info=True)
         return {"error": str(e)}
 
 @router.get("/recommendations")
 async def get_model_recommendations() -> Dict[str, Any]:
-    """Get intelligent model recommendations based on system specs"""
+    """Return RAM-aware model configuration suggestions."""
     try:
         memory_info = ModelSelector.get_system_memory()
         available_ram = memory_info["available_gb"]
@@ -192,12 +238,12 @@ async def get_model_recommendations() -> Dict[str, Any]:
         }
         
     except Exception as e:
-        logging.error(f"Failed to generate recommendations: {e}")
+        logger.error("Failed to generate recommendations: %s", e, exc_info=True)
         return {"error": str(e)}
 
 @router.get("/preferences")
 async def get_user_preferences() -> Dict[str, Any]:
-    """Get current user preferences"""
+    """Return the persisted user model preferences and first-time flag."""
     try:
         preferences_manager = get_preferences_manager()
         preferences = preferences_manager.load_preferences()
@@ -208,25 +254,21 @@ async def get_user_preferences() -> Dict[str, Any]:
             "config_file_path": str(preferences_manager.preferences_file)
         }
     except Exception as e:
-        logging.error(f"Failed to get user preferences: {e}")
+        logger.error("Failed to get user preferences: %s", e, exc_info=True)
         return {"error": str(e)}
 
 @router.post("/preferences")
 async def update_user_preferences(config: ModelConfig) -> Dict[str, str]:
-    """Update user preferences"""
+    """Persist user model preferences and apply at runtime."""
     try:
         preferences_manager = get_preferences_manager()
         
-        # Log the model change prominently to console
-        print("\n" + "=" * 80)
-        print("🔄 MODEL CONFIGURATION CHANGED:")
-        print(f"   Primary Model:   {config.primary_model}")
-        print(f"   Review Model:    {config.review_model}")
-        print(f"   Embedding Model: {config.embedding_model}")
-        print(f"   Auto Selection:  {config.auto_selection}")
-        print(f"   Allow Swap:      {config.allow_swap}")
-        print(f"   Intelligent Routing: {config.enable_intelligent_routing} (Experimental)")
-        print("=" * 80 + "\n")
+        # Log the model change
+        logger.info(
+            "Model config changed: primary=%s, review=%s, embedding=%s, auto=%s, routing=%s",
+            config.primary_model, config.review_model, config.embedding_model,
+            config.auto_selection, config.enable_intelligent_routing,
+        )
         
         success = preferences_manager.set_model_config(
             primary=config.primary_model,
@@ -243,34 +285,39 @@ async def update_user_preferences(config: ModelConfig) -> Dict[str, str]:
             preferences_manager.update_preferences(enable_intelligent_routing=config.enable_intelligent_routing)
         
         if success:
-            print("✅ Model configuration saved successfully - Changes will take effect on next analysis\n")
+            logger.info("Model configuration saved successfully")
             return {
                 "message": "User preferences updated successfully",
                 "status": "success",
                 "note": "Changes will take effect on next analysis request"
             }
         else:
-            print("❌ Failed to save model configuration\n")
+            logger.error("Failed to save model configuration", exc_info=True)
             return {"error": "Failed to save preferences", "status": "error"}
             
     except Exception as e:
-        logging.error(f"Failed to update user preferences: {e}")
+        logger.error("Failed to update user preferences: %s", e, exc_info=True)
         return {"error": str(e), "status": "error"}
 
 class ModelTestRequest(BaseModel):
+    """Request payload for the ``/test-model`` endpoint."""
     model_name: str
 
 def _is_embedding_model(model_name: str) -> bool:
-    """Check if model is an embedding model (not for text generation)"""
+    """Return ``True`` if the model tag indicates an embedding-only model."""
     embedding_indicators = ['embed', 'nomic-embed', 'bge', 'e5', 'gte', 'embedding']
     model_lower = model_name.lower()
     return any(indicator in model_lower for indicator in embedding_indicators)
 
 def _test_embedding_model(model_name: str) -> dict:
-    """Test an embedding model using the embeddings API"""
-    import requests
-    import time
-    
+    """Probe an embedding model via the ``/api/embeddings`` endpoint.
+
+    Args:
+        model_name: Ollama model tag to test.
+
+    Returns:
+        Dict with ``success``, ``response_time``, ``result``, and ``error`` keys.
+    """
     url = "http://localhost:11434/api/embeddings"
     payload = {"model": model_name, "prompt": "test embedding"}
     
@@ -312,9 +359,8 @@ def _test_embedding_model(model_name: str) -> dict:
 
 @router.post("/test-model")
 async def test_model(request: ModelTestRequest) -> Dict[str, Any]:
-    """Test a specific model with a simple query"""
+    """Send a probe prompt to verify a specific model responds."""
     try:
-        import time
         from backend.agents.model_manager import get_model_manager
         
         start_time = time.time()
@@ -376,7 +422,7 @@ async def test_model(request: ModelTestRequest) -> Dict[str, Any]:
         }
         
     except Exception as e:
-        logging.error(f"Model test failed: {e}")
+        logger.error("Model test failed: %s", e, exc_info=True)
         preferences_manager = get_preferences_manager()
         preferences_manager.save_model_test_result(
             model_name=request.model_name,
@@ -392,7 +438,7 @@ async def test_model(request: ModelTestRequest) -> Dict[str, Any]:
 
 @router.post("/setup-complete")
 async def mark_setup_complete() -> Dict[str, str]:
-    """Mark first-time setup as complete"""
+    """Mark the first-time setup wizard as finished."""
     try:
         preferences_manager = get_preferences_manager()
         success = preferences_manager.mark_setup_complete()
@@ -403,12 +449,12 @@ async def mark_setup_complete() -> Dict[str, str]:
             return {"error": "Failed to update setup status", "status": "error"}
             
     except Exception as e:
-        logging.error(f"Failed to mark setup complete: {e}")
+        logger.error("Failed to mark setup complete: %s", e, exc_info=True)
         return {"error": str(e), "status": "error"}
 
 @router.get("/test-results")
 async def get_model_test_results() -> Dict[str, Any]:
-    """Get model test results"""
+    """Return persisted model test outcomes."""
     try:
         preferences_manager = get_preferences_manager()
         test_results = preferences_manager.get_model_test_results()
@@ -418,5 +464,5 @@ async def get_model_test_results() -> Dict[str, Any]:
             "status": "success"
         }
     except Exception as e:
-        logging.error(f"Failed to get test results: {e}")
+        logger.error("Failed to get test results: %s", e, exc_info=True)
         return {"error": str(e), "status": "error"}

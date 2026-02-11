@@ -1,18 +1,26 @@
-"""
-RAG (Retrieval-Augmented Generation) Module
-============================================
+"""RAG (Retrieval-Augmented Generation) Module — Nexus LLM Analytics
+====================================================================
 
-Provides enhanced RAG capabilities for document analysis.
+Provides enhanced RAG capabilities for research-grade document
+analysis and question answering.
 
-Components:
-- EnhancedRAGPipeline: Main RAG pipeline with reranking
-- QueryExpander: Query expansion with synonyms
-- BM25Scorer: Sparse retrieval scoring
-- ReRanker: Cross-encoder style reranking
-- ContextCompressor: Context length management
-- CitationTracker: Source citation tracking
-- ConfidenceScorer: Answer confidence scoring
+Components
+----------
+EnhancedRAGPipeline
+    Main pipeline with hybrid search, re-ranking, and citation tracking.
+QueryExpander
+    Synonym-based query expansion for improved recall.
+BM25Scorer / ReRanker
+    Sparse retrieval scoring and cross-encoder re-ranking.
+ContextCompressor / CitationTracker / ConfidenceScorer
+    Context management, source attribution, and answer confidence.
+
+v2.0 Enterprise Additions
+-------------------------
+* Enterprise module docstring with component catalogue.
 """
+
+from __future__ import annotations
 
 from .enhanced_rag_pipeline import (
     EnhancedRAGPipeline,

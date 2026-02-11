@@ -1,12 +1,12 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.backend.core.optimizers import (
-    MemoryOptimizer, PerformanceOptimizer, StartupOptimizer, AdaptiveTimeoutManager, UnifiedOptimizer
+from backend.core.optimizers import (
+    SystemResourceOptimizer, PerformanceOptimizer, StartupOptimizer, AdaptiveTimeoutManager, UnifiedOptimizer
 )
 
 @pytest.fixture
 def mock_psutil():
-    with patch('src.backend.core.optimizers.psutil') as mock:
+    with patch('backend.core.optimizers.psutil') as mock:
         memory = MagicMock()
         memory.total = 16 * 1024**3
         memory.available = 8 * 1024**3
@@ -35,12 +35,12 @@ def mock_psutil():
         
         yield mock
 
-def test_memory_optimizer(mock_psutil):
-    usage = MemoryOptimizer.get_memory_usage()
+def test_system_resource_optimizer(mock_psutil):
+    usage = SystemResourceOptimizer.get_memory_usage()
     assert usage['total_gb'] == 16.0
     assert usage['percent_used'] == 50.0
 
-    avail, recs = MemoryOptimizer.estimate_available_after_cleanup()
+    avail, recs = SystemResourceOptimizer.estimate_available_after_cleanup()
     # Should have recommendations for browser (2GB > 1.0) and IDE (1.5GB > 1.0)
     assert len(recs) >= 2
     # Check for browser recommendation

@@ -1,0 +1,117 @@
+FORM-2
+THE PATENTS ACT, 1970 (39 OF 1970)
+AND
+THE PATENT RULES, 2003
+(As Amended)
+
+
+COMPLETE SPECIFICATION (SECTION 10; RULE 13)
+
+TITLE
+AUTONOMOUS MULTI-AGENT SYSTEM FOR NATURAL LANGUAGE DRIVEN DATA ANALYSIS USING LOCAL LARGE LANGUAGE MODELS
+
+
+APPLICANT
+Mrs. P. Swathi , Faculty, Department of CSE – AI&ML, MLR Institute of Technology, Laxman Reddy Avenue, Dundigal-500043, Medchal District, Hyderabad, Telangana, India and Indian National.
+Mr. Mittapalli Dileep, Mr. Munagala Sandeep Kumar, Mr. Kota Harsha, Mr. E.Y.S.V.S Abhay, Students, Department of CSE – AI&ML, MLR Institute of Technology, Laxman Reddy Avenue, Dundigal-500043, Medchal District, Hyderabad, Telangana, India and Indian Nationals.
+
+
+
+
+
+
+
+
+
+
+The following specification particularly describes the invention and the manner in which it is performed.
+ 
+AUTONOMOUS MULTI-AGENT SYSTEM FOR NATURAL LANGUAGE DRIVEN DATA ANALYSIS USING LOCAL LARGE LANGUAGE MODELS
+Field of the Invention
+The present invention relates to the infrastructure for Data Analysis using Machine Learning (ML) through Artificial Intelligence (AI) technologies. Specifically, this invention provides an integrated solution for the analysis of data using Natural Language (NL) inputs that can be easily adapted for use across a wide variety of industries. This integrated solution consists of a number of key capabilities including Natural Language Processing (NLP), Automated Coding, Secure Code Execution, and Intelligent Multi-Agent Coordination. These capabilities enable the production of Accurate Analytical Outcomes (AAOs). The system is designed to minimize the necessity for programming or statistical expertise to successfully and consistently use this technology in any arena. The invention can be utilized in many industries including, but not limited to, Business Intelligence, Healthcare, Financial Services, Education, Research and Development.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Background of the Invention
+Currently, effective data analysis mostly depends on the technical ability of the individual performing it. Therefore, many non-technical users view this as a serious barrier to gain access to valuable insights from the analytical executives and will usually not consider it worth their time learning how to do analytical work using traditional methods. Traditional analytical methods require knowledge of programming languages like Python and SQL, and have a familiarity with statistical techniques, and data modeling, and an understanding of concepts specific to the particular domain where analysis is being performed. As a result, these providing useful insights from data can be made available only by trained analysts which creates a lag in the time required to make data-driven decisions and causes many data-driven systems to be under-utilized across many industries such as business intelligence, healthcare, finance, education, and research. Most existing analytical platforms use either manual code development or pre-defined (fixed) dashboards and the operations of the dashboards are limited to whichever pre-defined elements exist. Although these platforms are incredibly sophisticated, they do not have a great deal of flexibility to accommodate the varying needs of users for changing datasets, evolving user queries, and the need to use the data from multiple domains. Users are frequently required to convert their real-world questions into technical commands which results in inefficiencies, increases the chances of human error, and limits users' ability to perform exploratory analysis on the data. As a result of these issues, many users have a fragmented workflow where they are reliant upon continual human intervention.
+ The recent progress made in artificial intelligence (i.e., especially with machine learning, large language models (LLMs) have created new opportunities for automated analytics. Prior art for (patent) US20240028312A1 convert natural language commands into executable analytical code allowing non-programmers to analyze the data. In addition, US20230259705A1 and US20240111498A1 describe methods to analyze data and generate software code based on text input using an LLM. As a result, there are substantially fewer technical barriers for generating and executing analytics, and the analytics completion process is made more efficient.
+Most existing solutions primarily generate one-time code and then perform only a single run of an individual task. Most existing solutions lack continuous verification, correcting run-time errors, adapting to multi-step reasoning, and coordinating the numerous components of analytics autonomously. Other limitations of current solutions are transparency, maintaining privacy during the verification and correction phases, and modular extensibility. Therefore, there exists a need for a domain-agnostic, autonomous, privacy-preserving, multi-agent analytic system that supports iterative reasoning, supports self-correction, and adaptable to different domains or types of domains while enabling access to a person with little technical skill. 
+Summary of the Invention
+The present invention discloses a domain-flexible autonomous agent for data analysis that allows users to perform complete data analysis with just a natural language request. This invention has been specifically designed to allow for the removal of manual coding, querying, and specialized domain knowledge needed to produce high quality, formal output while getting reliable, accurate results from data analysis. In addition, this invention uses large language models to understand what users want, analyze the data they are asking for, and turn it into executable analytical workflows. To achieve this, these agents work together as part of a multi-agent system with a planning component to split complex analytical requests into smaller parts. The code synthesis components generate the proper SQL or python code depending on the type of the input data requested by the user, while the execution component safely runs the code created and captures the errors or abnormal behavior that occur during runtime. Finally, the verification components evaluate the outputs and initiate correction loops if necessary. By continuously learning and improving itself based on user feedback and execution errors, the proposed invention provides data analysis that can be performed across multiple industries and datasets. Thus, this invention is useful to all types of people who need to conduct data analysis, regardless of their level of experience.
+Brief Description of Drawings
+The invention will be described in detail with reference to the exemplary embodiments shown in the figures where in:
+FIG. 1 illustrates a flow chart representing the workflow of the system according to an embodiment of the present invention.
+FIG. 2 illustrates the proposed architecture diagram of the multi-agent system.
+
+
+
+
+
+
+
+
+
+
+
+Detailed Description of the Invention
+A domain-flexible autonomous data analysis agent has been developed to allow a user to complete an entire analytical process using several different types of natural language input. With the use of natural language input, the user can access all the functionality of the agent without the requirement to learn how to program or use any specialized software or statistical analysis method associated with a particular domain. The combination of the intelligent planning capability of a large language model and the ability to autonomously orchestrate tasks in conjunction with the secure execution and iterative validation of the results of those tasks will enable the generation of highly repeatable and reliable analyses and resulting insights.To initiate the operation of the system, a user will submit a plain-language request for an analysis such as asking for trends, comparisons, predictions, and/or summaries of data from one or more data sources. The first step in processing the user request is through the use of the intelligent planning component called the Planner. The Planner will help to identify the user's intent regarding what kind of analysis they want to conduct, clarify their analytical objective, and develop an overall analytical plan by breaking down the total analytical request into parts, or subtasks. By deconstructing the overall task into smaller subtasks, the user can process complex analytical queries in a more small step-by-step manner, and this will enhance the reliability of the execution of their complex queries by providing a clearer picture of what is continuing to be processed. Once the overall analytical plan is completed, the system will invoke the Code Synthesizer component to generate a new programmatic representation of the subtasks identified by the Planner into corresponding executable code (for example, the generation of Python scripts or SQL queries, etc.). The Executor component executes the created code within a secure, sandbox environment. The sandbox ensures that dangerous actions are limited, only provides access to the code's resources, and ensures that only a minimal amount of resources are available for execution. Throughout the execution of the code, the Executor collects all runtime output, intermediate results and error or exception messages. This careful and controlled execution of dynamically generated and possibly untrusted code ensures that the resulting analytical results are safe, repeatable, and can be reproduced repeatedly.
+After execution of code is completed the Verification component verifies the integrity and correctness of the resulting outputs against the user's original intent and the execution logs, output consistency, and the correspondence of the outputs with the intent of the execution. If there are any discrepancies, failures or logical errors in the execution results, the Verifier triggers an automated feedback loop to send the feedback regarding the errors, discrepancies, or failures back through the planning and generation of code phases so the system can revise either the analytical plan or generate a correct code version without the need for human intervention. This feedback loop and repeated execution of the generated code is an important component of the invention. Instead of terminating execution after any error or failure, this system has the ability to learn and improve on its own, and will continue to create or refine its approach until satisfactory results or pre-set conditions for termination are reached. This invention provides and supports an architecture to provide adaptive and cooperative orchestration using a variety of agent types with unique capabilities or tasks. Such types would include agent types such as task planners, execution monitors, validation agents, as well as memory components used to retain cross-session context between analyses. The adaptive cooperative approach provides increased capability for scalability, fault-tolerance, and the ability to efficiently   manage complex or multi-step analytical workflows. By developing a single framework that includes all elements needed for Natural Language Processing (NLP), Automated Code Generation (ACG), Secure Code Execution (SCE) and Iterative Validation (IV) within the same system, a consistent, repeatable, and transparent system for providing analytics has been created by this invention. In turn, the user is able to easily concentrate on making business decisions and interpreting results while allowing the system to manage everything else necessary to conduct data analytics in the many business sectors/markets across different data and datasets. The system as a whole operates based on the interaction of four components: natural language understanding, automated analytical planning, secure code execution, and continuous verification - which all work together to form one complete analytical pipeline. The user does not interact directly with the individual technology modules, but rather, they only communicate through natural language queries rather than operating a technical software platform. Therefore, the analytical experience of the user is more like having a conversation with an intelligent assistant than using traditional technical tools or software. Since the Planner interprets intent before computations are performed, there is much less potential for having an analysis that is not aligned with the intent of the user and this will be reflected in the plans created for users, regardless of whether the user's request is general or closely defined.
+Likewise, by using the combined feedback loops of all the analytical components, the system allows multiple iterations of the analytical process until the desired results have been reached. The system’s capacity to regenerate or revise analytical code due to an unexpected output permits it to function as a reasoning partner as opposed to solely an analytical engine. Each iteration refines the relationship between expressed intent and received output, creating greater confidence in the final results while decreasing the amount of required manual correction. Each execution takes place within a controlled sandbox and is subject to a series of checkpoints to verify accuracy, thereby providing confidence in the consistency, repeatability, and security of each analytical output. The cycle of planning, generating, executing, and validating each analytical output creates a foundation for the invention’s reliability and separates it from conventional analytical tools which rely heavily on direct human oversight, as well as one-time executions of analytical code. The invention, through this cycle of planning, generating, executing, and validating each analytical output, assures that the accuracy, safety, and usability of the analytical output are provided at the same time as ensuring that analytical processes will be approachable by individuals with differing levels of technical knowledge and experience across a variety of application domains.
+3 Claims and 2 Figures
+ 
+Equivalents
+It is recognized that the Inventive Concept as discussed throughout this document does not have to be solely based on the Components and Systems, Configurations and Processes herein discussed. The Inventive Concept has been developed to allow for Variability, Adequacy, Modification and Alternative Implementation techniques by anyone within their expertise as it relates to the function and operation of the components. For example, agents and modules of the components, as described herein, can be collated together, be Separated from each other or be implemented within Alternate Software Framework(s) while still achieving the same analytical Functionality.
+Likewise, Alternative Programming Languages, Data Storage Mechanisms and Execution Mechanisms can be Implemented, provided that they produce similar Types of Functionality and in a similar Manner as that described herein. The use of a Natural Language Interface, Memory Structures, and Execution Controls are examples of techniques and technologies that are used to implement the components.
+ 
+The scope of the invention is defined by the following claims:
+Claim:
+1.	Autonomous multi-agent system for natural language driven data analysis using local language models, wherein all components are integrated through an interface including an intelligent agent and an AI controller, configured to perform the following functions::
+a)	The use of LLMs (large language models) to create an intelligent agent system (a group of intelligent agents working collaboratively), each with specific roles relating to the overall data analysis process (e.g. data analytics agent, information retrieval agent, code validations agent, visualization agent, and report generation agents).
+b)	Provide a central AI Controller, which interprets user queries submitted in natural language, determines what means of analysis would be appropriate for each analysis, decomposes the user query into suitable tasks for each of the intelligent agents to perform, and coordinates the analysis process performed by the various agents.
+c)	Installing 1 or more copies of one or more LLMs locally on a user’s computing device, in order for the models to generate the code necessary to generate the analytical output, interpret the analytical results and assist in the decision-making processes without compromising any data privacy.
+d)	Provide a locally based processing platform whereby all data will be stored, computed and analyzed exclusively on the user’s device; and no data will be transmitted to either a remote processing server or to a 3rd party site.
+e)	A working memory system that would use vector-based representation of intermediate results and contextual information to facilitate storage/retrieval/reuse of all of these types of information during the execution of analytical processes.
+2.	According to claim 1 the system outlined above has an agent responsible for confirming and reviewing all automatically generated analytical code before running it and following the executing process in a secure area to find errors, and to prevent potentially unsafe or unauthorized use.
+3.	In accordance of claim 1 the system outlined above, will allow the agent responsible for retrieving information to connect to and retrieve both structured and unstructured data in a variety of file types including CSV, Excel, JSON and PDF. The agent will accomplish these searches using vector-based search methods and semantic retrieval techniques to produce reliable analysis.
+4.	According to claim 1 the multi-agents will provide transparency through maintaining an audit trail of all agent decisions, and performing actions  associated with each agent's specific types of functions. This will allow users to reconstruct, validate, and explain the analysis from these agents.
+5.	In accordance of claim 1 the multi-agent architecture of the above system will support a modular and extensible solution where newly created Domain-specific agents can be added without modifying the existing core of the system and the system will produce graphic representations of data analysis and create documents (such as graphics, charts, or reports) that are designed in user-friendly formats that are able to be interpreted by technical and non-technical personnel alike. 
+Mrs. P. Swathi	Number of sheets: 2
+Mr. Mittapalli Dileep	
+Mr. Munagala Sandeep Kumar Mr. Kota Harsha
+Mr. E.Y.S.V.S Abhay
+
+
+
+
+
+FIG. 1: Flow chart representing the work flow of the system
+ 
+Mrs. P. Swathi	Number of sheets: 2
+Mr. Mittapalli Dileep	
+Mr. Munagala Sandeep Kumar Mr. Kota Harsha
+Mr. E.Y.S.V.S Abhay
+
+
+
+
+
+FIG. 2: Proposed architecture diagram.
+ 
+Abstract
+
+The use of data analysis plays a vital role in the decision-making process, and for many users, conducting complex analyses often poses barriers due to their lack of programming or statistical expertise. Traditional tools typically require manual coding and domain-related knowledge, which can limit access and generate inefficiencies across all industries. Recent progress has been made with the introduction of Large Language Model (LLM) capabilities, facilitating greater automation of the data analysis workflow and providing users with additional means of interacting with data analysis in a user-friendly manner. Unfortunately, most current systems continue to limit advanced data analysis capabilities by providing little in the way of autonomy, flexibility and an adequate error correction methodology during the execution phase of the analysis. This paper introduces the Autonomous Multi-Agent System to address the limitations of most existing systems. The system automatically generates executable Python or SQL code based on a plain-language query, executes the code within a sandbox environment, verifies the outcome of the code execution and iteratively corrects any errors detected through automated fault tolerance mechanisms. The Autonomous Multi-Agent System architecture consists of several modules, including the Planner, which breaks the task into smaller components; the Code Synthesizer for generating programmatic code, Executor for executing the programmatic code with controlled execution; and Verifier for confirming the results generated by the comprehensive data analysis process. The combined functionality of intelligent code generation, runtime feedback, and iterative verification loops allows the system to support domain-independent, consistent, reliable, repeatable analytics. As a result, non-technical users can accurately conduct clear, transparent analyses using the system, freeing up the user from acting as the manual input of data into the analysis process.
+3 Claims and 2 Figures

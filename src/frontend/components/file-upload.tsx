@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { apiUrl, getEndpoint } from "@/lib/config";
+import { getEndpoint } from "@/lib/config";
 import {
   Upload,
   File,
@@ -84,20 +84,16 @@ export function FileUpload({ onFileUpload, uploadedFiles }: FileUploadProps) {
       setIsDragOver(false);
 
       const files = Array.from(e.dataTransfer.files);
-      const validFiles = files.filter((file) =>
-        ["application/pdf", "text/csv", "application/json", "text/plain"].includes(
-          file.type
-        )
-      );
+      const ALLOWED_TYPES = [
+        "application/pdf", "text/csv", "application/json", "text/plain",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-excel"
+      ];
+      const isAllowed = (f: File) =>
+        ALLOWED_TYPES.includes(f.type) || /\.(xlsx|xls|csv)$/i.test(f.name);
 
-      const rejected = files
-        .filter(
-          (file) =>
-            !["application/pdf", "text/csv", "application/json", "text/plain"].includes(
-              file.type
-            )
-        )
-        .map((file) => file.name);
+      const validFiles = files.filter(isAllowed);
+      const rejected = files.filter((f) => !isAllowed(f)).map((f) => f.name);
 
       setRejectedFiles(rejected);
 

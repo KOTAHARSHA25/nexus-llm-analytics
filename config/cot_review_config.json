@@ -17,8 +17,10 @@
       "correlation", "percentage", "ratio", "compare", "maximum",
       "minimum", "median", "standard deviation", "variance",
       "top", "bottom", "highest", "lowest", "by region", "by category",
-      "per", "each", "distribution", "breakdown", "what is", "which",
-      "find the", "show me", "list all", "get the"
+      "per", "each", "distribution", "breakdown", "categorize", 
+      "category", "categories", "segment", "classify", "analyze",
+      "forecast", "predict", "trend", "pattern",
+      "monthly", "daily", "yearly", "quarterly"
     ],
     "multi_step_keywords": [
       "and then", "after that", "then predict", "correlation", 
@@ -55,10 +57,10 @@
       },
       "code_generator": {
         "failure_threshold": 2,
-        "recovery_timeout": 45,
+        "recovery_timeout": 90,
         "success_threshold": 2,
-        "timeout": 45,
-        "comment": "Code generation operations (may be slower)"
+        "timeout": 90,
+        "comment": "Code generation operations — needs headroom for retry loops"
       },
       "cot_engine": {
         "failure_threshold": 3,

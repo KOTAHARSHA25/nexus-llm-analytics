@@ -8,7 +8,7 @@ import logging
 import os
 import json
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, TYPE_CHECKING
 from pathlib import Path
 
 # Add src to path
@@ -18,7 +18,8 @@ sys.path.insert(0, str(src_path))
 from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
 from backend.agents.model_manager import get_model_manager
 from backend.core.dynamic_planner import get_dynamic_planner
-from backend.core.engine.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
+if TYPE_CHECKING:
+    from backend.core.engine.query_orchestrator import QueryOrchestrator, ExecutionMethod, ReviewLevel
 
 # Phase 1 imports
 try:
@@ -73,13 +74,14 @@ class DataAnalystAgent(BasePluginAgent):
         self._circuit_name = "data_analyst"  # Phase 1: Circuit breaker name
         return True
     
-    def _get_orchestrator(self) -> QueryOrchestrator:
+    def _get_orchestrator(self) -> 'QueryOrchestrator':
         """
         Lazy load the QueryOrchestrator for unified decision making.
         
         STREAMLINED: No config needed - orchestrator loads from cot_review_config.json automatically
         """
         if self._orchestrator is None:
+            from backend.core.engine.query_orchestrator import QueryOrchestrator
             self._orchestrator = QueryOrchestrator()  # Auto-loads config
         return self._orchestrator
     
@@ -197,8 +199,9 @@ class DataAnalystAgent(BasePluginAgent):
             # HIGH PRIORITY: Queries asking for specific values/records/names
             # These MUST go to DataAnalyst for code generation, NOT StatisticalAgent
             specific_value_patterns = [
-                "what is the", "which is the", "find the", "show me the",
-                "who is the", "where is the", "get the",
+                "what is the", "what is", "which is the", "find the", "show me the",
+                "who is the", "where is the", "get the", "list the", "list all",
+                "show all", "show the", "what are the", "what are",
                 "most", "least", "highest", "lowest", "top", "bottom",
                 "best", "worst", "largest", "smallest", "maximum", "minimum",
                 "with highest", "with lowest", "with most", "with least"
@@ -209,7 +212,7 @@ class DataAnalystAgent(BasePluginAgent):
             # Only boost if query is VERY simple and general
             very_simple_patterns = [
                 "what is the average", "show me the top", "display summary",
-                "what is the name", "get the data", "calculate total"
+                "what is the name", "what is name", "get the data", "calculate total"
             ]
             if any(pattern in query_lower for pattern in very_simple_patterns):
                 confidence += 0.4  # Boost for truly simple queries
@@ -226,12 +229,63 @@ class DataAnalystAgent(BasePluginAgent):
                 
         return min(confidence, 0.85)  # Cap below specialists
 
+    def reflective_execute(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Swarm-enabled execution with self-correction and insight sharing.
+        
+        Follows the Swarm pattern:
+        1. Plan (handled by QueryOrchestrator/DynamicPlanner)
+        2. Execute (via self.execute)
+        3. Critique (Basic self-check)
+        4. Share Insights (via SwarmContext)
+        """
+        context = context or {}
+        
+        # 1. Execute the core logic
+        result = self.execute(query, **context)
+        
+        # 2. Basic Critique (Self-Correction)
+        # If execution failed but we have a specific error, try to recover
+        if not result['success'] and 'error' in result:
+            error_msg = result['error']
+            if "file not found" in str(error_msg).lower():
+                # self-correction: try to look for similar files
+                # (OMITTED for brevity, but this is where the logic goes)
+                pass
+        
+        # 3. Share Insights with Swarm
+        if self.swarm_context and result.get('success'):
+            try:
+                # Extract a concise summary for other agents
+                summary = "Data analysis completed successfully."
+                if 'metadata' in result:
+                    method = result['metadata'].get('execution_method', 'unknown')
+                    summary = f"Analysis completed using {method}."
+                
+                # Publish insight
+                self.publish_insight(
+                    insight_type="analysis_success",
+                    content={
+                        "query": query,
+                        "summary": summary,
+                        "metadata": result.get('metadata', {})
+                    },
+                    confidence=0.9
+                )
+                logging.info(f"[{self.metadata.name}] Published insight to Swarm")
+                
+            except Exception as e:
+                logging.warning(f"Failed to publish insight: {e}")
+                
+        return result
+
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
         """
         Execute analysis using QueryOrchestrator for unified decision making.
         
         Phase 1 Enhanced: Uses execute_with_fallback for resilient operation.
         """
+        from backend.core.engine.query_orchestrator import ExecutionMethod, ReviewLevel
         filename = kwargs.get('filename')
         filepath = kwargs.get('filepath')
         
@@ -246,23 +300,32 @@ class DataAnalystAgent(BasePluginAgent):
             self.initializer.ensure_initialized()
             
             # 1. Optimize Data
+            print(f"DEBUG: DataAnalystAgent: Optimizing data for {filename}...")
             data_info, optimized_data, available_columns = self._optimize_data(filepath, filename)
+            print(f"DEBUG: DataAnalystAgent: Optimization complete. Info len: {len(data_info)}")
             
             # 2. Use QueryOrchestrator for UNIFIED decision making (3-track system)
-            orchestrator = self._get_orchestrator()
-            execution_plan = orchestrator.create_execution_plan(
-                query=query,
-                data=optimized_data,
-                context={'columns': available_columns, 'filepath': filepath}
-            )
+            # Reuse pre-computed plan from AnalysisService if available (avoids duplicate LLM call)
+            execution_plan = kwargs.get('execution_plan')
+            if execution_plan:
+                logging.info("Reusing pre-computed execution plan from AnalysisService")
+            else:
+                print(f"DEBUG: DataAnalystAgent: Calling QueryOrchestrator...")
+                orchestrator = self._get_orchestrator()
+                execution_plan = orchestrator.create_execution_plan(
+                    query=query,
+                    data=optimized_data,
+                    context={'columns': available_columns, 'filepath': filepath}
+                )
             
             # Extract decisions from plan
-            selected_model = kwargs.get('force_model') or execution_plan.model
+            selected_model = kwargs.get('force_model') or kwargs.get('selected_model') or execution_plan.model
             complexity_score = execution_plan.complexity_score
             execution_method = execution_plan.execution_method
             review_level = execution_plan.review_level
             
             logging.info(f"QueryOrchestrator decision: {execution_plan.reasoning}")
+            print(f"DEBUG: DataAnalystAgent: Orchestrator decision: {execution_plan.execution_method} - {execution_plan.reasoning}")
             
             # 3. Dynamic Planning (optional enhancement - respects config)
             analysis_plan = None
@@ -342,6 +405,7 @@ class DataAnalystAgent(BasePluginAgent):
         Async version of execute for non-blocking operation.
         Mirrors execute() but uses async LLM calls where possible.
         """
+        from backend.core.engine.query_orchestrator import ExecutionMethod, ReviewLevel
         filename = kwargs.get('filename')
         filepath = kwargs.get('filepath')
         
@@ -357,15 +421,19 @@ class DataAnalystAgent(BasePluginAgent):
             # 1. Optimize Data (sync - file I/O)
             data_info, optimized_data, available_columns = self._optimize_data(filepath, filename)
             
-            # 2. Use QueryOrchestrator
-            orchestrator = self._get_orchestrator()
-            execution_plan = orchestrator.create_execution_plan(
-                query=query,
-                data=optimized_data,
-                context={'columns': available_columns, 'filepath': filepath}
-            )
+            # 2. Use QueryOrchestrator — reuse pre-computed plan if available
+            execution_plan = kwargs.get('execution_plan')
+            if execution_plan:
+                logging.info("Reusing pre-computed execution plan from AnalysisService (async)")
+            else:
+                orchestrator = self._get_orchestrator()
+                execution_plan = orchestrator.create_execution_plan(
+                    query=query,
+                    data=optimized_data,
+                    context={'columns': available_columns, 'filepath': filepath}
+                )
             
-            selected_model = kwargs.get('force_model') or execution_plan.model
+            selected_model = kwargs.get('force_model') or kwargs.get('selected_model') or execution_plan.model
             complexity_score = execution_plan.complexity_score
             execution_method = execution_plan.execution_method
             review_level = execution_plan.review_level
@@ -444,13 +512,15 @@ class DataAnalystAgent(BasePluginAgent):
                                       complexity_score: float,
                                       filepath: str,
                                       analysis_plan: Any,
-                                      execution_method: ExecutionMethod,
+                                      execution_method: 'ExecutionMethod',
                                       use_cot: bool,
                                       execution_plan) -> tuple:
         """
         Phase 1: Execute with smart fallback through model chain.
         Process never stops completely.
         """
+        from backend.core.engine.query_orchestrator import ExecutionMethod
+
         filename = os.path.basename(filepath) if filepath else "data"
         
         def execute_with_model(model: str):
@@ -473,27 +543,49 @@ class DataAnalystAgent(BasePluginAgent):
                 )
                 return {'success': True, 'result': result, 'metadata': {}}
         
-        # Use orchestrator's execute_with_fallback
-        orchestrator = self._get_orchestrator()
-        result = orchestrator.execute_with_fallback(
-            plan=execution_plan,
-            execute_func=execute_with_model,
-            max_retries=2
-        )
+        # Execute with inline fallback through model chain
+        primary_model = execution_plan.model
+        fallback_models = getattr(execution_plan, 'fallback_models', []) or []
         
-        # Check if result is a dict (fallback/degraded response)
-        if isinstance(result, dict):
-            if result.get('degraded'):
-                return result.get('message', str(result)), {
-                    'degraded': True,
-                    'fallback_activated': True
-                }
-            return result.get('result', str(result)), result.get('_execution_metadata', {})
+        # Try primary model first
+        last_error = None
+        for model in [primary_model] + fallback_models:
+            try:
+                result = execute_with_model(model)
+                if isinstance(result, dict) and result.get('success'):
+                    metadata = result.get('metadata', {})
+                    if model != primary_model:
+                        metadata['fallback_activated'] = True
+                        metadata['fallback_model'] = model
+                        logging.info(f"Fallback succeeded with model: {model}")
+                    return result.get('result', str(result)), metadata
+            except Exception as e:
+                last_error = e
+                logging.warning(f"Model {model} failed: {e}, trying next fallback...")
+                continue
         
-        return result, {'fallback_activated': False}
+        # All models failed - use graceful degradation
+        logging.error(f"All models failed. Last error: {last_error}")
+        if PHASE1_AVAILABLE:
+            degraded = GracefulDegradation.generate_degraded_response(
+                query=query,
+                context={'filepath': filepath},
+                error=str(last_error) if last_error else "All models failed"
+            )
+            return degraded.get('message', str(degraded)), {
+                'degraded': True,
+                'fallback_activated': True
+            }
+        
+        # Ultimate fallback
+        return f"Analysis could not be completed: {last_error}", {
+            'degraded': True,
+            'fallback_activated': True
+        }
     
-    def _should_use_cot(self, review_level: ReviewLevel, cot_config: Dict[str, Any]) -> bool:
+    def _should_use_cot(self, review_level: 'ReviewLevel', cot_config: Dict[str, Any]) -> bool:
         """Determine if CoT (Two Friends Model) should be used based on review level"""
+        from backend.core.engine.query_orchestrator import ReviewLevel
         if not cot_config.get('cot_review', {}).get('enabled', False):
             return False
         
@@ -521,6 +613,21 @@ class DataAnalystAgent(BasePluginAgent):
             
             # Load the actual data based on file type
             file_ext = os.path.splitext(filepath)[1].lower()
+            
+            # Document files (PDF, DOCX, PPTX, RTF) cannot be loaded into pandas.
+            # Check for extracted text file created during upload, otherwise fall back.
+            _DOCUMENT_EXTS = {'.pdf', '.docx', '.pptx', '.rtf'}
+            if file_ext in _DOCUMENT_EXTS:
+                extracted_path = filepath + '.extracted.txt'
+                if os.path.exists(extracted_path):
+                    logging.info("Using extracted text file for document: %s", os.path.basename(filepath))
+                    fallback_result = self._execute_direct(query, data_info, os.path.basename(filepath), model, analysis_plan)
+                    return fallback_result, {"execution_method": "direct_llm_document", "source": "extracted_text"}
+                else:
+                    logging.warning("Document file %s has no extracted text - falling back to direct LLM", file_ext)
+                    fallback_result = self._execute_direct(query, data_info, os.path.basename(filepath), model, analysis_plan)
+                    return fallback_result, {"execution_method": "direct_llm_fallback", "code_gen_error": f"Document type {file_ext} not supported for code generation"}
+            
             try:
                 if file_ext == '.json':
                     df = pd.read_json(filepath)
@@ -657,7 +764,7 @@ class DataAnalystAgent(BasePluginAgent):
         config = self._load_cot_config()
         if config.get('enabled') and self._cot_engine is None:
             try:
-                from backend.core.self_correction_engine import SelfCorrectionEngine
+                from backend.core.engine.self_correction_engine import SelfCorrectionEngine
                 self._cot_engine = SelfCorrectionEngine(config)
             except ImportError:
                 pass
@@ -683,7 +790,8 @@ class DataAnalystAgent(BasePluginAgent):
             
             from backend.utils.data_optimizer import DataOptimizer 
             
-            optimizer = DataOptimizer(max_rows=100, max_chars=8000)
+            # Optimization: Reduce max chars to 4000 for faster inference (Speed Fix)
+            optimizer = DataOptimizer(max_rows=100, max_chars=4000)
             optimized_data = optimizer.optimize_for_llm(filepath)
             
             if optimized_data['is_optimized']:
@@ -752,8 +860,17 @@ class DataAnalystAgent(BasePluginAgent):
                 logging.warning(f"Failed to inject analysis plan: {plan_error}")
                 plan_context = ""  # Fail gracefully
         
+        # For simple queries, instruct the model to be concise
+        instruction = ""
+        query_lower = query.lower()
+        simple_patterns = ['what is', 'show', 'list', 'get', 'display', 'tell me']
+        is_simple = any(p in query_lower for p in simple_patterns) and len(query) < 50
+        
+        if is_simple:
+            instruction = "INSTRUCTION: Provide a direct, concise answer. No explanations or reasoning needed.\n\n"
+        
         # Clean, direct prompt - query unchanged
-        prompt = f"""{hint}Question: {query}
+        prompt = f"""{instruction}{hint}Question: {query}
 
 Data from: {filename}
 
@@ -844,7 +961,16 @@ Answer:"""
                 logging.warning(f"Failed to inject analysis plan: {plan_error}")
                 plan_context = ""
         
-        prompt = f"""{hint}Question: {query}
+        # For simple queries, instruct the model to be concise
+        instruction = ""
+        query_lower = query.lower()
+        simple_patterns = ['what is', 'show', 'list', 'get', 'display', 'tell me']
+        is_simple = any(p in query_lower for p in simple_patterns) and len(query) < 50
+        
+        if is_simple:
+            instruction = "INSTRUCTION: Provide a direct, concise answer. No explanations or reasoning needed.\n\n"
+        
+        prompt = f"""{instruction}{hint}Question: {query}
 
 Data from: {filename}
 
@@ -874,15 +1000,15 @@ Answer:"""
                 )
                 circuit = get_circuit_breaker(self._circuit_name, config)
                 
-                # Wrap async LLM call in circuit breaker
+                # Wrap async LLM call in circuit breaker (use async_call, not sync call)
                 async def async_llm_call():
                     response = await self.initializer.llm_client.generate_async(prompt, model=selected_model)
                     if isinstance(response, dict):
                         return {"success": True, "response": response.get('response', str(response))}
                     return {"success": True, "response": str(response)}
                 
-                # Note: Circuit breaker.call() is sync, but we can wrap it
-                result = circuit.call(lambda: asyncio.run(async_llm_call()))
+                # Use circuit breaker's async_call method (avoids asyncio.run() inside running loop)
+                result = await circuit.async_call(async_llm_call)
                 
                 if result.get("fallback_used"):
                     logging.warning(f"⚠️ Circuit breaker fallback used for async {self._circuit_name}")

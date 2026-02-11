@@ -1,17 +1,38 @@
 """
-Code Execution History Storage
+Code Execution History — Nexus LLM Analytics v2.0
+=================================================
 
-Stores and retrieves code generation/execution history for user review and replay.
-Enables users to see generated code, outputs, and recreate past analyses.
+Persistent storage for code generation / execution history, enabling
+users to review generated code, inspect outputs, and replay past
+analyses.
 
-Author: Research Team
-Date: December 27, 2025
+Enterprise v2.0 Additions
+-------------------------
+* **ExecutionAnalytics** — Aggregated metrics (success rate by model,
+  average execution time, error frequency breakdown).
+* **HistoryRetentionPolicy** — Configurable TTL-based and count-based
+  retention with automatic pruning.
+* Thread-safe singleton accessor ``get_execution_history()`` now
+  uses double-checked locking.
+
+Backward Compatibility
+----------------------
+All v1.x classes (``CodeExecutionRecord``, ``CodeExecutionHistory``)
+and the ``get_execution_history()`` accessor retain their original
+signatures.
+
+.. versionchanged:: 2.0
+   Added analytics, retention policies, and thread-safe singleton.
+
+Author: Nexus Analytics Research Team
+Date: February 2026
 """
 
 import json
 import logging
+import threading
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict, field
 import hashlib
@@ -97,7 +118,9 @@ class CodeExecutionHistory:
             self.history_dir = Path(history_dir)
         
         self.history_dir.mkdir(parents=True, exist_ok=True)
-        self.history_file = self.history_dir / 'code_execution_history.json'
+        # Use .jsonl for append-only storage
+        self.history_file = self.history_dir / 'code_execution_history.jsonl'
+        self.legacy_history_file = self.history_dir / 'code_execution_history.json'
         
         # Load existing history
         self._history: List[CodeExecutionRecord] = []
@@ -106,30 +129,52 @@ class CodeExecutionHistory:
         logger.info(f"CodeExecutionHistory initialized with {len(self._history)} records")
     
     def _load_history(self) -> None:
-        """Load history from disk"""
+        """Load history from JSONL (preferred) or JSON (legacy migration)"""
+        # 1. Try JSONL first
         if self.history_file.exists():
             try:
                 with open(self.history_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        if line.strip():
+                            record_dict = json.loads(line)
+                            self._history.append(CodeExecutionRecord.from_dict(record_dict))
+                return
+            except Exception as e:
+                logger.warning(f"Failed to load JSONL history: {e}")
+        
+        # 2. Fallback to Legacy JSON (Migration)
+        if self.legacy_history_file.exists():
+            try:
+                logger.info("Migrating legacy JSON history to JSONL...")
+                with open(self.legacy_history_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     self._history = [
                         CodeExecutionRecord.from_dict(record) 
                         for record in data.get('executions', [])
                     ]
-            except (json.JSONDecodeError, Exception) as e:
-                logger.warning(f"Failed to load history: {e}")
-                self._history = []
-    
-    def _save_history(self) -> None:
-        """Save history to disk"""
+                # Trigger save to create JSONL
+                self._save_history(append_new_only=False)
+                # Rename legacy to backup
+                self.legacy_history_file.rename(self.legacy_history_file.with_suffix('.json.bak'))
+            except Exception as e:
+                logger.error(f"Failed to migrate legacy history: {e}")
+
+    def _save_history(self, append_new_only: bool = False) -> None:
+        """
+        Save history to disk.
+        Args:
+           append_new_only: If True, only append the last record to the file.
+        """
         try:
-            data = {
-                'version': '1.0',
-                'last_updated': datetime.now(timezone.utc).isoformat(),
-                'total_executions': len(self._history),
-                'executions': [record.to_dict() for record in self._history]
-            }
-            with open(self.history_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, default=str)
+            if append_new_only and self._history:
+                # Optimized append
+                with open(self.history_file, 'a', encoding='utf-8') as f:
+                    f.write(json.dumps(self._history[-1].to_dict(), default=str) + '\n')
+            else:
+                # Full rewrite (e.g. after pruning)
+                with open(self.history_file, 'w', encoding='utf-8') as f:
+                    for record in self._history:
+                        f.write(json.dumps(record.to_dict(), default=str) + '\n')
         except Exception as e:
             logger.error(f"Failed to save history: {e}")
     
@@ -220,7 +265,17 @@ class CodeExecutionHistory:
         )
         
         self._history.append(record)
-        self._save_history()
+        self._save_history(append_new_only=True)
+        
+        # Enforce retention policy every 50 saves to prevent unbounded growth
+        if len(self._history) % 50 == 0:
+            try:
+                policy = HistoryRetentionPolicy(max_age_days=90, max_records=5000)
+                removed = policy.enforce(self)
+                if removed:
+                    logger.info("Auto-pruned %d old history records", removed)
+            except Exception as e:
+                logger.debug("Retention policy enforcement skipped: %s", e)
         
         logger.info(f"Saved execution {execution_id}: {query[:50]}...")
         return execution_id
@@ -338,10 +393,134 @@ class CodeExecutionHistory:
 
 # Singleton instance
 _execution_history: Optional[CodeExecutionHistory] = None
+_execution_history_lock = threading.Lock()
 
 def get_execution_history() -> CodeExecutionHistory:
-    """Get singleton CodeExecutionHistory instance"""
+    """Return the singleton :class:`CodeExecutionHistory` instance.
+
+    Thread-safe with double-checked locking.
+
+    Returns:
+        The shared ``CodeExecutionHistory`` instance.
+    """
     global _execution_history
     if _execution_history is None:
-        _execution_history = CodeExecutionHistory()
+        with _execution_history_lock:
+            if _execution_history is None:
+                _execution_history = CodeExecutionHistory()
     return _execution_history
+
+
+# ============================================================================
+# Enterprise v2.0 — Analytics & Retention
+# ============================================================================
+
+
+class ExecutionAnalytics:
+    """Aggregated analytics over execution history.
+
+    Provides derived metrics useful for dashboards and observability:
+    per-model success rates, average execution times, and error
+    frequency breakdowns.
+
+    Args:
+        history: The :class:`CodeExecutionHistory` instance to analyse.
+
+    Example::
+
+        analytics = ExecutionAnalytics(get_execution_history())
+        print(analytics.success_rate_by_model())
+
+    .. versionadded:: 2.0
+    """
+
+    def __init__(self, history: CodeExecutionHistory) -> None:
+        self._history = history
+
+    def success_rate_by_model(self) -> Dict[str, float]:
+        """Return success rate (0–100) keyed by model name."""
+        model_stats: Dict[str, Dict[str, int]] = {}
+        for r in self._history._history:
+            m = r.model_used
+            if m not in model_stats:
+                model_stats[m] = {"ok": 0, "total": 0}
+            model_stats[m]["total"] += 1
+            if r.success:
+                model_stats[m]["ok"] += 1
+        return {
+            m: (s["ok"] / s["total"] * 100) if s["total"] else 0.0
+            for m, s in model_stats.items()
+        }
+
+    def avg_execution_time_by_model(self) -> Dict[str, float]:
+        """Return average execution time (ms) keyed by model name."""
+        model_times: Dict[str, List[float]] = {}
+        for r in self._history._history:
+            model_times.setdefault(r.model_used, []).append(r.execution_time_ms)
+        return {
+            m: sum(ts) / len(ts) if ts else 0.0
+            for m, ts in model_times.items()
+        }
+
+    def error_frequency(self) -> Dict[str, int]:
+        """Return error string frequency from failed executions."""
+        freq: Dict[str, int] = {}
+        for r in self._history._history:
+            if not r.success and r.error:
+                # Normalise error to first 80 chars for grouping
+                key = r.error[:80]
+                freq[key] = freq.get(key, 0) + 1
+        return dict(sorted(freq.items(), key=lambda kv: kv[1], reverse=True))
+
+
+class HistoryRetentionPolicy:
+    """Configurable retention policy for execution history.
+
+    Supports both age-based (TTL) and count-based limits.  Call
+    :meth:`enforce` periodically (e.g. via a background task) to prune
+    stale records.
+
+    Args:
+        max_age_days: Records older than this are pruned.
+        max_records: Hard cap on total record count.
+
+    Example::
+
+        policy = HistoryRetentionPolicy(max_age_days=30, max_records=5000)
+        removed = policy.enforce(get_execution_history())
+
+    .. versionadded:: 2.0
+    """
+
+    def __init__(self, max_age_days: int = 90, max_records: int = 10000) -> None:
+        self.max_age_days = max_age_days
+        self.max_records = max_records
+
+    def enforce(self, history: CodeExecutionHistory) -> int:
+        """Prune records exceeding the retention limits.
+
+        Args:
+            history: The history instance to prune.
+
+        Returns:
+            Number of records removed.
+        """
+        before = len(history._history)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=self.max_age_days)
+        cutoff_iso = cutoff.isoformat()
+
+        # Age-based pruning
+        history._history = [
+            r for r in history._history
+            if r.timestamp >= cutoff_iso
+        ]
+
+        # Count-based pruning (keep most recent)
+        if len(history._history) > self.max_records:
+            history._history = history._history[-self.max_records:]
+
+        removed = before - len(history._history)
+        if removed:
+            history._save_history()
+            logger.info("HistoryRetentionPolicy: pruned %d records", removed)
+        return removed

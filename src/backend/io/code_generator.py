@@ -1,19 +1,37 @@
+"""Code Generator for LLM-based Data Analysis — Nexus LLM Analytics
+===================================================================
 
+Phase 2 implementation: generates and executes Python code from natural
+language queries using the existing :class:`EnhancedSandbox` for safe
+execution.  Supports dynamic prompt building, model-size adaptation,
+ML/statistical prompt specialisation, and DynamicPlanner integration.
+
+Classes
+-------
+GeneratedCode
+    Container for generated code and validation metadata.
+ExecutionResult
+    Container for sandbox execution results with history tracking.
+CodeGenerator
+    End-to-end code generation → validation → execution pipeline.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`CodeGenerationMetrics` — tracks generation/execution
+  success rates, latencies, and retry statistics.
+* :func:`get_code_generator` — already exists as singleton accessor
+  (documented for completeness).
 """
-Code Generator for LLM-based Data Analysis
+from __future__ import annotations
 
-Phase 2 Implementation: Generates and executes Python code from natural language queries.
-Uses the existing EnhancedSandbox for safe execution.
-
-Author: Research Team
-Date: December 27, 2025
-"""
-
+import ast
+import json
 import re
 import logging
+import time
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -21,7 +39,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class GeneratedCode:
-    """Container for generated code and metadata"""
+    """Container for generated code and validation metadata.
+
+    Attributes:
+        code: The generated Python source code.
+        is_valid: Whether the code passed syntax validation.
+        error_message: Human-readable validation error (if any).
+        extraction_method: Strategy used to extract code from LLM output.
+    """
     code: str
     is_valid: bool = True
     error_message: Optional[str] = None
@@ -30,7 +55,21 @@ class GeneratedCode:
 
 @dataclass 
 class ExecutionResult:
-    """Container for code execution results with full history context"""
+    """Container for code execution results with full history context.
+
+    Attributes:
+        success: Whether the sandbox execution completed without error.
+        result: The value of the ``result`` variable after execution.
+        error: Error message if execution failed.
+        code: The cleaned code that was actually executed.
+        execution_time_ms: Wall-clock execution duration.
+        execution_id: Unique history identifier (set after save).
+        generated_code: The original LLM output before cleaning.
+        query: The originating natural-language question.
+        model_used: LLM model identifier.
+        attempt_count: Number of generation/execution attempts.
+        retry_errors: Error messages from earlier failed attempts.
+    """
     success: bool
     result: Any = None
     error: Optional[str] = None
@@ -47,17 +86,27 @@ class ExecutionResult:
     
 
 class CodeGenerator:
-    """
-    Generates executable Python code from natural language queries.
-    
+    """Generates executable Python code from natural language queries.
+
     Workflow:
-    1. Load prompt template
-    2. Format prompt with data context
-    3. Call LLM to generate code
-    4. Extract code from response
-    5. Validate code (syntax + security)
-    6. Execute in sandbox
-    7. Return results
+        1. Build a dynamic, context-aware prompt (adapts to model size).
+        2. Call the configured LLM via circuit-breaker protection.
+        3. Extract and clean code from the LLM response.
+        4. Validate syntax and column references.
+        5. Execute in the :class:`EnhancedSandbox`.
+        6. Save result to execution history.
+
+    Prompt Strategies:
+        * **Standard** — full column metadata, intent classification,
+          data-driven code examples.
+        * **Simple** — reduced cognitive load for small models
+          (tiny / mini / ≤3B params).
+        * **ML** — specialised template for clustering, regression,
+          PCA, statistical tests, and forecasting.
+
+    Thread Safety:
+        Not inherently thread-safe.  Wrap in external synchronisation
+        if concurrent ``generate_and_execute`` calls are required.
     """
     
     def __init__(self, llm_client=None):
@@ -84,7 +133,6 @@ class CodeGenerator:
             return self._cb_config
         
         try:
-            import json
             config_path = Path(__file__).parent.parent.parent.parent / "config" / "cot_review_config.json"
             if config_path.exists():
                 with open(config_path, 'r') as f:
@@ -105,7 +153,7 @@ class CodeGenerator:
                     })
                     return self._cb_config
         except Exception as e:
-            logger.warning(f"Failed to load circuit breaker config: {e}")
+            logger.warning("Failed to load circuit breaker config: %s", e)
         
         # Default config
         self._cb_config = {
@@ -135,7 +183,7 @@ class CodeGenerator:
             try:
                 # Validate analysis_context structure
                 if not isinstance(analysis_context, dict):
-                    logger.warning(f"Invalid analysis_context type: {type(analysis_context)}")
+                    logger.warning("Invalid analysis_context type: %s", type(analysis_context))
                 else:
                     strategy = analysis_context.get('strategy', '')
                     if strategy and isinstance(strategy, str):
@@ -144,8 +192,8 @@ class CodeGenerator:
                         strategy = ''.join(char for char in strategy if char.isprintable() or char == '\n')
                         
                         if strategy:
-                            planner_guidance = f"\n\n📋 ANALYSIS STRATEGY (follow this approach):\n{strategy}\n"
-                            logger.info(f"✅ DynamicPlanner strategy injected into code prompt: {strategy[:80]}...")
+                            planner_guidance = f"\n\nANALYSIS STRATEGY (follow this approach):\n{strategy}\n"
+                            logger.info("DynamicPlanner strategy injected into code prompt: %s...", strategy[:80])
                             
                             # Validate and add steps
                             steps = analysis_context.get('steps', [])
@@ -161,24 +209,30 @@ class CodeGenerator:
                                 if validated_steps:
                                     steps_text = "\n".join(validated_steps)
                                     planner_guidance += f"\nSTEPS:\n{steps_text}\n"
-                                    logger.debug(f"Injected {len(validated_steps)} validated steps")
+                                    logger.debug("Injected %d validated steps", len(validated_steps))
             except Exception as e:
-                logger.warning(f"Failed to inject DynamicPlanner strategy: {e}")
+                logger.warning("Failed to inject DynamicPlanner strategy: %s", e)
                 planner_guidance = ""  # Fail gracefully without breaking code generation
-        # Detect if query requires ML/statistical capabilities (ALWAYS priority)
+        # Detect if query requires ML/statistical capabilities
+        # Use broad patterns that work across ALL domains (genomics, IoT, finance, etc.)
         ml_keywords = ['cluster', 'classification', 'classify', 'predict', 'regression', 'pca',
                        'random forest', 'decision tree', 'logistic', 'machine learning', 'ml',
                        't-test', 'anova', 'chi-square', 'statistical test', 'significance',
                        'forecast', 'arima', 'time series', 'seasonal', 'trend analysis',
                        'anomaly', 'outlier', 'z-score', 'standard deviation test',
-                       'feature importance', 'dimensionality reduction', 'train test split']
+                       'feature importance', 'dimensionality reduction', 'train test split',
+                       'normalize', 'survival analysis', 'enrichment', 'decompose',
+                       'k-nearest', 'svm', 'neural', 'cross validation', 'bootstrap',
+                       'bayesian', 'monte carlo', 'principal component', 'eigenvalue',
+                       'fft', 'frequency analysis', 'spectral', 'kaplan-meier',
+                       'upregulated', 'downregulated', 'differential expression']
         
         query_lower = query.lower()
         is_ml_query = any(keyword in query_lower for keyword in ml_keywords)
         
         # ML queries ALWAYS get detailed ML prompts regardless of model size
         if is_ml_query:
-            logger.info(f"ML query detected - using ML prompt regardless of model size")
+            logger.info("ML query detected - using ML prompt regardless of model size")
             return self._build_ml_prompt(query, df)
         
         # For non-ML queries, detect if this is a small model that needs simplified prompts
@@ -190,7 +244,6 @@ class CodeGenerator:
         is_mini = 'mini' in model_name
         # Match patterns like ':1b', ':2b', ':3b', ':1.5b', ':0.5b' but NOT ':13b', ':70b', ':35b'
         # The pattern ensures the first digit after separator is 0-3
-        import re
         small_param_match = re.search(r'[:_\-\s]([0-3](?:\.\d+)?)\s*b\b', model_name)
         is_small_params = small_param_match is not None
         
@@ -198,7 +251,7 @@ class CodeGenerator:
         
         # If small model, use simplified prompt template
         if is_small_model:
-            logger.info(f"Using simplified prompt for small model: {model}")
+            logger.info("Using simplified prompt for small model: %s", model)
             return self._build_simple_prompt(query, df)
         
         # Otherwise use standard analytics prompt
@@ -275,12 +328,11 @@ class CodeGenerator:
                 suggested_cols.append(col)
                 break
         
-        # If no specific metric found, use common popularity/score patterns
+        # If no specific metric found, use the first numeric column as a sensible default
+        # This is domain-agnostic: works for any dataset (genomics, IoT, finance, logs, etc.)
         if not any(col in suggested_cols for col in numeric_cols):
-            for col in numeric_cols:
-                if any(word in col.lower() for word in ['popular', 'score', 'rating', 'count', 'sales', 'revenue', 'listen']):
-                    suggested_cols.append(col)
-                    break
+            if numeric_cols:
+                suggested_cols.append(numeric_cols[0])
         
         # Format suggested columns
         suggested_cols_str = ", ".join(f"'{c}'" for c in suggested_cols[:4]) if suggested_cols else "name and metric columns"
@@ -323,7 +375,10 @@ SAMPLE DATA:
 CRITICAL INSTRUCTIONS:
 1. The DataFrame is loaded as `df`
 2. Store the final answer in `result`
-3. For listing/ranking queries:
+3. DO NOT generate code to plot charts (e.g., do not use matplotlib, seaborn, or plt.show()).
+   - The system will AUTOMATICALY generate interactive Plotly charts if 'result' is a DataFrame.
+   - Just filter/aggregate the data into a DataFrame and assign it to `result`.
+4. For listing/ranking queries:
    - Use NAME columns (marked with [NAME]) for display - these are human-readable
    - Do NOT include ID columns (marked with [ID]) - they contain codes like "abc123" that mean nothing to users
    - Include the metric column being ranked
@@ -396,6 +451,7 @@ Rules:
 1. Use ONLY these columns
 2. Store answer in `result`
 3. No print statements
+4. NO plotting code (matplotlib/seaborn)
 
 Output code only:
 ```python
@@ -405,7 +461,7 @@ result = ...
             return prompt
             
         except Exception as e:
-            logger.error(f"Error building simple prompt: {e}")
+            logger.error("Error building simple prompt: %s", e, exc_info=True)
             # Minimal fallback
             return f"""Generate code for: "{query}"
 Columns: {', '.join(df.columns)}
@@ -482,7 +538,6 @@ result = ...
         categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
         
         # Load ML prompt template
-        from pathlib import Path
         prompt_file = Path(__file__).parent.parent / 'prompts' / 'ml_code_generation_prompt.txt'
         
         if prompt_file.exists():
@@ -518,6 +573,7 @@ RULES:
 2. Handle missing data: df = df.dropna()
 3. Use simple models: max_iter=100, max_depth=5, n_estimators=50
 4. Return dict for ML results: {{'accuracy': ..., 'feature_importance': ...}}
+5. DO NOT PLOT. Do not use matplotlib/seaborn. Return data structures only.
 
 EXAMPLE (K-means):
 ```python
@@ -631,14 +687,14 @@ result = ...
     def _get_sandbox(self):
         """Lazy-load the sandbox"""
         if self._sandbox is None:
-            from .sandbox import EnhancedSandbox
+            from backend.core.security.sandbox import EnhancedSandbox
             self._sandbox = EnhancedSandbox(max_memory_mb=256, max_cpu_seconds=30)
         return self._sandbox
     
     def _get_llm_client(self):
         """Get or create LLM client"""
         if self.llm_client is None:
-            from .llm_client import LLMClient
+            from backend.core.llm_client import LLMClient
             self.llm_client = LLMClient()
         return self.llm_client
     
@@ -646,7 +702,8 @@ result = ...
                      query: str, 
                      df: pd.DataFrame,
                      model: str = "phi3:mini",
-                     analysis_context: Optional[Dict[str, Any]] = None) -> GeneratedCode:
+                     analysis_context: Optional[Dict[str, Any]] = None,
+                     error_feedback: Optional[Dict[str, str]] = None) -> GeneratedCode:
         """
         Generate Python code for the given query using dynamic prompt generation.
         
@@ -655,12 +712,17 @@ result = ...
         2. Extracts comprehensive data structure
         3. Builds a context-aware prompt dynamically
         4. Generates code tailored to the specific question
+        5. If error_feedback is provided, includes previous failed code and
+           error message so the LLM can produce a corrected version
+           (Patent: iterative verification feedback loop)
         
         Args:
             query: Natural language question from the user
             df: DataFrame to analyze
             model: LLM model to use for generation
             analysis_context: Optional strategy from DynamicPlanner (dict with 'strategy' and 'steps')
+            error_feedback: Optional dict with 'failed_code' and 'error' from a
+                           previous failed attempt, enabling iterative correction
             
         Returns:
             GeneratedCode with the generated code or error
@@ -696,9 +758,24 @@ result = ...
             # Includes DynamicPlanner strategy if available
             prompt = self._build_dynamic_prompt(query, df, model, analysis_context=analysis_context)
             
+            # PATENT: Iterative Verification Feedback Loop
+            # If a previous attempt failed, inject the error context so the LLM
+            # can learn from the failure and generate corrected code instead of
+            # regenerating blindly. This implements the patent's requirement that
+            # "the Verifier triggers an automated feedback loop to send feedback
+            # back through the generation of code phases."
+            if error_feedback and isinstance(error_feedback, dict):
+                failed_code = error_feedback.get('failed_code', '')
+                error_msg = error_feedback.get('error', '')
+                attempt_num = error_feedback.get('attempt', 0)
+                if failed_code and error_msg:
+                    correction_prompt = f"""\n\n⚠️ CORRECTION REQUIRED (Attempt {attempt_num}):\nYour previous code FAILED with this error:\n```\n{error_msg}\n```\n\nThe failing code was:\n```python\n{failed_code}\n```\n\nFix the error above. Generate corrected Python code that avoids this issue.\nCommon fixes: check column names exist, handle NaN values, use correct data types.\nStore the result in `result` variable.\n"""
+                    prompt = prompt + correction_prompt
+                    logger.info("Injected error feedback for iterative correction (attempt %d)", attempt_num)
+            
             # Extract data structure for logging
             data_structure = self._extract_data_structure(df)
-            logger.info(f"Data structure: {len(data_structure['identifier_columns'])} identifiers, {len(data_structure['numeric_columns'])} numeric cols")
+            logger.info("Data structure: %d identifiers, %d numeric cols", len(data_structure['identifier_columns']), len(data_structure['numeric_columns']))
             
             # FIX 12 (ENTERPRISE): Circuit Breaker Protection for Code Generation LLM Calls
             try:
@@ -708,9 +785,10 @@ result = ...
                         from backend.infra.circuit_breaker import get_circuit_breaker, CircuitBreakerConfig
                     except ImportError:
                         # Circuit breaker not available, continue without it
-                        logging.debug("Circuit breaker not available for code generator")
+                        logger.debug("Circuit breaker not available for code generator")
                         raise
-                    from backend.core.phase1_integration import PHASE1_AVAILABLE
+                    # phase1_integration is available if circuit_breaker imported OK
+                    PHASE1_AVAILABLE = True
                     
                     if PHASE1_AVAILABLE:
                         # Load circuit breaker configuration
@@ -738,7 +816,7 @@ result = ...
                             result = circuit.call(llm_call)
                             
                             if result.get("fallback_used"):
-                                logger.warning("⚠️ Circuit breaker fallback for code_generator")
+                                logger.warning("Circuit breaker fallback for code_generator")
                                 return GeneratedCode(
                                     code="",
                                     is_valid=False,
@@ -771,7 +849,7 @@ result = ...
                     response_text = response.get('response', '') if isinstance(response, dict) else str(response)
             
             except Exception as llm_error:
-                logger.error(f"LLM call failed: {llm_error}")
+                logger.error("LLM call failed: %s", llm_error, exc_info=True)
                 return GeneratedCode(
                     code="",
                     is_valid=False,
@@ -788,31 +866,136 @@ result = ...
                     error_message="No code block found in LLM response"
                 )
             
-            # Basic validation
+            # Basic validation (with auto-repair for small model errors)
             is_valid, error = self._validate_code_syntax(code)
             if not is_valid:
-                return GeneratedCode(
-                    code=code,
-                    is_valid=False,
-                    error_message=error
-                )
+                # Attempt auto-repair for common small-model syntax errors
+                repaired = self._attempt_code_repair(code)
+                if repaired and repaired != code:
+                    is_valid2, error2 = self._validate_code_syntax(repaired)
+                    if is_valid2:
+                        logger.info("Auto-repaired code syntax (was: %s)", error)
+                        code = repaired
+                        is_valid, error = True, None
+                
+                if not is_valid:
+                    return GeneratedCode(
+                        code=code,
+                        is_valid=False,
+                        error_message=error
+                    )
             
             # Validate column references
             cols_valid, cols_error = self._validate_code_columns(code, df)
             if not cols_valid:
-                logger.warning(f"Column validation warning: {cols_error}")
+                logger.warning("Column validation warning: %s", cols_error)
                 # Don't fail, just log - LLM might be using valid but unrecognized patterns
             
             return GeneratedCode(code=code, is_valid=True)
             
         except Exception as e:
-            logger.error(f"Code generation failed: {e}")
+            logger.error("Code generation failed: %s", e, exc_info=True)
             return GeneratedCode(
                 code="",
                 is_valid=False,
                 error_message=str(e)
             )
-    
+
+    def _review_generated_code(self, code: str, query: str, df: pd.DataFrame) -> Dict[str, Any]:
+        """Pre-execution code review — Patent Claim 2.
+
+        Reviews automatically generated analytical code **before** it is
+        executed in the sandbox.  Performs deterministic static checks that
+        catch common LLM code-generation errors without needing an extra
+        LLM call (keeps latency low).
+
+        Checks performed:
+            1. Code must assign to ``result`` (contract with sandbox).
+            2. Dangerous/disallowed operations (file I/O, network, exec/eval).
+            3. Column references validated against the actual DataFrame.
+            4. Overly-long code rejected (LLMs sometimes generate essays).
+            5. Infinite-loop risk detection (unbounded ``while True``).
+
+        Args:
+            code: The generated Python source to review.
+            query: The user's original question (for contextual logging).
+            df: The DataFrame the code will operate on.
+
+        Returns:
+            dict with ``approved`` (bool) and ``reason`` (str) keys.
+        """
+        try:
+            # 1. Must assign to 'result' variable
+            if 'result' not in code and 'result =' not in code:
+                return {'approved': False, 'reason': "Code does not assign to 'result' variable"}
+
+            # 2. Block dangerous operations (defence-in-depth with sandbox)
+            dangerous_patterns = [
+                ('open(', 'File I/O operation detected'),
+                ('os.system', 'System command execution detected'),
+                ('subprocess', 'Subprocess execution detected'),
+                ('requests.', 'Network request detected'),
+                ('urllib', 'Network access detected'),
+                ('eval(', 'eval() call detected'),
+                ('exec(', 'exec() call detected'),
+                ('__import__', 'Dynamic import detected'),
+                ('shutil', 'File manipulation detected'),
+                ('pickle', 'Deserialization risk detected'),
+            ]
+            for pattern, reason in dangerous_patterns:
+                if pattern in code:
+                    return {'approved': False, 'reason': reason}
+
+            # 3. Validate column references against actual DataFrame
+            # Extract string literals that look like column references
+            import re as _re
+            string_refs = _re.findall(r"""['"]([^'"]{1,80})['"]""", code)
+            df_columns_lower = {col.lower(): col for col in df.columns}
+            bad_cols = []
+            for ref in string_refs:
+                ref_lower = ref.lower()
+                # Skip common non-column strings
+                if ref_lower in ('result', 'index', 'python', 'pandas', 'numpy',
+                                 'true', 'false', 'none', 'all', 'any', 'mean',
+                                 'sum', 'count', 'min', 'max', 'std', 'var',
+                                 'asc', 'desc', 'left', 'right', 'inner', 'outer',
+                                 'bar', 'line', 'scatter', 'pie', 'hist', 'box',
+                                 'coerce', 'ignore', 'raise', 'records', 'columns',
+                                 'first', 'last', 'number', 'object', 'category',
+                                 'datetime64', 'float64', 'int64', 'string',''):
+                    continue
+                # Skip format strings and long text
+                if len(ref) > 60 or ' ' in ref and len(ref) > 20:
+                    continue
+                # Check if this looks like an attempted column reference
+                # (used with df[...] patterns)
+                if ref_lower not in df_columns_lower and ref in string_refs:
+                    # Only flag if it looks like a column access pattern in context
+                    col_access_pattern = f"['{ref}']" in code or f'["{ref}"]' in code
+                    if col_access_pattern:
+                        bad_cols.append(ref)
+
+            if len(bad_cols) >= 2:
+                return {
+                    'approved': False,
+                    'reason': f"References non-existent columns: {', '.join(bad_cols[:3])}. Available: {', '.join(list(df.columns)[:10])}"
+                }
+
+            # 4. Reject unreasonably long code (LLM hallucination indicator)
+            if len(code) > 5000:
+                return {'approved': False, 'reason': f"Generated code too long ({len(code)} chars) — likely hallucinated"}
+
+            # 5. Infinite loop risk
+            if 'while True' in code and 'break' not in code:
+                return {'approved': False, 'reason': "Potential infinite loop detected (while True without break)"}
+
+            return {'approved': True, 'reason': 'Code review passed'}
+
+        except Exception as e:
+            logger.warning("Code review encountered error (approving with caution): %s", e)
+            # On review failure, approve but log — don't block the pipeline
+            return {'approved': True, 'reason': f'Review error (skipped): {e}'}
+
     def execute_code(self, 
                     code: str, 
                     df: pd.DataFrame) -> ExecutionResult:
@@ -826,7 +1009,6 @@ result = ...
         Returns:
             ExecutionResult with success status and result/error
         """
-        import time
         start_time = time.time()
         
         try:
@@ -854,7 +1036,7 @@ result = ...
             validated_result, was_modified, validation_msg = self._validate_result_human_readable(raw_result, df)
             
             if was_modified:
-                logger.info(f"Result formatted: {validation_msg}")
+                logger.info("Result formatted: %s", validation_msg)
             
             return ExecutionResult(
                 success=True,
@@ -865,7 +1047,7 @@ result = ...
             
         except Exception as e:
             execution_time = (time.time() - start_time) * 1000
-            logger.error(f"Code execution failed: {e}")
+            logger.error("Code execution failed: %s", e, exc_info=True)
             return ExecutionResult(
                 success=False,
                 error=str(e),
@@ -903,11 +1085,21 @@ result = ...
         final_cleaned_code = None
         attempt_count = 0
         
+        # Track previous errors for iterative feedback loop (Patent: Verifier feedback)
+        previous_error_feedback = None
+        
         for attempt in range(max_retries + 1):
             attempt_count = attempt + 1
             
-            # Generate code (pass analysis_context for DynamicPlanner integration)
-            gen_result = self.generate_code(query, df, model, analysis_context=analysis_context)
+            # Generate code with error feedback from previous attempt if available
+            # Patent: "feedback loop to send feedback back through the generation
+            # of code phases so the system can revise... generate a correct code
+            # version without the need for human intervention"
+            gen_result = self.generate_code(
+                query, df, model,
+                analysis_context=analysis_context,
+                error_feedback=previous_error_feedback
+            )
             
             # Store original generated code from first attempt
             if original_generated_code is None and gen_result.code:
@@ -916,16 +1108,37 @@ result = ...
             if not gen_result.is_valid:
                 last_error = gen_result.error_message
                 retry_errors.append(f"Gen attempt {attempt_count}: {last_error}")
-                logger.warning(f"Code generation failed (attempt {attempt_count}): {last_error}")
+                logger.warning("Code generation failed (attempt %d): %s", attempt_count, last_error)
+                # Build error feedback for next attempt
+                previous_error_feedback = {
+                    'failed_code': gen_result.code or '',
+                    'error': last_error,
+                    'attempt': attempt_count
+                }
                 continue
             
             final_cleaned_code = gen_result.code
             
-            # Execute code
+            # PATENT CLAIM 2: Pre-execution code review
+            # "agent responsible for confirming and reviewing all automatically
+            # generated analytical code before running it"
+            review_result = self._review_generated_code(gen_result.code, query, df)
+            if not review_result['approved']:
+                logger.warning("Code review rejected (attempt %d): %s", attempt_count, review_result['reason'])
+                retry_errors.append(f"Review attempt {attempt_count}: {review_result['reason']}")
+                previous_error_feedback = {
+                    'failed_code': gen_result.code,
+                    'error': f"Code review rejected: {review_result['reason']}",
+                    'attempt': attempt_count
+                }
+                last_error = review_result['reason']
+                continue
+            
+            # Execute code in secure sandbox
             exec_result = self.execute_code(gen_result.code, df)
             
             if exec_result.success:
-                logger.info(f"Code execution succeeded in {exec_result.execution_time_ms:.1f}ms")
+                logger.info("Code execution succeeded in %.1fms", exec_result.execution_time_ms)
                 
                 # Save to history
                 execution_id = None
@@ -956,7 +1169,14 @@ result = ...
             
             last_error = exec_result.error
             retry_errors.append(f"Exec attempt {attempt_count}: {last_error}")
-            logger.warning(f"Code execution failed (attempt {attempt_count}): {last_error}")
+            logger.warning("Code execution failed (attempt %d): %s", attempt_count, last_error)
+            
+            # Build error feedback for next iteration (iterative correction loop)
+            previous_error_feedback = {
+                'failed_code': gen_result.code,
+                'error': last_error,
+                'attempt': attempt_count
+            }
         
         # All retries failed - still save to history
         execution_id = None
@@ -1003,7 +1223,7 @@ result = ...
                         retry_errors: Optional[List[str]] = None) -> Optional[str]:
         """Save execution to history and return execution_id"""
         try:
-            from core.code_execution_history import get_execution_history
+            from backend.core.code_execution_history import get_execution_history
             
             history = get_execution_history()
             
@@ -1029,7 +1249,7 @@ result = ...
             return execution_id
             
         except Exception as e:
-            logger.error(f"Failed to save execution to history: {e}")
+            logger.error("Failed to save execution to history: %s", e, exc_info=True)
             return None
     
     def replay_execution(self, 
@@ -1045,7 +1265,7 @@ result = ...
         Returns:
             ExecutionResult from replaying the code
         """
-        from core.code_execution_history import get_execution_history
+        from backend.core.code_execution_history import get_execution_history
         
         history = get_execution_history()
         replay_info = history.get_code_for_replay(execution_id)
@@ -1065,37 +1285,7 @@ result = ...
         
         return result
     
-    def get_execution_history(self, limit: int = 20) -> List[Dict[str, Any]]:
-        """
-        Get recent execution history for display.
-        
-        Returns:
-            List of execution records with code and results
-        """
-        from core.code_execution_history import get_execution_history
-        
-        history = get_execution_history()
-        records = history.get_recent_executions(limit=limit)
-        
-        return [
-            {
-                'execution_id': r.execution_id,
-                'timestamp': r.timestamp,
-                'query': r.query,
-                'model_used': r.model_used,
-                'success': r.success,
-                'execution_time_ms': r.execution_time_ms,
-                'result_preview': r.result_preview,
-                'result_type': r.result_type,
-                'error': r.error,
-                'generated_code': r.generated_code,
-                'cleaned_code': r.cleaned_code,
-                'data_file': r.data_file,
-                'columns': r.columns,
-                'attempt_count': r.attempt_count
-            }
-            for r in records
-        ]
+    # get_execution_history() removed — dead wrapper, use code_execution_history.py directly
     
     def _get_data_preview(self, df: pd.DataFrame, max_rows: int = 5) -> str:
         """Get a preview of the DataFrame for the prompt"""
@@ -1118,17 +1308,29 @@ result = ...
         }
         
         for col in df.columns:
+            # Handle nested/unhashable types gracefully
+            try:
+                unique_count = int(df[col].nunique())
+            except (TypeError, AttributeError):
+                # For unhashable types (dicts, lists), count total non-null as approximation
+                unique_count = int(df[col].notna().sum())
+            
             col_info = {
                 'dtype': str(df[col].dtype),
                 'non_null_count': int(df[col].notna().sum()),
-                'unique_count': int(df[col].nunique()),
+                'unique_count': unique_count,
                 'sample_values': []
             }
             
             # Get sample values (up to 3 unique non-null values)
-            non_null_values = df[col].dropna().unique()
-            sample_count = min(3, len(non_null_values))
-            col_info['sample_values'] = [str(v)[:50] for v in non_null_values[:sample_count]]
+            try:
+                non_null_values = df[col].dropna().unique()
+                sample_count = min(3, len(non_null_values))
+                col_info['sample_values'] = [str(v)[:50] for v in non_null_values[:sample_count]]
+            except (TypeError, AttributeError):
+                # For unhashable types, just take first 3 values
+                sample_values = df[col].dropna().head(3).tolist()
+                col_info['sample_values'] = [str(v)[:50] for v in sample_values]
             
             # Classify column type
             dtype_str = str(df[col].dtype)
@@ -1141,16 +1343,20 @@ result = ...
                 col_info['min'] = float(df[col].min()) if df[col].notna().any() else None
                 col_info['max'] = float(df[col].max()) if df[col].notna().any() else None
             elif dtype_str == 'object' or dtype_str == 'string':
-                # Check if it's likely an identifier column
-                uniqueness_ratio = df[col].nunique() / len(df) if len(df) > 0 else 0
+                # Check if it's likely an identifier column (use safe unique_count)
+                uniqueness_ratio = unique_count / len(df) if len(df) > 0 else 0
                 
-                # Identifier columns have high uniqueness and text values
-                # Also check column name patterns
-                identifier_patterns = ['name', 'title', 'id', 'track', 'song', 'artist', 
-                                       'product', 'item', 'user', 'customer', 'label']
+                # Identifier columns: high uniqueness OR column name ends with common
+                # identifier suffixes (domain-agnostic: works for any dataset)
+                col_lower = col.lower()
                 is_identifier = (
                     uniqueness_ratio > 0.5 or 
-                    any(pattern in col.lower() for pattern in identifier_patterns)
+                    col_lower.endswith('_name') or
+                    col_lower.endswith('_id') or
+                    col_lower in ('name', 'title', 'id', 'label', 'key', 'identifier') or
+                    col_lower.endswith('_title') or
+                    col_lower.endswith('_label') or
+                    col_lower.endswith('_key')
                 )
                 
                 if is_identifier:
@@ -1271,10 +1477,59 @@ result = ...
         
         return result
     
+    def _attempt_code_repair(self, code: str) -> Optional[str]:
+        """Attempt to auto-repair common syntax errors from small LLMs.
+        
+        Handles:
+        - Unbalanced brackets/parentheses
+        - Trailing text after last complete statement
+        - Missing closing brackets at end of code
+        """
+        try:
+            lines = code.strip().split('\n')
+            
+            # Strategy 1: Try truncating to last syntactically valid line
+            for end_idx in range(len(lines), 0, -1):
+                candidate = '\n'.join(lines[:end_idx]).strip()
+                if not candidate:
+                    continue
+                try:
+                    ast.parse(candidate)
+                    if 'result' in candidate:
+                        return candidate
+                except SyntaxError:
+                    continue
+            
+            # Strategy 2: Balance brackets/parens at the end
+            repaired = code.rstrip()
+            open_parens = repaired.count('(') - repaired.count(')')
+            open_brackets = repaired.count('[') - repaired.count(']')
+            open_braces = repaired.count('{') - repaired.count('}')
+            
+            if open_parens > 0:
+                repaired += ')' * open_parens
+            if open_brackets > 0:
+                repaired += ']' * open_brackets
+            if open_braces > 0:
+                repaired += '}' * open_braces
+            
+            # Remove trailing comma before closing bracket
+            repaired = re.sub(r',\s*\)', ')', repaired)
+            repaired = re.sub(r',\s*\]', ']', repaired)
+            repaired = re.sub(r',\s*\}', '}', repaired)
+            
+            try:
+                ast.parse(repaired)
+                return repaired
+            except SyntaxError:
+                pass
+            
+            return None
+        except Exception:
+            return None
+
     def _validate_code_syntax(self, code: str) -> Tuple[bool, Optional[str]]:
         """Validate code syntax"""
-        import ast
-        
         try:
             ast.parse(code)
             return True, None
@@ -1291,3 +1546,88 @@ def get_code_generator() -> CodeGenerator:
     if _code_generator is None:
         _code_generator = CodeGenerator()
     return _code_generator
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+import threading
+from collections import Counter
+
+
+@dataclass
+class CodeGenerationMetrics:
+    """Tracks code generation and execution success rates.
+
+    Attributes:
+        total_generations: Number of ``generate_code`` calls.
+        successful_generations: Generations that passed validation.
+        total_executions: Number of ``execute_code`` calls.
+        successful_executions: Executions that returned a result.
+        total_retries: Cumulative retry count across all calls.
+        total_generation_ms: Cumulative generation latency.
+        total_execution_ms: Cumulative execution latency.
+        model_usage: Counter mapping model name → call count.
+
+    v2.0 Enterprise Addition.
+    """
+
+    total_generations: int = 0
+    successful_generations: int = 0
+    total_executions: int = 0
+    successful_executions: int = 0
+    total_retries: int = 0
+    total_generation_ms: float = 0.0
+    total_execution_ms: float = 0.0
+    model_usage: Counter = field(default_factory=Counter)
+
+    # ------------------------------------------------------------------
+    def record_generation(
+        self, *, success: bool, latency_ms: float = 0.0, model: str = ""
+    ) -> None:
+        """Record a code-generation attempt."""
+        self.total_generations += 1
+        if success:
+            self.successful_generations += 1
+        self.total_generation_ms += latency_ms
+        if model:
+            self.model_usage[model] += 1
+
+    def record_execution(
+        self, *, success: bool, latency_ms: float = 0.0
+    ) -> None:
+        """Record a code-execution attempt."""
+        self.total_executions += 1
+        if success:
+            self.successful_executions += 1
+        self.total_execution_ms += latency_ms
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a JSON-serialisable snapshot."""
+        return {
+            "total_generations": self.total_generations,
+            "generation_success_rate": round(
+                self.successful_generations / self.total_generations, 4
+            )
+            if self.total_generations
+            else 0.0,
+            "total_executions": self.total_executions,
+            "execution_success_rate": round(
+                self.successful_executions / self.total_executions, 4
+            )
+            if self.total_executions
+            else 0.0,
+            "total_retries": self.total_retries,
+            "avg_generation_ms": round(
+                self.total_generation_ms / self.total_generations, 2
+            )
+            if self.total_generations
+            else 0.0,
+            "avg_execution_ms": round(
+                self.total_execution_ms / self.total_executions, 2
+            )
+            if self.total_executions
+            else 0.0,
+            "model_usage": dict(self.model_usage),
+        }

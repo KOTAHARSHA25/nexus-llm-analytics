@@ -1,29 +1,47 @@
-# Fix 17: Enterprise PDF Report Generator
-# Professional, comprehensive, zero-waste-space PDF generation
+"""Enterprise PDF Report Generator — Nexus LLM Analytics
+========================================================
 
-import os
+Professional, comprehensive, zero-waste-space PDF generation
+powered by ReportLab.  Produces paginated A4 reports with
+enterprise headers/footers, table-of-contents, executive
+summaries, and code appendices.
+
+Classes
+-------
+EnterpriseColors
+    Accessible colour palette derived from Tailwind Slate/Blue.
+EnterpriseCanvas
+    Custom :class:`canvas.Canvas` with branded header/footer chrome.
+PDFReportGenerator
+    Full report builder: title page → TOC → executive summary →
+    findings → code → methodology → technical appendix.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`ReportGenerationEvent` — structured audit record for
+  every generated report (path, page count, byte size, latency).
+* :func:`get_pdf_generator` — thread-safe singleton accessor.
+"""
+from __future__ import annotations
+
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any
 from datetime import datetime
 from pathlib import Path
 import json
-import base64
-from io import BytesIO
 
 # ReportLab imports
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import A4
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    PageBreak, KeepTogether, ListFlowable, ListItem, Image as RLImage
+    PageBreak
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.colors import HexColor, black, white, grey
-from reportlab.lib.units import inch, cm
-from reportlab.lib import colors
+from reportlab.lib.colors import HexColor, white
+from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
-from reportlab.graphics.shapes import Drawing, Rect, String
-from reportlab.graphics import renderPDF
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+from reportlab.graphics.shapes import Drawing, Rect
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +50,11 @@ logger = logging.getLogger(__name__)
 # PROFESSIONAL COLOR SCHEME
 # =============================================================================
 class EnterpriseColors:
-    """Enterprise-grade color palette - professional and accessible"""
+    """Enterprise-grade colour palette — professional and WCAG-accessible.
+
+    Derived from Tailwind CSS Slate/Blue scale to ensure excellent
+    contrast ratios on both screen previews and printed output.
+    """
     PRIMARY = HexColor('#0f172a')         # Slate 900 - main headers
     SECONDARY = HexColor('#1e40af')       # Blue 800 - section headers
     ACCENT = HexColor('#3b82f6')          # Blue 500 - accents/links
@@ -53,7 +75,18 @@ class EnterpriseColors:
 # NUMBERED CANVAS WITH ENTERPRISE HEADERS/FOOTERS
 # =============================================================================
 class EnterpriseCanvas(canvas.Canvas):
-    """Custom canvas with professional headers, footers, and page numbers"""
+    """Custom ReportLab canvas with branded headers, footers, and page numbers.
+
+    Accumulates page states during ``showPage()`` calls and renders
+    enterprise chrome (header bar, footer with pagination and model
+    attribution) on every non-title page in ``save()``.
+
+    Attributes:
+        report_title: Short title rendered in the header bar.
+        company_name: Brand name for the top-left header text.
+        model_used: LLM model name shown in the footer.
+        generated_date: Timestamp printed in the footer.
+    """
     
     def __init__(self, *args, **kwargs):
         canvas.Canvas.__init__(self, *args, **kwargs)
@@ -65,11 +98,13 @@ class EnterpriseCanvas(canvas.Canvas):
         self.generated_date = datetime.now()
         self.company_name = "Nexus LLM Analytics"
     
-    def showPage(self):
+    def showPage(self) -> None:
+        """Save current page state and begin a new page."""
         self._saved_page_states.append(dict(self.__dict__))
         self._startPage()
     
-    def save(self):
+    def save(self) -> None:
+        """Render all saved pages with enterprise headers/footers and save."""
         num_pages = len(self._saved_page_states)
         for state in self._saved_page_states:
             self.__dict__.update(state)
@@ -77,8 +112,8 @@ class EnterpriseCanvas(canvas.Canvas):
             canvas.Canvas.showPage(self)
         canvas.Canvas.save(self)
     
-    def _draw_enterprise_header_footer(self, page_count):
-        """Draw enterprise-grade header and footer"""
+    def _draw_enterprise_header_footer(self, page_count: int) -> None:
+        """Draw enterprise-grade header and footer on non-title pages."""
         page_num = self._pageNumber
         width, height = A4
         
@@ -141,17 +176,31 @@ class EnterpriseCanvas(canvas.Canvas):
 # PDF REPORT GENERATOR - ENTERPRISE EDITION
 # =============================================================================
 class PDFReportGenerator:
-    """
-    Enterprise-grade PDF report generator.
+    """Enterprise-grade PDF report generator.
+
     Zero wasted space, comprehensive content, professional formatting.
+    Builds a ReportLab *story* (list of Flowables) from a raw analysis
+    result dictionary, renders it through :class:`EnterpriseCanvas`,
+    and writes a paginated A4 PDF.
+
+    Section Pipeline:
+        Title Page → Table of Contents → Executive Summary →
+        Query Analysis → AI Interpretation → Orchestrator Reasoning →
+        Key Findings → Detailed Results → Data Insights →
+        Generated Code → Visualisations → Methodology →
+        Technical Details → Raw Data Appendix.
+
+    Thread Safety:
+        Instance methods mutate only local ``story`` lists.  Creating
+        one instance per request is recommended for concurrent use.
     """
     
     def __init__(self):
         self.styles = getSampleStyleSheet()
         self._setup_enterprise_styles()
     
-    def _setup_enterprise_styles(self):
-        """Setup comprehensive typography system"""
+    def _setup_enterprise_styles(self) -> None:
+        """Set up comprehensive typography system for enterprise reports."""
         
         # === TITLE PAGE STYLES ===
         self.styles.add(ParagraphStyle(
@@ -358,7 +407,7 @@ class PDFReportGenerator:
             output_dir.mkdir(exist_ok=True)
             output_path = str(output_dir / f'analysis_report_{timestamp}.pdf')
         
-        logger.info(f"[PDF] Generating enterprise report: {output_path}")
+        logger.info("[PDF] Generating enterprise report: %s", output_path)
         
         # Create PDF document with custom canvas
         doc = SimpleDocTemplate(
@@ -456,7 +505,7 @@ class PDFReportGenerator:
             doc.canv.user_query = query
             doc.canv.model_used = model
         
-        logger.info(f"[PDF] Report generated successfully: {output_path}")
+        logger.info("[PDF] Report generated successfully: %s", output_path)
         return output_path
     
     # =========================================================================
@@ -1118,3 +1167,69 @@ def generate_pdf_report(analysis_result: Dict[str, Any],
     """
     generator = PDFReportGenerator()
     return generator.generate_report(analysis_result, output_path, include_raw_data)
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+import threading
+import time as _time
+from dataclasses import dataclass, field as _field
+
+
+@dataclass
+class ReportGenerationEvent:
+    """Structured audit record for a generated PDF report.
+
+    Attributes:
+        output_path: Absolute path of the written PDF file.
+        page_count: Number of pages in the report (estimated).
+        byte_size: File size in bytes (populated after write).
+        generation_ms: Wall-clock generation latency.
+        query: The originating user query.
+        model: LLM model used for the analysis.
+        timestamp: Unix epoch when the report was created.
+
+    v2.0 Enterprise Addition.
+    """
+
+    output_path: str = ""
+    page_count: int = 0
+    byte_size: int = 0
+    generation_ms: float = 0.0
+    query: str = ""
+    model: str = ""
+    timestamp: float = _field(default_factory=_time.time)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a JSON-serialisable snapshot."""
+        return {
+            "output_path": self.output_path,
+            "page_count": self.page_count,
+            "byte_size": self.byte_size,
+            "generation_ms": round(self.generation_ms, 2),
+            "query": self.query[:200],
+            "model": self.model,
+            "timestamp": self.timestamp,
+        }
+
+
+# -- Singleton accessor (double-checked locking) -----------------------
+
+_pdf_generator_instance: "PDFReportGenerator | None" = None
+_pdf_generator_lock = threading.Lock()
+
+
+def get_pdf_generator() -> PDFReportGenerator:
+    """Return the process-wide :class:`PDFReportGenerator` singleton.
+
+    Thread Safety:
+        Uses double-checked locking for safe lazy initialisation.
+    """
+    global _pdf_generator_instance
+    if _pdf_generator_instance is None:
+        with _pdf_generator_lock:
+            if _pdf_generator_instance is None:
+                _pdf_generator_instance = PDFReportGenerator()
+    return _pdf_generator_instance

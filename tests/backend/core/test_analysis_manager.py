@@ -3,7 +3,7 @@ import time
 from unittest.mock import patch, MagicMock
 from fastapi import HTTPException
 import threading
-from src.backend.core.analysis_manager import AnalysisManager, check_cancellation, analysis_manager
+from backend.core.analysis_manager import AnalysisManager, check_cancellation, analysis_manager
 
 # Fixture for fresh AnalysisManager instance
 @pytest.fixture
@@ -155,7 +155,7 @@ def test_check_cancellation_helper():
     # Helper uses the global instance, so we mock method on that global instance
     # or we can mock the global instance itself in the module
     
-    with patch('src.backend.core.analysis_manager.analysis_manager') as mock_global:
+    with patch('backend.core.analysis_manager.analysis_manager') as mock_global:
         mock_global.is_cancelled.return_value = False
         # Should not raise
         check_cancellation("some_id")

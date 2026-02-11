@@ -23,14 +23,17 @@ COMMON PATTERNS (use these directly):
 - "lowest/minimum X" → result = df['X'].min()
 - "average/mean X" → result = df['X'].mean()
 - "total/sum X" → result = df['X'].sum()
+- "total X by Y" → result = df.groupby('Y')['X'].sum()
 - "median X" → result = df['X'].median()
 - "standard deviation X" → result = df['X'].std()
 - "variance X" → result = df['X'].var()
 - "count X" → result = df['X'].count()
 - "how many rows/items where X > Y" → result = len(df[df['X'] > Y])
 - "which has highest X" → result = df.loc[df['X'].idxmax()]
+- "which Y has highest X" → result = df.groupby('Y')['X'].sum().idxmax()
 - "top N by X" → result = df.nlargest(N, 'X')[['name_col', 'X']]
 - "bottom N by X" → result = df.nsmallest(N, 'X')[['name_col', 'X']]
+- Multiple questions → use a dict: result = dict(total=df['X'].sum(), best=df.groupby('Y')['X'].sum().idxmax())
 
 FORBIDDEN:
 - Creating sample data (DO NOT USE StringIO, CSV strings, or fake data)

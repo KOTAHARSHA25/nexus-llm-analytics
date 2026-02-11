@@ -65,6 +65,7 @@ export function isLocalBackend(url?: string): boolean {
  */
 export function buildApiUrl(endpoint: string): string {
   const baseUrl = getBackendUrl();
+  if (!endpoint) return baseUrl;
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   return `${baseUrl}${cleanEndpoint}`;
 }
@@ -99,7 +100,7 @@ export async function testBackendConnection(url?: string): Promise<{
   const backendUrl = url || getBackendUrl();
   
   try {
-    const response = await fetch(`${backendUrl}/health`, {
+    const response = await fetch(`${backendUrl}/api/health/`, {
       method: "GET",
       headers: {
         Accept: "application/json",

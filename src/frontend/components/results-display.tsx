@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Card,
   CardContent,
@@ -21,11 +23,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getEndpoint } from "@/lib/config";
 import { ChartViewer } from "@/components/chart-viewer";
-import { 
-  BarChart3, 
-  FileText, 
-  Code, 
-  TrendingUp, 
+import {
+  BarChart3,
+  FileText,
+  Code,
+  TrendingUp,
   Database,
   Eye,
   BarChart,
@@ -54,83 +56,80 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
-// Helper function to format analysis results with proper structure
+// Render analysis result as rich markdown
 const formatAnalysisResult = (result: string) => {
-  if (!result) return <p>No result available</p>;
+  if (!result) return <p className="text-gray-400 italic">No result available</p>;
 
-  // Split by numbered sections or bullet points
-  const sections = result.split(/(?=\d+\.\s)|(?=\n[•\-\*]\s)/);
-  
   return (
-    <div className="space-y-4">
-      {sections.map((section, index) => {
-        if (!section.trim()) return null;
-        
-        const lines = section.trim().split('\n');
-        const isNumberedSection = /^\d+\.\s/.test(section.trim());
-        const isBulletPoint = /^[•\-\*]\s/.test(section.trim());
-        
-        if (isNumberedSection || isBulletPoint) {
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        // Headings
+        h1: ({ children }) => (
+          <h1 className="text-xl font-bold text-white mt-4 mb-2 border-b border-purple-500/30 pb-1">
+            {children}
+          </h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-lg font-semibold text-purple-200 mt-4 mb-2">{children}</h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-base font-semibold text-purple-300 mt-3 mb-1">{children}</h3>
+        ),
+        // Paragraphs
+        p: ({ children }) => <p className="text-sm text-gray-200 leading-relaxed mb-2">{children}</p>,
+        // Bold / italic
+        strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
+        em: ({ children }) => <em className="text-purple-300">{children}</em>,
+        // Lists
+        ul: ({ children }) => <ul className="list-disc list-inside space-y-1 ml-2 mb-2">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 ml-2 mb-2">{children}</ol>,
+        li: ({ children }) => <li className="text-sm text-gray-200">{children}</li>,
+        // Code blocks
+        code: ({ className, children, ...props }) => {
+          const isBlock = className?.includes("language-");
+          if (isBlock) {
+            return (
+              <pre className="bg-gray-900/70 border border-gray-700/50 rounded-lg p-3 my-2 overflow-x-auto">
+                <code className="text-sm text-green-400 font-mono">{children}</code>
+              </pre>
+            );
+          }
           return (
-            <div key={index} className="border-l-2 border-purple-400/30 pl-4 py-2">
-              <div className="space-y-2">
-                {lines.map((line, lineIndex) => {
-                  if (!line.trim()) return null;
-                  
-                  // Check if it's a code block
-                  if (line.includes('```') || line.includes('import ') || line.includes('pd.')) {
-                    return (
-                      <pre key={lineIndex} className="bg-gray-800/50 rounded p-2 text-sm overflow-x-auto text-green-400">
-                        <code>{line.trim()}</code>
-                      </pre>
-                    );
-                  }
-                  
-                  // Check if it's a header line (starts with number or bullet)
-                  if (lineIndex === 0 && (isNumberedSection || isBulletPoint)) {
-                    return (
-                      <h4 key={lineIndex} className="font-semibold text-purple-300">
-                        {line.trim()}
-                      </h4>
-                    );
-                  }
-                  
-                  return (
-                    <p key={lineIndex} className="text-sm text-gray-300">
-                      {line.trim()}
-                    </p>
-                  );
-                })}
-              </div>
-            </div>
+            <code className="bg-gray-800/60 text-purple-300 rounded px-1.5 py-0.5 text-sm font-mono" {...props}>
+              {children}
+            </code>
           );
-        }
-        
-        // Regular paragraph
-        return (
-          <div key={index} className="space-y-2">
-            {lines.map((line, lineIndex) => {
-              if (!line.trim()) return null;
-              
-              // Check if it's a code block
-              if (line.includes('```') || line.includes('import ') || line.includes('pd.')) {
-                return (
-                  <pre key={lineIndex} className="bg-gray-800/50 rounded p-2 text-sm overflow-x-auto text-green-400">
-                    <code>{line.trim()}</code>
-                  </pre>
-                );
-              }
-              
-              return (
-                <p key={lineIndex} className="text-sm text-gray-300">
-                  {line.trim()}
-                </p>
-              );
-            })}
+        },
+        // Tables
+        table: ({ children }) => (
+          <div className="overflow-x-auto my-3 rounded-lg border border-gray-700/50">
+            <table className="min-w-full text-sm">{children}</table>
           </div>
-        );
-      })}
-    </div>
+        ),
+        thead: ({ children }) => (
+          <thead className="bg-purple-900/30 border-b border-gray-700/50">{children}</thead>
+        ),
+        tbody: ({ children }) => <tbody className="divide-y divide-gray-800/50">{children}</tbody>,
+        tr: ({ children }) => <tr className="hover:bg-gray-800/30 transition-colors">{children}</tr>,
+        th: ({ children }) => (
+          <th className="px-3 py-2 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">
+            {children}
+          </th>
+        ),
+        td: ({ children }) => <td className="px-3 py-2 text-gray-200 whitespace-nowrap">{children}</td>,
+        // Horizontal rules
+        hr: () => <hr className="border-gray-700/50 my-3" />,
+        // Blockquotes
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-2 border-purple-500/50 pl-3 italic text-gray-400 my-2">
+            {children}
+          </blockquote>
+        ),
+      }}
+    >
+      {result}
+    </ReactMarkdown>
   );
 };
 
@@ -148,18 +147,18 @@ interface CollapsibleSectionProps {
   badge?: React.ReactNode;
 }
 
-function CollapsibleSection({ 
-  title, 
-  children, 
-  defaultExpanded = false, 
-  icon, 
-  badge 
+function CollapsibleSection({
+  title,
+  children,
+  defaultExpanded = false,
+  icon,
+  badge
 }: CollapsibleSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
     <Card className="glass-card hover:glow-card transition-all duration-300">
-      <CardHeader 
+      <CardHeader
         className="cursor-pointer hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10 transition-all duration-300"
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -204,7 +203,7 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
   useEffect(() => {
     // Check BOTH success boolean AND status string for backward compatibility
     const isSuccessful = results && (results.success === true || results.status === "success");
-    
+
     if (isSuccessful) {
       setHasTriggeredGeneration(false);
       setChartData(null);
@@ -215,19 +214,10 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
 
   // Auto-generate visualization when filename and results are ready
   useEffect(() => {
-    console.log("🎨 Chart generation check:", {
-      hasResults: !!results,
-      success: results?.success,
-      status: results?.status,
-      filename,
-      hasTriggered: hasTriggeredGeneration
-    });
-    
     // Check BOTH success boolean AND status string for backward compatibility
     const isSuccessful = results && (results.success === true || results.status === "success");
-    
+
     if (isSuccessful && filename && !hasTriggeredGeneration) {
-      console.log("✅ Triggering chart generation");
       setHasTriggeredGeneration(true);
       generateVisualization();
     }
@@ -235,20 +225,10 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
 
   // Auto-generate review insights when modelSettings loads
   useEffect(() => {
-    console.log("🔍 Review insights check:", {
-      hasResults: !!results,
-      success: results?.success,
-      status: results?.status,
-      hasModelSettings: !!modelSettings,
-      hasReviewInsights: !!reviewInsights,
-      isLoading: reviewLoading
-    });
-    
     // Check BOTH success boolean AND status string for backward compatibility
     const isSuccessful = results && (results.success === true || results.status === "success");
-    
+
     if (isSuccessful && modelSettings && !reviewInsights && !reviewLoading) {
-      console.log("✅ Triggering review insights generation");
       generateReviewInsights();
     }
   }, [results, modelSettings, reviewInsights, reviewLoading]);
@@ -276,12 +256,12 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ filename }),
       });
-      
+
       if (suggestionsResponse.ok) {
         const suggestionsData = await suggestionsResponse.json();
         setChartSuggestions(suggestionsData);
       }
-      
+
       // Then generate visualization using new goal-based endpoint
       // CRITICAL: Pass the user's original query AND analysis results for context
       const userQuery = results?.query || "";
@@ -395,15 +375,15 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
       };
 
       const dataStr = JSON.stringify(reportData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      
-      const exportFileDefaultName = `analysis_report_${filename || 'results'}_${new Date().toISOString().slice(0,10)}.json`;
-      
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+      const exportFileDefaultName = `analysis_report_${filename || 'results'}_${new Date().toISOString().slice(0, 10)}.json`;
+
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
       linkElement.setAttribute('download', exportFileDefaultName);
       linkElement.click();
-      
+
       toast({
         title: "✅ JSON Report Downloaded",
         description: `Saved as ${exportFileDefaultName}`,
@@ -413,7 +393,7 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
 
     // PDF/Excel/CSV - call backend API
     setDownloadingReport(true);
-    
+
     try {
       toast({
         title: "⏳ Generating Report...",
@@ -464,12 +444,12 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         // Download the generated report
         const downloadUrl = `${getEndpoint('downloadReport')}?filename=${encodeURIComponent(result.report_path || '')}`;
         window.open(downloadUrl, '_blank');
-        
+
         toast({
           title: "✅ Report Generated Successfully",
           description: `${format.toUpperCase()} report is ready for download`,
@@ -477,7 +457,7 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
       } else {
         throw new Error(result.error || 'Unknown error');
       }
-      
+
     } catch (error) {
       console.error('Report generation error:', error);
       toast({
@@ -490,7 +470,8 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
     }
   };
 
-  if (isLoading) {
+  // Only show full loading spinner if we have NO results to show yet
+  if (isLoading && (!results || !results.result)) {
     return (
       <Card className="glass-card">
         <CardHeader>
@@ -564,6 +545,7 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
 
   return (
     <div className="space-y-6">
+
       {/* Header with Actions */}
       <Card className="glass-card">
         <CardHeader>
@@ -607,7 +589,7 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                   </>
                 )}
               </Button>
-              
+
               {/* Enhanced Export Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -633,8 +615,8 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                 <DropdownMenuContent align="end" className="w-72 bg-gray-800/95 border-gray-700">
                   <DropdownMenuLabel className="text-gray-300 font-semibold">Select Format</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-gray-700" />
-                  
-                  <DropdownMenuItem 
+
+                  <DropdownMenuItem
                     onClick={() => downloadReport('pdf')}
                     className="text-gray-200 hover:bg-purple-500/20 cursor-pointer py-3"
                   >
@@ -644,8 +626,8 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                       <span className="text-xs text-gray-400">Professional presentation format</span>
                     </div>
                   </DropdownMenuItem>
-                  
-                  <DropdownMenuItem 
+
+                  <DropdownMenuItem
                     onClick={() => downloadReport('excel')}
                     className="text-gray-200 hover:bg-purple-500/20 cursor-pointer py-3"
                   >
@@ -655,8 +637,8 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                       <span className="text-xs text-gray-400">Structured data with multiple sheets</span>
                     </div>
                   </DropdownMenuItem>
-                  
-                  <DropdownMenuItem 
+
+                  <DropdownMenuItem
                     onClick={() => downloadReport('csv')}
                     className="text-gray-200 hover:bg-purple-500/20 cursor-pointer py-3"
                   >
@@ -666,10 +648,10 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                       <span className="text-xs text-gray-400">Simple tabular data</span>
                     </div>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuSeparator className="bg-gray-700" />
-                  
-                  <DropdownMenuItem 
+
+                  <DropdownMenuItem
                     onClick={() => downloadReport('json')}
                     className="text-gray-200 hover:bg-purple-500/20 cursor-pointer py-3"
                   >
@@ -691,8 +673,8 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
         <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600/50">
           <TabsTrigger value="analysis" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-300">Analysis</TabsTrigger>
           <TabsTrigger value="insights" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-300">
-            {modelSettings?.review_model ? 
-              `${modelSettings.review_model.split(':')[0]} Insights` : 
+            {modelSettings?.review_model ?
+              `${modelSettings.review_model.split(':')[0]} Insights` :
               'Review Insights'
             }
           </TabsTrigger>
@@ -714,11 +696,11 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
           >
             <div className="prose prose-sm max-w-none">
               <div className="text-gray-100 leading-relaxed space-y-4">
-                {typeof results.result === 'string' 
+                {typeof results.result === 'string'
                   ? formatAnalysisResult(results.result)
                   : <pre className="whitespace-pre-wrap bg-gray-800/50 rounded p-3 text-sm text-gray-300">
-                      {JSON.stringify(results.result, null, 2)}
-                    </pre>}
+                    {JSON.stringify(results.result, null, 2)}
+                  </pre>}
               </div>
             </div>
           </CollapsibleSection>
@@ -748,13 +730,13 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                   <Brain className="h-3 w-3" />
                   <span>This analysis used automatic reasoning validation for accuracy</span>
                 </div>
-                
+
                 <div className="p-3 bg-gray-900/50 border border-purple-500/20 rounded-lg">
                   <pre className="whitespace-pre-wrap text-xs text-gray-300 leading-relaxed">
                     {results.metadata.cot_reasoning}
                   </pre>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div className="text-center p-2 bg-purple-900/10 border border-purple-500/20 rounded">
                     <div className="font-mono text-purple-300">{results.metadata.cot_time_seconds.toFixed(1)}s</div>
@@ -872,11 +854,11 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                 ) : (
                   <div className="prose prose-sm max-w-none">
                     <div className="text-foreground leading-relaxed space-y-4">
-                      {typeof reviewInsights.insights === 'string' 
+                      {typeof reviewInsights.insights === 'string'
                         ? formatAnalysisResult(reviewInsights.insights)
                         : <pre className="whitespace-pre-wrap bg-muted/50 rounded p-3 text-sm">
-                            {JSON.stringify(reviewInsights.insights, null, 2)}
-                          </pre>}
+                          {JSON.stringify(reviewInsights.insights, null, 2)}
+                        </pre>}
                     </div>
                   </div>
                 )}
@@ -935,8 +917,8 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                 </div>
                 <div className="grid gap-3">
                   {chartSuggestions.suggestions.slice(0, 3).map((suggestion: any, index: number) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="border rounded-lg p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                       onClick={() => generateChartWithType(suggestion.type)}
                     >
@@ -955,8 +937,8 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                             {suggestion.use_case}
                           </p>
                         </div>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -987,7 +969,7 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
               </div>
             </CollapsibleSection>
           )}
-          
+
           {/* Visualization Section */}
           <CollapsibleSection
             title="Data Visualization"
@@ -1025,6 +1007,55 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
         </TabsContent>
 
         <TabsContent value="details" className="space-y-4 mt-6">
+          {/* Execution Plan */}
+          {results.plan && (
+            <CollapsibleSection
+              title="Execution Plan"
+              defaultExpanded={true}
+              icon={<Brain className="h-4 w-4" />}
+              badge={
+                <Badge className="text-xs bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-purple-300 border-purple-500/30">
+                  {results.plan.execution_method || 'auto'}
+                </Badge>
+              }
+            >
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  {results.plan.model && (
+                    <div className="p-2 bg-purple-900/10 border border-purple-500/20 rounded">
+                      <div className="text-gray-400">Model</div>
+                      <div className="font-mono text-purple-300">{results.plan.model}</div>
+                    </div>
+                  )}
+                  {results.plan.execution_method && (
+                    <div className="p-2 bg-purple-900/10 border border-purple-500/20 rounded">
+                      <div className="text-gray-400">Method</div>
+                      <div className="font-mono text-purple-300">{results.plan.execution_method}</div>
+                    </div>
+                  )}
+                  {results.plan.review_level && (
+                    <div className="p-2 bg-purple-900/10 border border-purple-500/20 rounded">
+                      <div className="text-gray-400">Review Level</div>
+                      <div className="font-mono text-purple-300 capitalize">{results.plan.review_level}</div>
+                    </div>
+                  )}
+                  {results.plan.complexity_score != null && (
+                    <div className="p-2 bg-purple-900/10 border border-purple-500/20 rounded">
+                      <div className="text-gray-400">Complexity</div>
+                      <div className="font-mono text-purple-300">{Number(results.plan.complexity_score).toFixed(3)}</div>
+                    </div>
+                  )}
+                </div>
+                {results.plan.reasoning && (
+                  <div className="p-3 bg-gray-900/50 border border-purple-500/20 rounded-lg">
+                    <div className="text-xs text-gray-400 mb-1">Reasoning</div>
+                    <div className="text-sm text-gray-300">{results.plan.reasoning}</div>
+                  </div>
+                )}
+              </div>
+            </CollapsibleSection>
+          )}
+
           {/* Data Statistics */}
           {(results.describe || results.value_counts || results.filtered_count !== undefined) && (
             <CollapsibleSection
@@ -1140,7 +1171,7 @@ export function ResultsDisplay({ results, isLoading, filename }: ResultsDisplayP
                     )}
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="text-sm font-medium">Analysis Metadata</h4>
                   <div className="text-xs text-muted-foreground space-y-1">

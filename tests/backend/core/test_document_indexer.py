@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from unittest.mock import MagicMock, patch, mock_open, AsyncMock
-from src.backend.core.document_indexer import SemanticChunker, OptimizedDocumentIndexer, ChunkType, SemanticChunk
+from backend.core.document_indexer import SemanticChunker, OptimizedDocumentIndexer, ChunkType, SemanticChunk
 
 # --- SemanticChunker Tests ---
 
@@ -55,7 +55,7 @@ def mock_chroma_client():
 
 @pytest.fixture
 def indexer(mock_chroma_client):
-    with patch('src.backend.core.document_indexer.embed_text') as mock_embed:
+    with patch('backend.core.document_indexer.embed_text') as mock_embed:
         # Mock embed_text globally for the module
         mock_embed.return_value = [0.1, 0.2, 0.3]
         idx = OptimizedDocumentIndexer(chroma_client=mock_chroma_client, max_workers=1)
@@ -103,7 +103,7 @@ async def test_optimized_chunking_fallback(indexer, mock_chroma_client):
         assert result["chunking_method"] == "optimized"
 
 def test_index_extracted_documents(indexer):
-    with patch('src.backend.core.document_indexer.Path') as mock_path:
+    with patch('backend.core.document_indexer.Path') as mock_path:
         # Mock glob
         mock_file = MagicMock()
         mock_file.name = "test.extracted.txt"

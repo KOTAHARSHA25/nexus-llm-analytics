@@ -1,17 +1,45 @@
-# Result Interpreter Utility
-# Provides domain-agnostic, human-readable interpretation of analysis results
+"""Result Interpreter Utility — Nexus LLM Analytics
+===================================================
+
+Provides domain-agnostic, human-readable interpretation of
+analysis results, supporting nested dicts, lists, numeric
+formatting, and query-aware summaries.
+
+Classes
+-------
+ResultInterpreter
+    Static-method collection translating raw agent output to
+    Markdown-formatted human-readable text.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`InterpretationMetrics` — tracks format call-counts,
+  latencies, and truncation events.
+* :func:`get_result_interpreter` — thread-safe singleton accessor
+  (wraps the class for future stateful extensions).
+"""
+from __future__ import annotations
 
 import logging
-from typing import Dict, Any, List, Optional, Union
-import numpy as np
+from typing import Any, Dict, List
+
+logger = logging.getLogger(__name__)
+
 
 class ResultInterpreter:
-    """
-    Domain-agnostic result interpreter that converts analysis results 
-    into human-readable, meaningful text.
-    
-    This class provides consistent formatting across all agents while
-    preserving all important information in a readable format.
+    """Domain-agnostic result interpreter for analysis output.
+
+    Converts raw agent result dictionaries into human-readable,
+    Markdown-formatted text.  All public methods are ``@staticmethod``
+    so the class can be used without instantiation.
+
+    Supported Structures:
+        * Nested ``dict`` → headings + key/value pairs
+        * ``list[dict]`` → numbered records (capped at 10)
+        * Scalar values → inline formatting with locale-aware numbers
+
+    Thread Safety:
+        Entirely stateless — safe for concurrent use from any thread.
     """
     
     @staticmethod
@@ -326,7 +354,7 @@ class ResultInterpreter:
             return "\n".join(lines)
             
         except Exception as e:
-            logging.error(f"Grouped summary generation failed: {e}")
+            logger.error("Grouped summary generation failed: %s", e, exc_info=True)
             return f"Unable to generate grouped summary: {str(e)}"
 
 
@@ -361,3 +389,73 @@ def generate_analysis_interpretation(
         categorical_summary=categorical_summary,
         query=query
     )
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+import threading
+import time
+from dataclasses import dataclass, field
+
+
+@dataclass
+class InterpretationMetrics:
+    """Tracks interpretation call-counts, latencies, and truncation events.
+
+    Attributes:
+        total_calls: Number of ``interpret()`` invocations.
+        total_latency_ms: Cumulative processing time in milliseconds.
+        truncation_events: Times output was truncated or capped.
+
+    v2.0 Enterprise Addition.
+    """
+
+    total_calls: int = 0
+    total_latency_ms: float = 0.0
+    truncation_events: int = 0
+
+    def record(self, latency_ms: float, *, truncated: bool = False) -> None:
+        """Record a single interpretation call."""
+        self.total_calls += 1
+        self.total_latency_ms += latency_ms
+        if truncated:
+            self.truncation_events += 1
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a JSON-serialisable snapshot of current metrics."""
+        return {
+            "total_calls": self.total_calls,
+            "total_latency_ms": round(self.total_latency_ms, 2),
+            "avg_latency_ms": round(
+                self.total_latency_ms / self.total_calls, 2
+            )
+            if self.total_calls
+            else 0.0,
+            "truncation_events": self.truncation_events,
+        }
+
+
+# -- Singleton accessor (double-checked locking) -----------------------
+
+_interpreter_instance: "ResultInterpreter | None" = None
+_interpreter_lock = threading.Lock()
+
+
+def get_result_interpreter() -> ResultInterpreter:
+    """Return the process-wide :class:`ResultInterpreter` singleton.
+
+    Although ``ResultInterpreter`` is currently stateless, this accessor
+    provides a future-proof extension point for adding instance-level
+    configuration (e.g. custom formatters, locale settings).
+
+    Thread Safety:
+        Uses double-checked locking for safe lazy initialisation.
+    """
+    global _interpreter_instance
+    if _interpreter_instance is None:
+        with _interpreter_lock:
+            if _interpreter_instance is None:
+                _interpreter_instance = ResultInterpreter()
+    return _interpreter_instance

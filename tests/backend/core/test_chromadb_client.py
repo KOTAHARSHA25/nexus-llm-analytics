@@ -1,12 +1,12 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from src.backend.core.chromadb_client import (
+from backend.core.chromadb_client import (
     ChromaDBClient, CitedSource, RAGResponse, chunk_text, embed_text
 )
 
 @pytest.fixture
 def mock_chroma():
-    with patch('src.backend.core.chromadb_client.chromadb') as mock:
+    with patch('backend.core.chromadb_client.chromadb') as mock:
         mock.PersistentClient.return_value.get_or_create_collection.return_value = MagicMock()
         yield mock
 
@@ -79,13 +79,16 @@ def test_chunk_text():
     assert len(chunks) > 0
 
 def test_embed_text():
-    with patch('src.backend.core.chromadb_client.requests.post') as mock_post:
-        mock_post.return_value.json.return_value = {"embedding": [0.1, 0.2]}
-        mock_post.return_value.raise_for_status = MagicMock()
+    with patch('backend.core.chromadb_client._session') as mock_session:
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"embedding": [0.1, 0.2]}
+        mock_response.raise_for_status = MagicMock()
+        mock_session.post.return_value = mock_response
         
         emb = embed_text("text")
         assert emb == [0.1, 0.2]
 
         # Fail case
-        mock_post.side_effect = Exception("Fail")
+        mock_session.post.side_effect = Exception("Fail")
         assert embed_text("text") is None
+

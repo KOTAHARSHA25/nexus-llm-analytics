@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch, mock_open
-from src.backend.core.plugin_system import AgentRegistry, BasePluginAgent, AgentMetadata, AgentCapability
+from backend.core.plugin_system import AgentRegistry, BasePluginAgent, AgentMetadata, AgentCapability
 
 # Mock Agent Implementation
 class MockAgent(BasePluginAgent):
@@ -23,7 +23,7 @@ class MockAgent(BasePluginAgent):
 
 @pytest.fixture
 def registry():
-    with patch('src.backend.core.plugin_system.Path') as mock_path:
+    with patch('backend.core.plugin_system.Path') as mock_path:
         mock_path.return_value.glob.return_value = [] # No files by default
         reg = AgentRegistry("/tmp/plugins")
         yield reg

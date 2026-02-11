@@ -1,15 +1,52 @@
+"""Upload API — Secure File Ingestion & Content Extraction Endpoints
+====================================================================
+
+Handles multi-format file uploads (CSV, JSON, PDF, DOCX, XLSX, PPTX, RTF,
+Parquet, Feather, HDF5, NetCDF, MAT) with layered security validation:
+
+1. **Filename sanitization** — path-traversal prevention via werkzeug.
+2. **Extension allow-list** — rejects unknown file types.
+3. **Size enforcement** — streaming chunk check against ``MAX_FILE_SIZE``.
+4. **MIME/content validation** — ``python-magic`` or signature-based fallback.
+5. **Text sanitization** — bleach / HTML-escape before storage.
+6. **Secure permissions** — ``0600`` on saved files.
+
+After upload, structured files are column-scanned, text documents are
+chunked and indexed into ChromaDB for RAG retrieval, and the analysis
+cache is tag-invalidated so stale results are never served.
+
+Endpoints
+---------
+``POST /``
+    Upload a single file with full security pipeline.
+``POST /raw-text``
+    Accept raw text input without file upload.
+``GET  /files``
+    List all uploaded files with metadata.
+``GET  /files/{filename}/summary``
+    Return column & statistical summary for a structured file.
+``DELETE /files/{filename}``
+    Remove an uploaded file and its extracted text.
+``GET  /templates``
+    Provide sample file download links for first-time users.
+"""
+
+from __future__ import annotations
+
 from fastapi import APIRouter, UploadFile, File
 import os
 import tempfile
 import shutil
 import stat
+import re
+import datetime
 import logging
 from werkzeug.utils import secure_filename
 from backend.utils.data_utils import read_dataframe, validate_dataframe, create_data_summary
 try:
-    import PyPDF2
+    import pypdf
 except ImportError:
-    PyPDF2 = None
+    pypdf = None
 
 try:
     import openpyxl
@@ -53,7 +90,10 @@ except ImportError:
     HAS_FILETYPE = False
     filetype = None
 
-import mimetypes
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
 
 try:
     import bleach
@@ -64,16 +104,25 @@ except ImportError:
 
 from pydantic import BaseModel
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# Pydantic models for raw text input
+
 class RawTextInput(BaseModel):
+    """Request body for direct text ingestion without file upload.
+
+    Attributes:
+        text:        The raw text content to analyze.
+        title:       Human-readable title (used to generate the saved filename).
+        description: Optional context about the text content.
+    """
+
     text: str
     title: str = "Raw Text Input"
     description: str = ""
 
 # Security Configuration
-MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB limit
+MAX_FILE_SIZE: int = 100 * 1024 * 1024  # 100 MB upload ceiling
 # Phase 3.5: Added scientific file formats (parquet, feather, hdf5, h5, nc, mat)
 ALLOWED_EXTENSIONS = {
     # Standard formats
@@ -105,7 +154,18 @@ from backend.utils.data_utils import DataPathResolver
 DataPathResolver.ensure_directories_exist()
 
 def validate_filename(filename: str) -> str:
-    """Validate and secure filename against path traversal attacks"""
+    """Sanitize and validate a user-supplied filename against path-traversal attacks.
+
+    Args:
+        filename: Raw filename from the upload request.
+
+    Returns:
+        A sanitized filename safe for use on the local filesystem.
+
+    Raises:
+        ValueError: If the filename is missing, contains traversal sequences,
+            null bytes, or becomes empty after sanitization.
+    """
     if not filename:
         raise ValueError("Filename is required")
     
@@ -135,19 +195,30 @@ def validate_filename(filename: str) -> str:
     return filename
 
 def validate_file_size(size: int) -> None:
-    """Validate file size is within acceptable limits"""
+    """Raise ``ValueError`` if *size* exceeds ``MAX_FILE_SIZE``."""
     if size > MAX_FILE_SIZE:
         raise ValueError(f"File size {size} exceeds maximum allowed size of {MAX_FILE_SIZE} bytes ({MAX_FILE_SIZE // (1024*1024)}MB)")
 
 def validate_file_extension(filename: str) -> str:
-    """Validate file extension is allowed"""
+    """Return the lowercase extension if it is in ``ALLOWED_EXTENSIONS``; raise otherwise."""
     ext = os.path.splitext(filename)[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
         raise ValueError(f"File extension '{ext}' not allowed. Supported extensions: {', '.join(ALLOWED_EXTENSIONS)}")
     return ext
 
 def validate_file_content(content: bytes, extension: str) -> bool:
-    """Validate file content matches extension using MIME type detection"""
+    """Verify file content matches the claimed extension via MIME detection.
+
+    Uses ``python-magic`` (libmagic) when available, falling back to the
+    ``filetype`` package and then lightweight signature checks.
+
+    Args:
+        content:   First 1 KB of the uploaded file.
+        extension: Lowercase extension including the leading dot.
+
+    Returns:
+        ``True`` if the content is consistent with the extension.
+    """
     # Prefer python-magic (libmagic) if available for robust detection
     if HAS_MAGIC:
         try:
@@ -156,15 +227,15 @@ def validate_file_content(content: bytes, extension: str) -> bool:
 
             is_valid = mime_type in allowed_mimes
             if not is_valid:
-                logging.warning(f"MIME type mismatch: got {mime_type}, expected one of {allowed_mimes} for extension {extension}")
+                logger.warning("MIME type mismatch: got %s, expected one of %s for extension %s", mime_type, allowed_mimes, extension)
 
             return is_valid
         except Exception as e:
-            logging.error(f"Failed to validate file content with python-magic: {e}")
+            logger.error("Failed to validate file content with python-magic: %s", e, exc_info=True)
             return False
 
     # Fallback: try the 'filetype' package if available
-    logging.info("python-magic not available, using fallback content checks. For best results on Windows, consider installing python-magic-bin or libmagic.")
+    logger.info("python-magic not available, using fallback content checks. For best results on Windows, consider installing python-magic-bin or libmagic.")
     try:
         if HAS_FILETYPE:
             try:
@@ -175,10 +246,10 @@ def validate_file_content(content: bytes, extension: str) -> bool:
                     if mime_type in allowed_mimes:
                         return True
                     else:
-                        logging.warning(f"Fallback filetype mismatch: got {mime_type}, expected one of {allowed_mimes} for extension {extension}")
+                        logger.warning("Fallback filetype mismatch: got %s, expected one of %s for extension %s", mime_type, allowed_mimes, extension)
                         return False
             except Exception as e:
-                logging.debug(f"filetype.guess failed: {e}")
+                logger.debug("filetype.guess failed: %s", e)
 
         # Lightweight signature-based checks
         # PDF files start with %PDF
@@ -199,18 +270,18 @@ def validate_file_content(content: bytes, extension: str) -> bool:
                     content.decode('latin-1')
                     return True
                 except Exception:
-                    logging.warning(f"Unable to decode text-like file for extension {extension}")
+                    logger.warning("Unable to decode text-like file for extension %s", extension)
                     return False
 
         # Unknown extension: be permissive but log the uncertainty
-        logging.info("Fallback content validation could not determine MIME reliably; allowing upload as a permissive fallback")
+        logger.info("Fallback content validation could not determine MIME reliably; allowing upload as a permissive fallback")
         return True
     except Exception as e:
-        logging.error(f"Unexpected error during fallback content validation: {e}")
+        logger.error("Unexpected error during fallback content validation: %s", e, exc_info=True)
         return False
 
 def sanitize_extracted_text(text: str) -> str:
-    """Sanitize extracted text content to prevent XSS and limit size"""
+    """Strip HTML tags and truncate extracted text to prevent XSS and memory issues."""
     if not text:
         return ""
     
@@ -218,7 +289,7 @@ def sanitize_extracted_text(text: str) -> str:
     max_text_length = 1024 * 1024  # 1MB of text
     if len(text) > max_text_length:
         text = text[:max_text_length]
-        logging.warning(f"Truncated extracted text to {max_text_length} characters")
+        logger.warning("Truncated extracted text to %s characters", max_text_length)
     
     # Use bleach for HTML sanitization if available
     if HAS_BLEACH:
@@ -232,7 +303,11 @@ def sanitize_extracted_text(text: str) -> str:
     return text
 
 def secure_file_path(filename: str) -> str:
-    """Create secure file path and validate it's within DATA_DIR"""
+    """Build an absolute path within the uploads directory and verify no traversal.
+
+    Raises:
+        ValueError: If the resolved path escapes the uploads directory.
+    """
     data_dir = str(DataPathResolver.get_uploads_dir())
     file_path = os.path.join(data_dir, filename)
     
@@ -250,28 +325,40 @@ def secure_file_path(filename: str) -> str:
 # Secure file upload endpoint with comprehensive security validation
 @router.post("/")
 async def upload_document(file: UploadFile = File(...)):
-    """
-    Secure file upload endpoint that handles CSV, JSON, PDF, and TXT files
-    with comprehensive security validation and protection against various attacks.
+    """Secure file upload with multi-format support and layered validation.
+
+    Accepts CSV, JSON, PDF, TXT, XLSX/XLS, DOCX, PPTX, RTF, Parquet,
+    Feather, HDF5, NetCDF, and MAT files.  Each upload passes through
+    filename sanitisation, extension allow-list, streaming size check,
+    MIME content validation, text extraction, ChromaDB indexing, and
+    cache invalidation.
+
+    Args:
+        file: The uploaded file from the multipart form.
+
+    Returns:
+        Dict with ``filename``, ``message``, ``file_size``, optional
+        ``columns``, and ``extracted_text_path`` on success; ``error``
+        on failure.
     """
     temp_file_path = None
     final_file_path = None
     
     try:
-        logging.debug(f"[UPLOAD] Received upload request for file: {file.filename}")
+        logger.debug("[UPLOAD] Received upload request for file: %s", file.filename)
         
         # Step 1: Validate filename
         try:
             filename = validate_filename(file.filename)
         except ValueError as e:
-            logging.warning(f"[UPLOAD] Filename validation failed: {e}")
+            logger.warning("[UPLOAD] Filename validation failed: %s", e)
             return {"error": f"Invalid filename: {str(e)}"}
         
         # Step 2: Validate file extension  
         try:
             extension = validate_file_extension(filename)
         except ValueError as e:
-            logging.warning(f"[UPLOAD] File extension validation failed: {e}")
+            logger.warning("[UPLOAD] File extension validation failed: %s", e)
             return {"error": str(e)}
         
         # Step 3: Check file size if available
@@ -279,14 +366,14 @@ async def upload_document(file: UploadFile = File(...)):
             try:
                 validate_file_size(file.size)
             except ValueError as e:
-                logging.warning(f"[UPLOAD] File size validation failed: {e}")
+                logger.warning("[UPLOAD] File size validation failed: %s", e)
                 return {"error": str(e)}
         
         # Step 4: Create secure file path
         try:
             final_file_path = secure_file_path(filename)
         except ValueError as e:
-            logging.error(f"[UPLOAD] Path validation failed: {e}")
+            logger.error("[UPLOAD] Path validation failed: %s", e, exc_info=True)
             return {"error": "Invalid file path"}
         
         # Step 5: Process file upload with temporary file for security  
@@ -310,7 +397,7 @@ async def upload_document(file: UploadFile = File(...)):
                     temp_file.write(chunk)
                 
                 temp_file.flush()
-                logging.debug(f"[UPLOAD] Successfully streamed {total_size} bytes to temporary file")
+                logger.debug("[UPLOAD] Successfully streamed %s bytes to temporary file", total_size)
             
             # File is now closed and can be moved safely
             
@@ -318,7 +405,7 @@ async def upload_document(file: UploadFile = File(...)):
             with open(temp_file_path, 'rb') as f:
                 content_sample = f.read(1024)  # Read first 1KB for validation
                 if not validate_file_content(content_sample, extension):
-                    logging.warning(f"[UPLOAD] File content validation failed for {filename}")
+                    logger.warning("[UPLOAD] File content validation failed for %s", filename)
                     return {"error": "File content does not match the file extension"}
             
             # Step 7: Move file to final location with secure permissions
@@ -327,7 +414,7 @@ async def upload_document(file: UploadFile = File(...)):
             
             # Set restrictive permissions (owner read/write only)
             os.chmod(final_file_path, stat.S_IRUSR | stat.S_IWUSR)
-            logging.debug(f"[UPLOAD] File saved securely to: {final_file_path}")
+            logger.debug("[UPLOAD] File saved securely to: %s", final_file_path)
             
             # Step 8: Extract and sanitize text content if applicable
             extracted_text = None
@@ -356,7 +443,7 @@ async def upload_document(file: UploadFile = File(...)):
                 
                 # Set secure permissions on extracted text file
                 os.chmod(extracted_text_path, stat.S_IRUSR | stat.S_IWUSR)
-                logging.debug(f"[UPLOAD] Sanitized extracted text saved to: {extracted_text_path}")
+                logger.debug("[UPLOAD] Sanitized extracted text saved to: %s", extracted_text_path)
                 
                 # Step 9.5: Index extracted text into ChromaDB for RAG retrieval
                 try:
@@ -373,9 +460,9 @@ async def upload_document(file: UploadFile = File(...)):
                             metadata={"filename": filename, "chunk_index": i, "total_chunks": len(chunks)}
                         )
                     
-                    logging.debug(f"[UPLOAD] Indexed {len(chunks)} chunks from {filename} into ChromaDB")
+                    logger.debug("[UPLOAD] Indexed %s chunks from %s into ChromaDB", len(chunks), filename)
                 except Exception as index_error:
-                    logging.warning(f"[UPLOAD] Failed to index document into ChromaDB: {index_error}")
+                    logger.warning("[UPLOAD] Failed to index document into ChromaDB: %s", index_error)
                     # Don't fail upload if indexing fails
             
             # Step 10: Extract column information for structured files
@@ -385,58 +472,34 @@ async def upload_document(file: UploadFile = File(...)):
             elif extension in ['.xlsx', '.xls']:
                 columns = await extract_excel_columns(final_file_path, filename)
             
-            # Step 11: Invalidate cache for this filename to prevent stale data
+            # Step 11a: Invalidate DataFrame store so stale in-memory copies are dropped
             try:
-                try:
-                    from backend.core.advanced_cache import _query_cache, _file_analysis_cache
-                except ImportError:
-                    logging.debug("Cache module not available for clearing")
-                    # allow execution to continue even if cache clearing fails
-                    pass
-                
-                # Clear ALL caches for this filename using multiple strategies
-                # Strategy 1: Tag-based invalidation
-                try:
-                    _query_cache.invalidate_by_tags({'structured_data', filename})
-                except Exception as e:
-                    logging.warning(f"Failed to clear structured_data cache: {e}")
+                from backend.core.dataframe_store import get_dataframe_store
+                get_dataframe_store().invalidate(final_file_path)
+                logger.debug("[UPLOAD] DataFrame store invalidated for: %s", filename)
+            except Exception as store_error:
+                logger.debug("[UPLOAD] DataFrame store invalidation skipped: %s", store_error)
 
-                try:
-                    _query_cache.invalidate_by_tags({'rag_data', filename})
-                except Exception:
-                    pass
-                _file_analysis_cache.invalidate_by_tags({'file_analysis', filename})
+            # Step 11b: Invalidate analysis cache for this filename to prevent stale data
+            try:
+                from backend.core.enhanced_cache_integration import get_enhanced_cache_manager
+                cache_mgr = get_enhanced_cache_manager()
                 
-                # Strategy 2: Direct key invalidation - remove ALL entries containing this filename
-                with _query_cache._lock:
-                    keys_to_remove = []
-                    for key, entry in list(_query_cache._cache.items()):
-                        # Check if filename appears in the cache key or entry
-                        cache_key_str = str(key) + str(entry.value)
-                        if filename in cache_key_str:
-                            keys_to_remove.append(key)
-                    
-                    for key in keys_to_remove:
-                        del _query_cache._cache[key]
-                        logging.debug(f"[UPLOAD] Removed cache entry for key containing: {filename}")
+                # Tag-based invalidation across all tiers (L1/L2/L3)
+                cache_mgr.l3_cache.invalidate_by_tags({filename, 'structured_data', 'file_analysis'})
                 
-                # Strategy 3: Also clear from file analysis cache
-                with _file_analysis_cache._lock:
-                    keys_to_remove = []
-                    for key, entry in list(_file_analysis_cache._cache.items()):
-                        cache_key_str = str(key) + str(entry.value)
-                        if filename in cache_key_str:
-                            keys_to_remove.append(key)
-                    
-                    for key in keys_to_remove:
-                        del _file_analysis_cache._cache[key]
+                # Clear L1 (LRU) entries containing filename
+                if hasattr(cache_mgr.l1_cache, 'cache'):
+                    keys_to_remove = [k for k in list(cache_mgr.l1_cache.cache.keys()) if filename in str(k)]
+                    for k in keys_to_remove:
+                        cache_mgr.l1_cache.cache.pop(k, None)
                 
-                logging.debug(f"[UPLOAD] Cache aggressively invalidated for file: {filename}")
+                logger.debug("[UPLOAD] Cache invalidated for file: %s", filename)
             except Exception as cache_error:
-                logging.warning(f"[UPLOAD] Failed to invalidate cache for {filename}: {cache_error}")
+                logger.debug("[UPLOAD] Cache invalidation skipped: %s", cache_error)
                 # Don't fail the upload if cache invalidation fails
             
-            logging.debug(f"[UPLOAD] Upload completed successfully for: {filename}")
+            logger.debug("[UPLOAD] Upload completed successfully for: %s", filename)
             return {
                 "filename": filename,
                 "message": "File uploaded successfully",
@@ -446,15 +509,15 @@ async def upload_document(file: UploadFile = File(...)):
             }
                 
         except ValueError as e:
-            logging.error(f"[UPLOAD] Validation error during upload: {e}")
+            logger.error("[UPLOAD] Validation error during upload: %s", e, exc_info=True)
             return {"error": str(e)}
         
         except Exception as e:
-            logging.error(f"[UPLOAD] Unexpected error during file processing: {e}")
+            logger.error("[UPLOAD] Unexpected error during file processing: %s", e, exc_info=True)
             return {"error": "File processing failed due to an internal error"}
     
     except Exception as e:
-        logging.error(f"[UPLOAD] Critical error in upload endpoint: {e}")
+        logger.error("[UPLOAD] Critical error in upload endpoint: %s", e, exc_info=True)
         return {"error": "Upload failed due to an internal error"}
     
     finally:
@@ -462,38 +525,29 @@ async def upload_document(file: UploadFile = File(...)):
         if temp_file_path and os.path.exists(temp_file_path):
             try:
                 os.unlink(temp_file_path)
-                logging.info(f"[UPLOAD] Cleaned up temporary file: {temp_file_path}")
+                logger.info("[UPLOAD] Cleaned up temporary file: %s", temp_file_path)
             except OSError as e:
-                logging.warning(f"[UPLOAD] Failed to cleanup temporary file {temp_file_path}: {e}")
+                logger.warning("[UPLOAD] Failed to cleanup temporary file %s: %s", temp_file_path, e)
         
-        # Cleanup: Remove final file if there was an error and it exists
-        if final_file_path and os.path.exists(final_file_path):
-            # Only cleanup if we're returning an error
-            import inspect
-            frame = inspect.currentframe()
-            try:
-                # This is a heuristic to detect if we're in an error state
-                # In a production system, you'd use a more robust error tracking mechanism
-                pass
-            finally:
-                del frame
+        # NOTE: Final file cleanup is intentionally skipped — the file is the user's upload
+        # and should persist. Temporary files are cleaned above.
 
 async def extract_pdf_text_secure(file_path: str, filename: str) -> str:
     """Securely extract text from PDF file with proper error handling"""
-    if PyPDF2 is None:
-        logging.error(f"[UPLOAD] PyPDF2 not available for PDF text extraction: {filename}")
-        raise ValueError("PDF text extraction not available - PyPDF2 not installed")
+    if pypdf is None:
+        logger.error("[UPLOAD] pypdf not available for PDF text extraction: %s", filename, exc_info=True)
+        raise ValueError("PDF text extraction not available - pypdf not installed")
     
     try:
         with open(file_path, 'rb') as f:
-            pdf_reader = PyPDF2.PdfReader(f)
+            pdf_reader = pypdf.PdfReader(f)
             
             # Limit number of pages to prevent DoS
             max_pages = 100
             pages_to_process = min(len(pdf_reader.pages), max_pages)
             
             if len(pdf_reader.pages) > max_pages:
-                logging.warning(f"[UPLOAD] PDF has {len(pdf_reader.pages)} pages, processing only first {max_pages}")
+                logger.warning("[UPLOAD] PDF has %s pages, processing only first %s", len(pdf_reader.pages), max_pages)
             
             extracted_pages = []
             for i in range(pages_to_process):
@@ -501,18 +555,18 @@ async def extract_pdf_text_secure(file_path: str, filename: str) -> str:
                     page_text = pdf_reader.pages[i].extract_text() or ''
                     extracted_pages.append(page_text)
                 except Exception as e:
-                    logging.warning(f"[UPLOAD] Failed to extract text from page {i+1} of {filename}: {e}")
+                    logger.warning("[UPLOAD] Failed to extract text from page %s of %s: %s", i+1, filename, e)
                     continue
             
             extracted_text = "\n".join(extracted_pages)
-            logging.info(f"[UPLOAD] Successfully extracted text from {pages_to_process} pages of PDF: {filename}")
+            logger.info("[UPLOAD] Successfully extracted text from %s pages of PDF: %s", pages_to_process, filename)
             return extracted_text
             
-    except PyPDF2.errors.PdfReadError as e:
-        logging.error(f"[UPLOAD] PDF read error for {filename}: {e}")
+    except pypdf.errors.PdfReadError as e:
+        logger.error("[UPLOAD] PDF read error for %s: %s", filename, e, exc_info=True)
         raise ValueError("Invalid or corrupted PDF file")
     except Exception as e:
-        logging.error(f"[UPLOAD] Unexpected error extracting PDF text from {filename}: {e}")
+        logger.error("[UPLOAD] Unexpected error extracting PDF text from %s: %s", filename, e, exc_info=True)
         raise ValueError("PDF text extraction failed")
 
 async def extract_txt_text_secure(file_path: str, filename: str) -> str:
@@ -529,9 +583,9 @@ async def extract_txt_text_secure(file_path: str, filename: str) -> str:
                     text = f.read(max_text_size)
                     
                     if len(text) == max_text_size:
-                        logging.warning(f"[UPLOAD] Text file {filename} truncated at {max_text_size} bytes")
+                        logger.warning("[UPLOAD] Text file %s truncated at %s bytes", filename, max_text_size)
                     
-                    logging.info(f"[UPLOAD] Successfully read text file {filename} with encoding {encoding}")
+                    logger.info("[UPLOAD] Successfully read text file %s with encoding %s", filename, encoding)
                     return text
                     
             except UnicodeDecodeError:
@@ -541,45 +595,41 @@ async def extract_txt_text_secure(file_path: str, filename: str) -> str:
         raise ValueError("Unable to decode text file with any supported encoding")
         
     except Exception as e:
-        logging.error(f"[UPLOAD] Error reading text file {filename}: {e}")
+        logger.error("[UPLOAD] Error reading text file %s: %s", filename, e, exc_info=True)
         raise ValueError("Text file reading failed")
 
 async def extract_csv_columns(file_path: str, filename: str) -> list:
     """Extract column names from CSV file"""
     try:
-        import pandas as pd
-        
         # Read just the first row to get column names
         df = pd.read_csv(file_path, nrows=0)  # nrows=0 means read only headers
         columns = df.columns.tolist()
         
-        logging.info(f"[UPLOAD] Extracted {len(columns)} columns from CSV: {filename}")
+        logger.info("[UPLOAD] Extracted %s columns from CSV: %s", len(columns), filename)
         return columns
         
     except Exception as e:
-        logging.warning(f"[UPLOAD] Failed to extract columns from CSV {filename}: {e}")
+        logger.warning("[UPLOAD] Failed to extract columns from CSV %s: %s", filename, e)
         return []
 
 async def extract_excel_columns(file_path: str, filename: str) -> list:
     """Extract column names from Excel file"""
     try:
-        import pandas as pd
-        
         # Read just the first row to get column names
         df = pd.read_excel(file_path, nrows=0)  # nrows=0 means read only headers
         columns = df.columns.tolist()
         
-        logging.info(f"[UPLOAD] Extracted {len(columns)} columns from Excel: {filename}")
+        logger.info("[UPLOAD] Extracted %s columns from Excel: %s", len(columns), filename)
         return columns
         
     except Exception as e:
-        logging.warning(f"[UPLOAD] Failed to extract columns from Excel {filename}: {e}")
+        logger.warning("[UPLOAD] Failed to extract columns from Excel %s: %s", filename, e)
         return []
 
 async def extract_excel_text_secure(file_path: str, filename: str) -> str:
     """Securely extract text from Excel files (.xlsx, .xls)"""
     if not HAS_OPENPYXL:
-        logging.error(f"[UPLOAD] openpyxl not available for Excel text extraction: {filename}")
+        logger.error("[UPLOAD] openpyxl not available for Excel text extraction: %s", filename, exc_info=True)
         raise ValueError("Excel text extraction not available - openpyxl not installed")
     
     try:
@@ -591,7 +641,7 @@ async def extract_excel_text_secure(file_path: str, filename: str) -> str:
         sheets_to_process = min(len(workbook.sheetnames), max_sheets)
         
         if len(workbook.sheetnames) > max_sheets:
-            logging.warning(f"[UPLOAD] Excel has {len(workbook.sheetnames)} sheets, processing only first {max_sheets}")
+            logger.warning("[UPLOAD] Excel has %s sheets, processing only first %s", len(workbook.sheetnames), max_sheets)
         
         for sheet_name in workbook.sheetnames[:sheets_to_process]:
             try:
@@ -604,7 +654,7 @@ async def extract_excel_text_secure(file_path: str, filename: str) -> str:
                 
                 for row in worksheet.iter_rows(values_only=True):
                     if row_count >= max_rows:
-                        logging.warning(f"[UPLOAD] Sheet '{sheet_name}' has more than {max_rows} rows, truncating")
+                        logger.warning("[UPLOAD] Sheet '%s' has more than %s rows, truncating", sheet_name, max_rows)
                         break
                     
                     # Convert row to string, handling None values
@@ -617,22 +667,22 @@ async def extract_excel_text_secure(file_path: str, filename: str) -> str:
                     extracted_sheets.append(f"=== Sheet: {sheet_name} ===\n" + '\n'.join(sheet_data))
                 
             except Exception as e:
-                logging.warning(f"[UPLOAD] Failed to extract data from sheet '{sheet_name}' in {filename}: {e}")
+                logger.warning("[UPLOAD] Failed to extract data from sheet '%s' in %s: %s", sheet_name, filename, e)
                 continue
         
         workbook.close()
         extracted_text = "\n\n".join(extracted_sheets)
-        logging.info(f"[UPLOAD] Successfully extracted text from {sheets_to_process} sheets of Excel: {filename}")
+        logger.info("[UPLOAD] Successfully extracted text from %s sheets of Excel: %s", sheets_to_process, filename)
         return extracted_text
         
     except Exception as e:
-        logging.error(f"[UPLOAD] Error extracting Excel text from {filename}: {e}")
+        logger.error("[UPLOAD] Error extracting Excel text from %s: %s", filename, e, exc_info=True)
         raise ValueError("Excel text extraction failed")
 
 async def extract_docx_text_secure(file_path: str, filename: str) -> str:
     """Securely extract text from Word documents (.docx)"""
     if not HAS_PYTHON_DOCX:
-        logging.error(f"[UPLOAD] python-docx not available for DOCX text extraction: {filename}")
+        logger.error("[UPLOAD] python-docx not available for DOCX text extraction: %s", filename, exc_info=True)
         raise ValueError("DOCX text extraction not available - python-docx not installed")
     
     try:
@@ -645,7 +695,7 @@ async def extract_docx_text_secure(file_path: str, filename: str) -> str:
         
         for paragraph in doc.paragraphs:
             if paragraphs_processed >= max_paragraphs:
-                logging.warning(f"[UPLOAD] DOCX has more than {max_paragraphs} paragraphs, truncating")
+                logger.warning("[UPLOAD] DOCX has more than %s paragraphs, truncating", max_paragraphs)
                 break
             
             text = paragraph.text.strip()
@@ -669,17 +719,17 @@ async def extract_docx_text_secure(file_path: str, filename: str) -> str:
                 extracted_paragraphs.append("\n=== Table ===\n" + '\n'.join(table_data))
         
         extracted_text = '\n\n'.join(extracted_paragraphs)
-        logging.info(f"[UPLOAD] Successfully extracted text from DOCX: {filename}")
+        logger.info("[UPLOAD] Successfully extracted text from DOCX: %s", filename)
         return extracted_text
         
     except Exception as e:
-        logging.error(f"[UPLOAD] Error extracting DOCX text from {filename}: {e}")
+        logger.error("[UPLOAD] Error extracting DOCX text from %s: %s", filename, e, exc_info=True)
         raise ValueError("DOCX text extraction failed")
 
 async def extract_pptx_text_secure(file_path: str, filename: str) -> str:
     """Securely extract text from PowerPoint presentations (.pptx)"""
     if not HAS_PYTHON_PPTX:
-        logging.error(f"[UPLOAD] python-pptx not available for PPTX text extraction: {filename}")
+        logger.error("[UPLOAD] python-pptx not available for PPTX text extraction: %s", filename, exc_info=True)
         raise ValueError("PPTX text extraction not available - python-pptx not installed")
     
     try:
@@ -691,7 +741,7 @@ async def extract_pptx_text_secure(file_path: str, filename: str) -> str:
         slides_to_process = min(len(prs.slides), max_slides)
         
         if len(prs.slides) > max_slides:
-            logging.warning(f"[UPLOAD] PPTX has {len(prs.slides)} slides, processing only first {max_slides}")
+            logger.warning("[UPLOAD] PPTX has %s slides, processing only first %s", len(prs.slides), max_slides)
         
         for i, slide in enumerate(prs.slides[:slides_to_process]):
             try:
@@ -721,15 +771,15 @@ async def extract_pptx_text_secure(file_path: str, filename: str) -> str:
                     extracted_slides.append(f"=== Slide {i+1} ===\n" + '\n\n'.join(slide_text))
                 
             except Exception as e:
-                logging.warning(f"[UPLOAD] Failed to extract text from slide {i+1} in {filename}: {e}")
+                logger.warning("[UPLOAD] Failed to extract text from slide %s in %s: %s", i+1, filename, e)
                 continue
         
         extracted_text = "\n\n".join(extracted_slides)
-        logging.info(f"[UPLOAD] Successfully extracted text from {slides_to_process} slides of PPTX: {filename}")
+        logger.info("[UPLOAD] Successfully extracted text from %s slides of PPTX: %s", slides_to_process, filename)
         return extracted_text
         
     except Exception as e:
-        logging.error(f"[UPLOAD] Error extracting PPTX text from {filename}: {e}")
+        logger.error("[UPLOAD] Error extracting PPTX text from %s: %s", filename, e, exc_info=True)
         raise ValueError("PPTX text extraction failed")
 
 async def extract_rtf_text_secure(file_path: str, filename: str) -> str:
@@ -746,14 +796,12 @@ async def extract_rtf_text_secure(file_path: str, filename: str) -> str:
                 detected = chardet.detect(raw_data)
                 if detected['encoding'] and detected['confidence'] > 0.7:
                     encoding = detected['encoding']
-                    logging.info(f"[UPLOAD] Detected RTF encoding: {encoding} (confidence: {detected['confidence']:.2f})")
+                    logger.info("[UPLOAD] Detected RTF encoding: %s (confidence: %.2f)", encoding, detected['confidence'])
         
         with open(file_path, 'r', encoding=encoding, errors='replace') as f:
             content = f.read(1024 * 1024)  # Limit to 1MB
         
         # Basic RTF content extraction (remove RTF control codes)
-        import re
-        
         # Remove RTF header and control groups
         content = re.sub(r'\\[a-z]+\d*[\s]?', ' ', content)  # Remove RTF control words
         content = re.sub(r'[{}]', '', content)  # Remove braces
@@ -772,11 +820,11 @@ async def extract_rtf_text_secure(file_path: str, filename: str) -> str:
                 lines.append(line)
         
         extracted_text = '\n'.join(lines)
-        logging.info(f"[UPLOAD] Successfully extracted text from RTF: {filename}")
+        logger.info("[UPLOAD] Successfully extracted text from RTF: %s", filename)
         return extracted_text
         
     except Exception as e:
-        logging.error(f"[UPLOAD] Error extracting RTF text from {filename}: {e}")
+        logger.error("[UPLOAD] Error extracting RTF text from %s: %s", filename, e, exc_info=True)
         raise ValueError("RTF text extraction failed")
 
 @router.post("/raw-text")
@@ -786,7 +834,7 @@ async def upload_raw_text(raw_text: RawTextInput):
     Useful for quick analysis of text data, SQL queries, or code snippets.
     """
     try:
-        logging.info(f"[RAW_TEXT] Received raw text input: {raw_text.title}")
+        logger.info("[RAW_TEXT] Received raw text input: %s", raw_text.title)
         
         # Validate text content
         if not raw_text.text or not raw_text.text.strip():
@@ -801,9 +849,6 @@ async def upload_raw_text(raw_text: RawTextInput):
         sanitized_text = sanitize_extracted_text(raw_text.text)
         
         # Generate a filename based on title
-        import re
-        import datetime
-        
         # Create safe filename from title
         safe_title = re.sub(r'[^\w\-_\. ]', '', raw_text.title)
         safe_title = re.sub(r'\s+', '_', safe_title).strip('_')
@@ -828,10 +873,9 @@ async def upload_raw_text(raw_text: RawTextInput):
             f.write(content_with_metadata)
         
         # Set secure permissions
-        import stat
         os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR)
         
-        logging.info(f"[RAW_TEXT] Successfully saved raw text to: {filename}")
+        logger.info("[RAW_TEXT] Successfully saved raw text to: %s", filename)
         
         # Index the raw text into ChromaDB for RAG
         try:
@@ -840,7 +884,7 @@ async def upload_raw_text(raw_text: RawTextInput):
             
             # Chunk the sanitized text
             chunks = chunk_text(sanitized_text, chunk_size=1000, overlap=200)
-            logging.info(f"[RAW_TEXT] Chunking text into {len(chunks)} chunks for ChromaDB")
+            logger.info("[RAW_TEXT] Chunking text into %s chunks for ChromaDB", len(chunks))
             
             # Index each chunk
             for i, chunk in enumerate(chunks):
@@ -854,9 +898,9 @@ async def upload_raw_text(raw_text: RawTextInput):
                 }
                 chroma_client.add_document(doc_id, chunk, metadata=metadata)
             
-            logging.info(f"[RAW_TEXT] Indexed {len(chunks)} chunks into ChromaDB for: {filename}")
+            logger.info("[RAW_TEXT] Indexed %s chunks into ChromaDB for: %s", len(chunks), filename)
         except Exception as e:
-            logging.warning(f"[RAW_TEXT] ChromaDB indexing failed (non-critical): {e}")
+            logger.warning("[RAW_TEXT] ChromaDB indexing failed (non-critical): %s", e)
             # Don't fail the upload if ChromaDB indexing fails
         
         return {
@@ -869,7 +913,7 @@ async def upload_raw_text(raw_text: RawTextInput):
         }
         
     except Exception as e:
-        logging.error(f"[RAW_TEXT] Error processing raw text input: {e}")
+        logger.error("[RAW_TEXT] Error processing raw text input: %s", e, exc_info=True)
         return {"error": f"Raw text processing failed: {str(e)}"}
 
 @router.get("/preview-file/{filename}")
@@ -879,7 +923,7 @@ async def preview_file(filename: str):
     Returns file content in a structured format for frontend display.
     """
     try:
-        logging.info(f"[PREVIEW] Generating preview for file: {filename}")
+        logger.info("[PREVIEW] Generating preview for file: %s", filename)
         
         # Get secure file path
         file_path = secure_file_path(filename)
@@ -912,22 +956,20 @@ async def preview_file(filename: str):
         elif file_ext == '.pdf':
             result = preview_pdf_file(file_path, result)
         elif file_ext in ['.txt', '.rtf', '.docx', '.pptx']:
-            result = preview_text_file(file_path, result, file_ext)
+            result = await preview_text_file(file_path, result, file_ext)
         else:
             result["error"] = f"Preview not supported for file type: {file_ext}"
         
-        logging.info(f"[PREVIEW] Successfully generated preview for: {filename}")
+        logger.info("[PREVIEW] Successfully generated preview for: %s", filename)
         return result
     
     except Exception as e:
-        logging.error(f"[PREVIEW] Error generating preview for {filename}: {e}")
+        logger.error("[PREVIEW] Error generating preview for %s: %s", filename, e, exc_info=True)
         return {"error": f"Preview generation failed: {str(e)}"}
 
 def preview_csv_file(file_path: str, result: dict) -> dict:
     """Generate preview for CSV files"""
     try:
-        import pandas as pd
-        
         # Read CSV with encoding detection
         encoding = 'utf-8'
         if HAS_CHARDET:
@@ -959,8 +1001,6 @@ def preview_excel_file(file_path: str, result: dict) -> dict:
         if not HAS_OPENPYXL:
             result["error"] = "Excel preview requires openpyxl package"
             return result
-        
-        import pandas as pd
         
         # Read all sheets
         excel_file = pd.ExcelFile(file_path)
@@ -1050,7 +1090,7 @@ def preview_pdf_file(file_path: str, result: dict) -> dict:
         result["error"] = f"PDF preview failed: {str(e)}"
         return result
 
-def preview_text_file(file_path: str, result: dict, file_ext: str) -> dict:
+async def preview_text_file(file_path: str, result: dict, file_ext: str) -> dict:
     """Generate preview for text-based files"""
     try:
         encoding = 'utf-8'
@@ -1065,11 +1105,11 @@ def preview_text_file(file_path: str, result: dict, file_ext: str) -> dict:
         
         # Extract content based on file type
         if file_ext == '.docx':
-            content = extract_docx_text_secure(file_path, os.path.basename(file_path))
+            content = await extract_docx_text_secure(file_path, os.path.basename(file_path))
         elif file_ext == '.pptx':
-            content = extract_pptx_text_secure(file_path, os.path.basename(file_path))
+            content = await extract_pptx_text_secure(file_path, os.path.basename(file_path))
         elif file_ext == '.rtf':
-            content = extract_rtf_text_secure(file_path, os.path.basename(file_path))
+            content = await extract_rtf_text_secure(file_path, os.path.basename(file_path))
         else:  # .txt and other text files
             with open(file_path, 'r', encoding=encoding, errors='replace') as f:
                 content = f.read(10000)  # First 10KB
@@ -1096,7 +1136,7 @@ async def download_file(filename: str):
     try:
         from fastapi.responses import FileResponse
         
-        logging.info(f"[DOWNLOAD] Downloading file: {filename}")
+        logger.info("[DOWNLOAD] Downloading file: %s", filename)
         
         # Get secure file path
         file_path = secure_file_path(filename)
@@ -1112,5 +1152,5 @@ async def download_file(filename: str):
         )
     
     except Exception as e:
-        logging.error(f"[DOWNLOAD] Error downloading file {filename}: {e}")
+        logger.error("[DOWNLOAD] Error downloading file %s: %s", filename, e, exc_info=True)
         return {"error": f"Download failed: {str(e)}"}

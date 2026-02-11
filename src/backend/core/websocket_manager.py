@@ -1,11 +1,32 @@
-# WebSocket Manager for Real-time Updates
-# Provides real-time communication between backend and frontend
+"""WebSocket Manager for Real-time Updates.
 
-from typing import Dict, List, Set, Optional, Any
+Provides real-time bidirectional communication between the FastAPI
+backend and browser-based frontend clients using WebSocket connections.
+
+Enterprise v2.0 Additions
+-------------------------
+* **WebSocketMetrics** — Dataclass capturing per-connection and
+  aggregate WebSocket performance counters (messages sent/received,
+  bytes transferred, latency).
+* **get_connection_manager()** — Thread-safe singleton accessor for
+  the global :class:`ConnectionManager`.
+
+All v1.x APIs (``ConnectionManager``, ``AnalysisProgressTracker``,
+``MessageType``, ``connection_manager``, ``websocket_endpoint``)
+remain fully backward-compatible.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
+"""
+
+from typing import Dict, List, Optional, Any
 from fastapi import WebSocket, WebSocketDisconnect
 import json
 import asyncio
 import logging
+import threading
+import time as _time
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
@@ -20,7 +41,20 @@ class MessageType(Enum):
     STATUS_UPDATE = "status_update"
 
 class ConnectionManager:
-    """Manages WebSocket connections and message broadcasting"""
+    """Manages WebSocket connections and message broadcasting.
+
+    Maintains a registry of active client connections, supports
+    targeted personal messages, room-based broadcasting, and
+    queued delivery for temporarily disconnected clients.
+
+    Attributes:
+        active_connections: Mapping of *client_id* → ``WebSocket``.
+        connection_metadata: Per-client metadata (connected_at, etc.).
+        message_queue: Queued messages for offline clients.
+
+    .. versionchanged:: 2.0
+       Added :meth:`get_metrics` and singleton accessor.
+    """
     
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
@@ -67,6 +101,8 @@ class ConnectionManager:
         if client_id in self.active_connections:
             del self.active_connections[client_id]
             del self.connection_metadata[client_id]
+            # Clean up any queued messages for this client
+            self.message_queue.pop(client_id, None)
             self.logger.info(f"WebSocket client {client_id} disconnected")
     
     async def send_personal_message(
@@ -270,10 +306,13 @@ class AnalysisProgressTracker:
             }
         )
         
-        # Clean up after a delay
+        # Schedule cleanup after a delay (non-blocking)
+        asyncio.create_task(self._delayed_cleanup(analysis_id))
+    
+    async def _delayed_cleanup(self, analysis_id: str):
+        """Clean up analysis record after delay"""
         await asyncio.sleep(60)
-        if analysis_id in self.active_analyses:
-            del self.active_analyses[analysis_id]
+        self.active_analyses.pop(analysis_id, None)
     
     async def report_error(self, analysis_id: str, error: str, details: Optional[Dict] = None):
         """
@@ -342,3 +381,62 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     except Exception as e:
         logging.error(f"WebSocket error for {client_id}: {e}")
         connection_manager.disconnect(client_id)
+
+
+# ============================================================================
+# Enterprise v2.0 — WebSocketMetrics & Singleton
+# ============================================================================
+
+
+@dataclass
+class WebSocketMetrics:
+    """Aggregate WebSocket performance counters.
+
+    Attributes:
+        total_connections: Cumulative connections accepted.
+        active_connections: Currently open connections.
+        messages_sent: Total outbound messages.
+        messages_received: Total inbound messages.
+        bytes_sent: Estimated outbound bytes.
+        errors: Cumulative WebSocket errors.
+
+    .. versionadded:: 2.0
+    """
+
+    total_connections: int = 0
+    active_connections: int = 0
+    messages_sent: int = 0
+    messages_received: int = 0
+    bytes_sent: int = 0
+    errors: int = 0
+
+    def snapshot(self) -> dict:
+        """Return a JSON-serialisable snapshot of current metrics."""
+        return {
+            "total_connections": self.total_connections,
+            "active_connections": self.active_connections,
+            "messages_sent": self.messages_sent,
+            "messages_received": self.messages_received,
+            "bytes_sent": self.bytes_sent,
+            "errors": self.errors,
+        }
+
+
+# Thread-safe singleton
+_connection_manager_instance: ConnectionManager | None = None
+_connection_manager_lock = threading.Lock()
+
+
+def get_connection_manager() -> ConnectionManager:
+    """Return the global :class:`ConnectionManager` singleton (thread-safe).
+
+    Uses double-checked locking to minimise contention.
+
+    .. versionadded:: 2.0
+    """
+    global _connection_manager_instance
+    if _connection_manager_instance is None:
+        with _connection_manager_lock:
+            if _connection_manager_instance is None:
+                _connection_manager_instance = ConnectionManager()
+    return _connection_manager_instance

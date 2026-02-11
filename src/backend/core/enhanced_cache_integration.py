@@ -1,7 +1,38 @@
-# Enhanced Caching System Integration
-# Combines existing advanced_cache.py with new optimized data structures
-# BEFORE: Single cache implementation, O(n) lookups in some cases
-# AFTER: Multi-tier caching with O(1) operations, intelligent cache warming
+"""Enhanced Caching System Integration.
+
+Multi-tier caching with O(1) operations and intelligent cache warming,
+combining optimised data structures with persistent file-system storage.
+
+Cache hierarchy:
+
+* **L1 (Memory)** — Hottest data in an :class:`OptimizedLRUCache`.
+* **L2 (Optimised)** — Warm data in a :class:`HighPerformanceHashMap`.
+* **L3 (Persistent)** — Cold data in file-system pickle files with
+  TTL expiration and tag-based invalidation.
+
+Key classes:
+
+* **EnhancedCacheManager** — Façade over the three tiers with
+  automatic promotion, pattern indexing, and background tasks.
+* **SmartCacheWarmer** — Predictive warming based on access patterns.
+* **enhanced_cached** — Decorator for transparent function-level
+  caching with tier and TTL control.
+
+Enterprise v2.0 Additions
+-------------------------
+* **CacheHealthSnapshot** — Frozen dataclass summarising tier
+  utilisation, hit rates, and warming status for dashboards.
+* Enhanced class-level and method-level docstrings throughout.
+
+All v1.x APIs (``CacheLevel``, ``EnhancedCacheEntry``,
+``SmartCacheWarmer``, ``EnhancedCacheManager``,
+``get_enhanced_cache_manager``, ``enhanced_cached``,
+``warm_cache_for_queries``, ``optimize_cache_performance``)
+remain fully backward-compatible.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
+"""
 
 import asyncio
 import time
@@ -41,36 +72,74 @@ class PersistentCache:
         return os.path.join(self.cache_dir, f"{safe_key}.pickle")
     
     def get(self, key: str) -> Any:
+        """Get value from L3 cache, unwrapping the tag metadata wrapper.
+        Also enforces TTL based on file modification time.
+        """
         path = self._get_path(key)
         if not os.path.exists(path):
             return None
-            
         try:
-            # Check TTL
+            # Check TTL based on file mtime
             mtime = os.path.getmtime(path)
             if time.time() - mtime > self.default_ttl:
                 os.remove(path)
                 return None
-                
+
             with open(path, 'rb') as f:
-                return pickle.load(f)
+                data = pickle.load(f)
+            # Handle both old format (raw value) and new format (dict with tags)
+            if isinstance(data, dict) and "value" in data and "tags" in data:
+                return data["value"]
+            return data  # Old format - return raw value
         except Exception:
             return None
             
     def put(self, key: str, value: Any, ttl: float = None, tags: Set[str] = None):
         path = self._get_path(key)
         try:
+            # Store value with tags metadata for invalidation
+            entry = {"value": value, "tags": list(tags) if tags else []}
             with open(path, 'wb') as f:
-                pickle.dump(value, f)
+                pickle.dump(entry, f)
         except Exception as e:
             logging.warning(f"Failed to write L3 cache: {e}")
             
     def invalidate_by_tags(self, tags: Set[str]):
-        # Simplified: File based tagging is complex, skipping for now or clear all
-        pass
+        """Invalidate all cached entries that have any of the given tags."""
+        if not os.path.exists(self.cache_dir):
+            return
+        invalidated = 0
+        import glob as glob_mod
+        for filepath in glob_mod.glob(os.path.join(self.cache_dir, "*.pickle")):
+            try:
+                with open(filepath, 'rb') as f:
+                    data = pickle.load(f)
+                if isinstance(data, dict) and "tags" in data:
+                    entry_tags = set(data.get("tags", []))
+                    if entry_tags & tags:  # Intersection - any matching tag
+                        os.remove(filepath)
+                        invalidated += 1
+            except Exception:
+                continue
+        if invalidated:
+            logging.info(f"L3 cache: invalidated {invalidated} entries by tags {tags}")
         
     def get_stats(self):
         return {"type": "filesystem", "dir": self.cache_dir}
+        
+    def clear(self):
+        """Clear all persistent cache files"""
+        try:
+            import glob
+            if os.path.exists(self.cache_dir):
+                for f in glob.glob(os.path.join(self.cache_dir, "*.pickle")):
+                    try:
+                        os.remove(f)
+                    except OSError:
+                        pass
+                logger.info(f"Cleared L3 persistent cache at {self.cache_dir}")
+        except Exception as e:
+            logger.warning(f"Failed to clear L3 cache: {e}")
 
 logger = logging.getLogger(__name__)
 
@@ -98,9 +167,11 @@ class EnhancedCacheEntry:
         """Calculate entry size after initialization"""
         if self.size_bytes == 0:
             try:
-                self.size_bytes = len(pickle.dumps(self.value))
+                # [OPTIMIZATION 5.1] Remove pickle.dumps overhead
+                import sys
+                self.size_bytes = sys.getsizeof(self.value)
             except Exception:
-                self.size_bytes = len(str(self.value).encode('utf-8'))
+                self.size_bytes = 100 # Fallback estimate
     
     def is_expired(self) -> bool:
         """Check if cache entry has expired"""
@@ -241,10 +312,10 @@ class EnhancedCacheManager:
             asyncio.create_task(self._periodic_cleanup())
             
             # Start optimization task
+            asyncio.create_task(self._periodic_optimization())
         except RuntimeError:
             # No event loop running (e.g., in tests)
             logging.info("Skipping background tasks - no event loop")
-        asyncio.create_task(self._periodic_optimization())
     
     def _generate_optimized_key(self, func_name: str, args: tuple, kwargs: dict) -> str:
         """Generate optimized cache key using trie-based patterns"""
@@ -432,18 +503,31 @@ class EnhancedCacheManager:
                     self.l2_cache.put(key, entry)
                     self.tier_stats[CacheLevel.L2_OPTIMIZED]['puts'] += 1
                 
-                # Always store in L3 for persistence
-                self.l3_cache.put(key, value, ttl, cache_tags)
-                self.tier_stats[CacheLevel.L3_PERSISTENT]['puts'] += 1
+                self.stats['total_puts'] += 1
                 
-                # Update trie index for key patterns
+                # Update trie index (fast in-memory operation)
                 self._update_pattern_index(key)
                 
-                self.stats['total_puts'] += 1
+                # Optimistically track L3 puts
+                self.tier_stats[CacheLevel.L3_PERSISTENT]['puts'] += 1
+                
                 logger.debug(f"Cache PUT: {key} -> {level.value}")
                 
         finally:
             self.performance_monitor.end_timer("cache_put")
+
+        # [OPTIMIZATION 5.2] Lazy L3 write outside lock
+        # We fire and forget this task to not block the response
+        try:
+             asyncio.create_task(self._async_l3_write(key, value, ttl, cache_tags))
+        except RuntimeError:
+             # Fallback for sync contexts or no loop
+             self.l3_cache.put(key, value, ttl, cache_tags)
+
+    async def _async_l3_write(self, key, value, ttl, tags):
+        """Execute L3 write in thread pool to avoid blocking loop"""
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, self.l3_cache.put, key, value, ttl, tags)
 
     def put_sync(self, key: str, value: Any, ttl: Optional[float] = None, 
                  tags: Set[str] = None, level: CacheLevel = CacheLevel.L1_MEMORY):
@@ -539,12 +623,17 @@ class EnhancedCacheManager:
     async def _cleanup_expired_entries(self):
         """Clean up expired entries across all tiers"""
         with self.lock:
-            # L2 cache cleanup
+            # L2 cache cleanup (HighPerformanceHashMap)
             expired_keys = []
-            for key in list(self.l2_cache.cache.keys()):
-                entry = self.l2_cache.get(key)
-                if isinstance(entry, EnhancedCacheEntry) and entry.is_expired():
-                    expired_keys.append(key)
+            
+            # [FIX] Iterate over buckets correctly
+            # The class does not expose .keys() or .cache directly
+            if hasattr(self.l2_cache, 'buckets'):
+                for bucket in self.l2_cache.buckets:
+                    for key, _ in bucket:
+                        entry = self.l2_cache.get(key)
+                        if isinstance(entry, EnhancedCacheEntry) and entry.is_expired():
+                            expired_keys.append(key)
             
             for key in expired_keys:
                 self.l2_cache.delete(key)
@@ -574,12 +663,33 @@ class EnhancedCacheManager:
         """Optimize cache distribution based on access patterns"""
         # Analyze tier usage and redistribute if needed
         l1_usage = len(self.l1_cache.cache) / self.l1_cache.capacity
-        l2_usage = len(self.l2_cache.cache) / self.l2_cache.capacity
+        l2_usage = self.l2_cache.size / self.l2_cache.capacity
         
         if l1_usage > 0.9 and l2_usage < 0.5:
             # Consider promoting some L2 items to L1
             # Implementation would be more sophisticated
             pass
+
+    def clear_all(self):
+        """Clear all cache tiers and indexes"""
+        with self.lock:
+            # Clear all tiers
+            self.l1_cache.clear()
+            self.l2_cache.clear()
+            self.l3_cache.clear()
+            
+            # Reset indexes and stats
+            self.trie_index = OptimizedTrie()
+            self.stats = defaultdict(int)
+            
+            # Reset tier stats
+            for level in self.tier_stats:
+                self.tier_stats[level] = defaultdict(int)
+                
+            # Reset cache warmer patterns
+            self.cache_warmer = SmartCacheWarmer(self)
+            
+            logger.info("Cache cleared completely (all tiers)")
     
     def get_comprehensive_stats(self) -> Dict[str, Any]:
         """Get comprehensive cache statistics"""
@@ -605,9 +715,9 @@ class EnhancedCacheManager:
                     },
                     'l2': {
                         'hits': self.stats['l2_hits'],
-                        'size': len(self.l2_cache.cache),
+                        'size': self.l2_cache.size,
                         'capacity': self.l2_cache.capacity,
-                        'utilization': round(len(self.l2_cache.cache) / self.l2_cache.capacity * 100, 2)
+                        'utilization': round(self.l2_cache.size / self.l2_cache.capacity * 100, 2)
                     },
                     'l3': {
                         'hits': self.stats['l3_hits'],
@@ -689,3 +799,65 @@ async def optimize_cache_performance():
     await cache_manager._analyze_access_patterns()
     await cache_manager._optimize_tier_distribution()
     logger.info("Manual cache optimization completed")
+
+
+# ============================================================================
+# Enterprise v2.0 — CacheHealthSnapshot
+# ============================================================================
+
+from dataclasses import dataclass as _dataclass, field as _field
+import datetime as _dt
+
+
+@_dataclass(frozen=True)
+class CacheHealthSnapshot:
+    """Frozen point-in-time snapshot of cache-system health.
+
+    Designed for export to observability dashboards and alerting
+    pipelines.
+
+    Attributes:
+        l1_utilisation: L1 cache utilisation ratio (0.0–1.0).
+        l2_utilisation: L2 cache utilisation ratio.
+        overall_hit_rate: Aggregate hit rate across all tiers.
+        total_requests: Cumulative cache requests.
+        warming_patterns: Number of tracked warming patterns.
+        timestamp: ISO-8601 creation timestamp.
+
+    .. versionadded:: 2.0
+    """
+
+    l1_utilisation: float
+    l2_utilisation: float
+    overall_hit_rate: float
+    total_requests: int
+    warming_patterns: int
+    timestamp: str = _field(
+        default_factory=lambda: _dt.datetime.now().isoformat()
+    )
+
+    @classmethod
+    def capture(cls, manager: EnhancedCacheManager | None = None) -> "CacheHealthSnapshot":
+        """Capture a live snapshot from an :class:`EnhancedCacheManager`.
+
+        Args:
+            manager: Cache manager instance; uses the global singleton
+                     if ``None``.
+
+        Returns:
+            A frozen :class:`CacheHealthSnapshot`.
+        """
+        mgr = manager or get_enhanced_cache_manager()
+        stats = mgr.get_comprehensive_stats()
+        overview = stats.get("overview", {})
+        l1 = stats.get("tier_performance", {}).get("l1", {})
+        l2 = stats.get("tier_performance", {}).get("l2", {})
+        patterns = stats.get("pattern_analysis", {})
+        total = overview.get("total_requests", 0)
+        return cls(
+            l1_utilisation=round(l1.get("utilization", 0) / 100, 4),
+            l2_utilisation=round(l2.get("utilization", 0) / 100, 4),
+            overall_hit_rate=round(overview.get("hit_rate", 0) / 100, 4),
+            total_requests=total,
+            warming_patterns=patterns.get("cache_warming_patterns", 0),
+        )

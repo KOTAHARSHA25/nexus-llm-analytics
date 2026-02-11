@@ -8,7 +8,7 @@ import json
 import logging
 import os
 from unittest.mock import patch, MagicMock, mock_open
-from src.backend.core.utils import (
+from backend.core.utils import (
     JsonFormatter, log_data_version, setup_logging, friendly_error, AgentRegistry
 )
 

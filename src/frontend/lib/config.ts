@@ -1,45 +1,67 @@
 ﻿/**
  * Application Configuration
  * Centralized configuration for backend URLs and environment settings
+ * 
+ * URL resolution priority: localStorage > env variable > hostname detection > default
  */
+
+const STORAGE_KEY = "nexus_backend_url";
 
 /**
  * Get the backend API base URL based on environment
- * Supports development, production, and custom configurations
+ * Supports development, production, localStorage overrides, and custom configurations
  */
 export function getBackendUrl(): string {
   // Check if running in browser
   if (typeof window !== 'undefined') {
-    // Check for environment-specific override
+    // 1. Check localStorage first (user preference from Settings UI)
+    const savedUrl = localStorage.getItem(STORAGE_KEY);
+    if (savedUrl) {
+      return savedUrl;
+    }
+
+    // 2. Check for environment-specific override
     if (process.env.NEXT_PUBLIC_BACKEND_URL) {
       return process.env.NEXT_PUBLIC_BACKEND_URL;
     }
 
-    // Production check (if hosted)
+    // 3. Production check (if hosted on non-localhost)
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      // In production, backend might be on same host different port or subdomain
       return `${window.location.protocol}//${window.location.hostname}:8000`;
     }
   }
 
-  // Development default
+  // 4. Development default
   return 'http://localhost:8000';
 }
 
 /**
- * Backend API base URL
- * Use this constant throughout the application
+ * Set the backend URL in localStorage (called from Settings UI)
  */
-export const BACKEND_URL = getBackendUrl();
+export function setBackendUrl(url: string): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY, url);
+  }
+}
+
+/**
+ * Reset backend URL to default (removes localStorage override)
+ */
+export function resetBackendUrl(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
 
 /**
  * API endpoint builder helper
- * Ensures consistent URL construction
+ * Calls getBackendUrl() dynamically to pick up localStorage changes
  */
 export function apiUrl(endpoint: string): string {
-  // Remove leading slash if present to avoid double slashes
+  const baseUrl = getBackendUrl();
+  if (!endpoint) return baseUrl;
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-  return `${BACKEND_URL}/${cleanEndpoint}`;
+  return `${baseUrl}/${cleanEndpoint}`;
 }
 
 /**
@@ -55,9 +77,9 @@ export function getWebSocketUrl(): string {
  */
 export const config = {
   backend: {
-    baseUrl: BACKEND_URL,
+    get baseUrl() { return getBackendUrl(); },
     apiUrl: apiUrl,
-    wsUrl: getWebSocketUrl(),
+    get wsUrl() { return getWebSocketUrl(); },
   },
   endpoints: {
     // ========== HEALTH & SYSTEM ==========
@@ -69,6 +91,7 @@ export const config = {
 
     // ========== ANALYSIS (CORE FLOW) ==========
     analyze: '/api/analyze/',
+    stream: '/api/analyze/stream',                 // Streaming analysis with SSE
     analyzeCancel: '/api/analyze/cancel',          // Note: Use with /{analysis_id}
     analyzeStatus: '/api/analyze/status',          // Note: Use with /{analysis_id}
     analyzeReview: '/api/analyze/review-insights',
@@ -110,6 +133,15 @@ export const config = {
     downloadReport: '/api/report/download-report/',
     downloadLog: '/api/report/download-log',
     downloadAudit: '/api/report/download-audit',
+
+    // ========== FEEDBACK ==========
+    feedback: '/api/feedback/',
+    feedbackStats: '/api/feedback/stats',
+    feedbackExport: '/api/feedback/export',
+    feedbackReset: '/api/feedback/reset',
+
+    // ========== RUNNING ANALYSES ==========
+    analyzeRunning: '/api/analyze/running',
   },
 } as const;
 

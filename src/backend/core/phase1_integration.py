@@ -1,20 +1,34 @@
-"""
-Phase 1 Integration Module
-==========================
-Provides unified access to all Phase 1 components and ensures they work together.
+"""Phase 1 Integration Module.
 
-This module serves as the single entry point for:
-- Smart Fallback Management
-- Dynamic Model Discovery  
-- RAM-Aware Selection
-- Circuit Breaker Protection
-- Enhanced Query Orchestration
+Provides unified access to all Phase 1 resilience components and
+ensures they work together through the :class:`Phase1Coordinator`.
+
+Single entry point for:
+
+* **Smart Fallback Management** — automatic degradation on failures.
+* **Dynamic Model Discovery** — runtime detection of available models.
+* **RAM-Aware Selection** — memory-pressure-driven model choice.
+* **Circuit Breaker Protection** — fault isolation per service.
+* **Enhanced Query Orchestration** — complexity-aware execution plans.
 
 Design Principles:
-- Zero Hardcoding: All configuration is dynamic
-- Domain Agnostic: Works with any data domain
-- Fail-Safe: Process never stops completely
-- Observable: Full visibility into system state
+
+* Zero Hardcoding — all configuration is dynamic.
+* Domain Agnostic — works with any data domain.
+* Fail-Safe — process never stops completely.
+* Observable — full visibility into system state.
+
+Enterprise v2.0 Additions
+-------------------------
+* **Phase1HealthMonitor** — periodic health-check runner that
+  captures :class:`Phase1Status` snapshots and triggers alerts
+  when the health score drops below a configurable threshold.
+
+All v1.x APIs (``Phase1Coordinator``, ``get_phase1_coordinator``,
+``resilient_llm_call``, re-exports) remain unchanged.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
 """
 
 import logging
@@ -378,3 +392,88 @@ __all__ = [
     'ExecutionMethod',
     'ReviewLevel',
 ]
+
+
+# ============================================================================
+# Enterprise v2.0 — Phase1HealthMonitor
+# ============================================================================
+
+import threading as _threading
+
+
+class Phase1HealthMonitor:
+    """Periodic health-check runner for Phase 1 components.
+
+    Captures :class:`Phase1Status` snapshots at a configurable
+    interval and invokes a callback when the health score drops
+    below a threshold.
+
+    Args:
+        coordinator: The :class:`Phase1Coordinator` to monitor.
+        interval_seconds: Seconds between health checks.
+        alert_threshold: Score below which the alert callback fires.
+        on_alert: Optional callback ``(Phase1Status) -> None``.
+
+    Example::
+
+        coord = get_phase1_coordinator()
+        monitor = Phase1HealthMonitor(coord, interval_seconds=60)
+        monitor.start()
+
+    .. versionadded:: 2.0
+    """
+
+    def __init__(
+        self,
+        coordinator: Phase1Coordinator | None = None,
+        interval_seconds: float = 120.0,
+        alert_threshold: float = 0.7,
+        on_alert=None,
+    ) -> None:
+        self._coordinator = coordinator
+        self._interval = interval_seconds
+        self._threshold = alert_threshold
+        self._on_alert = on_alert
+        self._running = False
+        self._thread: _threading.Thread | None = None
+        self._history: list[dict] = []
+
+    def start(self) -> None:
+        """Start the background health-check loop."""
+        if self._running:
+            return
+        self._running = True
+        self._thread = _threading.Thread(target=self._loop, daemon=True)
+        self._thread.start()
+        logger.info("Phase1HealthMonitor started (interval=%ss)", self._interval)
+
+    def stop(self) -> None:
+        """Signal the monitor to stop after the current iteration."""
+        self._running = False
+        logger.info("Phase1HealthMonitor stopping")
+
+    def _loop(self) -> None:
+        import time as _time
+        coord = self._coordinator or get_phase1_coordinator()
+        while self._running:
+            try:
+                status = coord.get_status()
+                entry = {
+                    "healthy": status.healthy,
+                    "score": status.overall_health_score,
+                    "timestamp": _time.time(),
+                }
+                self._history.append(entry)
+                # Keep last 500 entries
+                if len(self._history) > 500:
+                    self._history = self._history[-250:]
+                if status.overall_health_score < self._threshold and self._on_alert:
+                    self._on_alert(status)
+            except Exception as exc:
+                logger.warning("Phase1HealthMonitor check failed: %s", exc)
+            _time.sleep(self._interval)
+
+    @property
+    def history(self) -> list[dict]:
+        """Return the recorded health-check history."""
+        return list(self._history)

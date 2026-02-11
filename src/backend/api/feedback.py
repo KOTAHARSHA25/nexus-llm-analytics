@@ -1,23 +1,41 @@
-"""
-Feedback API: Collects user ratings for analysis results.
-This enables a feedback flywheel for continuous improvement.
+"""Feedback API — User Rating Collection for Continuous Improvement
+==================================================================
 
-Author: Nexus Analytics Team
-Date: January 3, 2026
-Purpose: Fix 10 - Enable user feedback collection
+Collects per-query user ratings (1–5 stars, thumbs up/down, free-text
+comments) and persists them as JSONL for downstream fine-tuning and
+performance monitoring.
+
+Feedback flywheel: users rate results → system identifies weak queries
+→ prompts/models improved → better results → higher ratings.
+
+Endpoints
+---------
+``POST  /``       Submit feedback for an analysis result.
+``GET   /stats``  Aggregate feedback statistics.
+``GET   /export`` Export feedback as JSONL, JSON, or CSV.
+``DELETE /reset``  Admin function to clear all feedback data.
 """
+
+from __future__ import annotations
+
+import csv
+import hashlib
+import io
+import json
+import logging
+import os
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional
-import json
-import os
-from datetime import datetime
-import logging
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/feedback", tags=["feedback"])
+
+# Project root directory — single source of truth for all feedback paths
+_PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent.parent.parent
 
 
 class FeedbackRequest(BaseModel):
@@ -45,7 +63,7 @@ class FeedbackStats(BaseModel):
     thumbs_up_count: int
     thumbs_down_count: int
     thumbs_up_rate: Optional[float]
-    recent_comments: list
+    recent_comments: List[Dict[str, Any]]
 
 
 @router.post("/", response_model=FeedbackResponse)
@@ -62,7 +80,8 @@ async def submit_feedback(request: FeedbackRequest):
     """
     try:
         # Generate unique feedback ID
-        feedback_id = f"fb_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hash(request.query) % 10000:04d}"
+        query_hash = hashlib.sha256(request.query.encode()).hexdigest()[:4]
+        feedback_id = f"fb_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{query_hash}"
         
         # Prepare feedback entry
         entry = {
@@ -78,9 +97,7 @@ async def submit_feedback(request: FeedbackRequest):
         }
         
         # Determine feedback storage location
-        # Try project root data/feedback first
-        project_root = Path(__file__).parent.parent.parent.parent
-        feedback_dir = project_root / 'data' / 'feedback'
+        feedback_dir = _PROJECT_ROOT / 'data' / 'feedback'
         feedback_dir.mkdir(parents=True, exist_ok=True)
         feedback_file = feedback_dir / 'user_feedback.jsonl'
         
@@ -90,7 +107,10 @@ async def submit_feedback(request: FeedbackRequest):
         
         # Log feedback for monitoring
         emoji = "👍" if request.thumbs_up else "👎" if request.thumbs_up is False else "⭐"
-        logger.info(f"Feedback recorded: {feedback_id} | Rating: {request.rating}/5 {emoji} | Query: {request.query[:50]}...")
+        logger.info(
+            "Feedback recorded: %s | Rating: %d/5 %s | Query: %.50s...",
+            feedback_id, request.rating, emoji, request.query,
+        )
         
         return FeedbackResponse(
             success=True,
@@ -99,7 +119,7 @@ async def submit_feedback(request: FeedbackRequest):
         )
         
     except Exception as e:
-        logger.error(f"Failed to save feedback: {e}", exc_info=True)
+        logger.error("Failed to save feedback: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to save feedback: {str(e)}")
 
 
@@ -113,8 +133,7 @@ async def get_feedback_stats(limit: int = 10):
         limit: Number of recent comments to include (default 10)
     """
     try:
-        project_root = Path(__file__).parent.parent.parent.parent
-        feedback_file = project_root / 'data' / 'feedback' / 'user_feedback.jsonl'
+        feedback_file = _PROJECT_ROOT / 'data' / 'feedback' / 'user_feedback.jsonl'
         
         if not feedback_file.exists():
             return FeedbackStats(
@@ -159,7 +178,7 @@ async def get_feedback_stats(limit: int = 10):
                                 'query': entry.get('query', '')[:50] + '...'
                             })
                     except json.JSONDecodeError:
-                        logger.warning(f"Skipping malformed feedback line: {line[:100]}")
+                        logger.warning("Skipping malformed feedback line: %.100s", line)
                         continue
         
         # Calculate statistics
@@ -184,12 +203,12 @@ async def get_feedback_stats(limit: int = 10):
         )
         
     except Exception as e:
-        logger.error(f"Failed to get feedback stats: {e}", exc_info=True)
+        logger.error("Failed to get feedback stats: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to retrieve stats: {str(e)}")
 
 
 @router.get("/export")
-async def export_feedback(format: str = "jsonl"):
+async def export_feedback(format: str = "jsonl") -> Dict[str, Any]:
     """
     Export all feedback for analysis/fine-tuning.
     
@@ -200,8 +219,7 @@ async def export_feedback(format: str = "jsonl"):
         Feedback data in requested format
     """
     try:
-        project_root = Path(__file__).parent.parent.parent.parent
-        feedback_file = project_root / 'data' / 'feedback' / 'user_feedback.jsonl'
+        feedback_file = _PROJECT_ROOT / 'data' / 'feedback' / 'user_feedback.jsonl'
         
         if not feedback_file.exists():
             return {"entries": [], "count": 0}
@@ -219,8 +237,6 @@ async def export_feedback(format: str = "jsonl"):
             return {"entries": entries, "count": len(entries)}
         elif format == "csv":
             # Simple CSV format
-            import io
-            import csv
             output = io.StringIO()
             if entries:
                 writer = csv.DictWriter(output, fieldnames=entries[0].keys())
@@ -234,12 +250,12 @@ async def export_feedback(format: str = "jsonl"):
             }
         
     except Exception as e:
-        logger.error(f"Failed to export feedback: {e}", exc_info=True)
+        logger.error("Failed to export feedback: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
 
 @router.delete("/reset")
-async def reset_feedback(confirm: str = ""):
+async def reset_feedback(confirm: str = "") -> Dict[str, Any]:
     """
     Reset/clear all feedback data (admin function).
     Requires confirmation parameter.
@@ -254,14 +270,13 @@ async def reset_feedback(confirm: str = ""):
         )
     
     try:
-        project_root = Path(__file__).parent.parent.parent.parent
-        feedback_file = project_root / 'data' / 'feedback' / 'user_feedback.jsonl'
+        feedback_file = _PROJECT_ROOT / 'data' / 'feedback' / 'user_feedback.jsonl'
         
         if feedback_file.exists():
             # Backup before deleting
             backup_file = feedback_file.with_suffix('.jsonl.backup')
             feedback_file.rename(backup_file)
-            logger.warning(f"Feedback reset - backup saved to {backup_file}")
+            logger.warning("Feedback reset - backup saved to %s", backup_file)
             
             return {
                 "success": True,
@@ -272,5 +287,69 @@ async def reset_feedback(confirm: str = ""):
             return {"success": True, "message": "No feedback data to reset"}
         
     except Exception as e:
-        logger.error(f"Failed to reset feedback: {e}", exc_info=True)
+        logger.error("Failed to reset feedback: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Reset failed: {str(e)}")
+
+
+# =====================================================================
+# PATENT COMPLIANCE: Feedback-Driven Learning
+# =====================================================================
+# The patent states "continuously learning and improving itself based on
+# user feedback and execution errors."  This section closes the feedback
+# loop by reading stored ratings and surfacing low-rated query patterns
+# so the Generator/Planner can avoid past mistakes.
+# =====================================================================
+
+def get_weak_query_patterns(max_patterns: int = 5) -> str:
+    """Read stored user feedback and return low-rated query patterns.
+
+    This function is called by the analysis pipeline before prompt
+    construction so the LLM is warned about past failures — closing
+    the feedback flywheel described in the patent.
+
+    Returns:
+        A formatted string describing queries that received poor
+        ratings, or an empty string if no weak patterns exist.
+    """
+    try:
+        feedback_file = _PROJECT_ROOT / 'data' / 'feedback' / 'user_feedback.jsonl'
+        if not feedback_file.exists():
+            return ""
+
+        weak: List[Dict[str, Any]] = []
+        with open(feedback_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                try:
+                    entry = json.loads(line)
+                    rating = entry.get('rating', 5)
+                    if rating <= 2:
+                        weak.append(entry)
+                except json.JSONDecodeError:
+                    continue
+
+        if not weak:
+            return ""
+
+        # Sort by timestamp (most recent first) and take top N
+        weak.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        weak = weak[:max_patterns]
+
+        context = "User Feedback — Past Weak Results to Avoid:\n"
+        for entry in weak:
+            q = entry.get('query', '')[:80]
+            comment = entry.get('comment', 'No comment')
+            rating = entry.get('rating', '?')
+            context += (
+                f"- Query '{q}' received {rating}/5."
+            )
+            if comment and comment != 'No comment':
+                context += f" User said: '{comment[:100]}'"
+            context += "\n"
+
+        return context
+
+    except Exception as e:
+        logger.warning("Failed to load weak query patterns: %s", e)
+        return ""

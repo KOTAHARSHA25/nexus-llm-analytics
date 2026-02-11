@@ -1,0 +1,9 @@
+[
+    {
+        "dataset": "complex_sales_10k.csv",
+        "total_revenue": 2513705.4372131145,
+        "avg_sale": 251.37054372131144,
+        "top_category": "Home",
+        "notes": "Includes 1 outlier (500k) and null regions"
+    }
+]

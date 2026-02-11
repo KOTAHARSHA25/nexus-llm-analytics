@@ -2,7 +2,7 @@ import pytest
 import asyncio
 import time
 from unittest.mock import patch
-from src.backend.core.rate_limiter import TokenBucket, RateLimiter, RateLimitStrategy, RateLimitExceeded, rate_limit
+from backend.core.rate_limiter import TokenBucket, RateLimiter, RateLimitStrategy, RateLimitExceeded, rate_limit
 
 @pytest.mark.asyncio
 async def test_token_bucket():

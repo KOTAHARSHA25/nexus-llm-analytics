@@ -74,6 +74,16 @@ history/
 *.pyd
 .DS_Store
 Thumbs.db
+*.pickle
+data/cache/
+.pytest_cache/
+.benchmarks/
+.swarm_memory/
+
+# Database files (generated at runtime)
+*.db
+*.sqlite
+*.sqlite3
 
 # Distribution archives
 nexus-llm-analytics-distribution*/
@@ -81,6 +91,41 @@ archive/
 
 # Broken folder
 broken/
+
+# Debug, error, and runtime output files
+debug_output.txt
+test_output.txt
+self_learning_result.txt
+verification_result.txt
+benchmark_log.txt
+benchmark_results.json
+debug.log
+error_log*.txt
+collection_*.log
+collection_*.txt
+test_collection*.log
+test_collection*.txt
+test_output.txt
+test_accuracy_checkpoint.json
+pytest_error.log
+research_metrics_output.log
+config/user_preferences.json
+
+# Standalone chart/test scripts (generated during debug)
+generate_charts.py
+make_charts.py
+standalone_charts.py
+create_charts.bat
+repro_config.py
+
+# Temporary validation/test files at root
+test_integration_full.py
+FORMAT_VALIDATION_REPORT.md
+FUNCTIONAL_TEST_REPORT.md
+INTERIM_OPTIMIZATION_REPORT.md
+
+# Word/binary docs (keep markdown versions only)
+*.docx
 
 # Whitelist frontend lib
 !src/frontend/lib/

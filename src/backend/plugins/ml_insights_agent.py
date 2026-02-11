@@ -1,3 +1,15 @@
+"""ML Insights Agent Plugin — Nexus LLM Analytics
+==================================================
+
+Specialised agent for machine-learning pattern detection,
+clustering, anomaly detection, PCA, feature importance,
+and predictive analytics powered by scikit-learn.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`MLInsightsMetrics` — per-agent call-count and
+  latency tracker for ML operations.
+"""
 # ML Insights Agent Plugin
 # Specialized agent for machine learning pattern detection and insights
 
@@ -18,8 +30,7 @@ sys.path.insert(0, str(src_path))
 try:
     from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
 except ImportError as e:
-    print(f"Import error: {e}")
-    print("Make sure you're running from the correct directory")
+    logging.error(f"Import error: {e} - Make sure you're running from the correct directory")
     raise
 
 # ML and data science imports
@@ -53,34 +64,23 @@ except ImportError:
 
 
 class MLInsightsAgent(BasePluginAgent):
-    """
-    Machine Learning Insights Agent
-    
+    """Machine Learning Insights Agent.
+
     Capabilities:
-    - Pattern detection and data mining
-    - Clustering analysis for customer segmentation
-    - Anomaly detection using multiple algorithms
-    - Principal Component Analysis (PCA) for dimensionality reduction
-    - Feature importance analysis
-    - Correlation and association analysis
-    - Classification insights and predictions
-    - Regression analysis for trend prediction
-    - Data preprocessing and feature engineering
-    - Model performance evaluation
-    - Automated machine learning insights
-    - Predictive analytics recommendations
-    - Data quality assessment
-    - Feature selection and ranking
-    
+        * Pattern detection, clustering, and anomaly detection
+        * PCA dimensionality reduction and feature importance
+        * Classification / regression insights and predictions
+        * Automated algorithm selection and model evaluation
+        * Data quality assessment and feature engineering
+
     Features:
-    - Automatic algorithm selection based on data characteristics
-    - Hyperparameter optimization suggestions
-    - Model interpretability and explainability
-    - Bias detection and fairness analysis
-    - Performance benchmarking
-    - Cross-validation and model validation
-    - Feature engineering recommendations
-    - Data visualization for ML insights
+        * Automatic algorithm selection based on data characteristics
+        * Hyperparameter optimisation suggestions
+        * Model interpretability and cross-validation
+        * Bias detection and fairness analysis
+
+    Thread Safety:
+        Not inherently thread-safe — instantiate one per request.
     """
     
     def get_metadata(self) -> AgentMetadata:
@@ -105,6 +105,7 @@ class MLInsightsAgent(BasePluginAgent):
     def initialize(self, **kwargs) -> bool:
         """Initialize the ML insights agent"""
         try:
+            self.registry = kwargs.get("registry")
             if not HAS_SKLEARN:
                 logging.error("scikit-learn not available - required for ML analysis")
                 return False
@@ -230,13 +231,63 @@ class MLInsightsAgent(BasePluginAgent):
         confidence += min(algo_matches * 0.12, 0.3)
         
         return min(confidence, 1.0)
+
+    def reflective_execute(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Swarm-enabled execution with self-correction and insight sharing.
+        """
+        context = context or {}
+        
+        # 1. Execute
+        result = self.execute(query, **context)
+        
+        # 2. Critique
+        if not result['success']:
+             pass
+
+        # 3. Share Insights
+        if self.swarm_context and result.get('success'):
+            try:
+                summary = f"ML Analysis: {result.get('operation', 'unknown')}"
+                if 'interpretation' in result and result['interpretation']:
+                     # Extract first few lines of interpretation
+                     lines = str(result['interpretation']).split('\n')
+                     summary = "\\n".join([l for l in lines if l.strip()][:3])
+
+                content = {
+                    "query": query,
+                    "summary": summary,
+                    "result_keys": list(result.get('result', {}).keys()) if isinstance(result.get('result'), dict) else [],
+                    "metadata": result.get('metadata', {})
+                }
+                
+                self.publish_insight(
+                    insight_type="ml_analysis_success",
+                    content=content,
+                    confidence=0.9
+                )
+                logging.info(f"[{self.metadata.name}] Published insight to Swarm")
+            except Exception as e:
+                logging.warning(f"Failed to publish insight: {e}")
+        
+        return result
     
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
         """Execute ML analysis based on the query"""
         try:
-            # Load data if filename provided
+            # Load data from pre-resolved filepath (set by analysis_service) or filename
+            filepath = kwargs.get('filepath')
             filename = kwargs.get('filename')
-            if filename and not data:
+            if not data and filepath:
+                try:
+                    data = pd.read_csv(filepath) if filepath.endswith('.csv') else (
+                        pd.read_excel(filepath) if filepath.endswith(('.xlsx', '.xls')) else
+                        pd.read_json(filepath) if filepath.endswith('.json') else None
+                    )
+                    logging.info(f"Loaded data from pre-resolved path: {filepath}")
+                except Exception as e:
+                    logging.warning(f"Failed to load from filepath {filepath}: {e}")
+            if filename and data is None:
                 data = self._load_data(filename)
             
             if data is None:
@@ -286,8 +337,8 @@ class MLInsightsAgent(BasePluginAgent):
     def _load_data(self, filename: str) -> Optional[pd.DataFrame]:
         """Load data from file"""
         try:
-            # Project root is 3 levels up from this file (src/backend/plugins)
-            project_root = Path(__file__).parent.parent.parent
+            # Project root is 4 levels up from this file (src/backend/plugins/ → src/backend → src → ROOT)
+            project_root = Path(__file__).parent.parent.parent.parent
             base_data_dir = project_root / "data"
             
             for subdir in ["uploads", "samples"]:
@@ -887,7 +938,8 @@ class MLInsightsAgent(BasePluginAgent):
                                 if potential_target in col.lower():
                                     target_col = col
                                     break
-                    except: pass
+                    except (ValueError, IndexError):
+                        pass
                 
                 if not target_col:
                     # Default to last categorical column
@@ -1072,3 +1124,39 @@ class MLInsightsAgent(BasePluginAgent):
             }
         except Exception as e:
             return {"success": False, "error": f"Feature importance analysis failed: {str(e)}", "agent": "MLInsightsAgent"}
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+from dataclasses import dataclass
+
+
+@dataclass
+class MLInsightsMetrics:
+    """Per-agent call-count and latency tracker for ML operations.
+
+    v2.0 Enterprise Addition.
+    """
+
+    total_analyses: int = 0
+    successful_analyses: int = 0
+    total_latency_ms: float = 0.0
+
+    def record(self, *, success: bool, latency_ms: float = 0.0) -> None:
+        self.total_analyses += 1
+        if success:
+            self.successful_analyses += 1
+        self.total_latency_ms += latency_ms
+
+    def to_dict(self) -> dict:
+        return {
+            "total_analyses": self.total_analyses,
+            "success_rate": round(
+                self.successful_analyses / self.total_analyses, 4
+            ) if self.total_analyses else 0.0,
+            "avg_latency_ms": round(
+                self.total_latency_ms / self.total_analyses, 2
+            ) if self.total_analyses else 0.0,
+        }

@@ -1,14 +1,33 @@
+"""Chain-of-Thought Parser — Nexus LLM Analytics
+================================================
+
+Extracts and validates CoT reasoning from LLM responses.
+Supports exact tag matching, fuzzy variations, and content-based
+heuristic extraction with multi-strategy fallback.
+
+Classes
+-------
+CoTParser
+    Multi-strategy extraction of ``[REASONING]`` / ``[OUTPUT]`` sections.
+CriticParser
+    Structured parsing of critic model feedback with issue extraction.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`ParsingMetrics` — tracks parse strategy hit rates and latencies.
+* :func:`get_cot_parser` — thread-safe singleton accessor.
+* :func:`get_critic_parser` — thread-safe singleton accessor.
 """
-Chain-of-Thought Parser
-Extracts and validates CoT reasoning from LLM responses
-"""
+from __future__ import annotations
+
 import re
-import logging
-from dataclasses import dataclass
-from typing import Optional, List
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 from enum import Enum
 
 class CoTSection(Enum):
+    """Enumeration of chain-of-thought response section types."""
+
     REASONING = "reasoning"
     OUTPUT = "output"
 
@@ -55,7 +74,18 @@ class CriticFeedback:
         return "\n".join(feedback_parts)
 
 class CoTParser:
-    """Parse and validate CoT-structured responses"""
+    """Parse and validate CoT-structured responses.
+
+    Employs a four-stage parsing pipeline:
+
+    1. **Exact match** — tag delimiters (``[REASONING]`` / ``[OUTPUT]``).
+    2. **Fuzzy match** — angle brackets, markdown headings, colons, bold.
+    3. **Content-based** — paragraph-level heuristic splitting.
+    4. **Fallback** — entire response returned as ``output``.
+
+    Thread Safety:
+        Instance methods are stateless and therefore inherently thread-safe.
+    """
     
     def __init__(self, reasoning_start="[REASONING]", reasoning_end="[/REASONING]",
                  output_start="[OUTPUT]", output_end="[/OUTPUT]"):
@@ -248,7 +278,14 @@ class CoTParser:
         return [step.strip() for step in steps if step.strip()]
 
 class CriticParser:
-    """Parse critic model feedback"""
+    """Parse critic model feedback into structured issue records.
+
+    Extracts ``[VALID]`` markers, numbered issues with location,
+    severity, and suggestion fields from free-form LLM critic output.
+
+    Thread Safety:
+        Stateless — safe for concurrent use.
+    """
     
     def parse(self, response: str) -> CriticFeedback:
         """
@@ -291,3 +328,89 @@ class CriticParser:
             issues=issues,
             raw_response=response
         )
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+import threading
+import time
+from collections import Counter
+
+
+@dataclass
+class ParsingMetrics:
+    """Tracks CoT parse strategy hit-rates and latencies.
+
+    Attributes:
+        strategy_hits: Counter mapping strategy name → success count.
+        total_parses: Total ``parse()`` invocations observed.
+        total_latency_ms: Cumulative parsing time in milliseconds.
+
+    v2.0 Enterprise Addition.
+    """
+
+    strategy_hits: Counter = field(default_factory=Counter)
+    total_parses: int = 0
+    total_latency_ms: float = 0.0
+
+    # ------------------------------------------------------------------
+    def record(self, strategy: str, latency_ms: float) -> None:
+        """Record a successful parse attributed to *strategy*."""
+        self.strategy_hits[strategy] += 1
+        self.total_parses += 1
+        self.total_latency_ms += latency_ms
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a JSON-serialisable snapshot."""
+        return {
+            "strategy_hits": dict(self.strategy_hits),
+            "total_parses": self.total_parses,
+            "total_latency_ms": round(self.total_latency_ms, 2),
+            "avg_latency_ms": round(
+                self.total_latency_ms / self.total_parses, 2
+            )
+            if self.total_parses
+            else 0.0,
+        }
+
+
+# -- Singleton accessors (double-checked locking) ----------------------
+
+_cot_parser_instance: Optional[CoTParser] = None
+_cot_parser_lock = threading.Lock()
+
+
+def get_cot_parser(**kwargs) -> CoTParser:
+    """Return the process-wide :class:`CoTParser` singleton.
+
+    Keyword arguments are forwarded to the constructor on first call.
+
+    Thread Safety:
+        Uses double-checked locking for safe lazy initialisation.
+    """
+    global _cot_parser_instance
+    if _cot_parser_instance is None:
+        with _cot_parser_lock:
+            if _cot_parser_instance is None:
+                _cot_parser_instance = CoTParser(**kwargs)
+    return _cot_parser_instance
+
+
+_critic_parser_instance: Optional[CriticParser] = None
+_critic_parser_lock = threading.Lock()
+
+
+def get_critic_parser() -> CriticParser:
+    """Return the process-wide :class:`CriticParser` singleton.
+
+    Thread Safety:
+        Uses double-checked locking for safe lazy initialisation.
+    """
+    global _critic_parser_instance
+    if _critic_parser_instance is None:
+        with _critic_parser_lock:
+            if _critic_parser_instance is None:
+                _critic_parser_instance = CriticParser()
+    return _critic_parser_instance

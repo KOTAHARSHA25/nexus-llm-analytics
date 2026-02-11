@@ -7,10 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { getEndpoint } from "@/lib/config";
-import { 
-  History, Settings, BarChart3, TrendingUp, DollarSign, Activity, Cpu, 
+import {
+  History, Settings, BarChart3, TrendingUp, DollarSign, Activity, Cpu,
   Sparkles, Clock, MessageSquare, Brain, Database, Target, Zap, Bot,
-  FileText, Download
+  FileText, Download, Trash2
 } from "lucide-react";
 
 interface PluginInfo {
@@ -28,6 +28,7 @@ interface AnalyticsSidebarProps {
   onHistoryClick: (query: string) => void;
   onClearHistory: () => void;
   onOpenSettings: () => void;
+  onClearCache?: () => void;
 }
 
 const plugins: PluginInfo[] = [
@@ -39,7 +40,7 @@ const plugins: PluginInfo[] = [
     capabilities: ["Smart Selection", "Adaptive", "Multi-Modal"]
   },
   {
-    name: "Statistical Agent", 
+    name: "Statistical Agent",
     description: "Advanced statistical analysis, hypothesis testing, correlation analysis",
     icon: BarChart3,
     color: "blue",
@@ -47,7 +48,7 @@ const plugins: PluginInfo[] = [
   },
   {
     name: "Time Series Agent",
-    description: "ARIMA forecasting, trend analysis, seasonality detection", 
+    description: "ARIMA forecasting, trend analysis, seasonality detection",
     icon: TrendingUp,
     color: "green",
     capabilities: ["ARIMA", "Forecasting", "Trend Analysis"]
@@ -56,7 +57,7 @@ const plugins: PluginInfo[] = [
     name: "Financial Agent",
     description: "Business metrics, profitability analysis, financial health assessment",
     icon: DollarSign,
-    color: "emerald", 
+    color: "emerald",
     capabilities: ["ROI", "Profitability", "Financial Ratios"]
   },
   {
@@ -75,13 +76,14 @@ const plugins: PluginInfo[] = [
   }
 ];
 
-export function AnalyticsSidebar({ 
-  queryHistory, 
-  selectedPlugin, 
-  onPluginSelect, 
-  onHistoryClick, 
+export function AnalyticsSidebar({
+  queryHistory,
+  selectedPlugin,
+  onPluginSelect,
+  onHistoryClick,
   onClearHistory,
-  onOpenSettings 
+  onOpenSettings,
+  onClearCache
 }: AnalyticsSidebarProps) {
   const [showHistory, setShowHistory] = useState(true);
   const [showAgents, setShowAgents] = useState(true);
@@ -98,7 +100,7 @@ export function AnalyticsSidebar({
                 Quick Actions
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-2">
               <Button
                 onClick={onOpenSettings}
                 variant="ghost"
@@ -107,6 +109,16 @@ export function AnalyticsSidebar({
                 <Settings className="h-4 w-4 mr-2" />
                 Model Settings
               </Button>
+              {onClearCache && (
+                <Button
+                  onClick={onClearCache}
+                  variant="ghost"
+                  className="w-full justify-start bg-white/10 border border-white/20 text-white hover:bg-red-500/20 hover:text-red-200 transition-all duration-300"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Clear Analysis Cache
+                </Button>
+              )}
             </CardContent>
           </Card>
 
@@ -139,9 +151,12 @@ export function AnalyticsSidebar({
                     <div className="space-y-2">
                       {queryHistory.slice(-5).reverse().map((query, index) => (
                         <div
-                          key={index}
+                          key={`${query.slice(0, 30)}-${index}`}
+                          role="button"
+                          tabIndex={0}
                           className="p-3 rounded-lg bg-white/5 border border-white/10 text-sm text-white/90 cursor-pointer hover:bg-white/10 transition-all duration-200 group"
                           onClick={() => onHistoryClick(query)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onHistoryClick(query); } }}
                         >
                           <div className="flex items-start gap-2">
                             <Clock className="h-4 w-4 text-purple-300 mt-0.5 flex-shrink-0" />
@@ -154,7 +169,7 @@ export function AnalyticsSidebar({
                     </div>
                     {queryHistory.length > 0 && (
                       <Button
-                        variant="ghost" 
+                        variant="ghost"
                         size="sm"
                         onClick={onClearHistory}
                         className="w-full text-white/60 hover:text-white/80"
@@ -198,16 +213,18 @@ export function AnalyticsSidebar({
                 {plugins.map((plugin) => {
                   const IconComponent = plugin.icon;
                   const isSelected = selectedPlugin === plugin.name;
-                  
+
                   return (
                     <div
                       key={plugin.name}
-                      className={`plugin-card p-3 rounded-lg cursor-pointer transition-all duration-300 ${
-                        isSelected 
-                          ? 'bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-400/50 shadow-lg shadow-purple-500/25' 
+                      role="button"
+                      tabIndex={0}
+                      className={`plugin-card p-3 rounded-lg cursor-pointer transition-all duration-300 ${isSelected
+                          ? 'bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-purple-400/50 shadow-lg shadow-purple-500/25'
                           : 'bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10'
-                      }`}
+                        }`}
                       onClick={() => onPluginSelect(plugin.name)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPluginSelect(plugin.name); } }}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`p-2 rounded-lg bg-${plugin.color}-500/20`}>
@@ -222,17 +239,17 @@ export function AnalyticsSidebar({
                           </p>
                           <div className="flex flex-wrap gap-1 mt-2">
                             {plugin.capabilities.slice(0, 2).map((cap) => (
-                              <Badge 
-                                key={cap} 
-                                variant="secondary" 
+                              <Badge
+                                key={cap}
+                                variant="secondary"
                                 className="text-xs bg-white/10 text-white/70 border-0"
                               >
                                 {cap}
                               </Badge>
                             ))}
                             {plugin.capabilities.length > 2 && (
-                              <Badge 
-                                variant="secondary" 
+                              <Badge
+                                variant="secondary"
                                 className="text-xs bg-white/10 text-white/70 border-0"
                               >
                                 +{plugin.capabilities.length - 2}

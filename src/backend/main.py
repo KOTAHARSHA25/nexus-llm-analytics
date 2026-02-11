@@ -1,3 +1,20 @@
+"""Nexus LLM Analytics — FastAPI Application Entry-Point
+======================================================
+
+Configures the :class:`FastAPI` application instance with:
+
+* CORS, rate-limiting, and global error-handling middleware.
+* Lifespan hooks for model warm-up and periodic cleanup.
+* API router mounting (analyse, upload, report, visualise,
+  models, health, history, feedback, WebSocket).
+* Prometheus ``/metrics`` endpoint for monitoring.
+
+v2.0 Enterprise Additions
+-------------------------
+* Comprehensive module docstring.
+* Inline documentation for every middleware and router mount.
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -31,7 +48,7 @@ try:
         
 except ImportError as e:
     print(f"Import error: {e}")
-    print("Available paths:", sys.path)
+    print(f"Available paths: {sys.path}")
     raise
 
 # Load environment and settings
@@ -47,7 +64,18 @@ validate_config()
 # Lifespan event handler (replaces deprecated @app.on_event)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan event handler for startup and shutdown tasks"""
+    """Lifespan event handler for startup and shutdown tasks.
+
+    Startup:
+        1. Initialise :class:`ModelManager` singleton.
+        2. Async warm-up of the primary LLM into VRAM/RAM.
+        3. Run non-blocking startup optimisation pass.
+        4. Schedule hourly cleanup of stale analysis records.
+
+    Shutdown:
+        Cancel the periodic cleanup task and call
+        ``ModelManager.shutdown()`` for graceful resource release.
+    """
     import logging
     import asyncio
     
@@ -56,42 +84,72 @@ async def lifespan(app: FastAPI):
     
     logger.info("🚀 Starting Nexus LLM Analytics backend...")
     
-    # STEP 1: Auto-configure models on startup
-    try:
-        from backend.core.engine.model_selector import ModelSelector
-        primary, review, embedding = ModelSelector.select_optimal_models()
-        logger.info(f"✅ Models selected: Primary={primary.split('/')[-1]}, Review={review.split('/')[-1]}")
-    except Exception as model_error:
-        logger.warning(f"⚠️ Model selection warning: {model_error}")
+    # STEP 1: Initialize ModelManager singleton — lazy-loads models & infra
+    from backend.agents import get_model_manager
+    manager = get_model_manager()
     
-    # STEP 2: WARM UP PRIMARY MODEL (critical for first-request speed)
+    try:
+        manager.ensure_initialized()
+        logger.info(
+            "✅ Models ready: Primary=%s, Review=%s",
+            manager.cached_models.get("primary", "?"),
+            manager.cached_models.get("review", "?"),
+        )
+    except Exception as init_error:
+        logger.warning("⚠️ ModelManager init warning: %s", init_error)
+    
+    # STEP 2: Async warmup — forces Ollama to load model into VRAM/RAM
     try:
         logger.info("🔥 Warming up primary model (this may take 10-30 seconds)...")
-        from backend.core.llm_client import LLMClient
-        warmup_client = LLMClient()
-        warmup_response = warmup_client.generate_primary(
-            prompt="Say 'ready' in one word."
-        )
-        if warmup_response.get('response'):
-            logger.info("✅ Primary model warmed up and ready!")
+        warmup_result = await manager.async_warmup()
+        if warmup_result["success"]:
+            logger.info(
+                "✅ Model warmed up in %.1fs — ready!",
+                warmup_result["latency_seconds"],
+            )
         else:
-            logger.warning("⚠️ Model warmup returned empty response")
+            logger.warning("⚠️ Warmup issue: %s", warmup_result.get("error"))
     except Exception as warmup_error:
-        logger.warning(f"⚠️ Model warmup skipped: {warmup_error}")
+        logger.warning("⚠️ Model warmup skipped: %s", warmup_error)
     
     # STEP 3: Background optimization (non-blocking)
     try:
         from backend.core.optimizers import optimize_startup
         optimization_result = optimize_startup()
     except Exception as opt_error:
-        logger.debug(f"Optimization note: {opt_error}")
+        logger.debug("Optimization note: %s", opt_error)
     
     logger.info("✅ Backend ready to serve requests!")
     
-    yield  # Application serves requests here - model is already warm
+    # STEP 4: Schedule periodic cleanup of old analysis records
+    async def periodic_cleanup():
+        while True:
+            await asyncio.sleep(3600)  # Every hour
+            try:
+                from backend.core.analysis_manager import analysis_manager
+                analysis_manager.cleanup_old_analyses(max_age_hours=24)
+            except Exception:
+                pass
     
-    # Shutdown tasks
-    logger.info("👋 Shutting down Nexus LLM Analytics backend...")
+    cleanup_task = asyncio.create_task(periodic_cleanup())
+    
+    yield  # Application serves requests here — model is already warm
+    
+    # Shutdown tasks — clean up all managed resources
+    cleanup_task.cancel()
+    
+    # [OPTIMIZATION 9.4] Resource Registry Cleanup
+    try:
+        from backend.core.resource_registry import get_resource_registry
+        await get_resource_registry().cleanup_all()
+    except Exception as rr_error:
+        logger.warning("Resource registry cleanup error: %s", rr_error)
+
+    try:
+        await manager.shutdown()
+    except Exception as shutdown_error:
+        logger.warning("Shutdown error (ignored): %s", shutdown_error)
+    logger.info("👋 Nexus LLM Analytics backend shut down cleanly")
 
 # Create FastAPI app with settings and lifespan handler
 app = FastAPI(
@@ -120,6 +178,10 @@ app.add_middleware(
     allow_methods=settings.cors_allow_methods,
     allow_headers=settings.cors_allow_headers,
 )
+
+# GZip response compression — ~70% reduction for JSON responses
+from starlette.middleware.gzip import GZipMiddleware
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # Add global error handling
 from fastapi import HTTPException, Request, status
@@ -199,6 +261,14 @@ app.include_router(history.router, prefix="/api/history", tags=["history"])
 # Mount enhanced visualization router (LIDA-inspired features)
 app.include_router(viz_enhance.router, prefix="/api/viz", tags=["visualization-enhancement"])
 
+# Mount feedback router
+from backend.api import feedback
+app.include_router(feedback.router, tags=["feedback"])  # Router already has prefix="/api/feedback"
+
+# Mount Swarm API router (v2.1)
+from backend.api import swarm
+app.include_router(swarm.router, prefix="/api/swarm", tags=["swarm"])
+
 # WebSocket support for real-time updates across devices
 from fastapi import WebSocket
 try:
@@ -272,23 +342,32 @@ async def download_report_direct(filename: str = None):
     from backend.api.report import download_report
     return download_report(filename=filename)
 
-async def test_model_on_startup():
-    """
-    Optional background model validation.
-    Note: Primary warmup now happens in lifespan() before serving.
-    This function is kept for compatibility but is no longer used.
-    """
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.debug("Startup test disabled - warmup now happens in lifespan()")
 
-# WebSocket endpoint for real-time updates
-# NOTE (v1.1): WebSocket functionality archived - file moved to archive/removed_v1.1/
-# Uncomment and restore websocket_manager.py if real-time updates are needed in future
-# if settings.enable_websockets:
-#     from fastapi import WebSocket
-#     from backend.core.websocket_manager import websocket_endpoint
-#     
-#     @app.websocket("/ws/{client_id}")
-#     async def websocket_route(websocket: WebSocket, client_id: str):
-#         await websocket_endpoint(websocket, client_id)
+if __name__ == "__main__":
+    import uvicorn
+    import argparse
+    import sys
+    
+    # Configure stdout for Windows/Emoji support
+    if sys.platform == "win32":
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    
+    parser = argparse.ArgumentParser(description="Nexus LLM Analytics Backend Server")
+    parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
+    parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
+    parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
+    parser.add_argument("--workers", type=int, default=1, help="Number of worker processes")
+    
+    args = parser.parse_args()
+    
+    print(f"🚀 Starting Nexus Backend on {args.host}:{args.port} (Workers: {args.workers}, Reload: {args.reload})")
+    
+    uvicorn.run(
+        "backend.main:app",
+        host=args.host,
+        port=args.port,
+        reload=args.reload,
+        workers=args.workers,
+        log_level="info"
+    )

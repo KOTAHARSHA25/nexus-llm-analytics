@@ -1,29 +1,63 @@
-from fastapi import APIRouter
-from typing import Dict, Any
+"""Health & Diagnostics API — System Status Monitoring Endpoints
+================================================================
+
+Exposes health-check, network-info, cache, and comprehensive system-status
+endpoints consumed by frontend dashboards, load balancers, and admin tooling.
+
+Endpoints
+---------
+``GET /``
+    Minimal liveness probe — returns ``{"status": "ok"}``.
+``GET /status``
+    Full system diagnostic: memory, CPU, disk, Ollama, ChromaDB, circuit
+    breakers, cache performance, model status, and recommendations.
+``GET /network-info``
+    Local IP and sharing instructions for multi-device access.
+``GET /cache-info``
+    Detailed cache tier statistics.
+``POST /clear-cache``
+    Flush all cache tiers.
+"""
+
+from __future__ import annotations
+
 import logging
-import time
-import psutil
 import os
 import socket
+import time
+from typing import Any, Dict, List
 
-# Health monitoring and system status endpoint
+import psutil
+from fastapi import APIRouter
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 def _get_local_ip() -> str:
-    """Get the local IP address for network access"""
+    """Resolve the host’s LAN IP via a non-blocking UDP socket probe.
+
+    Returns:
+        The LAN-facing IPv4 address, or ``"127.0.0.1"`` on failure.
+    """
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        local_ip = s.getsockname()[0]
-        s.close()
-        return local_ip
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
     except Exception:
         return "127.0.0.1"
 
 @router.get("/status")
 async def get_system_status() -> Dict[str, Any]:
-    """Get comprehensive system health status"""
+    """Return comprehensive system health diagnostics.
+
+    Aggregates memory, CPU, disk, Ollama reachability, ChromaDB status,
+    circuit-breaker state, cache performance, active model config, and
+    actionable recommendations into a single response.
+
+    Returns:
+        Dict with top-level ``status`` (``healthy`` | ``unhealthy`` | ``error``),
+        plus nested sections for each subsystem.
+    """
     try:
         try:
             from backend.infra.circuit_breaker import get_all_circuit_breaker_status
@@ -33,15 +67,20 @@ async def get_system_status() -> Dict[str, Any]:
             from backend.core.advanced_cache import get_cache_status
         except ImportError:
             get_cache_status = None
-        from backend.core.engine.model_selector import ModelSelector
+        try:
+            from backend.core.engine.model_selector import ModelSelector
+        except ImportError:
+            ModelSelector = None
         
         # System resources
         memory_info = psutil.virtual_memory()
-        cpu_percent = psutil.cpu_percent(interval=1)
+        cpu_percent = psutil.cpu_percent(interval=0)  # Non-blocking: uses delta since last call
         disk_usage = psutil.disk_usage('/')
         
         # Model status
         try:
+            if ModelSelector is None:
+                raise ImportError("ModelSelector not available")
             selected_models = ModelSelector.select_optimal_models()
             model_status = {
                 "primary": selected_models[0],
@@ -61,8 +100,10 @@ async def get_system_status() -> Dict[str, Any]:
         # Check Ollama connection
         try:
             from backend.core.config import settings
-            import requests
-            response = requests.get(f"{settings.ollama_base_url}/api/tags", timeout=5)
+            import requests, asyncio
+            response = await asyncio.to_thread(
+                lambda: requests.get(f"{settings.ollama_base_url}/api/tags", timeout=5)
+            )
             services["ollama"] = {
                 "status": "healthy" if response.status_code == 200 else "degraded",
                 "response_time_ms": response.elapsed.total_seconds() * 1000,
@@ -91,10 +132,18 @@ async def get_system_status() -> Dict[str, Any]:
             }
         
         # Circuit breaker status
-        circuit_status = get_all_circuit_breaker_status()
+        # [FIX] Check if function exists before calling
+        if get_all_circuit_breaker_status:
+            circuit_status = get_all_circuit_breaker_status()
+        else:
+            circuit_status = {"status": "unavailable", "reason": "module_not_found"}
         
         # Cache performance
-        cache_status = get_cache_status()
+        # [FIX] Check if function exists before calling
+        if get_cache_status:
+            cache_status = get_cache_status()
+        else:
+            cache_status = {"status": "unavailable", "reason": "module_not_found"}
         
         # Overall health determination
         critical_services_healthy = services["ollama"]["status"] in ["healthy", "degraded"]
@@ -132,21 +181,17 @@ async def get_system_status() -> Dict[str, Any]:
         }
         
     except Exception as e:
-        logging.error(f"Health check failed: {e}")
-        return {
-            "status": "error",
-            "timestamp": time.time(),
-            "error": str(e)
-        }
+        logger.error("Health check failed: %s", e, exc_info=True)
+        raise HTTPException(status_code=503, detail=f"Health check failed: {e}")
 
 @router.get("/")
 async def health_check() -> Dict[str, str]:
-    """Simple health check endpoint"""
+    """Minimal liveness probe for orchestrators and load balancers."""
     return {"status": "ok", "message": "Nexus LLM Analytics is running"}
 
 @router.get("/network-info")
 async def get_network_info() -> Dict[str, Any]:
-    """Get network information for sharing with other devices"""
+    """Return LAN connection details for multi-device sharing."""
     local_ip = _get_local_ip()
     return {
         "local_ip": local_ip,
@@ -163,7 +208,7 @@ async def get_network_info() -> Dict[str, Any]:
 
 @router.get("/cache-info")
 async def get_cache_info() -> Dict[str, Any]:
-    """Get detailed cache information"""
+    """Return detailed cache-tier statistics."""
     try:
         try:
             from backend.core.advanced_cache import get_cache_status
@@ -175,7 +220,7 @@ async def get_cache_info() -> Dict[str, Any]:
 
 @router.post("/clear-cache")
 async def clear_cache() -> Dict[str, str]:
-    """Clear all system caches"""
+    """Flush all cache tiers (L1/L2/L3) and return confirmation."""
     try:
         try:
             from backend.core.advanced_cache import clear_all_caches
@@ -186,8 +231,22 @@ async def clear_cache() -> Dict[str, str]:
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
-def _generate_recommendations(services: Dict, model_status: Dict, memory_info) -> list:
-    """Generate system optimization recommendations"""
+def _generate_recommendations(
+    services: Dict[str, Any],
+    model_status: Dict[str, Any],
+    memory_info: Any,
+) -> List[Dict[str, str]]:
+    """Generate actionable optimization recommendations based on current system state.
+
+    Args:
+        services:     Health-check results keyed by service name.
+        model_status: Model selection outcome dict.
+        memory_info:  ``psutil`` virtual-memory named tuple.
+
+    Returns:
+        List of recommendation dicts with ``type``, ``title``, ``description``,
+        and ``action`` keys.
+    """
     recommendations = []
     
     # Ollama service recommendations

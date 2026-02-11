@@ -1,5 +1,23 @@
-# Advanced Natural Language Query Parser for Data Analysis
-# Converts natural language queries into structured analysis instructions
+"""Advanced Natural Language Query Parser for Data Analysis.
+
+Converts natural language queries into structured analysis
+instructions by combining regex-based intent classification with
+optional LLM-enhanced parsing for ambiguous inputs.
+
+Enterprise v2.0 Additions
+-------------------------
+* **QueryPlanCache** — LRU cache of parsed query plans keyed by
+  normalised query text, avoiding redundant LLM calls.
+* **get_query_parser()** — Thread-safe singleton accessor for
+  :class:`AdvancedQueryParser`.
+
+All v1.x APIs (``QueryIntent``, ``DataType``, ``QueryParams``,
+``IntentClassifier``, ``ColumnExtractor``, ``AdvancedQueryParser``,
+``EnhancedQueryParser``) remain fully backward-compatible.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
+"""
 
 from typing import Dict, List, Any, Optional, Tuple
 import re
@@ -381,3 +399,94 @@ class AdvancedQueryParser:
 
 # Alias for backward compatibility
 EnhancedQueryParser = AdvancedQueryParser
+
+
+# ============================================================================
+# Enterprise v2.0 — QueryPlanCache & Singleton
+# ============================================================================
+
+import threading as _threading
+from collections import OrderedDict as _OrderedDict
+
+
+class QueryPlanCache:
+    """LRU cache for parsed query plans.
+
+    Avoids redundant LLM calls by caching :class:`QueryParams`
+    results keyed on normalised (lowered, stripped) query text.
+
+    Args:
+        max_size: Maximum number of cached plans.
+
+    Example::
+
+        cache = QueryPlanCache(max_size=256)
+        cache.put("show total sales", parsed_params)
+        hit = cache.get("show total sales")
+
+    .. versionadded:: 2.0
+    """
+
+    def __init__(self, max_size: int = 512) -> None:
+        self._cache: _OrderedDict[str, QueryParams] = _OrderedDict()
+        self._max = max_size
+        self._lock = _threading.Lock()
+        self._hits = 0
+        self._misses = 0
+
+    @staticmethod
+    def _normalise(query: str) -> str:
+        return query.strip().lower()
+
+    def get(self, query: str) -> QueryParams | None:
+        """Look up a cached plan. Returns ``None`` on miss."""
+        key = self._normalise(query)
+        with self._lock:
+            if key in self._cache:
+                self._cache.move_to_end(key)
+                self._hits += 1
+                return self._cache[key]
+            self._misses += 1
+            return None
+
+    def put(self, query: str, params: QueryParams) -> None:
+        """Store a parsed plan, evicting the oldest on overflow."""
+        key = self._normalise(query)
+        with self._lock:
+            if key in self._cache:
+                self._cache.move_to_end(key)
+            self._cache[key] = params
+            if len(self._cache) > self._max:
+                self._cache.popitem(last=False)
+
+    @property
+    def stats(self) -> dict:
+        """Return cache hit/miss statistics."""
+        total = self._hits + self._misses
+        return {
+            "hits": self._hits,
+            "misses": self._misses,
+            "hit_rate": round(self._hits / total, 4) if total else 0.0,
+            "size": len(self._cache),
+        }
+
+
+# Thread-safe singleton
+_query_parser_instance: AdvancedQueryParser | None = None
+_query_parser_lock = _threading.Lock()
+
+
+def get_query_parser(**kwargs) -> AdvancedQueryParser:
+    """Return the global :class:`AdvancedQueryParser` singleton (thread-safe).
+
+    Keyword arguments are forwarded to the constructor on first
+    call only.
+
+    .. versionadded:: 2.0
+    """
+    global _query_parser_instance
+    if _query_parser_instance is None:
+        with _query_parser_lock:
+            if _query_parser_instance is None:
+                _query_parser_instance = AdvancedQueryParser(**kwargs)
+    return _query_parser_instance

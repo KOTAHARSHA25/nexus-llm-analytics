@@ -1,6 +1,19 @@
-"""
-Automated Validation - Pre-checks before LLM Critic
-Catches obvious errors regardless of critic model quality
+"""Automated Validation System for Nexus LLM Analytics.
+
+Runs comprehensive quality checks on system components including
+configuration, LLM connectivity, vector store health, security
+sandbox integrity, and inter-agent communication.
+
+Enterprise v2.0 Additions
+-------------------------
+* **ValidationReport** — Immutable dataclass aggregating all check
+  results with pass/fail counts, overall score, and export method.
+* **get_validator()** — Thread-safe singleton accessor.
+
+All v1.x APIs (``AutomatedValidator``) remain unchanged.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
 """
 
 import re
@@ -490,3 +503,83 @@ class AutomatedValidator:
                             break  # Only report once
         
         return issues
+
+
+# ============================================================================
+# Enterprise v2.0 — ValidationReport & Singleton
+# ============================================================================
+
+import threading as _threading
+from dataclasses import dataclass as _dataclass, field as _field
+import datetime as _dt
+from typing import Any as _Any
+
+
+@_dataclass(frozen=True)
+class ValidationReport:
+    """Immutable aggregation of all validation check results.
+
+    Attributes:
+        checks: List of individual check result dicts.
+        passed: Number of checks that passed.
+        failed: Number of checks that failed.
+        score: Overall pass rate (0.0–1.0).
+        generated_at: ISO-8601 timestamp of report creation.
+
+    .. versionadded:: 2.0
+    """
+
+    checks: tuple
+    passed: int
+    failed: int
+    score: float
+    generated_at: str = _field(
+        default_factory=lambda: _dt.datetime.now().isoformat()
+    )
+
+    def to_dict(self) -> dict:
+        """Return a JSON-serialisable representation."""
+        return {
+            "checks": list(self.checks),
+            "passed": self.passed,
+            "failed": self.failed,
+            "score": self.score,
+            "generated_at": self.generated_at,
+        }
+
+    @classmethod
+    def from_results(cls, results: list[dict]) -> "ValidationReport":
+        """Build a report from a list of check-result dicts.
+
+        Each dict should contain at least a ``"status"`` key whose
+        value is ``"pass"`` or ``"fail"``.
+        """
+        passed = sum(1 for r in results if r.get("status") == "pass")
+        failed = len(results) - passed
+        score = round(passed / len(results), 4) if results else 0.0
+        return cls(
+            checks=tuple(results),
+            passed=passed,
+            failed=failed,
+            score=score,
+        )
+
+
+# Thread-safe singleton
+_validator_instance: "AutomatedValidator | None" = None
+_validator_lock = _threading.Lock()
+
+
+def get_validator() -> "AutomatedValidator":
+    """Return the global :class:`AutomatedValidator` singleton (thread-safe).
+
+    Uses double-checked locking to minimise contention.
+
+    .. versionadded:: 2.0
+    """
+    global _validator_instance
+    if _validator_instance is None:
+        with _validator_lock:
+            if _validator_instance is None:
+                _validator_instance = AutomatedValidator()
+    return _validator_instance

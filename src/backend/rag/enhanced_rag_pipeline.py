@@ -1,23 +1,50 @@
-"""
-Enhanced RAG Pipeline Module
-============================
+"""Enhanced RAG Pipeline Module — Nexus LLM Analytics
+=====================================================
 
-This module provides advanced RAG (Retrieval-Augmented Generation) capabilities
-for research-grade document analysis and question answering.
+Advanced Retrieval-Augmented Generation pipeline for
+research-grade document analysis and question answering.
 
-Features:
-- Hybrid search (dense + sparse)
-- Query expansion and rewriting
-- Re-ranking with cross-encoders
-- Context compression
-- Citation tracking
-- Confidence scoring
+Features
+--------
+* Hybrid search (dense + sparse via BM25)
+* Query expansion and synonym-based rewriting
+* Cross-encoder style re-ranking
+* Context compression for token-budget management
+* Citation tracking with source attribution
+* Answer confidence scoring
+
+Classes
+-------
+RetrievedChunk / RAGResult
+    Data containers for retrieval and pipeline output.
+QueryExpander
+    Synonym-driven query augmentation.
+BM25Scorer
+    Okapi BM25 sparse-retrieval scorer.
+ReRanker
+    Keyword-overlap and length-normalised re-ranker.
+ContextCompressor
+    Token-budget aware context window manager.
+CitationTracker
+    Source attribution and citation formatting.
+ConfidenceScorer
+    Multi-signal answer confidence estimator.
+EnhancedRAGPipeline
+    End-to-end orchestrator composing all components.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`RAGPipelineMetrics` — tracks query counts, latencies,
+  and average confidence scores.
+* :func:`get_rag_pipeline` — thread-safe singleton accessor.
 """
+
+from __future__ import annotations
 
 import re
 import math
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
 from collections import defaultdict
@@ -47,10 +74,13 @@ class RAGResult:
 
 
 class QueryExpander:
-    """
-    Expands queries using synonyms and related terms.
-    
-    Improves recall by generating query variations.
+    """Expands queries using synonyms and related terms.
+
+    Improves recall by generating multiple query variations
+    from a built-in synonym database.
+
+    Thread Safety:
+        Stateless — safe for concurrent use.
     """
     
     def __init__(self):
@@ -132,7 +162,7 @@ class BM25Scorer:
         self.doc_term_freqs: Dict[str, Dict[str, int]] = {}
         self.idf: Dict[str, float] = {}
     
-    def index(self, documents: List[Tuple[str, str]]):
+    def index(self, documents: List[Tuple[str, str]]) -> None:
         """
         Index documents for BM25 scoring.
         
@@ -553,7 +583,7 @@ class EnhancedRAGPipeline:
         
         self._indexed = False
     
-    def index_documents(self, documents: List[Dict[str, Any]]):
+    def index_documents(self, documents: List[Dict[str, Any]]) -> None:
         """
         Index documents for hybrid retrieval.
         
@@ -629,7 +659,7 @@ class EnhancedRAGPipeline:
         self,
         query: str,
         dense_results: List[Dict[str, Any]],
-        generate_fn: Optional[callable] = None
+        generate_fn: Optional[Callable[..., str]] = None
     ) -> RAGResult:
         """
         Process a complete RAG query.
@@ -742,3 +772,66 @@ if __name__ == "__main__":
     print(f"Answer: {result.answer}")
     print(f"Confidence: {result.confidence:.2f}")
     print(f"Citations: {len(result.citations)}")
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+import threading
+
+
+@dataclass
+class RAGPipelineMetrics:
+    """Tracks RAG pipeline query counts, latencies, and confidence.
+
+    Attributes:
+        total_queries: Number of ``process()`` invocations.
+        total_latency_ms: Cumulative processing time.
+        avg_confidence: Running average confidence score.
+
+    v2.0 Enterprise Addition.
+    """
+
+    total_queries: int = 0
+    total_latency_ms: float = 0.0
+    _confidence_sum: float = 0.0
+
+    def record(self, *, latency_ms: float = 0.0, confidence: float = 0.0) -> None:
+        """Record a single pipeline invocation."""
+        self.total_queries += 1
+        self.total_latency_ms += latency_ms
+        self._confidence_sum += confidence
+
+    @property
+    def avg_confidence(self) -> float:
+        """Average confidence across all queries."""
+        return round(self._confidence_sum / self.total_queries, 4) if self.total_queries else 0.0
+
+    def to_dict(self) -> dict:
+        """Return a JSON-serialisable snapshot."""
+        return {
+            "total_queries": self.total_queries,
+            "avg_latency_ms": round(
+                self.total_latency_ms / self.total_queries, 2
+            ) if self.total_queries else 0.0,
+            "avg_confidence": self.avg_confidence,
+        }
+
+
+_rag_pipeline_instance: "EnhancedRAGPipeline | None" = None
+_rag_pipeline_lock = threading.Lock()
+
+
+def get_rag_pipeline(**kwargs) -> "EnhancedRAGPipeline":
+    """Return the process-wide :class:`EnhancedRAGPipeline` singleton.
+
+    Thread Safety:
+        Uses double-checked locking for safe lazy initialisation.
+    """
+    global _rag_pipeline_instance
+    if _rag_pipeline_instance is None:
+        with _rag_pipeline_lock:
+            if _rag_pipeline_instance is None:
+                _rag_pipeline_instance = EnhancedRAGPipeline(**kwargs)
+    return _rag_pipeline_instance

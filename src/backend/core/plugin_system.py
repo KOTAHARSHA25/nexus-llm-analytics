@@ -1,8 +1,33 @@
-# Plug-and-Play Agent Architecture
-# Modular system for easy addition of new agents without code changes
+"""Plug-and-Play Agent Architecture.
+
+Modular system for discovering, registering, and routing queries to
+specialist plugin agents at runtime without code changes.
+
+Key classes:
+
+* **AgentCapability** — Enum of recognised agent capabilities.
+* **AgentMetadata** — Dataclass carrying agent identification and
+  resource requirements.
+* **BasePluginAgent** — Abstract base class every plugin must extend.
+* **AgentRegistry** — Central registry with auto-discovery,
+  capability-based routing, and hot-reload.
+
+Enterprise v2.0 Additions
+-------------------------
+* **Swarm Integration** — Agents can now share context and coordinate via `SwarmContext`.
+* **Reflective Execution** — `reflective_execute` method for plan-exec-critique loops.
+* **PluginHealthReport** — Dataclass summarising per-plugin health
+  (initialised, dependency status, last-error).
+
+All v1.x APIs remain fully backward-compatible.
+
+Author: Nexus Team
+Since: v1.0 (Swarm enhancements v2.1 — February 2026)
+"""
 
 import json
 import logging
+import os
 import threading
 import importlib
 import importlib.util
@@ -13,6 +38,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from backend.core.optimizers import OptimizedAgentMixin
+# Swarm Import
+from backend.core.swarm import SwarmContext, SwarmEvent
 
 class AgentCapability(Enum):
     """Enumeration of agent capabilities"""
@@ -45,7 +72,8 @@ class BasePluginAgent(ABC, OptimizedAgentMixin):
     Abstract base class for all plugin agents
     
     This defines the contract that all plugin agents must implement
-    Now includes OptimizedAgentMixin for automatic performance tracking.
+    Now includes OptimizedAgentMixin for automatic performance tracking
+    and Swarm coordination capabilities.
     """
     
     def __init__(self, config: Dict[str, Any] = None):
@@ -53,6 +81,151 @@ class BasePluginAgent(ABC, OptimizedAgentMixin):
         self.config = config or {}
         self.metadata = self.get_metadata()
         self.initialized = False
+        self.registry = None  # Will be injected by AgentRegistry
+        self.swarm_context = None # Will be injected by AgentRegistry
+        self.enable_verbose_logging = os.environ.get('NEXUS_VERBOSE_LOGGING', 'false').lower() == 'true'
+    
+    # --- Swarm Capabilities ---
+
+    def publish_insight(self, topic: str, content: Any) -> None:
+        """Share an insight with the swarm"""
+        if self.swarm_context:
+            self.swarm_context.publish(
+                SwarmEvent.INSIGHT_FOUND,
+                self.metadata.name,
+                {"topic": topic, "content": content}
+            )
+
+    def subscribe_topic(self, topic: str, callback: Callable) -> None:
+        """Subscribe to a specific topic (placeholder for future topic filtering)"""
+        # Currently we just subscribe to general types via context, extending later
+        pass
+
+    def reflective_execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
+        """
+        Advanced execution with Self-Correction (Plan -> Execute -> Critique -> Refine).
+        
+        Default implementation wraps standard execution. 
+        Subclasses should override for specific cognitive loops.
+        """
+        return self.execute_with_logging(query, data, **kwargs)
+
+    # --- Core Methods ---
+
+    def delegate(self, agent_name: str, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
+        """
+        Delegate a sub-task to a specific agent by name.
+        
+        Args:
+            agent_name: Name of the agent to call (e.g., "TimeSeriesAgent")
+            query: The query/instruction for the sub-agent
+            data: Optional data to pass to the sub-agent
+            **kwargs: Additional context
+            
+        Returns:
+            Dict containing the execution result
+        """
+        if not self.registry:
+            return {"success": False, "error": "No registry available for delegation", "agent": self.metadata.name}
+            
+        target_agent = self.registry.get_agent(agent_name)
+        if not target_agent:
+            return {"success": False, "error": f"Agent {agent_name} not found", "agent": self.metadata.name}
+            
+        # Circular dependency protection
+        current_depth = kwargs.get('recursion_depth', 0)
+        if current_depth > 3:
+            return {"success": False, "error": "Max delegation depth reached (possible infinite loop)", "agent": self.metadata.name}
+        
+        # Pass updated depth
+        kwargs['recursion_depth'] = current_depth + 1
+        
+        # Add trace info
+        kwargs['parent_agent'] = self.metadata.name
+        
+        return target_agent.execute_with_logging(query, data, **kwargs)
+
+    def delegate_by_capability(self, capability: AgentCapability, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
+        """
+        Delegate to the best available agent for a specific capability.
+        """
+        if not self.registry:
+             return {"success": False, "error": "No registry available", "agent": self.metadata.name}
+             
+        agents = self.registry.get_agents_by_capability(capability)
+        if not agents:
+            return {"success": False, "error": f"No agent found for capability {capability.value}", "agent": self.metadata.name}
+            
+        # Pick the highest priority agent
+        # (In future, could use more complex routing logic here)
+        best_agent = sorted(agents, key=lambda a: a.metadata.priority, reverse=True)[0]
+        
+        return self.delegate(best_agent.metadata.name, query, data, **kwargs)
+
+    def _log_execution(self, query: str, result: Dict[str, Any], execution_time: float):
+        """
+        Log agent execution details for backend visibility.
+        Mirrors what the frontend sees in the UI.
+        """
+        import logging
+        logger = logging.getLogger(f"agent.{self.metadata.name}")
+        
+        # Create a formatted log entry
+        log_lines = [
+            "\n" + "="*80,
+            f"🤖 AGENT EXECUTION: {self.metadata.name}",
+            "="*80,
+            f"📝 Query: {query[:200]}{'...' if len(query) > 200 else ''}",
+            f"⏱️  Execution Time: {execution_time:.2f}s",
+            f"✅ Success: {result.get('success', False)}",
+        ]
+        
+        # Add result summary
+        if result.get('success'):
+            result_text = str(result.get('result', ''))
+            log_lines.append(f"📊 Result Preview: {result_text[:300]}{'...' if len(result_text) > 300 else ''}")
+            
+            # Log metadata if present
+            metadata = result.get('metadata', {})
+            if metadata:
+                log_lines.append(f"🔍 Metadata: {list(metadata.keys())}")
+                if 'code' in metadata or 'executed_code' in metadata:
+                    log_lines.append(f"   - Code Generated: Yes")
+                if 'visualization' in metadata:
+                    log_lines.append(f"   - Visualization: Yes")
+        else:
+            log_lines.append(f"❌ Error: {result.get('error', 'Unknown error')}")
+        
+        log_lines.append("="*80 + "\n")
+        
+        # Log to console (INFO level so it shows by default)
+        logger.info("\n".join(log_lines))
+    
+    def execute_with_logging(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
+        """
+        Wrapper around execute() that adds logging for backend visibility.
+        This ensures all agent executions are visible in the backend logs.
+        """
+        import time
+        start_time = time.time()
+        
+        try:
+            result = self.execute(query, data, **kwargs)
+            execution_time = time.time() - start_time
+            
+            # Log the execution
+            self._log_execution(query, result, execution_time)
+            
+            return result
+        except Exception as e:
+            execution_time = time.time() - start_time
+            error_result = {
+                'success': False,
+                'error': str(e),
+                'agent': self.metadata.name
+            }
+            self._log_execution(query, error_result, execution_time)
+            raise
     
     @abstractmethod
     def get_metadata(self) -> AgentMetadata:
@@ -120,6 +293,7 @@ class AgentRegistry:
     - Capability-based routing
     - Resource-aware scheduling
     - Hot-reloading of agents
+    - **Swarm Coordination** (New)
     """
     
     def __init__(self, plugins_directory: str = None):
@@ -133,6 +307,9 @@ class AgentRegistry:
         self.capability_index: Dict[AgentCapability, List[str]] = {}
         self.file_type_index: Dict[str, List[str]] = {}
         self.agent_configs: Dict[str, Dict[str, Any]] = {}
+
+        # Swarm Initialization
+        self.swarm_context = SwarmContext()
         
         # Create plugins directory if it doesn't exist
         self.plugins_directory.mkdir(parents=True, exist_ok=True)
@@ -166,10 +343,36 @@ class AgentRegistry:
         return discovered
     
     def _load_agent_from_file(self, plugin_file: Path) -> int:
-        """Load agent class from Python file"""
-        spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file)
+        """Load agent class from Python file.
+
+        Registers the module in ``sys.modules`` before execution so that
+        Python 3.13+ ``@dataclass`` processing (which looks up
+        ``cls.__module__`` in ``sys.modules``) works correctly for
+        dynamically-loaded plugin files.
+        """
+        import sys as _sys
+
+        module_name = plugin_file.stem
+        spec = importlib.util.spec_from_file_location(module_name, plugin_file)
+        if spec is None or spec.loader is None:
+            logging.warning("Could not create module spec for %s", plugin_file)
+            return 0
+
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+
+        # Register in sys.modules BEFORE exec_module so that @dataclass
+        # and other stdlib machinery that does
+        #   sys.modules.get(cls.__module__)
+        # can find the module.  This is the pattern recommended by the
+        # Python docs for importing a source file directly.
+        _sys.modules[module_name] = module
+        try:
+            spec.loader.exec_module(module)
+        except Exception:
+            # Roll back registration on failure so we don't leave a
+            # broken module in sys.modules.
+            _sys.modules.pop(module_name, None)
+            raise
         
         agents_found = 0
         
@@ -213,8 +416,13 @@ class AgentRegistry:
                 logging.debug(f"Plugin {agent.metadata.name} skipped (missing optional dependencies: {missing_deps})")
                 return False
             
+            # Inject registry for delegation
+            agent.registry = self
+            # Inject swarm context for coordination
+            agent.swarm_context = self.swarm_context
+            
             # Initialize the agent
-            if not agent.initialize():
+            if not agent.initialize(registry=self):
                 logging.debug(f"Plugin {agent.metadata.name} failed to initialize (this is optional)")
                 return False
             
@@ -356,16 +564,7 @@ class AgentRegistry:
                 # Note: Indexes might be inconsistent now, but better than losing the agent entirely
             return False
     
-    def get_system_resources(self) -> Dict[str, Any]:
-        """Get current system resource availability"""
-        import psutil
-        
-        memory = psutil.virtual_memory()
-        return {
-            "available_ram_mb": memory.available // (1024 * 1024),
-            "cpu_percent": psutil.cpu_percent(interval=0.1),
-            "agent_count": len(self.registered_agents)
-        }
+    # get_system_resources() removed — was dead code with missing psutil dependency
 
 # Thread-safe Global registry instance
 _global_registry: Optional[AgentRegistry] = None
@@ -416,3 +615,57 @@ def initialize_plugin_system(plugins_dir: str = None) -> AgentRegistry:
     
     logging.debug(f"Plugin system initialized with {len(registry.registered_agents)} agents")
     return registry
+
+
+# ============================================================================
+# Enterprise v2.0 — PluginHealthReport
+# ============================================================================
+
+from dataclasses import dataclass as _dataclass, field as _field
+import datetime as _dt
+
+
+@_dataclass
+class PluginHealthReport:
+    """Per-plugin health summary for observability dashboards.
+
+    Attributes:
+        agent_name: Registered name of the plugin agent.
+        version: Plugin version string.
+        initialised: Whether :meth:`BasePluginAgent.initialize` succeeded.
+        missing_deps: List of missing Python dependencies.
+        capabilities: List of capability value strings.
+        last_error: Most recent error message, or ``None``.
+        checked_at: ISO-8601 timestamp of the health check.
+
+    .. versionadded:: 2.0
+    """
+
+    agent_name: str
+    version: str
+    initialised: bool
+    missing_deps: list = _field(default_factory=list)
+    capabilities: list = _field(default_factory=list)
+    last_error: str | None = None
+    checked_at: str = _field(
+        default_factory=lambda: _dt.datetime.now().isoformat()
+    )
+
+    @classmethod
+    def from_agent(cls, agent: BasePluginAgent) -> "PluginHealthReport":
+        """Build a health report from an instantiated agent.
+
+        Args:
+            agent: The plugin agent to inspect.
+
+        Returns:
+            A fully populated :class:`PluginHealthReport`.
+        """
+        missing = agent.validate_dependencies()
+        return cls(
+            agent_name=agent.metadata.name,
+            version=agent.metadata.version,
+            initialised=agent.initialized,
+            missing_deps=missing,
+            capabilities=[c.value for c in agent.metadata.capabilities],
+        )

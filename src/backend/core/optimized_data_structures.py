@@ -1,6 +1,29 @@
-# Advanced Data Structures and Algorithms Optimization
-# BEFORE: O(n) linear searches, inefficient data processing, memory fragmentation
-# AFTER: O(1) hash map lookups, optimized algorithms, efficient memory usage
+"""Advanced Data Structures and Algorithms Optimisation.
+
+Provides high-performance, thread-safe data structures purpose-built
+for the Nexus analytics pipeline:
+
+* **OptimizedTrie** — prefix-based search with frequency ranking.
+* **HighPerformanceHashMap** — custom hash map with dynamic resizing.
+* **LRUCache** — O(1) LFU-eviction cache.
+* **OptimizedDataProcessor** — parallel batch query processing.
+* **OptimizedConnectionPool** — async connection pool with health checks.
+* **OptimizedAlgorithms** — fuzzy match, cost-based query planning,
+  parallel merge sort.
+* **DataStructureFactory** — factory for selecting the right
+  structure by use-case.
+* **PerformanceMonitor** — operation-level timing and aggregation.
+
+Enterprise v2.0 Additions
+-------------------------
+* **DataStructureHealthCheck** — runs integrity diagnostics across
+  all instantiated structures and returns a summary report.
+
+All v1.x classes remain fully backward-compatible.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
+"""
 
 from collections import defaultdict, deque
 from typing import Dict, List, Any, Optional, Set, Tuple, Union
@@ -228,6 +251,12 @@ class HighPerformanceHashMap:
                     return True
             return False
 
+    def clear(self) -> None:
+        """Clear all entries"""
+        with self.lock:
+            self.buckets = [[] for _ in range(self.capacity)]
+            self.size = 0
+
 class LRUCache:
     """High-performance LRU cache with O(1) operations"""
     
@@ -238,6 +267,19 @@ class LRUCache:
         self.min_freq = 0
         self.freq_to_keys = defaultdict(set)
         self.key_to_freq = {}
+    
+    def clear(self) -> None:
+        """Clear all entries"""
+        self.cache.clear()
+        self.freq_map.clear()
+        self.min_freq = 0
+        self.freq_to_keys.clear()
+        self.key_to_freq.clear()
+        
+    @property
+    def curr_size(self) -> int:
+        """Return current number of items in cache"""
+        return len(self.cache)
         
     def _update_freq(self, key: str) -> None:
         """Update frequency tracking for LFU eviction"""
@@ -642,3 +684,78 @@ class PerformanceMonitor:
                 'total': sum(times)
             }
         return report
+
+
+# ============================================================================
+# Enterprise v2.0 — DataStructureHealthCheck
+# ============================================================================
+
+
+class DataStructureHealthCheck:
+    """Diagnostics utility for instantiated data structures.
+
+    Runs lightweight integrity checks on supplied structures and
+    returns a summary dict suitable for health-check endpoints.
+
+    Example::
+
+        trie = OptimizedTrie()
+        hmap = HighPerformanceHashMap()
+        report = DataStructureHealthCheck.check_all(trie=trie, hash_map=hmap)
+        print(report["overall_healthy"])
+
+    .. versionadded:: 2.0
+    """
+
+    @staticmethod
+    def check_all(
+        *,
+        trie: OptimizedTrie | None = None,
+        hash_map: HighPerformanceHashMap | None = None,
+        cache: LRUCache | None = None,
+    ) -> dict:
+        """Run diagnostics on provided structures.
+
+        Args:
+            trie: Optional trie to check.
+            hash_map: Optional hash map to check.
+            cache: Optional LRU cache to check.
+
+        Returns:
+            Dict with per-structure status and ``overall_healthy`` flag.
+        """
+        results: dict = {}
+        healthy = True
+
+        if trie is not None:
+            stats = trie.get_stats()
+            results["trie"] = {
+                "word_count": stats.get("word_count", 0),
+                "total_nodes": stats.get("total_nodes", 0),
+                "healthy": stats.get("total_nodes", 0) >= stats.get("word_count", 0),
+            }
+            if not results["trie"]["healthy"]:
+                healthy = False
+
+        if hash_map is not None:
+            load = hash_map.size / max(hash_map.capacity, 1)
+            results["hash_map"] = {
+                "size": hash_map.size,
+                "capacity": hash_map.capacity,
+                "load_factor": round(load, 4),
+                "healthy": load <= 1.0,
+            }
+            if not results["hash_map"]["healthy"]:
+                healthy = False
+
+        if cache is not None:
+            results["cache"] = {
+                "size": len(cache.cache),
+                "capacity": cache.capacity,
+                "healthy": len(cache.cache) <= cache.capacity,
+            }
+            if not results["cache"]["healthy"]:
+                healthy = False
+
+        results["overall_healthy"] = healthy
+        return results

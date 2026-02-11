@@ -1,12 +1,21 @@
-"""
-Query Complexity Analyzer V2 - 95% Accuracy Target
+"""Query Complexity Analyzer V2 — Semantic + Hierarchical Decision.
 
-Complete rewrite using hierarchical decision rules instead of additive scoring.
-This achieves publication-ready accuracy by eliminating weak signal combination.
+Replaces weighted scoring with a decision tree driven by semantic
+understanding of natural-language queries.  Outputs a complexity
+tier (``simple``, ``moderate``, ``complex``, ``expert``) that feeds
+into model selection and timeout scheduling.
 
-Author: Research Team
-Date: November 9, 2025
-Target: 95% routing accuracy
+Enterprise v2.0 Additions
+-------------------------
+* **ComplexityProfile** — Dataclass aggregating the full breakdown
+  of a complexity analysis (tier, score, contributing factors).
+* **ComplexityBenchmark** — Utility to benchmark the analyser
+  against a labelled dataset and report accuracy metrics.
+
+All v1.x APIs (``QueryComplexityAnalyzer``) remain unchanged.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
 """
 
 import re
@@ -452,3 +461,88 @@ EXPLANATION: {result.reasoning.get('explanation', 'N/A')}
 MATCHED KEYWORDS: {result.reasoning.get('matched_keywords', [])}
 """
         return report
+
+
+# ============================================================================
+# Enterprise v2.0 — ComplexityProfile & ComplexityBenchmark
+# ============================================================================
+
+from dataclasses import dataclass as _dataclass, field as _field
+import datetime as _dt
+
+
+@_dataclass
+class ComplexityProfile:
+    """Full breakdown of a query complexity analysis.
+
+    Attributes:
+        query: The original query string.
+        tier: Complexity tier (``simple``, ``moderate``, ``complex``, ``expert``).
+        score: Numeric complexity score (0.0–1.0).
+        factors: Dict of contributing factor names to their individual scores.
+        model_recommendation: Suggested model name for this tier.
+        timestamp: ISO-8601 timestamp of the analysis.
+
+    .. versionadded:: 2.0
+    """
+
+    query: str
+    tier: str
+    score: float
+    factors: dict = _field(default_factory=dict)
+    model_recommendation: str = ""
+    timestamp: str = _field(default_factory=lambda: _dt.datetime.now().isoformat())
+
+
+class ComplexityBenchmark:
+    """Benchmark the analyser against a labelled dataset.
+
+    Accepts a list of ``(query, expected_tier)`` tuples, runs them
+    through a :class:`QueryComplexityAnalyzer`, and reports accuracy.
+
+    Example::
+
+        bench = ComplexityBenchmark()
+        results = bench.run([("show total sales", "simple"),
+                             ("correlate revenue with marketing spend", "complex")])
+        print(results["accuracy"])
+
+    .. versionadded:: 2.0
+    """
+
+    def run(
+        self,
+        labelled_data: list[tuple[str, str]],
+        columns: list[str] | None = None,
+    ) -> dict:
+        """Execute benchmark and return accuracy report.
+
+        Args:
+            labelled_data: List of ``(query, expected_tier)`` pairs.
+            columns: Optional column names for context.
+
+        Returns:
+            Dict with ``total``, ``correct``, ``accuracy``, and
+            ``mismatches`` keys.
+        """
+        analyzer = QueryComplexityAnalyzer()
+        correct = 0
+        mismatches: list[dict] = []
+        for query, expected in labelled_data:
+            result = analyzer.analyze(query, columns or [])
+            predicted = result.get("tier", result.get("complexity", "unknown"))
+            if predicted == expected:
+                correct += 1
+            else:
+                mismatches.append({
+                    "query": query,
+                    "expected": expected,
+                    "predicted": predicted,
+                })
+        total = len(labelled_data)
+        return {
+            "total": total,
+            "correct": correct,
+            "accuracy": round(correct / total, 4) if total else 0.0,
+            "mismatches": mismatches,
+        }

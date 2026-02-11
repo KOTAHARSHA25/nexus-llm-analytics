@@ -11,7 +11,7 @@ class TestMessageType:
     """Test MessageType enum"""
     
     def test_message_types(self):
-        from src.backend.core.websocket_manager import MessageType
+        from backend.core.websocket_manager import MessageType
         
         assert MessageType.ANALYSIS_START.value == "analysis_start"
         assert MessageType.ANALYSIS_PROGRESS.value == "analysis_progress"
@@ -27,7 +27,7 @@ class TestConnectionManager:
     
     @pytest.fixture
     def manager(self):
-        from src.backend.core.websocket_manager import ConnectionManager
+        from backend.core.websocket_manager import ConnectionManager
         return ConnectionManager()
     
     def test_init(self, manager):
@@ -70,7 +70,7 @@ class TestAnalysisProgressTracker:
     
     @pytest.fixture
     def tracker(self):
-        from src.backend.core.websocket_manager import AnalysisProgressTracker, ConnectionManager
+        from backend.core.websocket_manager import AnalysisProgressTracker, ConnectionManager
         mock_manager = MagicMock(spec=ConnectionManager)
         mock_manager.send_personal_message = AsyncMock()
         return AnalysisProgressTracker(mock_manager)
@@ -100,7 +100,8 @@ class TestAnalysisProgressTracker:
         await tracker.start_analysis("analysis1", "client1", "test query")
         await tracker.complete_analysis("analysis1", {"result": "data"}, 1.5)
         
-        assert "analysis1" not in tracker.active_analyses
+        assert "analysis1" in tracker.active_analyses
+        assert tracker.active_analyses["analysis1"]["status"] == "completed"
     
     @pytest.mark.asyncio
     async def test_report_error(self, tracker):

@@ -1,6 +1,6 @@
 import pytest
 import threading
-from src.backend.core.optimized_data_structures import (
+from backend.core.optimized_data_structures import (
     OptimizedTrie, HighPerformanceHashMap, LRUCache, OptimizedDataProcessor
 )
 

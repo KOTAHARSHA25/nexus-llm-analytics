@@ -1,17 +1,40 @@
+"""Enhanced Visualization API — LIDA-Inspired Chart Enhancement Endpoints
+========================================================================
+
+Provides post-generation chart improvement capabilities modelled after
+Microsoft’s LIDA framework: editing, explanation, evaluation, repair,
+and recommendation.
+
+Endpoints
+---------
+``POST /edit``
+    Apply natural-language edit instructions to existing chart code.
+``POST /explain``
+    Generate a structured human-readable explanation of chart code.
+``POST /evaluate``
+    Score chart quality across six dimensions (bugs, transformation,
+    compliance, type, encoding, aesthetics).
+``POST /repair``
+    Repair chart code based on evaluation or user feedback.
+``POST /recommend``
+    Suggest *n* diverse alternative visualizations.
+``POST /persona-goals``
+    Generate visualization goals tailored to a user persona.
 """
-Enhanced Visualization API with LIDA-Inspired Features.
-Provides editing, explanation, evaluation, repair, and recommendation capabilities.
-"""
+
+from __future__ import annotations
+
+import json
+import logging
+from typing import Any, Dict, List, Optional, Union
 
 from fastapi import APIRouter, HTTPException
+from pathlib import Path
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional, Union
-import logging
-import json
 
 from backend.visualization.scaffold import ChartScaffold, VisualizationGoal
-from backend.utils.data_utils import clean_code_snippet, create_data_summary, read_dataframe
-from pathlib import Path
+from backend.utils.data_utils import clean_code_snippet, create_data_summary, read_dataframe, DataPathResolver, preprocess_visualization_code
+from backend.core.plugin_system import get_agent_registry
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -68,8 +91,6 @@ class PersonaGoalsRequest(BaseModel):
 
 def get_data_path(filename: str) -> str:
     """Get full path for uploaded file using centralized resolver"""
-    from backend.utils.data_utils import DataPathResolver
-    
     filepath = DataPathResolver.resolve_data_file(filename)
     if not filepath:
         raise FileNotFoundError(f"File '{filename}' not found")
@@ -79,14 +100,26 @@ def get_data_path(filename: str) -> str:
 
 def preprocess_code(code: str) -> str:
     """Preprocess code for execution (uses centralized function)"""
-    from backend.utils.data_utils import preprocess_visualization_code
     return preprocess_visualization_code(code, library="plotly")
+
+
+def _get_data_analyst_agent():
+    """Retrieve the DataAnalyst agent from the registry.
+    
+    Raises:
+        ValueError: If the DataAnalyst agent is not registered.
+    """
+    registry = get_agent_registry()
+    agent = registry.get_agent("DataAnalyst")
+    if not agent:
+        raise ValueError("DataAnalyst agent not found")
+    return agent
 
 
 # ==================== EDIT ENDPOINT ====================
 
 @router.post("/edit")
-async def edit_visualization(request: ChartEditRequest):
+async def edit_visualization(request: ChartEditRequest) -> Dict[str, Any]:
     """
     Edit a visualization using natural language instructions.
     
@@ -96,7 +129,10 @@ async def edit_visualization(request: ChartEditRequest):
     - "Add a trend line"
     - "Rotate x-axis labels"
     """
-    logger.debug(f"[VIZ_EDIT] Editing chart with {len(request.instructions) if isinstance(request.instructions, list) else 1} instructions")
+    logger.debug(
+        "[VIZ_EDIT] Editing chart with %d instructions",
+        len(request.instructions) if isinstance(request.instructions, list) else 1,
+    )
     
     try:
         # Load data summary
@@ -149,12 +185,7 @@ async def edit_visualization(request: ChartEditRequest):
         """
         
         # Get edited code from Agent
-        from backend.core.plugin_system import get_agent_registry
-        registry = get_agent_registry()
-        analyst = registry.get_agent("DataAnalyst")
-        
-        if not analyst:
-            raise ValueError("DataAnalyst agent not found")
+        analyst = _get_data_analyst_agent()
             
         result = analyst.execute(
             query=prompt,
@@ -174,14 +205,14 @@ async def edit_visualization(request: ChartEditRequest):
         }
         
     except Exception as e:
-        logger.error(f"[VIZ_EDIT] Error: {e}")
+        logger.error("[VIZ_EDIT] Error: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Edit failed: {str(e)}")
 
 
 # ==================== EXPLAIN ENDPOINT ====================
 
 @router.post("/explain")
-async def explain_visualization(request: ChartExplainRequest):
+async def explain_visualization(request: ChartExplainRequest) -> Dict[str, Any]:
     """
     Explain a visualization code in human-readable format.
     
@@ -190,7 +221,7 @@ async def explain_visualization(request: ChartExplainRequest):
     - Transformation: Data filtering, aggregation, grouping
     - Visualization: Step-by-step code explanation
     """
-    logger.debug(f"[VIZ_EXPLAIN] Explaining {request.library} visualization")
+    logger.debug("[VIZ_EXPLAIN] Explaining %s visualization", request.library)
     
     try:
         # Build prompt
@@ -217,12 +248,7 @@ async def explain_visualization(request: ChartExplainRequest):
         ```
         """
         
-        from backend.core.plugin_system import get_agent_registry
-        registry = get_agent_registry()
-        analyst = registry.get_agent("DataAnalyst")
-        
-        if not analyst:
-            raise ValueError("DataAnalyst agent not found")
+        analyst = _get_data_analyst_agent()
             
         result = analyst.execute(
             query=prompt,
@@ -254,14 +280,14 @@ async def explain_visualization(request: ChartExplainRequest):
         }
         
     except Exception as e:
-        logger.error(f"[VIZ_EXPLAIN] Error: {e}")
+        logger.error("[VIZ_EXPLAIN] Error: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Explanation failed: {str(e)}")
 
 
 # ==================== EVALUATE ENDPOINT ====================
 
 @router.post("/evaluate")
-async def evaluate_visualization(request: ChartEvaluateRequest):
+async def evaluate_visualization(request: ChartEvaluateRequest) -> Dict[str, Any]:
     """
     Evaluate visualization quality on 6 dimensions.
     
@@ -275,7 +301,7 @@ async def evaluate_visualization(request: ChartEvaluateRequest):
     
     Each dimension scored 1 (bad) - 10 (good) with rationale.
     """
-    logger.debug(f"[VIZ_EVAL] Evaluating {request.library} visualization")
+    logger.debug("[VIZ_EVAL] Evaluating %s visualization", request.library)
     
     try:
         prompt = f"""
@@ -312,12 +338,7 @@ async def evaluate_visualization(request: ChartEvaluateRequest):
         
 
         
-        from backend.core.plugin_system import get_agent_registry
-        registry = get_agent_registry()
-        analyst = registry.get_agent("DataAnalyst")
-        
-        if not analyst:
-            raise ValueError("DataAnalyst agent not found")
+        analyst = _get_data_analyst_agent()
             
         result = analyst.execute(
             query=prompt,
@@ -350,14 +371,14 @@ async def evaluate_visualization(request: ChartEvaluateRequest):
             }
         
     except Exception as e:
-        logger.error(f"[VIZ_EVAL] Error: {e}")
+        logger.error("[VIZ_EVAL] Error: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Evaluation failed: {str(e)}")
 
 
 # ==================== REPAIR ENDPOINT ====================
 
 @router.post("/repair")
-async def repair_visualization(request: ChartRepairRequest):
+async def repair_visualization(request: ChartRepairRequest) -> Dict[str, Any]:
     """
     Repair visualization based on feedback from evaluation or user.
     
@@ -366,7 +387,7 @@ async def repair_visualization(request: ChartRepairRequest):
     - List of strings: ["Fix the colors", "Add labels"]
     - List of evaluation dicts: Output from /evaluate endpoint
     """
-    logger.debug(f"[VIZ_REPAIR] Repairing {request.library} visualization")
+    logger.debug("[VIZ_REPAIR] Repairing %s visualization", request.library)
     
     try:
         # Load data summary
@@ -427,12 +448,7 @@ async def repair_visualization(request: ChartRepairRequest):
         
 
         
-        from backend.core.plugin_system import get_agent_registry
-        registry = get_agent_registry()
-        analyst = registry.get_agent("DataAnalyst")
-        
-        if not analyst:
-            raise ValueError("DataAnalyst agent not found")
+        analyst = _get_data_analyst_agent()
             
         result = analyst.execute(
             query=prompt,
@@ -451,14 +467,14 @@ async def repair_visualization(request: ChartRepairRequest):
         }
         
     except Exception as e:
-        logger.error(f"[VIZ_REPAIR] Error: {e}")
+        logger.error("[VIZ_REPAIR] Error: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Repair failed: {str(e)}")
 
 
 # ==================== RECOMMEND ENDPOINT ====================
 
 @router.post("/recommend")
-async def recommend_visualizations(request: ChartRecommendRequest):
+async def recommend_visualizations(request: ChartRecommendRequest) -> Dict[str, Any]:
     """
     Recommend alternative visualizations based on current chart.
     
@@ -468,7 +484,7 @@ async def recommend_visualizations(request: ChartRecommendRequest):
     - Different variables from dataset
     - Clearer ways to display information
     """
-    logger.debug(f"[VIZ_RECOMMEND] Generating {request.n} recommendations")
+    logger.debug("[VIZ_RECOMMEND] Generating %d recommendations", request.n)
     
     try:
         # Load data summary
@@ -527,12 +543,7 @@ async def recommend_visualizations(request: ChartRecommendRequest):
         
 
         
-        from backend.core.plugin_system import get_agent_registry
-        registry = get_agent_registry()
-        analyst = registry.get_agent("DataAnalyst")
-        
-        if not analyst:
-            raise ValueError("DataAnalyst agent not found")
+        analyst = _get_data_analyst_agent()
             
         result = analyst.execute(
             query=prompt,
@@ -562,14 +573,14 @@ async def recommend_visualizations(request: ChartRecommendRequest):
         }
         
     except Exception as e:
-        logger.error(f"[VIZ_RECOMMEND] Error: {e}")
+        logger.error("[VIZ_RECOMMEND] Error: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Recommendations failed: {str(e)}")
 
 
 # ==================== PERSONA GOALS ENDPOINT ====================
 
 @router.post("/persona-goals")
-async def generate_persona_goals(request: PersonaGoalsRequest):
+async def generate_persona_goals(request: PersonaGoalsRequest) -> Dict[str, Any]:
     """
     Generate visualization goals based on a persona.
     
@@ -580,7 +591,7 @@ async def generate_persona_goals(request: PersonaGoalsRequest):
     - Accountant: Financial metrics, cost analysis
     - (or auto-detect from data)
     """
-    logger.debug(f"[PERSONA_GOALS] Generating goals for persona: {request.persona or 'auto'}")
+    logger.debug("[PERSONA_GOALS] Generating goals for persona: %s", request.persona or "auto")
     
     try:
         # Load data summary
@@ -627,12 +638,7 @@ async def generate_persona_goals(request: PersonaGoalsRequest):
         ```
         """
         
-        from backend.core.plugin_system import get_agent_registry
-        registry = get_agent_registry()
-        analyst = registry.get_agent("DataAnalyst")
-        
-        if not analyst:
-            raise ValueError("DataAnalyst agent not found")
+        analyst = _get_data_analyst_agent()
             
         result = analyst.execute(
             query=prompt,
@@ -661,5 +667,5 @@ async def generate_persona_goals(request: PersonaGoalsRequest):
             }
         
     except Exception as e:
-        logger.error(f"[PERSONA_GOALS] Error: {e}")
+        logger.error("[PERSONA_GOALS] Error: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Goal generation failed: {str(e)}")

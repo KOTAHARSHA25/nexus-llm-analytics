@@ -1,10 +1,10 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.backend.core.memory_optimizer import MemoryOptimizer
+from backend.core.memory_optimizer import MemoryOptimizer
 
 @pytest.fixture
 def mock_psutil():
-    with patch('src.backend.core.memory_optimizer.psutil') as mock:
+    with patch('backend.core.memory_optimizer.psutil') as mock:
         # Mock virtual_memory
         mem = MagicMock()
         mem.total = 16 * 1024**3

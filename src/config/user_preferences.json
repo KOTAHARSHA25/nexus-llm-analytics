@@ -6,32 +6,32 @@
   "allow_swap_usage": true,
   "memory_buffer_gb": 0.5,
   "preferred_performance": "balanced",
-  "enable_intelligent_routing": false,
+  "enable_intelligent_routing": true,
   "first_time_setup_complete": true,
-  "last_updated": "2026-01-08T22:54:28.693925",
+  "last_updated": "2026-02-11T13:03:38.101809",
   "model_test_results": {
     "phi3:mini": {
       "success": true,
-      "timestamp": "2026-01-08T20:20:08.318169",
-      "response_time": 5.928908586502075,
+      "timestamp": "2026-02-07T12:12:54.340759",
+      "response_time": 5.258162021636963,
       "error": null
     },
     "nomic-embed-text:latest": {
       "success": true,
-      "timestamp": "2026-01-08T20:19:41.154643",
-      "response_time": 2.756531000137329,
+      "timestamp": "2026-02-07T12:12:19.692019",
+      "response_time": 2.741807460784912,
       "error": null
     },
     "tinyllama:latest": {
       "success": true,
-      "timestamp": "2026-01-08T20:19:46.823686",
-      "response_time": 4.089386463165283,
+      "timestamp": "2026-02-07T12:12:28.324745",
+      "response_time": 4.771409273147583,
       "error": null
     },
     "llama3.1:8b": {
       "success": true,
-      "timestamp": "2026-01-08T20:19:59.573303",
-      "response_time": 10.946776390075684,
+      "timestamp": "2026-02-07T12:12:41.482707",
+      "response_time": 10.96952486038208,
       "error": null
     }
   }

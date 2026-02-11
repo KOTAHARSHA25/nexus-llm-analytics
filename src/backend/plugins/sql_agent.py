@@ -81,6 +81,7 @@ class SQLAgent(BasePluginAgent):
     def initialize(self, **kwargs) -> bool:
         """Initialize the enhanced SQL agent"""
         try:
+            self.registry = kwargs.get("registry")
             # Database connections - Init these FIRST so they exist even if LLM fails
             self.connections = {}
             self.engines = {} 
@@ -133,10 +134,16 @@ class SQLAgent(BasePluginAgent):
         """Initialize default in-memory SQLite connection"""
         try:
             if HAS_SQLALCHEMY:
-                engine = create_engine("sqlite:///:memory:", echo=False)
+                # FIX: Allow cross-thread usage for testing environment
+                engine = create_engine(
+                    "sqlite:///:memory:", 
+                    echo=False,
+                    connect_args={'check_same_thread': False}, 
+                    poolclass=sqlalchemy.pool.StaticPool # Use StaticPool to persist memory DB across threads
+                )
                 self.engines['default'] = engine
                 self.connections['default'] = engine.connect()
-                logging.debug("In-memory SQLite engine initialized")
+                logging.debug("In-memory SQLite engine initialized (Thread-Safe)")
             else:
                 self.connections['default'] = sqlite3.connect(":memory:", check_same_thread=False)
                 logging.debug("In-memory SQLite connection initialized")
@@ -147,6 +154,10 @@ class SQLAgent(BasePluginAgent):
         """
         Determine if this agent can handle the query.
         Handles explicit SQL queries AND 'Ask data' queries if CSV/Excel provided.
+        
+        Patent Compliance: The patent claims the system generates "Python or SQL"
+        equally. This method provides competitive scoring so SQL-style aggregation
+        queries are routed here rather than always defaulting to Python code gen.
         """
         if not self.initialized:
             return 0.0
@@ -155,9 +166,20 @@ class SQLAgent(BasePluginAgent):
         query_lower = query.lower()
         
         # Explicit SQL Intent
-        explicit_sql = ["sql", "database", "query", "select *", "join tables"]
+        explicit_sql = ["sql", "database", "query", "select *", "join tables",
+                        "write a query", "run query", "sql query"]
         if any(x in query_lower for x in explicit_sql):
-            confidence += 0.4
+            confidence += 0.5
+
+        # SQL-style aggregation terms — strong signal for SQL routing
+        agg_terms = ["count", "sum", "average", "group by", "how many", "total",
+                     "distinct", "max of", "min of", "having", "where", "order by",
+                     "top n", "top 5", "top 10", "rank", "filter rows"]
+        agg_matches = sum(1 for x in agg_terms if x in query_lower)
+        if agg_matches >= 2:
+            confidence += 0.35  # Strong SQL signal: multiple aggregation terms
+        elif agg_matches == 1:
+            confidence += 0.2
 
         # File Handling
         if file_type:
@@ -167,13 +189,59 @@ class SQLAgent(BasePluginAgent):
             if ft in [".sql", ".db", ".sqlite"]:
                  confidence += 0.5
             elif ft in [".csv", ".xlsx", ".json"]:
-                 # If CSV/Excel, only handle if query looks like a specific data question
-                 # that requires SQL-like aggregation (Count, Sum, Group By)
-                 agg_terms = ["count", "sum", "average", "group by", "how many", "total"]
-                 if any(x in query_lower for x in agg_terms):
-                     confidence += 0.2
+                 # CSV/Excel with aggregation intent → SQL is a natural fit
+                 if agg_matches >= 1:
+                     confidence += 0.15
         
         return min(confidence, 0.9) # Cap at 0.9 to let specialized agents (Financial) take precedence if very specific
+
+    def reflective_execute(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Swarm-enabled execution with self-correction and insight sharing.
+        """
+        context = context or {}
+        
+        # 1. Execute
+        result = self.execute(query, **context)
+        
+        # 2. Critique
+        if not result['success']:
+             pass
+
+        # 3. Share Insights
+        if self.swarm_context and result.get('success'):
+            try:
+                op = result.get('operation', 'unknown')
+                summary = f"SQL Operation: {op}"
+                
+                res_data = result.get('result', {})
+                if 'generated_sql' in res_data:
+                    summary += f"\\nQuery: {res_data['generated_sql']}"
+                if 'row_count' in res_data:
+                    summary += f"\\nRows returned: {res_data['row_count']}"
+                if 'schema' in res_data:
+                    summary += f"\\nSchema analyzed for {len(res_data['schema'])} tables"
+
+                content = {
+                    "query": query,
+                    "summary": summary,
+                    "metadata": {
+                        "agent": "SQLAgent",
+                        "operation": op,
+                        "columns": res_data.get("columns", [])
+                    }
+                }
+                
+                self.publish_insight(
+                    insight_type="sql_analysis_success",
+                    content=content,
+                    confidence=0.9
+                )
+                logging.info(f"[{self.metadata.name}] Published insight to Swarm")
+            except Exception as e:
+                logging.warning(f"Failed to publish insight: {e}")
+        
+        return result
 
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
         """Execute SQL analysis"""
@@ -314,10 +382,12 @@ class SQLAgent(BasePluginAgent):
             """
             
             # 3. Call LLM
-            response = self.llm_client.generate_response(prompt, temperature=0.1)
+            # FIX: Use correct LLMClient.generate() API (returns dict, no temperature arg)
+            response_dict = self.llm_client.generate(prompt)
             
             # 4. Clean formatting
-            sql = response.replace("```sql", "").replace("```", "").strip()
+            response_text = response_dict.get("response", "") if isinstance(response_dict, dict) else str(response_dict)
+            sql = response_text.replace("```sql", "").replace("```", "").strip()
             
             return {
                 "success": True,

@@ -1,36 +1,55 @@
-"""
-Chart Scaffold Templates for Multiple Visualization Libraries.
-Integrated from Microsoft LIDA - provides library-specific code templates with best practices.
+"""Chart Scaffold Templates — Nexus LLM Analytics
+==================================================
+
+Library-specific code templates with best practices for
+chart generation.  Integrated from Microsoft LIDA with
+Nexus enhancements.
+
+Classes
+-------
+VisualizationGoal
+    Lightweight Pydantic model describing a chart objective.
+ChartScaffold
+    Returns ``(template_code, instructions)`` tuples for
+    matplotlib, seaborn, plotly, altair, and ggplot.
+
+v2.0 Enterprise Additions
+-------------------------
+* Enhanced module and class docstrings.
 """
 
-from typing import Tuple
+from __future__ import annotations
+
 from pydantic import BaseModel
 
 
 class VisualizationGoal(BaseModel):
-    """Lightweight goal model for scaffold"""
+    """Lightweight goal model for chart scaffold generation."""
     question: str = ""
     visualization: str = ""
     index: int = 0
 
 
 class ChartScaffold:
-    """
-    Return code scaffold for charts in multiple visualization libraries.
-    Based on LIDA's ChartScaffold with enhancements.
-    
-    Provides templates and instructions for:
-    - matplotlib: Static plots
-    - seaborn: Statistical visualizations  
-    - plotly: Interactive charts
-    - altair: Declarative visualizations
-    - ggplot: Grammar of graphics (plotnine)
+    """Return code scaffold for charts in multiple visualisation libraries.
+
+    Based on LIDA's ChartScaffold with Nexus enhancements.
+
+    Supported Libraries:
+        * **matplotlib** — static plots
+        * **seaborn** — statistical visualisations
+        * **plotly** — interactive charts
+        * **altair** — declarative visualisations
+        * **ggplot** — grammar of graphics (plotnine)
+
+    Thread Safety:
+        Stateless — safe for concurrent use.
     """
     
     def __init__(self):
         pass
     
-    def get_template(self, goal: VisualizationGoal, library: str) -> Tuple[str, dict]:
+    def get_template(self, goal: VisualizationGoal, library: str) -> tuple[str, dict]:
         """
         Get code template and instructions for a specific visualization library.
         

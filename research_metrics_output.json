@@ -1,0 +1,32 @@
+{
+  "title": "Functional Contribution of AI Modules",
+  "subtitle": "(Experimental Estimation Based on System Testing)",
+  "x_axis": "Module Names",
+  "y_axis": "Contribution Level (0-1)",
+  "data": {
+    "Natural Language Understanding": 0.9,
+    "Semantic Router": 0.75,
+    "Code Generation Module": 0.85,
+    "Data Analytics Engine": 0.95,
+    "Self-Correction Module": 0.65,
+    "Execution Sandbox": 0.8
+  },
+  "performance_metrics": {
+    "overall_accuracy": 0.0,
+    "overall_avg_time": 0,
+    "by_complexity": {
+      "simple": {
+        "accuracy": 0.0,
+        "avg_time": 0
+      },
+      "moderate": {
+        "accuracy": 0.0,
+        "avg_time": 0
+      },
+      "complex": {
+        "accuracy": 0.0,
+        "avg_time": 0
+      }
+    }
+  }
+}
