@@ -6,9 +6,9 @@
   "allow_swap_usage": true,
   "memory_buffer_gb": 0.5,
   "preferred_performance": "balanced",
-  "enable_intelligent_routing": true,
+  "enable_intelligent_routing": false,
   "first_time_setup_complete": true,
-  "last_updated": "2026-02-11T13:03:38.101809",
+  "last_updated": "2026-02-24T10:48:41.041857",
   "model_test_results": {
     "phi3:mini": {
       "success": true,
