@@ -1,12 +1,21 @@
-"""
-Backend Utilities Package
-=========================
-Consolidated data processing and optimization utilities.
+"""Backend Utilities Package — Nexus LLM Analytics
+===================================================
 
-This package provides:
-- data_utils: DataFrame operations, path resolution, code cleaning
-- data_optimizer: LLM-optimized data preparation (flattening, sampling)
+Consolidated data-processing and optimisation utilities.
+
+Submodules
+----------
+data_utils
+    DataFrame operations, path resolution, code cleaning.
+data_optimizer
+    LLM-optimised data preparation (flattening, sampling).
+
+v2.0 Enterprise Additions
+-------------------------
+* Enterprise module docstring with submodule catalogue.
 """
+
+from __future__ import annotations
 
 from .data_utils import (
     clean_column_name,

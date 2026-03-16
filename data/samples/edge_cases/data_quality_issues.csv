@@ -1,0 +1,21 @@
+transaction_id,date,amount,category,status,notes
+T001,2024-01-15,1500.50,Purchase,Completed,
+T002,2024-01-16,null,Refund,Pending,Amount not yet determined
+T003,2024-01-17,-250.00,Withdrawal,Failed,Insufficient funds
+T004,2024-01-18,0,Transfer,Completed,Zero-value test transaction
+T005,2024-01-19,999999999.99,Purchase,Completed,Extreme value test
+T006,2024-01-20,,Deposit,Completed,Missing amount
+T007,2024-01-21,50.00,Purchase,null,Status not recorded
+T008,invalid-date,100.00,Purchase,Completed,Invalid date format
+T009,2024-01-23,ABC,Purchase,Completed,Non-numeric amount
+T010,2024-01-24,100.00,"",Completed,Empty category
+T011,2024-01-25,-0.01,Adjustment,Completed,Negative edge case
+T012,2024-13-45,200.00,Purchase,Completed,Impossible date
+T013,2024-01-27,50.00,Purchase,Completed,🎉 Unicode emoji in notes
+T014,2024-01-28,1e6,Purchase,Completed,Scientific notation
+T015,2024-01-29,Infinity,Error,Failed,String infinity
+T016,,150.00,Purchase,Completed,Missing date
+T017,2024-01-31,75.50,Purchase;Refund,Completed,Multiple categories
+T018,2024-02-01,100.00,Purchase,COMPLETED,Case variation
+T019,2024-02-02,  200.50  ,Purchase,Completed,Whitespace in amount
+T020,2024-02-03,100,00,Purchase,Completed,Comma instead of decimal

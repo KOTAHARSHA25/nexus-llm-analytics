@@ -1,16 +1,48 @@
-# Memory Optimization Helper for Nexus LLM Analytics
-# Helps free up RAM before running AI analysis
+"""Memory optimisation helper for Nexus LLM Analytics.
 
-import psutil
+Provides utilities to inspect system RAM usage, identify memory-hungry
+processes, and give actionable recommendations before running LLM inference.
+
+Enterprise v2.0 Additions
+-------------------------
+* **MemoryAlert** — Dataclass representing a memory-pressure alert with
+  severity, timestamp, and actionable recommendation.
+* **MemoryProfile** — Context-manager that snapshots RAM before/after a
+  block and logs the delta, useful for profiling LLM invocations.
+* **get_memory_optimizer()** — Thread-safe singleton accessor.
+
+All v1.x APIs (``MemoryOptimizer``, ``main``) remain unchanged.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
+"""
+
+from __future__ import annotations
+
+import logging
 import os
 import subprocess
-import logging
-from typing import List, Dict, Tuple
+import threading
+import time as _time
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Tuple
+
+import psutil
 
 class MemoryOptimizer:
-    """
-    Helps optimize system memory for LLM operations.
-    Provides recommendations and utilities to free up RAM.
+    """Helps optimise system memory for LLM operations.
+
+    Provides static utility methods to inspect current RAM usage,
+    identify the heaviest processes, estimate reclaimable memory,
+    and build an actionable optimisation plan with per-model
+    compatibility checks.
+
+    All methods are ``@staticmethod`` so the class can be used
+    without instantiation, but enterprise code should prefer the
+    :func:`get_memory_optimizer` singleton for consistency.
+
+    .. versionchanged:: 2.0
+       Added enterprise singleton accessor and profiling helpers.
     """
     
     @staticmethod
@@ -28,8 +60,8 @@ class MemoryOptimizer:
         }
     
     @staticmethod
-    def get_top_memory_processes(limit: int = 10) -> List[Dict[str, any]]:
-        """Get processes using the most memory"""
+    def get_top_memory_processes(limit: int = 10) -> List[Dict[str, Any]]:
+        """Get processes using the most memory."""
         processes = []
         
         for proc in psutil.process_iter(['pid', 'name', 'memory_info']):
@@ -111,8 +143,8 @@ class MemoryOptimizer:
         return estimated_available, recommendations
     
     @staticmethod
-    def get_optimization_plan() -> Dict[str, any]:
-        """Get a comprehensive memory optimization plan"""
+    def get_optimization_plan() -> Dict[str, Any]:
+        """Get a comprehensive memory optimization plan."""
         current_memory = MemoryOptimizer.get_memory_usage()
         top_processes = MemoryOptimizer.get_top_memory_processes(10)
         estimated_available, recommendations = MemoryOptimizer.estimate_available_after_cleanup()
@@ -144,12 +176,12 @@ class MemoryOptimizer:
         }
     
     @staticmethod
-    def clear_system_cache():
-        """Clear system caches (Windows-specific)"""
+    def clear_system_cache() -> None:
+        """Clear system caches (Windows-specific)."""
         try:
             # Clear DNS cache
             subprocess.run(['ipconfig', '/flushdns'], capture_output=True, check=True)
-            print("✅ DNS cache cleared")
+            logging.info("✅ DNS cache cleared")
             
             # Clear Windows temporary files (requires admin on some systems)
             temp_dirs = [
@@ -174,53 +206,164 @@ class MemoryOptimizer:
                         pass
             
             if cleared_something:
-                print("✅ Temporary files cleared")
+                logging.info("✅ Temporary files cleared")
             else:
-                print("ℹ️ No temporary files to clear or insufficient permissions")
+                logging.info("ℹ️ No temporary files to clear or insufficient permissions")
                 
         except Exception as e:
-            print(f"⚠️ Cache clearing partially failed: {e}")
+            logging.warning(f"⚠️ Cache clearing partially failed: {e}")
 
-def main():
-    """Main function to run memory optimization analysis"""
-    print("🧠 Nexus LLM Analytics - Memory Optimizer")
-    print("=" * 50)
+def main() -> None:
+    """Run interactive memory optimisation analysis and print results."""
+    logging.info("🧠 Nexus LLM Analytics - Memory Optimizer")
+    logging.info("=" * 50)
     
     # Get optimization plan
     plan = MemoryOptimizer.get_optimization_plan()
     
     # Display current memory status
     memory = plan["current_memory"]
-    print(f"💾 Current Memory Status:")
-    print(f"   Total: {memory['total_gb']:.1f}GB")
-    print(f"   Available: {memory['available_gb']:.1f}GB ({100-memory['percent_used']:.1f}% free)")
-    print(f"   Used: {memory['used_gb']:.1f}GB ({memory['percent_used']:.1f}%)")
+    logging.info(f"💾 Current Memory Status:")
+    logging.info(f"   Total: {memory['total_gb']:.1f}GB")
+    logging.info(f"   Available: {memory['available_gb']:.1f}GB ({100-memory['percent_used']:.1f}% free)")
+    logging.info(f"   Used: {memory['used_gb']:.1f}GB ({memory['percent_used']:.1f}%)")
     
     # Show top memory-consuming processes
-    print(f"\n🔍 Top Memory-Consuming Processes:")
+    logging.info(f"\n🔍 Top Memory-Consuming Processes:")
     for i, proc in enumerate(plan["top_processes"][:5], 1):
-        print(f"   {i}. {proc['name']} - {proc['memory_gb']:.1f}GB")
+        logging.info(f"   {i}. {proc['name']} - {proc['memory_gb']:.1f}GB")
     
     # Show optimization recommendations
     if plan["optimization_recommendations"]:
-        print(f"\n💡 Memory Optimization Recommendations:")
+        logging.info(f"\n💡 Memory Optimization Recommendations:")
         for rec in plan["optimization_recommendations"]:
-            print(f"   {rec}")
+            logging.info(f"   {rec}")
         
-        print(f"\n📈 Estimated Available After Cleanup: {plan['estimated_available_after_cleanup']:.1f}GB")
+        logging.info(f"\n📈 Estimated Available After Cleanup: {plan['estimated_available_after_cleanup']:.1f}GB")
     else:
-        print(f"\n✅ Memory usage looks optimal!")
+        logging.info(f"\n✅ Memory usage looks optimal!")
     
     # Show model compatibility
-    print(f"\n🤖 Model Compatibility:")
+    logging.info(f"\n🤖 Model Compatibility:")
     for model, compat in plan["model_compatibility"].items():
         current_status = "✅" if compat["current"] else "❌"
         cleanup_status = "✅" if compat["after_cleanup"] else "❌"
         
-        print(f"   {model}:")
-        print(f"      Current: {current_status} (needs {compat['required_gb']:.1f}GB)")
+        logging.info(f"   {model}:")
+        logging.info(f"      Current: {current_status} (needs {compat['required_gb']:.1f}GB)")
         if not compat["current"] and compat["after_cleanup"]:
-            print(f"      After cleanup: {cleanup_status} (possible with optimization)")
+            logging.info(f"      After cleanup: {cleanup_status} (possible with optimization)")
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     main()
+
+
+# ============================================================================
+# Enterprise v2.0 — MemoryAlert, MemoryProfile & Singleton
+# ============================================================================
+
+
+@dataclass
+class MemoryAlert:
+    """Structured memory-pressure alert.
+
+    Attributes:
+        severity: One of ``low``, ``moderate``, ``high``, ``critical``.
+        available_gb: Available RAM at the time of the alert.
+        percent_used: Percentage of total RAM in use.
+        recommendation: Human-readable recommendation string.
+        timestamp: ISO-8601 timestamp of alert creation.
+
+    .. versionadded:: 2.0
+    """
+
+    severity: str
+    available_gb: float
+    percent_used: float
+    recommendation: str
+    timestamp: str = field(default_factory=lambda: __import__("datetime").datetime.now().isoformat())
+
+    @classmethod
+    def from_current_state(cls) -> "MemoryAlert":
+        """Create an alert reflecting the current memory state.
+
+        Returns:
+            A :class:`MemoryAlert` with severity and recommendation
+            computed from live ``psutil`` data.
+        """
+        info = MemoryOptimizer.get_memory_usage()
+        pct = info["percent_used"]
+        avail = info["available_gb"]
+        if pct >= 95:
+            sev, rec = "critical", "Immediately free memory or reduce model size."
+        elif pct >= 85:
+            sev, rec = "high", "Close heavy applications before running LLM inference."
+        elif pct >= 70:
+            sev, rec = "moderate", "Consider closing unused browser tabs."
+        else:
+            sev, rec = "low", "Memory usage is healthy."
+        return cls(severity=sev, available_gb=avail, percent_used=pct, recommendation=rec)
+
+
+class MemoryProfile:
+    """Context manager that profiles memory usage across a code block.
+
+    Records available RAM before and after the block executes and
+    logs the delta at ``DEBUG`` level.
+
+    Example::
+
+        with MemoryProfile("llm_generate") as mp:
+            result = llm.generate(prompt)
+        print(f"RAM delta: {mp.delta_mb:.1f} MB")
+
+    Attributes:
+        label: Descriptive label for log messages.
+        before_mb: Available RAM (MB) before the block.
+        after_mb: Available RAM (MB) after the block.
+
+    .. versionadded:: 2.0
+    """
+
+    def __init__(self, label: str = "") -> None:
+        self.label = label
+        self.before_mb: float = 0.0
+        self.after_mb: float = 0.0
+
+    def __enter__(self) -> "MemoryProfile":
+        self.before_mb = psutil.virtual_memory().available / (1024 * 1024)
+        return self
+
+    def __exit__(self, *exc_info) -> None:
+        self.after_mb = psutil.virtual_memory().available / (1024 * 1024)
+        logging.debug(
+            "MemoryProfile [%s]: before=%.1f MB, after=%.1f MB, delta=%.1f MB",
+            self.label, self.before_mb, self.after_mb, self.delta_mb,
+        )
+
+    @property
+    def delta_mb(self) -> float:
+        """Change in available RAM in megabytes (negative = consumed)."""
+        return self.after_mb - self.before_mb
+
+
+# Thread-safe singleton
+_memory_optimizer_instance: MemoryOptimizer | None = None
+_memory_optimizer_lock = threading.Lock()
+
+
+def get_memory_optimizer() -> MemoryOptimizer:
+    """Return the global :class:`MemoryOptimizer` singleton (thread-safe).
+
+    Uses double-checked locking to avoid contention after the first
+    call.
+
+    .. versionadded:: 2.0
+    """
+    global _memory_optimizer_instance
+    if _memory_optimizer_instance is None:
+        with _memory_optimizer_lock:
+            if _memory_optimizer_instance is None:
+                _memory_optimizer_instance = MemoryOptimizer()
+    return _memory_optimizer_instance

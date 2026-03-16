@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "version": 1.0,
+    "source": "test"
+  },
+  "records": [
+    {
+      "id": 1,
+      "values": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": 2,
+      "values": {
+        "a": 1,
+        "b": 2
+      }
+    },
+    {
+      "id": 3,
+      "values": null
+    }
+  ]
+}

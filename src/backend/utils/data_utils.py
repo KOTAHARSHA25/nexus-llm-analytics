@@ -1,22 +1,46 @@
+"""Data Utility Functions — Nexus LLM Analytics
+================================================
+
+DataFrame operations and data preprocessing utilities.
+Integrated from Microsoft LIDA library with Nexus enhancements.
+
+Provides
+--------
+* :class:`DataPathResolver` — centralised file-path resolution
+  with caching for uploads and sample directories.
+* :func:`read_dataframe` — universal file reader (CSV, Excel,
+  JSON, Parquet, Feather, HDF5, TSV).
+* Column cleaning, type inference, and code-snippet sanitisation.
+
+v2.0 Enterprise Additions
+-------------------------
+* Enhanced module and class docstrings.
 """
-Data utility functions for DataFrame operations and data preprocessing.
-Integrated from Microsoft LIDA library with enhancements for Nexus.
-"""
+
+from __future__ import annotations
 
 import logging
 import re
-import pandas as pd
-import numpy as np
-from typing import Union, List, Dict, Any, Optional
+import warnings
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
+import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 
 class DataPathResolver:
-    """
-    Centralized data path resolution with caching.
-    Eliminates duplicate path resolution logic across API files.
+    """Centralised data-path resolution with caching.
+
+    Eliminates duplicate path-resolution logic across API files.
+    Uses class-level caches for project root, uploads, and samples
+    directories to avoid repeated filesystem traversal.
+
+    Thread Safety:
+        Class methods are guarded by the GIL for simple attribute
+        assignment — safe for typical concurrent access patterns.
     """
     
     _project_root: Optional[Path] = None
@@ -31,14 +55,21 @@ class DataPathResolver:
             # data_utils.py is in: src/backend/utils/
             # Project root is: ../../../ from here
             backend_dir = Path(__file__).parent.parent
-            cls._project_root = backend_dir.parent
+            # backend_dir is src/backend
+            # backend_dir.parent is src
+            # backend_dir.parent.parent is project root
+            cls._project_root = backend_dir.parent.parent
         return cls._project_root
     
     @classmethod
     def get_uploads_dir(cls) -> Path:
         """Get uploads directory path (cached)."""
+        from backend.core.config import settings
         if cls._uploads_dir is None:
-            cls._uploads_dir = cls.get_project_root() / "data" / "uploads"
+            cls._uploads_dir = Path(settings.upload_directory)
+            # Ensure it's absolute
+            if not cls._uploads_dir.is_absolute():
+                 cls._uploads_dir = cls.get_project_root() / cls._uploads_dir
         return cls._uploads_dir
     
     @classmethod
@@ -71,7 +102,7 @@ class DataPathResolver:
         for search_path in search_paths:
             file_path = root / search_path / filename
             if file_path.exists() and file_path.is_file():
-                logger.debug(f"Found file: {file_path}")
+                logger.debug("Found file: %s", file_path)
                 return file_path
         
         # Fallback: case-insensitive search in uploads directory
@@ -80,10 +111,10 @@ class DataPathResolver:
             for uploaded_file in uploads_dir.iterdir():
                 if uploaded_file.is_file():
                     if uploaded_file.name.lower() == filename.lower():
-                        logger.debug(f"Found file (case-insensitive): {uploaded_file}")
+                        logger.debug("Found file (case-insensitive): %s", uploaded_file)
                         return uploaded_file
         
-        logger.warning(f"File not found in search paths: {filename}")
+        logger.warning("File not found in search paths: %s", filename)
         return None
     
     @classmethod
@@ -95,7 +126,7 @@ class DataPathResolver:
         uploads_dir.mkdir(parents=True, exist_ok=True)
         samples_dir.mkdir(parents=True, exist_ok=True)
         
-        logger.debug(f"Data directories ready: {uploads_dir}, {samples_dir}")
+        logger.debug("Data directories ready: %s, %s", uploads_dir, samples_dir)
 
 
 def clean_column_name(col_name: str) -> str:
@@ -128,7 +159,101 @@ def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     return cleaned_df
 
 
-def read_dataframe(file_location: str, encoding: str = 'utf-8', sample_size: int = 4500) -> pd.DataFrame:
+# Phase 3.5: Scientific file format readers
+def _read_hdf5(file_location: str) -> pd.DataFrame:
+    """
+    Read HDF5 file into DataFrame.
+    Supports both pandas HDF5 format and generic HDF5 datasets.
+    """
+    try:
+        # Try pandas HDF5 format first
+        return pd.read_hdf(file_location)
+    except Exception:
+        # Fallback to h5py for generic HDF5 files
+        try:
+            import h5py
+            with h5py.File(file_location, 'r') as f:
+                # Find the first dataset and convert to DataFrame
+                data = {}
+                def extract_datasets(name, obj):
+                    if isinstance(obj, h5py.Dataset):
+                        try:
+                            data[name.replace('/', '_')] = obj[:]
+                        except Exception:
+                            pass
+                f.visititems(extract_datasets)
+                
+                if data:
+                    # Try to create DataFrame from extracted data
+                    return pd.DataFrame(data)
+                else:
+                    raise ValueError("No readable datasets found in HDF5 file")
+        except ImportError:
+            raise ImportError("h5py package required for reading HDF5 files. Install with: pip install h5py")
+
+
+def _read_netcdf(file_location: str) -> pd.DataFrame:
+    """
+    Read NetCDF file into DataFrame.
+    Commonly used for climate and scientific data.
+    """
+    try:
+        import xarray as xr
+        ds = xr.open_dataset(file_location)
+        return ds.to_dataframe().reset_index()
+    except ImportError:
+        try:
+            # Fallback to netCDF4 library
+            import netCDF4 as nc
+            dataset = nc.Dataset(file_location, 'r')
+            data = {}
+            for var_name in dataset.variables:
+                var = dataset.variables[var_name]
+                if len(var.shape) <= 1:
+                    data[var_name] = var[:]
+            dataset.close()
+            return pd.DataFrame(data)
+        except ImportError:
+            raise ImportError("xarray or netCDF4 package required for reading NetCDF files. Install with: pip install xarray netCDF4")
+
+
+def _read_matlab(file_location: str) -> pd.DataFrame:
+    """
+    Read MATLAB .mat file into DataFrame.
+    Supports both v7.3 (HDF5-based) and older formats.
+    """
+    try:
+        from scipy.io import loadmat
+        mat_data = loadmat(file_location, squeeze_me=True)
+        
+        # Filter out metadata keys
+        data = {}
+        for key, value in mat_data.items():
+            if not key.startswith('__'):
+                if hasattr(value, 'shape'):
+                    if len(value.shape) <= 2:
+                        if len(value.shape) == 1:
+                            data[key] = value
+                        elif len(value.shape) == 2:
+                            # 2D array - add as multiple columns
+                            for i in range(value.shape[1]):
+                                data[f"{key}_{i}"] = value[:, i]
+        
+        if data:
+            return pd.DataFrame(data)
+        else:
+            raise ValueError("No readable arrays found in MATLAB file")
+    except ImportError:
+        raise ImportError("scipy package required for reading MATLAB files. Install with: pip install scipy")
+
+
+def _read_txt_lines_safe(file_location: str, encoding: str = 'utf-8') -> list:
+    """Safely read text file lines with proper resource cleanup."""
+    with open(file_location, 'r', encoding=encoding, errors='replace') as f:
+        return f.readlines()
+
+
+def read_dataframe(file_location: str, encoding: str = 'utf-8', sample_size: int = 4500, write_back: bool = False) -> pd.DataFrame:
     """
     Read a dataframe from a given file location and clean its column names.
     Automatically samples down to specified size if data exceeds that limit.
@@ -138,6 +263,8 @@ def read_dataframe(file_location: str, encoding: str = 'utf-8', sample_size: int
         file_location: The path to the file containing the data.
         encoding: Encoding to use for the file reading.
         sample_size: Maximum number of rows to sample (default: 4500)
+        write_back: If True, write cleaned column names back to disk.
+            Default False to prevent destructive side-effects on reads.
         
     Returns:
         A cleaned DataFrame.
@@ -161,7 +288,13 @@ def read_dataframe(file_location: str, encoding: str = 'utf-8', sample_size: int
         'parquet': lambda: pd.read_parquet(file_location),
         'feather': lambda: pd.read_feather(file_location),
         'tsv': lambda: pd.read_csv(file_location, sep="\t", encoding=encoding),
-        'txt': lambda: pd.read_csv(file_location, sep="\t", encoding=encoding)
+        # Fix for .txt: Read as raw lines with proper file handle management
+        'txt': lambda: pd.DataFrame({'content': _read_txt_lines_safe(file_location, encoding)}),
+        # Phase 3.5: Scientific file formats
+        'hdf5': lambda: _read_hdf5(file_location),
+        'h5': lambda: _read_hdf5(file_location),
+        'nc': lambda: _read_netcdf(file_location),
+        'mat': lambda: _read_matlab(file_location)
     }
 
     if file_extension not in read_funcs:
@@ -169,25 +302,26 @@ def read_dataframe(file_location: str, encoding: str = 'utf-8', sample_size: int
 
     try:
         df = read_funcs[file_extension]()
-        logger.debug(f"Successfully read {len(df)} rows from {file_location}")
+        logger.debug("Successfully read %d rows from %s", len(df), file_location)
     except Exception as e:
-        logger.error(f"Failed to read file: {file_location}. Error: {e}")
+        logger.error("Failed to read file: %s", file_location, exc_info=True)
         raise
 
     # Clean column names
     cleaned_df = clean_column_names(df)
     
     # Log if columns were renamed
-    if cleaned_df.columns.tolist() != df.columns.tolist():
-        logger.debug(f"Cleaned column names in {file_location}")
+    columns_changed = cleaned_df.columns.tolist() != df.columns.tolist()
+    if columns_changed:
+        logger.debug("Cleaned column names in %s", file_location)
 
     # Sample down if necessary
     if len(cleaned_df) > sample_size:
-        logger.debug(f"Dataframe has {len(cleaned_df)} rows. Sampling {sample_size} rows.")
+        logger.debug("Dataframe has %d rows. Sampling %d rows.", len(cleaned_df), sample_size)
         cleaned_df = cleaned_df.sample(sample_size, random_state=42)
 
-    # Save back with cleaned columns if names changed
-    if cleaned_df.columns.tolist() != df.columns.tolist():
+    # Save back with cleaned columns only if explicitly requested
+    if write_back and columns_changed:
         write_funcs = {
             'csv': lambda: cleaned_df.to_csv(file_location, index=False, encoding=encoding),
             'xls': lambda: cleaned_df.to_excel(file_location, index=False, engine='xlrd'),
@@ -202,9 +336,9 @@ def read_dataframe(file_location: str, encoding: str = 'utf-8', sample_size: int
         if file_extension in write_funcs:
             try:
                 write_funcs[file_extension]()
-                logger.debug(f"Saved cleaned dataframe to {file_location}")
+                logger.debug("Saved cleaned dataframe to %s", file_location)
             except Exception as e:
-                logger.warning(f"Failed to save cleaned file: {file_location}. Error: {e}")
+                logger.warning("Failed to save cleaned file: %s", file_location, exc_info=True)
 
     return cleaned_df
 
@@ -246,7 +380,6 @@ def get_column_properties(df: pd.DataFrame, n_samples: int = 3) -> List[Dict[str
         elif dtype == object:
             # Try to parse as datetime
             try:
-                import warnings
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     pd.to_datetime(df[column], errors='raise')
@@ -455,14 +588,14 @@ def infer_data_types(df: pd.DataFrame) -> pd.DataFrame:
         # Try to convert to numeric
         try:
             df_copy[col] = pd.to_numeric(df_copy[col], errors='ignore')
-        except:
-            logging.debug("Operation failed (non-critical) - continuing")
+        except (ValueError, TypeError) as e:
+            logger.debug("Numeric conversion skipped for %s: %s", col, e)
         
         # Try to convert to datetime
         if df_copy[col].dtype == object:
             try:
                 df_copy[col] = pd.to_datetime(df_copy[col], errors='ignore')
-            except:
-                logging.debug("Operation failed (non-critical) - continuing")
+            except (ValueError, TypeError, pd.errors.ParserError) as e:
+                logger.debug("Datetime conversion skipped for %s: %s", col, e)
     
     return df_copy

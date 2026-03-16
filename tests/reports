@@ -1,0 +1,210 @@
+{
+  "summary": {
+    "total": 25,
+    "passed": 5,
+    "failed": 20,
+    "pass_rate": 0.2
+  },
+  "details": [
+    {
+      "scenario_id": "ECO-1",
+      "success": false,
+      "execution_time": 8.582817792892456,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "ECO-2",
+      "success": false,
+      "execution_time": 4.076384544372559,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "ECO-3",
+      "success": false,
+      "execution_time": 4.073988437652588,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "ECO-4",
+      "success": true,
+      "execution_time": 0.013410806655883789,
+      "error": null,
+      "result_summary": "{'quantity': {'trend_type': 'no clear trend', 'significance': 'not significant', 'slope': -0.0001302...",
+      "agent_used": "TimeSeriesAgent"
+    },
+    {
+      "scenario_id": "ECO-5",
+      "success": false,
+      "execution_time": 4.074139356613159,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "ECO-6",
+      "success": false,
+      "execution_time": 0.00478672981262207,
+      "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
+      "result_summary": "No result",
+      "agent_used": "EnhancedSQLAgent"
+    },
+    {
+      "scenario_id": "HEA-7",
+      "success": false,
+      "execution_time": 4.066720485687256,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "HEA-8",
+      "success": false,
+      "execution_time": 0.004242420196533203,
+      "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
+      "result_summary": "No result",
+      "agent_used": "EnhancedSQLAgent"
+    },
+    {
+      "scenario_id": "HEA-9",
+      "success": false,
+      "execution_time": 0.003293752670288086,
+      "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
+      "result_summary": "No result",
+      "agent_used": "EnhancedSQLAgent"
+    },
+    {
+      "scenario_id": "HEA-10",
+      "success": false,
+      "execution_time": 4.053164005279541,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "HEA-11",
+      "success": false,
+      "execution_time": 4.086244583129883,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "FIN-12",
+      "success": false,
+      "execution_time": 4.073013067245483,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "FIN-13",
+      "success": true,
+      "execution_time": 0.1998000144958496,
+      "error": null,
+      "result_summary": "{'data_info': {'start_date': '2025-01-01 00:00:00', 'end_date': '2025-12-31 00:00:00', 'observations...",
+      "agent_used": "TimeSeriesAgent"
+    },
+    {
+      "scenario_id": "FIN-14",
+      "success": true,
+      "execution_time": 0.0169069766998291,
+      "error": null,
+      "result_summary": "{'open': {'trend_type': 'decreasing', 'significance': 'significant', 'slope': -0.008573061060528572,...",
+      "agent_used": "TimeSeriesAgent"
+    },
+    {
+      "scenario_id": "FIN-15",
+      "success": false,
+      "execution_time": 4.084397554397583,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "FIN-16",
+      "success": false,
+      "execution_time": 4.091648578643799,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "IOT-17",
+      "success": false,
+      "execution_time": 0.006547451019287109,
+      "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
+      "result_summary": "No result",
+      "agent_used": "EnhancedSQLAgent"
+    },
+    {
+      "scenario_id": "IOT-18",
+      "success": false,
+      "execution_time": 0.003840923309326172,
+      "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
+      "result_summary": "No result",
+      "agent_used": "EnhancedSQLAgent"
+    },
+    {
+      "scenario_id": "IOT-19",
+      "success": true,
+      "execution_time": 0.008022546768188477,
+      "error": null,
+      "result_summary": "{'data_info': {'start_date': '2026-01-08 00:21:27.604117', 'end_date': '2026-01-08 16:51:27.603434',...",
+      "agent_used": "TimeSeriesAgent"
+    },
+    {
+      "scenario_id": "IOT-20",
+      "success": false,
+      "execution_time": 4.074869394302368,
+      "error": "No models installed. Run: ollama pull <model-name>",
+      "result_summary": "No result",
+      "agent_used": "DataAnalyst"
+    },
+    {
+      "scenario_id": "EDG-21",
+      "success": false,
+      "execution_time": 0.003092050552368164,
+      "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
+      "result_summary": "No result",
+      "agent_used": "EnhancedSQLAgent"
+    },
+    {
+      "scenario_id": "EDG-22",
+      "success": false,
+      "execution_time": 0.0028879642486572266,
+      "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
+      "result_summary": "No result",
+      "agent_used": "EnhancedSQLAgent"
+    },
+    {
+      "scenario_id": "EDG-23",
+      "success": false,
+      "execution_time": 0.0035064220428466797,
+      "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
+      "result_summary": "No result",
+      "agent_used": "EnhancedSQLAgent"
+    },
+    {
+      "scenario_id": "REP-24",
+      "success": false,
+      "execution_time": 0.004273653030395508,
+      "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
+      "result_summary": "No result",
+      "agent_used": "EnhancedSQLAgent"
+    },
+    {
+      "scenario_id": "REP-25",
+      "success": true,
+      "execution_time": 0.008347034454345703,
+      "error": null,
+      "result_summary": "{'quantity': {'trend_type': 'no clear trend', 'significance': 'not significant', 'slope': -0.0001302...",
+      "agent_used": "TimeSeriesAgent"
+    }
+  ]
+}

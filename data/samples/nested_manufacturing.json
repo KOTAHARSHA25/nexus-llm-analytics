@@ -1,0 +1,92 @@
+{
+  "manufacturing_plants": [
+    {
+      "plant_id": "P001",
+      "location": "Detroit, MI",
+      "product_line": "Automotive Parts",
+      "production_data": {
+        "daily_output": 1250,
+        "efficiency_rate": 0.87,
+        "defect_rate": 0.023,
+        "downtime_hours": 2.5,
+        "energy_consumption_kwh": 48500,
+        "workforce_count": 145
+      },
+      "quality_metrics": {
+        "first_pass_yield": 0.94,
+        "customer_returns": 12,
+        "warranty_claims": 8,
+        "inspection_pass_rate": 0.96
+      },
+      "sensors": [
+        {"id": "S001", "type": "temperature", "value": 72.5, "unit": "F", "status": "normal"},
+        {"id": "S002", "type": "humidity", "value": 45.2, "unit": "%", "status": "normal"},
+        {"id": "S003", "type": "pressure", "value": 102.8, "unit": "PSI", "status": "warning"},
+        {"id": "S004", "type": "vibration", "value": 3.2, "unit": "mm/s", "status": "normal"}
+      ]
+    },
+    {
+      "plant_id": "P002",
+      "location": "Shanghai, China",
+      "product_line": "Electronics Assembly",
+      "production_data": {
+        "daily_output": 3200,
+        "efficiency_rate": 0.92,
+        "defect_rate": 0.015,
+        "downtime_hours": 1.2,
+        "energy_consumption_kwh": 62000,
+        "workforce_count": 280
+      },
+      "quality_metrics": {
+        "first_pass_yield": 0.97,
+        "customer_returns": 5,
+        "warranty_claims": 3,
+        "inspection_pass_rate": 0.98
+      },
+      "sensors": [
+        {"id": "S005", "type": "temperature", "value": 68.9, "unit": "F", "status": "normal"},
+        {"id": "S006", "type": "humidity", "value": 52.1, "unit": "%", "status": "warning"},
+        {"id": "S007", "type": "pressure", "value": 98.5, "unit": "PSI", "status": "normal"},
+        {"id": "S008", "type": "vibration", "value": 2.8, "unit": "mm/s", "status": "normal"}
+      ]
+    },
+    {
+      "plant_id": "P003",
+      "location": "Berlin, Germany",
+      "product_line": "Pharmaceuticals",
+      "production_data": {
+        "daily_output": 850,
+        "efficiency_rate": 0.95,
+        "defect_rate": 0.008,
+        "downtime_hours": 0.8,
+        "energy_consumption_kwh": 35200,
+        "workforce_count": 98
+      },
+      "quality_metrics": {
+        "first_pass_yield": 0.99,
+        "customer_returns": 1,
+        "warranty_claims": 0,
+        "inspection_pass_rate": 0.995
+      },
+      "sensors": [
+        {"id": "S009", "type": "temperature", "value": 65.2, "unit": "F", "status": "normal"},
+        {"id": "S010", "type": "humidity", "value": 38.5, "unit": "%", "status": "normal"},
+        {"id": "S011", "type": "pressure", "value": 105.2, "unit": "PSI", "status": "normal"},
+        {"id": "S012", "type": "vibration", "value": 1.5, "unit": "mm/s", "status": "normal"}
+      ]
+    }
+  ],
+  "supply_chain": {
+    "suppliers": [
+      {"supplier_id": "SUP001", "name": "Steel Inc", "lead_time_days": 14, "reliability_score": 0.91, "cost_index": 1.05},
+      {"supplier_id": "SUP002", "name": "Electronics Co", "lead_time_days": 7, "reliability_score": 0.88, "cost_index": 1.12},
+      {"supplier_id": "SUP003", "name": "Chemical Corp", "lead_time_days": 21, "reliability_score": 0.95, "cost_index": 0.98}
+    ],
+    "inventory_status": {
+      "raw_materials": {"steel": 12500, "copper": 3400, "plastic": 8900, "chemicals": 1200},
+      "work_in_progress": 4500,
+      "finished_goods": 8900,
+      "safety_stock_level": 0.85
+    }
+  }
+}

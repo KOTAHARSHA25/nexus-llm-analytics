@@ -1,20 +1,56 @@
-# Enhanced endpoint for professional report generation and downloads
-from fastapi import APIRouter, Response, Request, HTTPException
-from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
-import os
+"""Report API — Professional Report Generation & Download Endpoints
+=================================================================
+
+Generates enterprise-grade PDF, Excel, and CSV reports from analysis
+results. Supports both the enhanced multi-result report manager and
+the single-result enterprise PDF generator.
+
+Endpoints
+---------
+``POST /``
+    Generate a multi-result report (PDF / Excel / CSV).
+``POST /pdf``
+    Generate an enterprise PDF from a single analysis result.
+``GET  /download-report``
+    Download the most recent (or named) report file.
+``GET  /download-log``
+    Download the application log file.
+``GET  /download-audit``
+    Download the JSONL audit log.
+"""
+
+from __future__ import annotations
+
 import json
 import logging
+import os
+import shutil
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
 import pandas as pd
+from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
 
-# Import the enhanced report manager
+from backend.core.config import settings
 from backend.core.enhanced_reports import EnhancedReportManager, ReportTemplate
+from backend.io.pdf_generator import PDFReportGenerator, generate_pdf_report
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class ReportGenerationRequest(BaseModel):
-    """Request model for generating professional reports"""
+    """Request payload for multi-result report generation.
+
+    Attributes:
+        results:              List of analysis result dicts to include.
+        format_type:          Output format (``pdf``, ``excel``, ``csv``, or ``both``).
+        title:                Custom report title (optional).
+        include_methodology:  Append a methodology section.
+        include_raw_data:     Append raw data in an appendix.
+        include_charts:       Embed visualizations.
+    """
     results: List[Dict[str, Any]] = Field(..., description="List of analysis results to include in report")
     format_type: str = Field("pdf", description="Report format: 'pdf', 'excel', 'csv', or 'both'")
     title: Optional[str] = Field(None, description="Custom report title")
@@ -26,41 +62,144 @@ class ReportGenerationRequest(BaseModel):
 report_manager = EnhancedReportManager()
 
 
-@router.get('/download-log')
-def download_log():
-    log_path = os.path.join(os.path.dirname(__file__), '../../nexus.log')
-    if not os.path.exists(log_path):
+@router.get('/download-log', response_model=None)
+def download_log() -> Response:
+    """Download the application log file as a plain-text attachment.
+
+    Returns:
+        ``Response`` with the log content, or a 404 if no log exists.
+    """
+    log_path = settings.get_log_path()
+    
+    if not log_path or not log_path.exists():
         return Response(content='Log file not found', media_type='text/plain', status_code=404)
+        
     with open(log_path, 'rb') as f:
         content = f.read()
-    return Response(content=content, media_type='text/plain', headers={'Content-Disposition': 'attachment; filename="nexus.log"'})
+    return Response(content=content, media_type='text/plain', headers={'Content-Disposition': f'attachment; filename="{log_path.name}"'})
 
-@router.get('/download-audit')
-def download_audit():
-    audit_path = os.path.join(os.path.dirname(__file__), '../../data/audit/audit_log.jsonl')
-    if not os.path.exists(audit_path):
+@router.get('/download-audit', response_model=None)
+def download_audit() -> Response:
+    """Download the JSONL audit log as an attachment.
+
+    Verifies the resolved path stays within the audit directory to
+    prevent path-traversal attacks.
+
+    Returns:
+        ``Response`` with the audit log, 404 if missing, or 403 if
+        the path resolves outside the allowed directory.
+    """
+    # Use centralized config for audit path
+    audit_dir = settings.PROJECT_ROOT / "data" / "audit"
+    audit_path = audit_dir / "audit_log.jsonl"
+    if not audit_path.exists():
         return Response(content='Audit log not found', media_type='text/plain', status_code=404)
+    # Verify resolved path stays within audit directory (prevent traversal)
+    if not str(audit_path.resolve()).startswith(str(audit_dir.resolve())):
+        return Response(content='Invalid path', media_type='text/plain', status_code=403)
     with open(audit_path, 'rb') as f:
         content = f.read()
     return Response(content=content, media_type='application/json', headers={'Content-Disposition': 'attachment; filename="audit_log.jsonl"'})
 
 
+# =============================================================================
+# FIX 17: ENTERPRISE PDF REPORT GENERATION ENDPOINT
+# =============================================================================
 
-# Enhanced report generation endpoint
-@router.post("/")
-async def generate_report(request: ReportGenerationRequest):
+class PDFReportRequest(BaseModel):
+    """Request payload for single-result enterprise PDF generation."""
+    analysis_result: Dict[str, Any] = Field(..., description="Single analysis result to generate PDF for")
+    include_raw_data: bool = Field(True, description="Include raw data in appendix")
+    custom_filename: Optional[str] = Field(None, description="Custom filename (without extension)")
+
+
+@router.post("/pdf")
+async def generate_pdf_report_endpoint(request: PDFReportRequest) -> Dict[str, Any]:
+    """Generate an enterprise-grade PDF report from a single analysis result.
+
+    Produces a multi-page document with title page, table of contents,
+    executive summary, AI interpretation, key findings, generated code,
+    methodology, and optional raw-data appendix.
+
+    Returns:
+        Dict with ``success``, ``download_url``, and ``metadata`` on success;
+        ``error`` and ``suggestion`` on failure.
     """
-    Generate professional reports in multiple formats (PDF/Excel/CSV)
+    logger.info("Generating enterprise PDF report")
     
-    Features:
-    - Professional headers and footers with page numbers
-    - Executive summary with key metrics
-    - Key findings section
-    - Statistical summary with confidence intervals
-    - Data quality assessment
-    - Methodology and glossary sections
-    """
-    logging.info(f"[REPORT] Generating {request.format_type} report with {len(request.results)} results")
+    try:
+        # Generate custom output path if filename provided
+        output_path = None
+        if request.custom_filename:
+            reports_dir = settings.get_reports_path()
+            
+            # Sanitize filename
+            safe_filename = "".join(c for c in request.custom_filename if c.isalnum() or c in (' ', '-', '_'))
+            output_path = str(reports_dir / f"{safe_filename}.pdf")
+        
+        # Generate PDF using enterprise generator
+        pdf_path = generate_pdf_report(
+            analysis_result=request.analysis_result,
+            output_path=output_path,
+            include_raw_data=request.include_raw_data
+        )
+        
+        # Extract filename
+        filename = os.path.basename(pdf_path)
+        
+        logger.info("PDF report generated: %s", filename)
+        
+        return {
+            "success": True,
+            "message": "Enterprise PDF report generated successfully",
+            "report_path": filename,
+            "format": "pdf",
+            "download_url": f"/api/report/download-report?filename={filename}",
+            "features": [
+                "Professional title page",
+                "Table of contents",
+                "Executive summary",
+                "Query analysis",
+                "AI interpretation",
+                "Orchestrator reasoning",
+                "Key findings",
+                "Detailed results",
+                "Data insights",
+                "Generated code",
+                "Visualizations",
+                "Methodology",
+                "Technical details",
+                "Raw data appendix" if request.include_raw_data else "No appendix"
+            ],
+            "metadata": {
+                "query": request.analysis_result.get('query', 'N/A')[:100],
+                "model": request.analysis_result.get('model_used', 'Unknown'),
+                "agent": request.analysis_result.get('agent', 'Unknown'),
+                "pages": "Multiple",
+                "file_size": f"{os.path.getsize(pdf_path) / 1024:.1f} KB"
+            }
+        }
+        
+    except Exception as e:
+        logger.error("PDF generation failed: %s", e, exc_info=True)
+        return {
+            "success": False,
+            "error": f"PDF generation failed: {str(e)}",
+            "suggestion": "Check the analysis result format. Ensure it contains 'query' and result data."
+        }
+
+
+# =============================================================================
+# Multi-Result Report Generation
+# =============================================================================
+
+@router.post("/")
+async def generate_report(request: ReportGenerationRequest) -> Dict[str, Any]:
+    """Generate a multi-result professional report (PDF / Excel / CSV)."""
+    logger.info(
+        "Generating %s report with %d results",
+        request.format_type, len(request.results),
+    )
     
     try:
         # Handle CSV export separately (simpler format)
@@ -86,8 +225,8 @@ async def generate_report(request: ReportGenerationRequest):
         )
         
         # Store the report path for download
-        data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'reports')
-        os.makedirs(data_dir, exist_ok=True)
+        data_dir = settings.get_reports_path()
+        # os.makedirs(data_dir, exist_ok=True) # settings.get_reports_path() already treats it as Path, but ensure it exists? settings.get_reports_path() creates it!
         
         # Copy to data directory for download
         if isinstance(report_path, list):
@@ -95,10 +234,9 @@ async def generate_report(request: ReportGenerationRequest):
             stored_paths = []
             for path in report_path:
                 filename = os.path.basename(path)
-                stored_path = os.path.join(data_dir, filename)
+                stored_path = data_dir / filename
                 
                 # Copy file
-                import shutil
                 shutil.copy2(path, stored_path)
                 stored_paths.append(filename)
             
@@ -112,10 +250,9 @@ async def generate_report(request: ReportGenerationRequest):
         else:
             # Single file generated
             filename = os.path.basename(report_path)
-            stored_path = os.path.join(data_dir, filename)
+            stored_path = data_dir / filename
             
             # Copy file
-            import shutil
             shutil.copy2(report_path, stored_path)
             
             return {
@@ -127,16 +264,26 @@ async def generate_report(request: ReportGenerationRequest):
             }
             
     except Exception as e:
-        logging.error(f"[REPORT] Generation failed: {e}")
-        return {
-            "success": False,
-            "error": f"Report generation failed: {str(e)}",
-            "suggestion": "Check the analysis results format and try again"
-        }
+        logger.error("Report generation failed: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "error": f"Report generation failed: {str(e)}",
+                "suggestion": "Check the analysis results format and try again"
+            },
+        )
 
 
 def _generate_csv_export(results: List[Dict[str, Any]]) -> str:
-    """Generate simple CSV export of analysis results"""
+    """Convert analysis results to a CSV file in the reports directory.
+
+    Args:
+        results: List of analysis result dicts.
+
+    Returns:
+        Absolute path to the written CSV file.
+    """
     try:
         # Extract key data from results
         csv_data = []
@@ -162,41 +309,54 @@ def _generate_csv_export(results: List[Dict[str, Any]]) -> str:
         csv_filename = f"analysis_export_{timestamp}.csv"
         
         # Save to data/reports directory
-        data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'reports')
-        os.makedirs(data_dir, exist_ok=True)
-        csv_path = os.path.join(data_dir, csv_filename)
+        data_dir = settings.get_reports_path()
+        csv_path = data_dir / csv_filename
         
         df.to_csv(csv_path, index=False)
-        logging.info(f"[CSV] Export generated: {csv_path}")
+        logger.info("CSV export generated: %s", csv_path)
         
         return csv_path
         
     except Exception as e:
-        logging.error(f"[CSV] Generation failed: {e}")
+        logger.error("CSV generation failed: %s", e, exc_info=True)
         raise e
 
 
-# Download generated report
-@router.get('/download-report')
-def download_report(filename: Optional[str] = None):
-    """
-    Download the most recent generated report or a specific file
+@router.get('/download-report', response_model=None)
+def download_report(filename: Optional[str] = None) -> Union[FileResponse, Response]:
+    """Download the most recent generated report, or a specific file by name.
+
+    Args:
+        filename: Optional report filename. If omitted, serves the newest
+            PDF/Excel/CSV in the reports directory.
+
+    Returns:
+        ``FileResponse`` with the appropriate content type.
     """
     try:
-        from pathlib import Path
-        
-        # Get the project root and data directories
-        backend_dir = Path(__file__).parent.parent
-        project_root = backend_dir.parent
-        
         # Look in reports directory
-        reports_dir = project_root / "data" / "reports"
+        reports_dir = settings.get_reports_path()
         
         report_file = None
         
         if filename:
-            # Look for specific filename
-            potential_path = reports_dir / filename
+            # Sanitize filename - prevent path traversal
+            from werkzeug.utils import secure_filename
+            safe_name = secure_filename(filename)
+            if not safe_name:
+                return Response(
+                    content='Invalid filename',
+                    media_type='text/plain',
+                    status_code=400
+                )
+            potential_path = reports_dir / safe_name
+            # Verify resolved path stays within reports directory
+            if not str(potential_path.resolve()).startswith(str(reports_dir.resolve())):
+                return Response(
+                    content='Invalid file path',
+                    media_type='text/plain',
+                    status_code=403
+                )
             if potential_path.exists():
                 report_file = potential_path
         else:
@@ -225,7 +385,7 @@ def download_report(filename: Optional[str] = None):
         elif report_file.suffix.lower() == ".json":
             content_type = "application/json"
         
-        logging.info(f"[DOWNLOAD] Serving report: {report_file.name}")
+        logger.info("Serving report: %s", report_file.name)
             
         return FileResponse(
             path=str(report_file),
@@ -234,7 +394,7 @@ def download_report(filename: Optional[str] = None):
         )
         
     except Exception as e:
-        logging.error(f"Report download failed: {e}")
+        logger.error("Report download failed: %s", e, exc_info=True)
         return Response(
             content=f'Report download failed: {str(e)}', 
             media_type='text/plain', 

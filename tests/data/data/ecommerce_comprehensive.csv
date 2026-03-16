@@ -1,0 +1,501 @@
+transaction_id,customer_id,date,category,product_name,quantity,unit_price,total_amount,payment_method,status
+TXN-10000,CUST-185,2025-04-01,Toys,Doll,2,276.8,553.6,Debit Card,Completed
+TXN-10001,CUST-167,2025-11-15,Clothing,Jeans,1,319.58,319.58,Debit Card,Pending
+TXN-10002,CUST-126,2025-01-03,Electronics,Tablet,1,20.27,20.27,Credit Card,Cancelled
+TXN-10003,CUST-169,2025-06-01,Home & Garden,Lamp,1,318.93,318.93,Credit Card,Completed
+TXN-10004,CUST-193,2025-10-10,Home & Garden,Plant Pot,6,708.36,4250.16,Credit Card,Pending
+TXN-10005,CUST-115,2025-12-31,Clothing,T-Shirt,8,744.0,5952.0,PayPal,Cancelled
+TXN-10006,CUST-103,2025-08-08,Clothing,Hat,2,437.22,874.44,PayPal,Cancelled
+TXN-10007,CUST-179,2025-06-13,Clothing,Jacket,5,406.24,2031.2,PayPal,Returned
+TXN-10008,CUST-159,2025-05-01,Electronics,Tablet,8,347.04,2776.32,PayPal,Returned
+TXN-10009,CUST-182,2025-01-13,Electronics,Smart Watch,7,47.25,330.75,PayPal,Completed
+TXN-10010,CUST-150,2025-11-08,Books,Cookbook,2,315.11,630.22,Debit Card,Returned
+TXN-10011,CUST-179,2025-07-13,Home & Garden,Garden Hose,3,128.2,384.6,Debit Card,Completed
+TXN-10012,CUST-156,2025-01-15,Electronics,Headphones,9,81.44,732.96,Debit Card,Returned
+TXN-10013,CUST-131,2025-04-25,Clothing,Sneakers,4,952.2,3808.8,Debit Card,Cancelled
+TXN-10014,CUST-146,2025-10-08,Home & Garden,Table,4,709.88,2839.52,Debit Card,Returned
+TXN-10015,CUST-111,2025-12-18,Books,Novel,7,338.58,2370.06,Credit Card,Cancelled
+TXN-10016,CUST-136,2025-12-31,Clothing,Hat,9,188.6,1697.4,Credit Card,Completed
+TXN-10017,CUST-163,2025-06-25,Books,Biography,4,407.02,1628.08,Debit Card,Cancelled
+TXN-10018,CUST-133,2025-11-07,Clothing,Jeans,4,652.48,2609.92,Debit Card,Completed
+TXN-10019,CUST-134,2025-02-05,Books,Textbook,10,986.24,9862.4,Debit Card,Returned
+TXN-10020,CUST-143,2025-06-03,Electronics,Laptop,7,536.15,3753.05,PayPal,Cancelled
+TXN-10021,CUST-171,2025-10-26,Electronics,Smartphone,7,384.22,2689.54,Credit Card,Returned
+TXN-10022,CUST-125,2025-03-05,Books,Novel,5,570.28,2851.4,PayPal,Cancelled
+TXN-10023,CUST-120,2025-10-15,Toys,Doll,8,13.46,107.68,Debit Card,Returned
+TXN-10024,CUST-156,2025-09-07,Clothing,Sneakers,1,276.39,276.39,Credit Card,Completed
+TXN-10025,CUST-112,2025-04-24,Toys,Board Game,1,290.23,290.23,Credit Card,Cancelled
+TXN-10026,CUST-200,2025-07-24,Home & Garden,Lamp,2,638.18,1276.36,Debit Card,Cancelled
+TXN-10027,CUST-168,2025-03-05,Home & Garden,Table,7,849.99,5949.93,Debit Card,Returned
+TXN-10028,CUST-180,2025-05-09,Electronics,Smart Watch,3,964.01,2892.03,PayPal,Returned
+TXN-10029,CUST-104,2025-10-11,Books,Biography,4,513.21,2052.84,PayPal,Returned
+TXN-10030,CUST-182,2025-04-14,Home & Garden,Chair,2,212.12,424.24,Debit Card,Returned
+TXN-10031,CUST-137,2025-09-15,Clothing,Jacket,10,150.22,1502.2,Debit Card,Pending
+TXN-10032,CUST-155,2025-05-15,Home & Garden,Table,4,102.59,410.36,Debit Card,Cancelled
+TXN-10033,CUST-181,2025-12-24,Toys,Lego Set,8,324.34,2594.72,PayPal,Pending
+TXN-10034,CUST-126,2025-11-29,Books,Cookbook,7,817.13,5719.91,Credit Card,Completed
+TXN-10035,CUST-158,2025-02-24,Home & Garden,Table,8,213.71,1709.68,Credit Card,Returned
+TXN-10036,CUST-136,2025-03-25,Toys,Doll,5,414.76,2073.8,PayPal,Cancelled
+TXN-10037,CUST-131,2025-06-18,Books,Comic,7,967.38,6771.66,PayPal,Pending
+TXN-10038,CUST-164,2025-09-17,Electronics,Headphones,5,387.36,1936.8,Debit Card,Completed
+TXN-10039,CUST-174,2025-12-23,Toys,Lego Set,9,456.05,4104.45,Credit Card,Completed
+TXN-10040,CUST-192,2025-06-19,Home & Garden,Garden Hose,2,756.85,1513.7,Debit Card,Pending
+TXN-10041,CUST-181,2025-08-10,Clothing,Hat,1,322.54,322.54,Debit Card,Returned
+TXN-10042,CUST-120,2025-07-24,Electronics,Smart Watch,2,232.37,464.74,PayPal,Cancelled
+TXN-10043,CUST-142,2025-04-15,Books,Biography,9,79.88,718.92,Debit Card,Returned
+TXN-10044,CUST-194,2025-02-28,Electronics,Laptop,9,727.54,6547.86,PayPal,Pending
+TXN-10045,CUST-111,2025-11-25,Toys,Lego Set,4,376.08,1504.32,Credit Card,Returned
+TXN-10046,CUST-197,2025-07-14,Books,Comic,3,376.91,1130.73,PayPal,Cancelled
+TXN-10047,CUST-163,2025-03-15,Home & Garden,Plant Pot,10,101.3,1013.0,PayPal,Returned
+TXN-10048,CUST-155,2025-01-01,Clothing,Hat,7,453.91,3177.37,PayPal,Pending
+TXN-10049,CUST-170,2025-05-18,Toys,Doll,9,92.83,835.47,PayPal,Pending
+TXN-10050,CUST-131,2025-07-29,Home & Garden,Garden Hose,7,614.65,4302.55,Credit Card,Returned
+TXN-10051,CUST-191,2025-03-17,Clothing,Hat,8,713.91,5711.28,PayPal,Cancelled
+TXN-10052,CUST-166,2025-11-12,Toys,Action Figure,4,432.41,1729.64,Debit Card,Returned
+TXN-10053,CUST-148,2025-10-01,Electronics,Smart Watch,7,723.36,5063.52,Debit Card,Returned
+TXN-10054,CUST-115,2025-10-09,Home & Garden,Chair,6,485.67,2914.02,Credit Card,Completed
+TXN-10055,CUST-151,2025-08-04,Clothing,Hat,3,268.44,805.32,Credit Card,Pending
+TXN-10056,CUST-196,2025-06-11,Books,Comic,9,586.91,5282.19,Credit Card,Completed
+TXN-10057,CUST-195,2025-05-01,Electronics,Smart Watch,3,319.65,958.95,PayPal,Pending
+TXN-10058,CUST-132,2025-06-12,Toys,Lego Set,7,16.19,113.33,Debit Card,Completed
+TXN-10059,CUST-189,2025-07-16,Home & Garden,Lamp,2,269.29,538.58,PayPal,Pending
+TXN-10060,CUST-166,2025-08-21,Books,Biography,8,929.96,7439.68,Debit Card,Pending
+TXN-10061,CUST-157,2025-08-10,Electronics,Smart Watch,3,683.19,2049.57,Credit Card,Cancelled
+TXN-10062,CUST-192,2025-03-20,Electronics,Tablet,6,195.94,1175.64,Debit Card,Cancelled
+TXN-10063,CUST-199,2025-08-19,Toys,Puzzle,9,403.56,3632.04,Debit Card,Completed
+TXN-10064,CUST-131,2025-02-20,Electronics,Smartphone,5,526.51,2632.55,PayPal,Cancelled
+TXN-10065,CUST-105,2025-04-04,Electronics,Headphones,10,632.25,6322.5,PayPal,Completed
+TXN-10066,CUST-179,2025-03-10,Books,Cookbook,8,512.58,4100.64,Credit Card,Returned
+TXN-10067,CUST-193,2025-03-03,Toys,Puzzle,9,699.82,6298.38,Debit Card,Pending
+TXN-10068,CUST-177,2025-06-15,Books,Textbook,3,129.42,388.26,Debit Card,Cancelled
+TXN-10069,CUST-183,2025-08-03,Books,Comic,8,929.57,7436.56,Credit Card,Cancelled
+TXN-10070,CUST-162,2025-05-26,Toys,Doll,7,597.85,4184.95,Credit Card,Cancelled
+TXN-10071,CUST-157,2025-11-01,Books,Cookbook,4,71.87,287.48,Credit Card,Returned
+TXN-10072,CUST-140,2025-05-17,Home & Garden,Garden Hose,6,493.13,2958.78,Debit Card,Completed
+TXN-10073,CUST-124,2025-09-11,Books,Cookbook,4,506.76,2027.04,Debit Card,Pending
+TXN-10074,CUST-186,2025-07-04,Electronics,Tablet,5,483.81,2419.05,Debit Card,Pending
+TXN-10075,CUST-152,2025-02-17,Home & Garden,Lamp,8,505.96,4047.68,Debit Card,Completed
+TXN-10076,CUST-151,2025-02-23,Home & Garden,Table,9,583.27,5249.43,PayPal,Pending
+TXN-10077,CUST-180,2025-06-29,Clothing,Hat,9,713.95,6425.55,Debit Card,Pending
+TXN-10078,CUST-187,2025-08-19,Toys,Board Game,4,152.28,609.12,PayPal,Pending
+TXN-10079,CUST-138,2025-07-31,Clothing,Hat,9,642.24,5780.16,Debit Card,Cancelled
+TXN-10080,CUST-181,2025-06-19,Toys,Board Game,8,71.4,571.2,Debit Card,Cancelled
+TXN-10081,CUST-128,2025-12-20,Home & Garden,Garden Hose,2,133.56,267.12,Debit Card,Cancelled
+TXN-10082,CUST-134,2025-03-11,Electronics,Headphones,9,999.11,8991.99,Credit Card,Returned
+TXN-10083,CUST-199,2025-10-10,Home & Garden,Garden Hose,5,93.6,468.0,Debit Card,Pending
+TXN-10084,CUST-115,2025-03-15,Clothing,Jacket,6,881.63,5289.78,Debit Card,Returned
+TXN-10085,CUST-100,2025-10-12,Home & Garden,Table,10,462.03,4620.3,PayPal,Cancelled
+TXN-10086,CUST-110,2025-01-30,Home & Garden,Lamp,9,657.8,5920.2,Credit Card,Completed
+TXN-10087,CUST-130,2025-09-25,Books,Cookbook,3,287.26,861.78,Debit Card,Returned
+TXN-10088,CUST-112,2025-10-16,Clothing,T-Shirt,3,11.66,34.98,PayPal,Completed
+TXN-10089,CUST-161,2025-02-07,Home & Garden,Lamp,4,872.82,3491.28,PayPal,Pending
+TXN-10090,CUST-115,2025-09-24,Books,Biography,3,693.3,2079.9,PayPal,Cancelled
+TXN-10091,CUST-184,2025-11-05,Books,Novel,2,211.75,423.5,PayPal,Returned
+TXN-10092,CUST-155,2025-09-17,Clothing,Sneakers,8,603.28,4826.24,Credit Card,Returned
+TXN-10093,CUST-164,2025-07-21,Toys,Lego Set,5,582.83,2914.15,Credit Card,Cancelled
+TXN-10094,CUST-187,2025-01-04,Books,Cookbook,9,619.55,5575.95,PayPal,Cancelled
+TXN-10095,CUST-192,2025-07-11,Home & Garden,Lamp,7,826.06,5782.42,Credit Card,Cancelled
+TXN-10096,CUST-156,2025-06-14,Home & Garden,Plant Pot,3,349.65,1048.95,Credit Card,Returned
+TXN-10097,CUST-133,2025-07-04,Home & Garden,Chair,2,293.21,586.42,Credit Card,Pending
+TXN-10098,CUST-193,2025-06-29,Home & Garden,Garden Hose,5,996.14,4980.7,Debit Card,Completed
+TXN-10099,CUST-114,2025-10-21,Home & Garden,Garden Hose,10,978.42,9784.2,Debit Card,Completed
+TXN-10100,CUST-197,2025-06-03,Toys,Puzzle,9,634.29,5708.61,Debit Card,Pending
+TXN-10101,CUST-169,2025-09-17,Toys,Puzzle,8,145.76,1166.08,Credit Card,Pending
+TXN-10102,CUST-163,2025-11-18,Toys,Lego Set,5,995.54,4977.7,Debit Card,Completed
+TXN-10103,CUST-129,2025-06-09,Books,Cookbook,4,127.3,509.2,Debit Card,Returned
+TXN-10104,CUST-162,2025-10-15,Books,Textbook,9,674.92,6074.28,Debit Card,Pending
+TXN-10105,CUST-117,2025-03-31,Home & Garden,Plant Pot,6,346.1,2076.6,Credit Card,Cancelled
+TXN-10106,CUST-133,2025-11-12,Toys,Doll,7,286.85,2007.95,Credit Card,Cancelled
+TXN-10107,CUST-187,2025-10-12,Books,Biography,9,827.71,7449.39,Credit Card,Pending
+TXN-10108,CUST-134,2025-06-18,Toys,Lego Set,4,931.49,3725.96,Debit Card,Cancelled
+TXN-10109,CUST-200,2025-09-19,Books,Textbook,3,362.04,1086.12,Debit Card,Pending
+TXN-10110,CUST-164,2025-01-19,Home & Garden,Chair,8,15.09,120.72,Credit Card,Returned
+TXN-10111,CUST-143,2025-04-06,Toys,Action Figure,1,474.11,474.11,Debit Card,Completed
+TXN-10112,CUST-122,2025-05-27,Clothing,T-Shirt,8,63.23,505.84,PayPal,Completed
+TXN-10113,CUST-186,2025-02-25,Books,Textbook,8,636.34,5090.72,Debit Card,Completed
+TXN-10114,CUST-129,2025-03-01,Electronics,Smartphone,3,301.26,903.78,Debit Card,Completed
+TXN-10115,CUST-111,2025-04-24,Books,Novel,3,764.78,2294.34,Credit Card,Completed
+TXN-10116,CUST-161,2025-09-17,Home & Garden,Garden Hose,6,306.12,1836.72,Debit Card,Returned
+TXN-10117,CUST-105,2025-06-12,Toys,Doll,7,495.9,3471.3,Debit Card,Cancelled
+TXN-10118,CUST-155,2025-12-22,Clothing,T-Shirt,2,42.79,85.58,Debit Card,Completed
+TXN-10119,CUST-106,2025-01-07,Home & Garden,Plant Pot,3,93.22,279.66,Credit Card,Cancelled
+TXN-10120,CUST-121,2025-11-24,Home & Garden,Garden Hose,6,23.45,140.7,Debit Card,Pending
+TXN-10121,CUST-194,2025-12-06,Toys,Puzzle,6,325.53,1953.18,Debit Card,Cancelled
+TXN-10122,CUST-114,2025-03-21,Home & Garden,Garden Hose,3,618.19,1854.57,Credit Card,Cancelled
+TXN-10123,CUST-167,2025-01-29,Clothing,Jacket,2,311.47,622.94,PayPal,Pending
+TXN-10124,CUST-125,2025-01-21,Books,Textbook,7,338.17,2367.19,Debit Card,Returned
+TXN-10125,CUST-158,2025-07-29,Books,Comic,1,967.75,967.75,Debit Card,Pending
+TXN-10126,CUST-148,2025-06-26,Clothing,Sneakers,5,222.45,1112.25,Debit Card,Returned
+TXN-10127,CUST-191,2025-12-06,Clothing,Jeans,10,358.36,3583.6,PayPal,Returned
+TXN-10128,CUST-113,2025-03-31,Home & Garden,Lamp,1,667.75,667.75,Credit Card,Returned
+TXN-10129,CUST-148,2025-02-25,Books,Cookbook,6,768.13,4608.78,Debit Card,Returned
+TXN-10130,CUST-154,2025-05-05,Home & Garden,Plant Pot,9,732.31,6590.79,PayPal,Returned
+TXN-10131,CUST-147,2025-03-02,Electronics,Headphones,7,233.8,1636.6,Debit Card,Completed
+TXN-10132,CUST-173,2025-05-18,Toys,Action Figure,8,40.12,320.96,PayPal,Returned
+TXN-10133,CUST-149,2025-09-14,Electronics,Tablet,4,354.25,1417.0,PayPal,Completed
+TXN-10134,CUST-158,2025-12-15,Electronics,Tablet,4,716.76,2867.04,Debit Card,Completed
+TXN-10135,CUST-192,2025-11-06,Home & Garden,Chair,2,939.71,1879.42,Debit Card,Returned
+TXN-10136,CUST-199,2025-11-08,Books,Comic,2,199.16,398.32,Debit Card,Completed
+TXN-10137,CUST-182,2025-03-06,Clothing,Hat,8,806.02,6448.16,PayPal,Pending
+TXN-10138,CUST-199,2025-12-21,Home & Garden,Lamp,1,526.33,526.33,PayPal,Cancelled
+TXN-10139,CUST-124,2025-05-19,Clothing,Jeans,3,398.7,1196.1,PayPal,Pending
+TXN-10140,CUST-183,2025-04-24,Clothing,Sneakers,5,550.76,2753.8,Debit Card,Completed
+TXN-10141,CUST-118,2025-01-20,Toys,Lego Set,1,568.44,568.44,Debit Card,Returned
+TXN-10142,CUST-172,2025-09-28,Home & Garden,Lamp,3,950.39,2851.17,Debit Card,Returned
+TXN-10143,CUST-111,2025-05-11,Toys,Doll,8,289.49,2315.92,Credit Card,Cancelled
+TXN-10144,CUST-139,2025-10-15,Books,Comic,1,774.28,774.28,Credit Card,Completed
+TXN-10145,CUST-195,2025-07-05,Toys,Puzzle,4,545.0,2180.0,Debit Card,Completed
+TXN-10146,CUST-123,2025-12-04,Electronics,Smartphone,9,521.01,4689.09,Debit Card,Pending
+TXN-10147,CUST-109,2025-08-17,Toys,Doll,7,822.41,5756.87,Credit Card,Completed
+TXN-10148,CUST-130,2025-07-12,Books,Comic,6,759.03,4554.18,Credit Card,Completed
+TXN-10149,CUST-182,2025-09-07,Books,Biography,1,376.92,376.92,PayPal,Pending
+TXN-10150,CUST-155,2025-06-24,Electronics,Smartphone,10,293.25,2932.5,Credit Card,Cancelled
+TXN-10151,CUST-189,2025-03-21,Toys,Doll,5,879.58,4397.9,PayPal,Completed
+TXN-10152,CUST-115,2025-02-04,Home & Garden,Chair,9,96.55,868.95,Debit Card,Cancelled
+TXN-10153,CUST-154,2025-06-17,Electronics,Laptop,10,830.64,8306.4,PayPal,Completed
+TXN-10154,CUST-174,2025-04-12,Toys,Lego Set,5,29.13,145.65,PayPal,Cancelled
+TXN-10155,CUST-110,2025-07-04,Electronics,Headphones,1,684.82,684.82,PayPal,Cancelled
+TXN-10156,CUST-129,2025-03-07,Home & Garden,Plant Pot,6,243.31,1459.86,Debit Card,Cancelled
+TXN-10157,CUST-103,2025-06-29,Electronics,Laptop,4,681.75,2727.0,Credit Card,Returned
+TXN-10158,CUST-113,2025-05-06,Books,Novel,9,557.94,5021.46,PayPal,Pending
+TXN-10159,CUST-158,2025-09-26,Books,Comic,1,461.6,461.6,Credit Card,Pending
+TXN-10160,CUST-190,2025-10-18,Toys,Board Game,2,288.3,576.6,Debit Card,Completed
+TXN-10161,CUST-156,2025-03-25,Clothing,Hat,6,763.59,4581.54,Debit Card,Pending
+TXN-10162,CUST-174,2025-07-05,Toys,Puzzle,2,660.73,1321.46,Credit Card,Pending
+TXN-10163,CUST-187,2025-06-27,Books,Comic,3,636.79,1910.37,Credit Card,Completed
+TXN-10164,CUST-103,2025-08-12,Home & Garden,Chair,6,650.11,3900.66,PayPal,Cancelled
+TXN-10165,CUST-104,2025-10-16,Clothing,Jacket,4,366.06,1464.24,Credit Card,Returned
+TXN-10166,CUST-139,2025-12-05,Electronics,Laptop,7,125.84,880.88,Credit Card,Cancelled
+TXN-10167,CUST-174,2025-09-12,Home & Garden,Plant Pot,2,266.42,532.84,Debit Card,Cancelled
+TXN-10168,CUST-186,2025-03-16,Toys,Board Game,3,127.77,383.31,Credit Card,Pending
+TXN-10169,CUST-173,2025-10-07,Clothing,Jacket,1,542.99,542.99,Credit Card,Pending
+TXN-10170,CUST-160,2025-11-12,Home & Garden,Lamp,4,939.08,3756.32,PayPal,Pending
+TXN-10171,CUST-102,2025-10-08,Toys,Lego Set,6,992.33,5953.98,Credit Card,Completed
+TXN-10172,CUST-144,2025-04-09,Books,Biography,2,492.88,985.76,PayPal,Cancelled
+TXN-10173,CUST-198,2025-07-31,Books,Textbook,7,238.68,1670.76,PayPal,Completed
+TXN-10174,CUST-151,2025-06-02,Electronics,Smartphone,5,878.7,4393.5,PayPal,Cancelled
+TXN-10175,CUST-160,2025-01-11,Clothing,Sneakers,5,529.09,2645.45,Credit Card,Returned
+TXN-10176,CUST-107,2025-07-13,Home & Garden,Lamp,9,89.65,806.85,PayPal,Pending
+TXN-10177,CUST-137,2025-01-22,Toys,Puzzle,6,869.03,5214.18,PayPal,Cancelled
+TXN-10178,CUST-143,2025-08-02,Home & Garden,Plant Pot,5,531.68,2658.4,Debit Card,Pending
+TXN-10179,CUST-122,2025-10-02,Books,Novel,8,173.98,1391.84,Credit Card,Completed
+TXN-10180,CUST-128,2025-03-17,Books,Textbook,4,519.4,2077.6,Credit Card,Completed
+TXN-10181,CUST-119,2025-01-06,Books,Textbook,3,132.03,396.09,Debit Card,Completed
+TXN-10182,CUST-137,2025-11-12,Clothing,Jeans,1,326.11,326.11,Debit Card,Pending
+TXN-10183,CUST-107,2025-03-13,Toys,Doll,10,894.05,8940.5,PayPal,Pending
+TXN-10184,CUST-187,2025-01-15,Books,Cookbook,7,906.91,6348.37,PayPal,Completed
+TXN-10185,CUST-196,2025-10-24,Books,Comic,10,781.52,7815.2,PayPal,Pending
+TXN-10186,CUST-190,2025-02-17,Home & Garden,Table,7,903.62,6325.34,PayPal,Returned
+TXN-10187,CUST-183,2025-10-16,Home & Garden,Lamp,5,926.35,4631.75,Debit Card,Returned
+TXN-10188,CUST-192,2025-06-20,Electronics,Laptop,10,269.58,2695.8,Credit Card,Pending
+TXN-10189,CUST-192,2025-08-28,Books,Cookbook,3,799.54,2398.62,PayPal,Pending
+TXN-10190,CUST-148,2025-06-02,Home & Garden,Table,3,110.49,331.47,PayPal,Returned
+TXN-10191,CUST-153,2025-07-08,Electronics,Smart Watch,2,205.58,411.16,Credit Card,Returned
+TXN-10192,CUST-115,2025-07-02,Home & Garden,Chair,6,136.56,819.36,Credit Card,Returned
+TXN-10193,CUST-152,2025-06-20,Home & Garden,Chair,7,944.22,6609.54,Debit Card,Cancelled
+TXN-10194,CUST-196,2025-12-21,Electronics,Laptop,9,91.71,825.39,Credit Card,Cancelled
+TXN-10195,CUST-139,2025-10-28,Electronics,Laptop,5,251.04,1255.2,Credit Card,Completed
+TXN-10196,CUST-114,2025-04-14,Toys,Action Figure,10,652.81,6528.1,Debit Card,Cancelled
+TXN-10197,CUST-137,2025-02-03,Electronics,Smart Watch,2,494.74,989.48,Credit Card,Returned
+TXN-10198,CUST-105,2025-06-09,Home & Garden,Chair,1,717.67,717.67,Debit Card,Returned
+TXN-10199,CUST-178,2025-08-09,Books,Biography,2,426.99,853.98,Debit Card,Returned
+TXN-10200,CUST-131,2025-05-29,Books,Novel,9,328.32,2954.88,Debit Card,Cancelled
+TXN-10201,CUST-188,2025-06-08,Toys,Action Figure,2,807.32,1614.64,Credit Card,Completed
+TXN-10202,CUST-141,2025-05-11,Books,Biography,4,142.48,569.92,PayPal,Cancelled
+TXN-10203,CUST-155,2025-05-25,Electronics,Headphones,1,855.61,855.61,Credit Card,Returned
+TXN-10204,CUST-136,2025-09-08,Home & Garden,Chair,6,747.78,4486.68,Credit Card,Completed
+TXN-10205,CUST-142,2025-01-17,Books,Biography,1,652.43,652.43,Credit Card,Cancelled
+TXN-10206,CUST-151,2025-05-13,Books,Textbook,3,873.14,2619.42,PayPal,Returned
+TXN-10207,CUST-190,2025-03-02,Home & Garden,Garden Hose,9,552.92,4976.28,Credit Card,Completed
+TXN-10208,CUST-156,2025-01-03,Home & Garden,Lamp,7,886.2,6203.4,Credit Card,Pending
+TXN-10209,CUST-124,2025-11-19,Home & Garden,Table,4,935.86,3743.44,Credit Card,Cancelled
+TXN-10210,CUST-130,2025-01-25,Home & Garden,Lamp,5,342.87,1714.35,Credit Card,Cancelled
+TXN-10211,CUST-143,2025-10-20,Toys,Action Figure,7,74.34,520.38,Credit Card,Pending
+TXN-10212,CUST-154,2025-09-18,Home & Garden,Plant Pot,9,386.15,3475.35,Debit Card,Pending
+TXN-10213,CUST-176,2025-07-21,Toys,Lego Set,10,923.57,9235.7,Debit Card,Cancelled
+TXN-10214,CUST-130,2025-02-08,Home & Garden,Table,8,496.12,3968.96,Debit Card,Returned
+TXN-10215,CUST-115,2025-11-01,Toys,Lego Set,4,75.51,302.04,Credit Card,Pending
+TXN-10216,CUST-194,2025-03-20,Toys,Puzzle,6,871.8,5230.8,Debit Card,Pending
+TXN-10217,CUST-192,2025-07-02,Books,Novel,3,730.82,2192.46,Credit Card,Returned
+TXN-10218,CUST-169,2025-07-05,Clothing,Jacket,5,876.82,4384.1,PayPal,Returned
+TXN-10219,CUST-118,2025-03-27,Toys,Doll,4,492.07,1968.28,Credit Card,Pending
+TXN-10220,CUST-199,2025-11-27,Toys,Action Figure,8,407.75,3262.0,PayPal,Cancelled
+TXN-10221,CUST-111,2025-11-27,Electronics,Smart Watch,9,442.7,3984.3,PayPal,Returned
+TXN-10222,CUST-175,2025-01-27,Home & Garden,Plant Pot,8,55.4,443.2,PayPal,Cancelled
+TXN-10223,CUST-148,2025-01-29,Electronics,Headphones,5,487.65,2438.25,Credit Card,Completed
+TXN-10224,CUST-101,2025-09-06,Books,Biography,6,976.16,5856.96,Credit Card,Returned
+TXN-10225,CUST-151,2025-06-03,Books,Comic,10,242.68,2426.8,Debit Card,Completed
+TXN-10226,CUST-122,2025-12-19,Home & Garden,Garden Hose,8,648.89,5191.12,PayPal,Cancelled
+TXN-10227,CUST-190,2025-08-16,Books,Novel,7,890.7,6234.9,Credit Card,Cancelled
+TXN-10228,CUST-108,2025-01-11,Books,Comic,8,765.57,6124.56,PayPal,Pending
+TXN-10229,CUST-173,2025-10-21,Toys,Lego Set,9,824.47,7420.23,PayPal,Pending
+TXN-10230,CUST-111,2025-07-02,Home & Garden,Garden Hose,8,122.46,979.68,PayPal,Returned
+TXN-10231,CUST-114,2025-05-20,Toys,Lego Set,5,437.02,2185.1,Credit Card,Completed
+TXN-10232,CUST-184,2025-05-08,Books,Novel,7,81.95,573.65,Debit Card,Completed
+TXN-10233,CUST-164,2025-10-09,Clothing,Hat,1,142.35,142.35,Credit Card,Returned
+TXN-10234,CUST-184,2025-09-06,Toys,Board Game,3,986.37,2959.11,PayPal,Pending
+TXN-10235,CUST-166,2025-04-22,Electronics,Tablet,1,953.79,953.79,PayPal,Cancelled
+TXN-10236,CUST-174,2025-11-21,Electronics,Laptop,2,140.15,280.3,PayPal,Cancelled
+TXN-10237,CUST-140,2025-09-01,Electronics,Laptop,10,302.49,3024.9,PayPal,Cancelled
+TXN-10238,CUST-155,2025-07-07,Toys,Action Figure,7,200.78,1405.46,Debit Card,Cancelled
+TXN-10239,CUST-103,2025-10-31,Electronics,Tablet,10,144.85,1448.5,Debit Card,Returned
+TXN-10240,CUST-157,2025-01-13,Toys,Doll,6,381.96,2291.76,Credit Card,Returned
+TXN-10241,CUST-186,2025-02-23,Toys,Lego Set,5,392.27,1961.35,PayPal,Pending
+TXN-10242,CUST-141,2025-10-05,Toys,Puzzle,10,48.06,480.6,PayPal,Cancelled
+TXN-10243,CUST-198,2025-06-28,Home & Garden,Lamp,6,576.4,3458.4,Debit Card,Completed
+TXN-10244,CUST-184,2025-09-23,Clothing,Sneakers,3,995.92,2987.76,PayPal,Pending
+TXN-10245,CUST-103,2025-06-06,Books,Textbook,5,665.48,3327.4,Debit Card,Cancelled
+TXN-10246,CUST-127,2025-02-26,Home & Garden,Table,10,797.45,7974.5,Credit Card,Cancelled
+TXN-10247,CUST-150,2025-09-09,Electronics,Smartphone,8,690.83,5526.64,PayPal,Completed
+TXN-10248,CUST-106,2025-10-30,Home & Garden,Plant Pot,5,699.3,3496.5,Credit Card,Cancelled
+TXN-10249,CUST-122,2025-08-18,Electronics,Tablet,5,799.53,3997.65,PayPal,Completed
+TXN-10250,CUST-169,2025-08-06,Home & Garden,Lamp,8,620.6,4964.8,Debit Card,Cancelled
+TXN-10251,CUST-170,2025-11-21,Home & Garden,Lamp,5,510.9,2554.5,PayPal,Completed
+TXN-10252,CUST-114,2025-08-28,Home & Garden,Garden Hose,4,938.07,3752.28,PayPal,Pending
+TXN-10253,CUST-103,2025-06-25,Books,Comic,9,621.38,5592.42,Credit Card,Pending
+TXN-10254,CUST-103,2025-09-29,Toys,Board Game,8,793.64,6349.12,PayPal,Cancelled
+TXN-10255,CUST-128,2025-06-18,Clothing,Sneakers,5,802.68,4013.4,Credit Card,Cancelled
+TXN-10256,CUST-150,2025-09-02,Clothing,Jacket,2,810.17,1620.34,Credit Card,Completed
+TXN-10257,CUST-165,2025-08-22,Home & Garden,Lamp,5,762.84,3814.2,PayPal,Cancelled
+TXN-10258,CUST-180,2025-01-27,Books,Biography,10,574.36,5743.6,Debit Card,Returned
+TXN-10259,CUST-131,2025-11-20,Clothing,Jacket,8,234.59,1876.72,Debit Card,Completed
+TXN-10260,CUST-107,2025-07-10,Home & Garden,Table,2,940.35,1880.7,PayPal,Returned
+TXN-10261,CUST-111,2025-02-27,Books,Cookbook,9,484.65,4361.85,PayPal,Pending
+TXN-10262,CUST-145,2025-12-23,Clothing,Hat,5,334.84,1674.2,PayPal,Cancelled
+TXN-10263,CUST-135,2025-11-16,Toys,Puzzle,10,842.75,8427.5,Debit Card,Pending
+TXN-10264,CUST-173,2025-09-22,Clothing,T-Shirt,10,19.91,199.1,PayPal,Completed
+TXN-10265,CUST-164,2025-06-05,Books,Biography,6,455.99,2735.94,Debit Card,Pending
+TXN-10266,CUST-161,2025-01-15,Toys,Lego Set,4,821.62,3286.48,Debit Card,Completed
+TXN-10267,CUST-199,2025-11-20,Toys,Puzzle,1,767.16,767.16,Debit Card,Pending
+TXN-10268,CUST-179,2025-08-01,Clothing,T-Shirt,7,123.88,867.16,Credit Card,Pending
+TXN-10269,CUST-107,2025-11-10,Clothing,T-Shirt,10,908.16,9081.6,PayPal,Completed
+TXN-10270,CUST-139,2025-09-22,Electronics,Headphones,5,299.29,1496.45,Debit Card,Pending
+TXN-10271,CUST-140,2025-04-19,Toys,Board Game,1,145.25,145.25,PayPal,Returned
+TXN-10272,CUST-154,2025-03-16,Electronics,Smartphone,3,990.32,2970.96,Credit Card,Returned
+TXN-10273,CUST-134,2025-09-08,Home & Garden,Table,3,896.52,2689.56,PayPal,Pending
+TXN-10274,CUST-194,2025-01-28,Clothing,Sneakers,4,509.22,2036.88,Debit Card,Cancelled
+TXN-10275,CUST-175,2025-05-28,Books,Biography,6,291.85,1751.1,Credit Card,Cancelled
+TXN-10276,CUST-135,2025-09-29,Home & Garden,Table,8,362.25,2898.0,Debit Card,Completed
+TXN-10277,CUST-144,2025-12-30,Books,Cookbook,7,647.24,4530.68,PayPal,Pending
+TXN-10278,CUST-191,2025-12-18,Clothing,Jacket,5,128.01,640.05,Credit Card,Cancelled
+TXN-10279,CUST-114,2025-06-13,Home & Garden,Garden Hose,6,429.15,2574.9,Credit Card,Cancelled
+TXN-10280,CUST-102,2025-05-02,Books,Cookbook,5,108.77,543.85,PayPal,Returned
+TXN-10281,CUST-165,2025-03-23,Electronics,Smartphone,5,838.71,4193.55,PayPal,Completed
+TXN-10282,CUST-160,2025-01-18,Clothing,Sneakers,7,63.53,444.71,Credit Card,Returned
+TXN-10283,CUST-196,2025-07-09,Electronics,Tablet,6,374.81,2248.86,Debit Card,Pending
+TXN-10284,CUST-124,2025-04-29,Home & Garden,Chair,4,971.47,3885.88,Credit Card,Completed
+TXN-10285,CUST-130,2025-08-13,Toys,Lego Set,3,286.04,858.12,PayPal,Pending
+TXN-10286,CUST-147,2025-08-19,Toys,Board Game,1,873.2,873.2,Credit Card,Completed
+TXN-10287,CUST-142,2025-12-18,Clothing,Jacket,7,945.1,6615.7,Credit Card,Returned
+TXN-10288,CUST-193,2025-09-03,Books,Novel,8,452.14,3617.12,Debit Card,Returned
+TXN-10289,CUST-174,2025-04-16,Clothing,T-Shirt,7,902.25,6315.75,Debit Card,Cancelled
+TXN-10290,CUST-173,2025-02-15,Books,Cookbook,4,116.79,467.16,PayPal,Returned
+TXN-10291,CUST-171,2025-12-16,Clothing,Jeans,3,586.19,1758.57,Debit Card,Completed
+TXN-10292,CUST-131,2025-11-07,Books,Biography,4,82.3,329.2,Credit Card,Completed
+TXN-10293,CUST-187,2025-03-01,Books,Cookbook,4,799.56,3198.24,PayPal,Returned
+TXN-10294,CUST-163,2025-11-02,Clothing,Jeans,5,640.83,3204.15,Credit Card,Cancelled
+TXN-10295,CUST-161,2025-06-19,Electronics,Headphones,3,538.32,1614.96,Debit Card,Pending
+TXN-10296,CUST-108,2025-05-05,Clothing,Hat,10,443.37,4433.7,Debit Card,Returned
+TXN-10297,CUST-138,2025-10-12,Electronics,Tablet,4,505.18,2020.72,Debit Card,Completed
+TXN-10298,CUST-178,2025-12-29,Electronics,Tablet,3,949.34,2848.02,Debit Card,Cancelled
+TXN-10299,CUST-147,2025-05-23,Books,Biography,4,955.54,3822.16,PayPal,Completed
+TXN-10300,CUST-122,2025-05-23,Toys,Puzzle,7,540.49,3783.43,Debit Card,Completed
+TXN-10301,CUST-123,2025-03-06,Books,Textbook,2,234.35,468.7,Credit Card,Completed
+TXN-10302,CUST-142,2025-02-20,Books,Biography,2,599.75,1199.5,Debit Card,Pending
+TXN-10303,CUST-162,2025-10-25,Electronics,Headphones,3,717.44,2152.32,PayPal,Pending
+TXN-10304,CUST-178,2025-08-08,Clothing,T-Shirt,10,871.09,8710.9,PayPal,Cancelled
+TXN-10305,CUST-168,2025-12-13,Electronics,Smartphone,10,208.32,2083.2,Credit Card,Completed
+TXN-10306,CUST-157,2025-10-10,Home & Garden,Table,4,566.46,2265.84,Credit Card,Cancelled
+TXN-10307,CUST-199,2025-01-21,Toys,Action Figure,10,370.93,3709.3,Debit Card,Cancelled
+TXN-10308,CUST-176,2025-03-07,Electronics,Smart Watch,6,368.32,2209.92,PayPal,Returned
+TXN-10309,CUST-138,2025-04-04,Books,Biography,9,722.31,6500.79,Debit Card,Pending
+TXN-10310,CUST-123,2025-07-22,Books,Novel,7,445.4,3117.8,Debit Card,Pending
+TXN-10311,CUST-131,2025-12-19,Electronics,Smart Watch,2,114.53,229.06,PayPal,Pending
+TXN-10312,CUST-191,2025-08-11,Clothing,Jacket,10,502.7,5027.0,Debit Card,Pending
+TXN-10313,CUST-120,2025-08-08,Home & Garden,Lamp,10,373.35,3733.5,Credit Card,Returned
+TXN-10314,CUST-160,2025-02-28,Clothing,Jacket,4,806.99,3227.96,Debit Card,Pending
+TXN-10315,CUST-124,2025-11-09,Home & Garden,Table,2,686.01,1372.02,Credit Card,Cancelled
+TXN-10316,CUST-168,2025-08-01,Home & Garden,Chair,1,548.06,548.06,Credit Card,Completed
+TXN-10317,CUST-155,2025-12-18,Home & Garden,Chair,5,148.06,740.3,Debit Card,Cancelled
+TXN-10318,CUST-111,2025-12-19,Home & Garden,Garden Hose,7,738.94,5172.58,Credit Card,Returned
+TXN-10319,CUST-148,2025-04-14,Books,Comic,10,39.06,390.6,Debit Card,Completed
+TXN-10320,CUST-143,2025-08-10,Books,Biography,5,279.9,1399.5,Debit Card,Pending
+TXN-10321,CUST-124,2025-05-24,Home & Garden,Garden Hose,4,407.27,1629.08,Credit Card,Completed
+TXN-10322,CUST-197,2025-12-06,Clothing,T-Shirt,2,944.07,1888.14,PayPal,Returned
+TXN-10323,CUST-199,2025-10-18,Books,Textbook,8,93.37,746.96,Debit Card,Returned
+TXN-10324,CUST-123,2025-11-29,Books,Comic,6,922.68,5536.08,Credit Card,Cancelled
+TXN-10325,CUST-124,2025-09-25,Toys,Puzzle,3,687.54,2062.62,PayPal,Cancelled
+TXN-10326,CUST-119,2025-06-21,Books,Biography,5,401.67,2008.35,Debit Card,Returned
+TXN-10327,CUST-165,2025-06-02,Home & Garden,Plant Pot,7,272.02,1904.14,PayPal,Returned
+TXN-10328,CUST-193,2025-07-29,Electronics,Smartphone,10,920.59,9205.9,Debit Card,Completed
+TXN-10329,CUST-128,2025-11-15,Clothing,T-Shirt,9,13.76,123.84,PayPal,Completed
+TXN-10330,CUST-133,2025-12-22,Clothing,T-Shirt,3,548.86,1646.58,Credit Card,Pending
+TXN-10331,CUST-108,2025-06-25,Toys,Doll,1,575.63,575.63,Credit Card,Returned
+TXN-10332,CUST-137,2025-09-06,Clothing,Hat,5,128.98,644.9,Credit Card,Returned
+TXN-10333,CUST-130,2025-10-18,Toys,Board Game,8,467.36,3738.88,Debit Card,Returned
+TXN-10334,CUST-144,2025-02-26,Home & Garden,Garden Hose,4,247.71,990.84,Credit Card,Cancelled
+TXN-10335,CUST-127,2025-12-31,Books,Comic,7,617.72,4324.04,Debit Card,Cancelled
+TXN-10336,CUST-125,2025-09-26,Toys,Board Game,10,97.11,971.1,Debit Card,Completed
+TXN-10337,CUST-180,2025-09-19,Clothing,Jacket,1,935.04,935.04,Credit Card,Returned
+TXN-10338,CUST-132,2025-08-12,Home & Garden,Lamp,10,862.31,8623.1,PayPal,Returned
+TXN-10339,CUST-138,2025-12-08,Toys,Board Game,8,287.0,2296.0,PayPal,Completed
+TXN-10340,CUST-126,2025-01-02,Home & Garden,Plant Pot,2,327.72,655.44,Credit Card,Completed
+TXN-10341,CUST-170,2025-08-25,Books,Cookbook,3,620.11,1860.33,PayPal,Cancelled
+TXN-10342,CUST-113,2025-12-30,Books,Textbook,9,394.05,3546.45,Credit Card,Returned
+TXN-10343,CUST-151,2025-12-14,Home & Garden,Garden Hose,8,758.87,6070.96,Debit Card,Completed
+TXN-10344,CUST-124,2025-03-14,Books,Comic,1,149.66,149.66,Debit Card,Pending
+TXN-10345,CUST-165,2025-08-07,Home & Garden,Lamp,2,102.71,205.42,PayPal,Completed
+TXN-10346,CUST-183,2025-01-11,Electronics,Tablet,10,109.94,1099.4,Credit Card,Returned
+TXN-10347,CUST-121,2025-04-17,Toys,Lego Set,9,256.24,2306.16,Credit Card,Pending
+TXN-10348,CUST-115,2025-08-04,Home & Garden,Lamp,9,153.97,1385.73,Credit Card,Pending
+TXN-10349,CUST-178,2025-05-06,Home & Garden,Lamp,4,787.16,3148.64,Debit Card,Cancelled
+TXN-10350,CUST-109,2025-04-12,Home & Garden,Lamp,3,22.22,66.66,PayPal,Returned
+TXN-10351,CUST-127,2025-08-27,Clothing,T-Shirt,2,197.2,394.4,Debit Card,Pending
+TXN-10352,CUST-142,2025-04-08,Books,Biography,4,68.28,273.12,PayPal,Completed
+TXN-10353,CUST-141,2025-02-06,Toys,Doll,3,774.46,2323.38,Debit Card,Completed
+TXN-10354,CUST-108,2025-12-27,Home & Garden,Chair,10,959.11,9591.1,PayPal,Completed
+TXN-10355,CUST-142,2025-09-05,Toys,Lego Set,3,595.64,1786.92,PayPal,Completed
+TXN-10356,CUST-157,2025-11-18,Clothing,Jacket,10,738.2,7382.0,Debit Card,Pending
+TXN-10357,CUST-161,2025-01-13,Clothing,Hat,10,478.67,4786.7,Debit Card,Completed
+TXN-10358,CUST-163,2025-03-31,Books,Cookbook,9,496.54,4468.86,Credit Card,Returned
+TXN-10359,CUST-147,2025-06-09,Clothing,Sneakers,8,733.5,5868.0,PayPal,Pending
+TXN-10360,CUST-138,2025-04-20,Clothing,Jeans,4,304.68,1218.72,PayPal,Returned
+TXN-10361,CUST-106,2025-04-22,Clothing,Sneakers,2,269.49,538.98,Debit Card,Cancelled
+TXN-10362,CUST-182,2025-05-30,Books,Biography,5,532.81,2664.05,PayPal,Returned
+TXN-10363,CUST-197,2025-01-07,Electronics,Smart Watch,3,796.23,2388.69,Credit Card,Cancelled
+TXN-10364,CUST-138,2025-12-25,Toys,Lego Set,10,730.72,7307.2,Credit Card,Returned
+TXN-10365,CUST-142,2025-05-14,Clothing,Sneakers,5,995.32,4976.6,PayPal,Pending
+TXN-10366,CUST-136,2025-01-09,Electronics,Headphones,2,103.1,206.2,Debit Card,Pending
+TXN-10367,CUST-123,2025-07-12,Toys,Lego Set,4,534.78,2139.12,Debit Card,Pending
+TXN-10368,CUST-131,2025-09-16,Electronics,Laptop,8,535.81,4286.48,Debit Card,Returned
+TXN-10369,CUST-147,2025-11-07,Toys,Doll,7,326.17,2283.19,PayPal,Completed
+TXN-10370,CUST-164,2025-03-01,Electronics,Headphones,6,506.58,3039.48,Credit Card,Completed
+TXN-10371,CUST-138,2025-06-10,Toys,Puzzle,6,623.39,3740.34,Credit Card,Completed
+TXN-10372,CUST-185,2025-10-25,Toys,Lego Set,9,781.75,7035.75,Credit Card,Cancelled
+TXN-10373,CUST-181,2025-12-25,Toys,Action Figure,2,410.71,821.42,Debit Card,Returned
+TXN-10374,CUST-119,2025-12-24,Toys,Puzzle,2,21.68,43.36,PayPal,Pending
+TXN-10375,CUST-147,2025-02-20,Toys,Puzzle,4,215.24,860.96,Credit Card,Cancelled
+TXN-10376,CUST-168,2025-01-08,Books,Comic,5,723.36,3616.8,Debit Card,Completed
+TXN-10377,CUST-120,2025-07-06,Toys,Puzzle,8,357.14,2857.12,PayPal,Pending
+TXN-10378,CUST-145,2025-02-28,Clothing,Hat,8,819.95,6559.6,Credit Card,Completed
+TXN-10379,CUST-107,2025-04-21,Home & Garden,Lamp,2,990.5,1981.0,Credit Card,Completed
+TXN-10380,CUST-130,2025-03-16,Toys,Action Figure,4,837.88,3351.52,PayPal,Returned
+TXN-10381,CUST-147,2025-09-16,Toys,Lego Set,10,812.49,8124.9,PayPal,Returned
+TXN-10382,CUST-142,2025-06-29,Home & Garden,Table,3,462.21,1386.63,Credit Card,Cancelled
+TXN-10383,CUST-175,2025-11-10,Books,Novel,9,827.4,7446.6,Credit Card,Cancelled
+TXN-10384,CUST-113,2025-05-01,Toys,Board Game,4,127.45,509.8,Credit Card,Returned
+TXN-10385,CUST-165,2025-05-28,Books,Novel,4,232.07,928.28,PayPal,Pending
+TXN-10386,CUST-120,2025-05-27,Clothing,Jeans,7,316.91,2218.37,PayPal,Pending
+TXN-10387,CUST-132,2025-06-18,Books,Textbook,8,606.7,4853.6,Credit Card,Cancelled
+TXN-10388,CUST-168,2025-11-14,Books,Comic,3,270.82,812.46,PayPal,Pending
+TXN-10389,CUST-153,2025-11-05,Books,Biography,8,868.4,6947.2,Credit Card,Returned
+TXN-10390,CUST-194,2025-09-19,Books,Cookbook,6,281.45,1688.7,PayPal,Cancelled
+TXN-10391,CUST-152,2025-01-30,Clothing,Hat,3,696.07,2088.21,Credit Card,Completed
+TXN-10392,CUST-144,2025-07-24,Toys,Board Game,10,362.81,3628.1,PayPal,Cancelled
+TXN-10393,CUST-106,2025-10-01,Home & Garden,Table,5,18.95,94.75,Debit Card,Completed
+TXN-10394,CUST-187,2025-07-22,Toys,Puzzle,4,836.31,3345.24,PayPal,Pending
+TXN-10395,CUST-191,2025-08-23,Electronics,Smart Watch,4,960.17,3840.68,Debit Card,Pending
+TXN-10396,CUST-168,2025-03-26,Books,Biography,5,600.2,3001.0,PayPal,Completed
+TXN-10397,CUST-194,2025-01-09,Toys,Board Game,3,462.28,1386.84,Credit Card,Pending
+TXN-10398,CUST-186,2025-12-20,Clothing,Jacket,9,249.83,2248.47,Credit Card,Pending
+TXN-10399,CUST-160,2025-08-07,Electronics,Headphones,4,226.77,907.08,Debit Card,Cancelled
+TXN-10400,CUST-173,2025-10-03,Clothing,T-Shirt,7,735.61,5149.27,Credit Card,Completed
+TXN-10401,CUST-135,2025-06-28,Electronics,Smart Watch,8,483.88,3871.04,Debit Card,Cancelled
+TXN-10402,CUST-200,2025-03-17,Toys,Action Figure,6,460.15,2760.9,Debit Card,Completed
+TXN-10403,CUST-192,2025-04-13,Home & Garden,Chair,9,221.87,1996.83,PayPal,Returned
+TXN-10404,CUST-130,2025-06-01,Books,Textbook,7,779.36,5455.52,PayPal,Completed
+TXN-10405,CUST-100,2025-01-04,Home & Garden,Garden Hose,1,28.08,28.08,Credit Card,Cancelled
+TXN-10406,CUST-156,2025-09-25,Electronics,Tablet,7,903.04,6321.28,Debit Card,Returned
+TXN-10407,CUST-122,2025-09-05,Electronics,Tablet,9,205.36,1848.24,Credit Card,Pending
+TXN-10408,CUST-107,2025-08-30,Electronics,Smartphone,1,305.04,305.04,Credit Card,Pending
+TXN-10409,CUST-155,2025-04-11,Home & Garden,Plant Pot,4,305.39,1221.56,Debit Card,Pending
+TXN-10410,CUST-154,2025-03-27,Electronics,Tablet,7,409.41,2865.87,Credit Card,Completed
+TXN-10411,CUST-158,2025-06-01,Books,Comic,1,867.58,867.58,Debit Card,Pending
+TXN-10412,CUST-139,2025-02-20,Toys,Doll,3,459.38,1378.14,Debit Card,Returned
+TXN-10413,CUST-149,2025-06-27,Electronics,Laptop,2,669.08,1338.16,Credit Card,Returned
+TXN-10414,CUST-186,2025-04-22,Toys,Doll,4,735.47,2941.88,PayPal,Pending
+TXN-10415,CUST-191,2025-08-26,Electronics,Smartphone,6,777.85,4667.1,PayPal,Cancelled
+TXN-10416,CUST-142,2025-11-28,Home & Garden,Chair,2,849.33,1698.66,Credit Card,Cancelled
+TXN-10417,CUST-152,2025-04-24,Home & Garden,Table,5,225.57,1127.85,Credit Card,Completed
+TXN-10418,CUST-144,2025-11-23,Home & Garden,Plant Pot,10,842.25,8422.5,PayPal,Returned
+TXN-10419,CUST-149,2025-10-05,Toys,Lego Set,9,225.3,2027.7,Credit Card,Returned
+TXN-10420,CUST-198,2025-12-20,Books,Textbook,2,994.22,1988.44,Debit Card,Cancelled
+TXN-10421,CUST-169,2025-02-19,Books,Textbook,7,99.62,697.34,Credit Card,Cancelled
+TXN-10422,CUST-173,2025-10-02,Toys,Action Figure,8,11.54,92.32,Debit Card,Returned
+TXN-10423,CUST-183,2025-12-21,Electronics,Smartphone,1,807.25,807.25,PayPal,Pending
+TXN-10424,CUST-194,2025-08-07,Clothing,Jacket,9,109.2,982.8,Credit Card,Completed
+TXN-10425,CUST-109,2025-09-29,Home & Garden,Garden Hose,9,588.91,5300.19,PayPal,Returned
+TXN-10426,CUST-127,2025-09-27,Electronics,Headphones,2,848.56,1697.12,Debit Card,Pending
+TXN-10427,CUST-163,2025-06-06,Clothing,Hat,2,857.44,1714.88,Credit Card,Completed
+TXN-10428,CUST-102,2025-02-06,Clothing,Sneakers,7,88.2,617.4,Debit Card,Completed
+TXN-10429,CUST-121,2025-11-17,Toys,Puzzle,1,904.8,904.8,Debit Card,Completed
+TXN-10430,CUST-111,2025-12-11,Clothing,Sneakers,8,653.37,5226.96,Credit Card,Cancelled
+TXN-10431,CUST-146,2025-05-12,Toys,Lego Set,10,601.21,6012.1,PayPal,Returned
+TXN-10432,CUST-100,2025-01-12,Electronics,Laptop,4,174.48,697.92,PayPal,Completed
+TXN-10433,CUST-103,2025-10-12,Electronics,Smart Watch,8,350.81,2806.48,Debit Card,Completed
+TXN-10434,CUST-101,2025-02-26,Home & Garden,Chair,7,760.01,5320.07,PayPal,Cancelled
+TXN-10435,CUST-116,2025-01-23,Clothing,Jeans,5,714.34,3571.7,PayPal,Cancelled
+TXN-10436,CUST-168,2025-02-23,Toys,Lego Set,7,809.28,5664.96,PayPal,Pending
+TXN-10437,CUST-184,2025-01-14,Home & Garden,Plant Pot,6,671.23,4027.38,Credit Card,Pending
+TXN-10438,CUST-192,2025-09-30,Home & Garden,Plant Pot,3,376.11,1128.33,Debit Card,Returned
+TXN-10439,CUST-124,2025-04-09,Books,Comic,7,424.79,2973.53,PayPal,Pending
+TXN-10440,CUST-143,2025-07-17,Toys,Doll,2,147.38,294.76,PayPal,Pending
+TXN-10441,CUST-126,2025-08-13,Home & Garden,Plant Pot,7,579.57,4056.99,Debit Card,Completed
+TXN-10442,CUST-157,2025-05-21,Clothing,Jacket,9,299.55,2695.95,Debit Card,Returned
+TXN-10443,CUST-164,2025-03-05,Electronics,Tablet,4,46.25,185.0,Credit Card,Completed
+TXN-10444,CUST-146,2025-07-26,Home & Garden,Lamp,6,649.25,3895.5,PayPal,Returned
+TXN-10445,CUST-158,2025-02-05,Books,Comic,2,417.38,834.76,PayPal,Completed
+TXN-10446,CUST-168,2025-02-15,Home & Garden,Chair,5,332.78,1663.9,Debit Card,Pending
+TXN-10447,CUST-105,2025-05-25,Toys,Doll,6,641.7,3850.2,Credit Card,Completed
+TXN-10448,CUST-165,2025-11-23,Toys,Puzzle,1,383.41,383.41,Credit Card,Completed
+TXN-10449,CUST-154,2025-11-06,Home & Garden,Garden Hose,4,430.01,1720.04,Debit Card,Cancelled
+TXN-10450,CUST-165,2025-05-10,Books,Novel,10,711.9,7119.0,Credit Card,Returned
+TXN-10451,CUST-104,2025-07-19,Books,Novel,7,169.69,1187.83,Debit Card,Pending
+TXN-10452,CUST-145,2025-02-01,Books,Cookbook,5,733.4,3667.0,PayPal,Cancelled
+TXN-10453,CUST-110,2025-10-12,Clothing,T-Shirt,7,217.9,1525.3,Credit Card,Returned
+TXN-10454,CUST-140,2025-01-11,Clothing,Sneakers,7,450.78,3155.46,Debit Card,Completed
+TXN-10455,CUST-176,2025-04-21,Electronics,Smartphone,5,788.28,3941.4,Debit Card,Pending
+TXN-10456,CUST-137,2025-04-08,Clothing,Jeans,5,218.97,1094.85,PayPal,Returned
+TXN-10457,CUST-132,2025-04-07,Clothing,Jeans,9,592.96,5336.64,PayPal,Returned
+TXN-10458,CUST-101,2025-10-11,Electronics,Smart Watch,4,216.36,865.44,Debit Card,Cancelled
+TXN-10459,CUST-141,2025-04-24,Books,Novel,6,332.67,1996.02,Credit Card,Pending
+TXN-10460,CUST-178,2025-08-24,Toys,Puzzle,7,57.88,405.16,Debit Card,Pending
+TXN-10461,CUST-169,2025-01-07,Books,Textbook,9,465.43,4188.87,Debit Card,Completed
+TXN-10462,CUST-179,2025-08-25,Home & Garden,Chair,1,100.98,100.98,Debit Card,Pending
+TXN-10463,CUST-138,2025-07-03,Books,Cookbook,2,412.94,825.88,PayPal,Pending
+TXN-10464,CUST-107,2025-04-07,Books,Cookbook,8,619.01,4952.08,PayPal,Completed
+TXN-10465,CUST-118,2025-06-20,Books,Biography,4,83.69,334.76,Debit Card,Pending
+TXN-10466,CUST-173,2025-04-16,Books,Biography,4,881.51,3526.04,PayPal,Completed
+TXN-10467,CUST-124,2025-12-09,Books,Cookbook,5,500.59,2502.95,Debit Card,Cancelled
+TXN-10468,CUST-146,2025-06-27,Books,Cookbook,2,691.51,1383.02,PayPal,Completed
+TXN-10469,CUST-184,2025-11-13,Electronics,Tablet,4,132.56,530.24,Credit Card,Completed
+TXN-10470,CUST-114,2025-02-24,Toys,Doll,9,404.99,3644.91,Credit Card,Completed
+TXN-10471,CUST-186,2025-01-20,Books,Novel,3,936.17,2808.51,Credit Card,Pending
+TXN-10472,CUST-100,2025-04-29,Electronics,Smartphone,6,326.36,1958.16,Credit Card,Cancelled
+TXN-10473,CUST-183,2025-03-06,Home & Garden,Table,5,213.41,1067.05,Debit Card,Completed
+TXN-10474,CUST-101,2025-05-29,Toys,Puzzle,1,962.04,962.04,PayPal,Completed
+TXN-10475,CUST-186,2025-09-14,Toys,Board Game,6,877.64,5265.84,PayPal,Pending
+TXN-10476,CUST-165,2025-11-12,Toys,Puzzle,5,544.22,2721.1,PayPal,Returned
+TXN-10477,CUST-117,2025-02-07,Clothing,Sneakers,7,164.49,1151.43,PayPal,Returned
+TXN-10478,CUST-181,2025-04-25,Electronics,Laptop,7,529.93,3709.51,Credit Card,Completed
+TXN-10479,CUST-168,2025-07-19,Clothing,Jacket,1,822.69,822.69,PayPal,Returned
+TXN-10480,CUST-132,2025-05-10,Home & Garden,Garden Hose,5,193.69,968.45,Credit Card,Completed
+TXN-10481,CUST-135,2025-12-29,Clothing,T-Shirt,9,461.85,4156.65,PayPal,Returned
+TXN-10482,CUST-149,2025-02-22,Home & Garden,Garden Hose,7,374.77,2623.39,Debit Card,Cancelled
+TXN-10483,CUST-131,2025-05-10,Electronics,Smart Watch,5,878.65,4393.25,PayPal,Returned
+TXN-10484,CUST-119,2025-06-01,Books,Textbook,5,442.63,2213.15,Credit Card,Returned
+TXN-10485,CUST-116,2025-06-06,Books,Comic,6,448.12,2688.72,Debit Card,Completed
+TXN-10486,CUST-144,2025-11-25,Electronics,Smartphone,7,629.24,4404.68,PayPal,Pending
+TXN-10487,CUST-162,2025-09-29,Books,Cookbook,5,703.16,3515.8,Credit Card,Returned
+TXN-10488,CUST-161,2025-06-07,Toys,Puzzle,6,167.03,1002.18,Debit Card,Returned
+TXN-10489,CUST-112,2025-04-04,Toys,Lego Set,5,226.19,1130.95,PayPal,Cancelled
+TXN-10490,CUST-141,2025-10-09,Electronics,Smartphone,9,535.48,4819.32,PayPal,Cancelled
+TXN-10491,CUST-153,2025-03-21,Clothing,Jeans,5,688.12,3440.6,Debit Card,Pending
+TXN-10492,CUST-113,2025-02-04,Home & Garden,Chair,3,318.62,955.86,Debit Card,Pending
+TXN-10493,CUST-123,2025-12-19,Clothing,Hat,1,258.07,258.07,PayPal,Cancelled
+TXN-10494,CUST-172,2025-08-09,Toys,Doll,7,532.8,3729.6,PayPal,Cancelled
+TXN-10495,CUST-153,2025-12-21,Home & Garden,Garden Hose,7,472.02,3304.14,Credit Card,Completed
+TXN-10496,CUST-193,2025-11-25,Home & Garden,Garden Hose,10,335.32,3353.2,Credit Card,Returned
+TXN-10497,CUST-186,2025-06-22,Home & Garden,Lamp,7,153.28,1072.96,PayPal,Cancelled
+TXN-10498,CUST-162,2025-12-21,Books,Textbook,4,163.58,654.32,PayPal,Returned
+TXN-10499,CUST-195,2025-12-31,Toys,Action Figure,1,461.51,461.51,Credit Card,Pending

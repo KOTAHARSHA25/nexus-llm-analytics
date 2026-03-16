@@ -77,6 +77,19 @@ class NexusLauncher:
         print(f"{Colors.GREEN}✅ System requirements check passed{Colors.END}")
         return True
 
+    def _get_local_ip(self) -> str:
+        """Get the local IP address for network access"""
+        import socket
+        try:
+            # Create a socket to determine the local IP
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))  # Doesn't actually send data
+            local_ip = s.getsockname()[0]
+            s.close()
+            return local_ip
+        except Exception:
+            return "YOUR_IP"
+
     def check_ollama(self):
         """Check if Ollama is available and required models are installed"""
         print(f"{Colors.BOLD}🤖 Checking Ollama...{Colors.END}")
@@ -244,12 +257,15 @@ class NexusLauncher:
         """Start the FastAPI backend server"""
         print(f"{Colors.BOLD}🔧 Starting backend server...{Colors.END}")
         
+        # Get local IP for network access info
+        local_ip = self._get_local_ip()
+        
         try:
             cmd = [
                 sys.executable, '-m', 'uvicorn', 
                 'src.backend.main:app',
                 '--reload',
-                '--host', '127.0.0.1',
+                '--host', '0.0.0.0',  # Bind to all interfaces for network access
                 '--port', '8000'
             ]
             
@@ -263,7 +279,9 @@ class NexusLauncher:
             # Wait a moment and check if it started
             time.sleep(3)
             if self.backend_process.poll() is None:
-                print(f"{Colors.GREEN}✅ Backend server started on http://127.0.0.1:8000{Colors.END}")
+                print(f"{Colors.GREEN}✅ Backend server started:{Colors.END}")
+                print(f"   • Local:   http://localhost:8000")
+                print(f"   • Network: http://{local_ip}:8000")
                 return True
             else:
                 stdout, stderr = self.backend_process.communicate()
@@ -379,12 +397,16 @@ class NexusLauncher:
                 return False
             
             # Print success message
+            local_ip = self._get_local_ip()
             print(f"\n{Colors.BOLD}{Colors.GREEN}🎉 Nexus LLM Analytics is running!{Colors.END}")
             print(f"\n{Colors.BOLD}🌐 Access your application at:{Colors.END}")
-            print(f"   • Backend API: http://127.0.0.1:8000")
+            print(f"   • Backend API (Local):   http://localhost:8000")
+            print(f"   • Backend API (Network): http://{local_ip}:8000")
             if not backend_only:
                 print(f"   • Frontend UI: http://localhost:3000")
-            print(f"   • API Docs: http://127.0.0.1:8000/docs")
+            print(f"   • API Docs: http://localhost:8000/docs")
+            print(f"\n{Colors.BOLD}📱 Other devices on same WiFi can connect using:{Colors.END}")
+            print(f"   • Backend URL: http://{local_ip}:8000")
             
             print(f"\n{Colors.BOLD}📋 Available endpoints:{Colors.END}")
             print(f"   • POST /analyze/ - Analyze data with natural language")

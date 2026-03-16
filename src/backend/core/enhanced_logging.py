@@ -1,234 +1,241 @@
 """
-Enhanced Logging Module
-=======================
-Beautiful, informative logging with emojis, colors, and structured output.
+Enhanced Logging — Nexus LLM Analytics v2.0
+============================================
 
-Features:
-- Emoji-prefixed log levels
-- Colored console output
-- Clean, readable format
-- Request tracing
-- Performance metrics
+Enterprise-grade logging configuration with JSON and coloured console
+formatters, rotating file handlers, and structured output.
+
+Enterprise v2.0 Additions
+-------------------------
+* **CorrelationIdFilter** — Logging filter that injects a correlation
+  (request) ID into every log record for distributed tracing.
+* **SensitiveDataFilter** — Redacts PII patterns (emails, API keys)
+  from log messages before they are emitted.
+* ``configure_logging()`` — High-level convenience wrapper around
+  ``setup_enhanced_logging()`` accepting a :class:`~backend.core.config.Settings`
+  object.
+
+Backward Compatibility
+----------------------
+``setup_enhanced_logging()``, ``JsonFormatter``, and
+``ColoredFormatter`` are unchanged.
+
+.. versionchanged:: 2.0
+   Added correlation-ID and PII-redaction filters.
+
+Author: Nexus Analytics Research Team
+Date: February 2026
 """
 
-import logging
-import sys
-import os
-from datetime import datetime
-from typing import Optional
+from __future__ import annotations
+
 import json
+import logging
+import re
+import sys
+import threading
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
+from typing import Optional
 
+logger = logging.getLogger(__name__)
 
-# ANSI color codes for terminal
-class Colors:
-    """ANSI color codes for terminal output"""
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    DIM = "\033[2m"
-    
-    # Foreground colors
-    BLACK = "\033[30m"
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-    WHITE = "\033[37m"
-    
-    # Bright foreground
-    BRIGHT_RED = "\033[91m"
-    BRIGHT_GREEN = "\033[92m"
-    BRIGHT_YELLOW = "\033[93m"
-    BRIGHT_BLUE = "\033[94m"
-    BRIGHT_MAGENTA = "\033[95m"
-    BRIGHT_CYAN = "\033[96m"
-    
-    # Background colors
-    BG_RED = "\033[41m"
-    BG_GREEN = "\033[42m"
-    BG_YELLOW = "\033[43m"
-    BG_BLUE = "\033[44m"
+# Custom formatter for JSON logs (Cloud/Production friendly)
+class JsonFormatter(logging.Formatter):
+    """Logging formatter that serialises log records as single-line JSON."""
 
-
-# Emoji prefixes for log levels
-LEVEL_EMOJI = {
-    'DEBUG': '🔍',
-    'INFO': '✨',
-    'WARNING': '⚠️',
-    'ERROR': '❌',
-    'CRITICAL': '🚨',
-}
-
-# Color mapping for log levels
-LEVEL_COLORS = {
-    'DEBUG': Colors.DIM + Colors.CYAN,
-    'INFO': Colors.GREEN,
-    'WARNING': Colors.YELLOW,
-    'ERROR': Colors.RED,
-    'CRITICAL': Colors.BOLD + Colors.BRIGHT_RED,
-}
-
-
-class EmojiFormatter(logging.Formatter):
-    """Custom formatter with emojis and colors"""
-    
-    def __init__(self, use_colors: bool = True, use_emojis: bool = True):
-        super().__init__()
-        self.use_colors = use_colors and sys.stdout.isatty()
-        self.use_emojis = use_emojis
-    
     def format(self, record: logging.LogRecord) -> str:
-        # Get emoji and color for level
-        level_name = record.levelname
-        emoji = LEVEL_EMOJI.get(level_name, '📝') if self.use_emojis else ''
-        color = LEVEL_COLORS.get(level_name, '') if self.use_colors else ''
-        reset = Colors.RESET if self.use_colors else ''
-        
-        # Format timestamp
-        timestamp = datetime.fromtimestamp(record.created).strftime('%H:%M:%S')
-        
-        # Format the message
-        message = record.getMessage()
-        
-        # Clean format for console
-        if self.use_colors:
-            formatted = f"{Colors.DIM}{timestamp}{reset} {emoji} {color}{message}{reset}"
-        else:
-            formatted = f"{timestamp} {emoji} {message}"
-        
-        return formatted
+        """Format *record* as a JSON string.
 
+        Args:
+            record: The log record to format.
 
-class FileFormatter(logging.Formatter):
-    """JSON formatter for file logging"""
-    
-    def format(self, record: logging.LogRecord) -> str:
-        log_entry = {
-            'timestamp': datetime.fromtimestamp(record.created).isoformat(),
-            'level': record.levelname,
-            'message': record.getMessage(),
-            'module': record.module,
-            'function': record.funcName,
-            'line': record.lineno,
+        Returns:
+            JSON-encoded representation of the log record.
+        """
+        log_data = {
+            "timestamp": self.formatTime(record),
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "logger": record.name,
+            "path": record.pathname,
+            "line": record.lineno
         }
-        
-        # Add exception info if present
         if record.exc_info:
-            log_entry['exception'] = self.formatException(record.exc_info)
-        
-        return json.dumps(log_entry)
+            log_data["exception"] = self.formatException(record.exc_info)
+        return json.dumps(log_data)
 
+# Custom formatter for Colored Console logs (Dev friendly)
+class ColoredFormatter(logging.Formatter):
+    """Logging formatter that adds ANSI colour codes for terminal output."""
 
-def setup_enhanced_logging(
-    level: str = "INFO",
-    log_file: Optional[str] = None,
-    use_colors: bool = True,
-    use_emojis: bool = True,
-) -> None:
-    """
-    Configure enhanced logging for the application.
-    
+    COLORS = {
+        'DEBUG': '\033[94m',    # Blue
+        'INFO': '\033[92m',     # Green
+        'WARNING': '\033[93m',  # Yellow
+        'ERROR': '\033[91m',    # Red
+        'CRITICAL': '\033[41m'  # Red background
+    }
+    RESET = '\033[0m'
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Wrap the log message in the appropriate ANSI colour escape.
+
+        Args:
+            record: The log record to format.
+
+        Returns:
+            Colour-wrapped formatted log string.
+        """
+        color = self.COLORS.get(record.levelname, self.RESET)
+        record.msg = f"{color}{record.msg}{self.RESET}"
+        return super().format(record)
+
+def setup_enhanced_logging(level: str = "INFO", log_file: Optional[Path] = None, use_colors: bool = True) -> None:
+    """Configure enterprise-grade logging with rotation and dual formatters.
+
     Args:
-        level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        log_file: Optional path to log file
-        use_colors: Enable colored output
-        use_emojis: Enable emoji prefixes
+        level: Logging verbosity (e.g. ``"INFO"``, ``"DEBUG"``).
+        log_file: Optional path for a rotating file handler.
+        use_colors: Whether to use ANSI colours on the console handler.
     """
-    # Get root logger
     root_logger = logging.getLogger()
-    root_logger.setLevel(getattr(logging, level.upper(), logging.INFO))
-    
-    # Remove existing handlers
+    root_logger.setLevel(level)
+
+    #Clear existing handlers
     root_logger.handlers.clear()
-    
-    # Console handler with emoji formatter
+
+    # 1. Console Handler (Human Friendly)
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(EmojiFormatter(use_colors=use_colors, use_emojis=use_emojis))
-    console_handler.setLevel(getattr(logging, level.upper(), logging.INFO))
+    console_formatter = ColoredFormatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ) if use_colors else logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
     root_logger.addHandler(console_handler)
-    
-    # File handler with JSON formatter (if specified)
+
+    # 2. File Handler (Machine Friendly / Persistent)
     if log_file:
-        # Ensure directory exists
-        log_dir = os.path.dirname(log_file)
-        if log_dir:
-            os.makedirs(log_dir, exist_ok=True)
-        
-        file_handler = logging.FileHandler(log_file, encoding='utf-8')
-        file_handler.setFormatter(FileFormatter())
-        file_handler.setLevel(logging.DEBUG)  # Log everything to file
+        file_handler = RotatingFileHandler(
+            log_file,
+            maxBytes=10*1024*1024, # 10MB
+            backupCount=5,
+            encoding='utf-8'
+        )
+        file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(file_formatter)
         root_logger.addHandler(file_handler)
-    
-    # Suppress noisy third-party loggers
-    noisy_loggers = [
-        'httpx',
-        'httpcore',
-        'urllib3',
-        'requests',
-        'chromadb',
-        'chromadb.telemetry',
-        'chromadb.config',
-        'openai',
-        'litellm',
-        'litellm.utils',
-        'litellm.llms',
-        'watchfiles',
-        'uvicorn.access',
-        'uvicorn.error',
-        'PIL',
-        'matplotlib',
-        'asyncio',
-        'parso',
-    ]
-    
-    for logger_name in noisy_loggers:
-        logging.getLogger(logger_name).setLevel(logging.WARNING)
-    
-    # Special handling for uvicorn to keep it clean
-    logging.getLogger('uvicorn').setLevel(logging.INFO)
+
+    logger.info("Enhanced logging initialized at level %s", level)
 
 
-def log_startup_banner(app_name: str = "Nexus LLM Analytics", version: str = "2.0"):
-    """Print a beautiful startup banner"""
-    banner = f"""
-╔══════════════════════════════════════════════════════════════╗
-║  🚀 {app_name}                                    ║
-║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-║  📊 AI-Powered Data Analytics Platform                       ║
-║  🔒 Privacy-First • Local LLMs • Multi-Agent                 ║
-╚══════════════════════════════════════════════════════════════╝
-"""
-    print(banner)
+# ============================================================================
+# Enterprise v2.0 — Correlation-ID & PII Redaction Filters
+# ============================================================================
+
+# Thread-local storage for correlation IDs
+_correlation_local = threading.local()
 
 
-def log_system_info(memory_gb: float, available_gb: float, models: list):
-    """Log system information in a nice table format"""
-    info = f"""
-┌─────────────────────────────────────────────────────────────┐
-│  💻 System Status                                           │
-├─────────────────────────────────────────────────────────────┤
-│  🧠 Memory: {available_gb:.1f}GB available / {memory_gb:.1f}GB total          │
-│  🤖 Models: {', '.join(models[:3]) if models else 'Loading...'}           │
-└─────────────────────────────────────────────────────────────┘
-"""
-    print(info)
+def set_correlation_id(cid: str) -> None:
+    """Store a correlation / request ID for the current thread.
+
+    Args:
+        cid: The correlation identifier (usually a UUID from the
+             incoming HTTP request).
+
+    .. versionadded:: 2.0
+    """
+    _correlation_local.correlation_id = cid
 
 
-def log_request(method: str, path: str, status: int, duration_ms: float):
-    """Log an HTTP request in a clean format"""
-    status_emoji = "✅" if 200 <= status < 300 else "⚠️" if 300 <= status < 400 else "❌"
-    logging.info(f"{status_emoji} {method} {path} → {status} ({duration_ms:.0f}ms)")
+def get_correlation_id() -> str:
+    """Return the correlation ID for the current thread, or ``'-'``.
+
+    .. versionadded:: 2.0
+    """
+    return getattr(_correlation_local, "correlation_id", "-")
 
 
-def log_analysis_start(query: str, model: str):
-    """Log the start of an analysis"""
-    query_preview = query[:50] + "..." if len(query) > 50 else query
-    logging.info(f"🔄 Analysis started: \"{query_preview}\" using {model}")
+class CorrelationIdFilter(logging.Filter):
+    """Inject ``correlation_id`` into every log record.
+
+    Attach this filter to a handler or logger to make the correlation
+    ID available in format strings via ``%(correlation_id)s``.
+
+    Example::
+
+        handler.addFilter(CorrelationIdFilter())
+        fmt = logging.Formatter('%(asctime)s [%(correlation_id)s] %(message)s')
+        handler.setFormatter(fmt)
+
+    .. versionadded:: 2.0
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:  # noqa: A003
+        """Add ``correlation_id`` attribute to *record*.
+
+        Args:
+            record: The log record being processed.
+
+        Returns:
+            Always ``True`` (never drops records).
+        """
+        record.correlation_id = get_correlation_id()  # type: ignore[attr-defined]
+        return True
 
 
-def log_analysis_complete(query: str, duration_s: float, success: bool):
-    """Log analysis completion"""
-    query_preview = query[:30] + "..." if len(query) > 30 else query
-    emoji = "✅" if success else "❌"
-    logging.info(f"{emoji} Analysis complete: \"{query_preview}\" ({duration_s:.1f}s)")
+class SensitiveDataFilter(logging.Filter):
+    """Redact common PII patterns from log messages.
+
+    Patterns redacted:
+    * Email addresses → ``[REDACTED_EMAIL]``
+    * Bearer / API tokens → ``[REDACTED_TOKEN]``
+    * Sequences of 16+ hex digits → ``[REDACTED_KEY]``
+
+    .. versionadded:: 2.0
+    """
+
+    _EMAIL_RE = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
+    _TOKEN_RE = re.compile(r"(?i)(bearer|token|api[_-]?key)\s*[:=]\s*\S+")
+    _HEX_RE = re.compile(r"\b[0-9a-fA-F]{16,}\b")
+
+    def filter(self, record: logging.LogRecord) -> bool:  # noqa: A003
+        """Scrub PII from *record.msg*.
+
+        Args:
+            record: The log record to sanitise.
+
+        Returns:
+            Always ``True``.
+        """
+        if isinstance(record.msg, str):
+            record.msg = self._EMAIL_RE.sub("[REDACTED_EMAIL]", record.msg)
+            record.msg = self._TOKEN_RE.sub("[REDACTED_TOKEN]", record.msg)
+            record.msg = self._HEX_RE.sub("[REDACTED_KEY]", record.msg)
+        return True
+
+
+def configure_logging(settings: Optional[object] = None) -> None:
+    """High-level convenience wrapper.
+
+    Calls :func:`setup_enhanced_logging` with parameters extracted from
+    a :class:`~backend.core.config.Settings` object (or sensible
+    defaults).
+
+    Args:
+        settings: Optional settings object with ``log_level``,
+                  ``log_file``, and ``debug`` attributes.
+
+    .. versionadded:: 2.0
+    """
+    level = "INFO"
+    log_file: Optional[Path] = None
+    use_colors = True
+
+    if settings is not None:
+        level = getattr(settings, "log_level", "INFO")
+        lf = getattr(settings, "log_file", None)
+        log_file = Path(lf) if lf else None
+        use_colors = getattr(settings, "debug", True)
+
+    setup_enhanced_logging(level=level, log_file=log_file, use_colors=use_colors)

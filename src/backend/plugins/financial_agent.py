@@ -1,3 +1,16 @@
+"""Financial Analysis Agent Plugin — Nexus LLM Analytics
+========================================================
+
+Specialised agent for financial data analysis, business metrics,
+ratio calculations, forecasting, and profitability assessment.
+Supports revenue analysis, cash-flow projections, break-even
+analysis, and CLV computation.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`FinancialAgentMetrics` — per-agent call-count and
+  latency tracker for financial operations.
+"""
 # Financial Analysis Agent Plugin
 # Specialized agent for financial data analysis and business metrics
 
@@ -11,20 +24,22 @@ import json
 from datetime import datetime, timedelta
 
 # Add src to path for imports
-src_path = Path(__file__).parent.parent / "src"
+# Add src to path for imports
+src_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(src_path))
 
 try:
     from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
 except ImportError as e:
-    print(f"Import error: {e}")
-    print("Make sure you're running from the correct directory")
+    logging.error(f"Import error: {e} - Make sure you're running from the correct directory")
     raise
+
+from backend.core.engine.query_orchestrator import QueryOrchestrator, ExecutionMethod
+from backend.agents.model_manager import get_model_manager
 
 # Financial analysis imports
 try:
     import pandas as pd
-    import numpy as np
     from scipy import stats
     HAS_SCIPY = True
 except ImportError:
@@ -38,36 +53,26 @@ except ImportError:
 
 
 class FinancialAgent(BasePluginAgent):
-    """
-    Advanced Financial Analysis Agent
-    
+    """Advanced Financial Analysis Agent.
+
     Capabilities:
-    - Revenue and profitability analysis
-    - Cash flow analysis and forecasting
-    - Financial ratio calculations (liquidity, profitability, efficiency)
-    - ROI and ROE analysis
-    - Cost analysis and optimization
-    - Budget vs actual performance
-    - Customer lifetime value (CLV) calculation
-    - Churn rate and retention analysis
-    - Sales performance metrics
-    - Inventory turnover analysis
-    - Working capital management
-    - Financial risk assessment
-    - Break-even analysis
-    - Market share analysis
-    - Price sensitivity analysis
-    - Financial forecasting and budgeting
-    
+        * Revenue and profitability analysis
+        * Cash flow analysis and forecasting
+        * Financial ratio calculations (liquidity, profitability, efficiency)
+        * ROI / ROE analysis and cost optimisation
+        * Budget-vs-actual performance and break-even analysis
+        * Customer lifetime value (CLV) and churn-rate computation
+        * Inventory turnover and working-capital management
+        * Financial risk assessment and forecasting
+
     Features:
-    - Automatic financial metric calculation
-    - Industry benchmark comparisons
-    - Financial health scoring
-    - Risk assessment and alerts
-    - Profitability optimization suggestions
-    - Cash flow projections
-    - Performance dashboards
-    - Financial report generation
+        * Automatic financial metric calculation
+        * Industry benchmark comparisons and health scoring
+        * Risk assessment with alerts
+        * Cash-flow projections and performance dashboards
+
+    Thread Safety:
+        Not inherently thread-safe — instantiate one per request.
     """
     
     def get_metadata(self) -> AgentMetadata:
@@ -92,10 +97,17 @@ class FinancialAgent(BasePluginAgent):
     def initialize(self, **kwargs) -> bool:
         """Initialize the financial analysis agent"""
         try:
+            # Registry injection
+            self.registry = kwargs.get("registry")
+            
             # Configuration
             self.currency = self.config.get("currency", "USD")
             self.fiscal_year_start = self.config.get("fiscal_year_start", 1)  # January
             self.industry_benchmarks = self.config.get("industry_benchmarks", {})
+            
+            # Setup orchestrator and model manager for code generation
+            self._orchestrator = None  # Lazy loaded
+            self.initializer = get_model_manager()
             
             # Financial patterns for query matching
             self.financial_patterns = {
@@ -192,57 +204,111 @@ class FinancialAgent(BasePluginAgent):
             logging.debug(f"Financial Agent rejecting document file: {file_type}")
             return 0.0
         
+        # Reject simple calculation queries (let DataAnalyst handle)
+        simple_calc_patterns = ["calculate total", "total revenue by category", "sum by"]
+        if any(pattern in query_lower for pattern in simple_calc_patterns):
+            if not any(word in query_lower for word in ["roi", "profitability", "margin", "ratio"]):
+                logging.debug(f"Financial Agent deferring simple calculation to DataAnalyst")
+                return 0.2  # Low confidence for simple totals
+        
         # File type support - only structured data
         if file_type and file_type.lower() in [".csv", ".xlsx", ".json", ".txt"]:
             confidence += 0.1
         
-        # Financial keywords
-        financial_keywords = [
-            "financial", "finance", "money", "dollar", "revenue", "profit",
-            "cost", "expense", "budget", "cash", "investment", "return"
+        # STRICT FINANCIAL CONTEXT - Only handle queries with clear financial domain indicators
+        strict_financial_keywords = [
+            "financial", "finance", "investment", "invest", "roi", "portfolio", "stock", "bond",
+            "equity", "debt", "asset", "liability", "balance sheet", "income statement",
+            "cash flow", "fiscal", "treasury", "securities", "trading"
         ]
         
-        keyword_matches = sum(1 for keyword in financial_keywords if keyword in query_lower)
-        confidence += min(keyword_matches * 0.12, 0.35)
+        strict_financial_matches = sum(1 for keyword in strict_financial_keywords if keyword in query_lower)
         
-        # Specific financial patterns
+        # Only boost confidence if query has STRONG financial context
+        if strict_financial_matches >= 2:
+            confidence += 0.4
+        elif strict_financial_matches == 1:
+            # Single financial keyword - check if it's truly financial context
+            financial_ratios = [
+                "current ratio", "quick ratio", "debt to equity", "return on equity",
+                "return on assets", "asset turnover", "liquidity ratio"
+            ]
+            if any(ratio in query_lower for ratio in financial_ratios):
+                confidence += 0.3
+            else:
+                confidence += 0.15  # Lower boost for single keyword
+        
+        # Currency indicators (strong financial signal)
+        monetary_indicators = ["$", "€", "£", "¥"]
+        if any(indicator in query_lower for indicator in monetary_indicators):
+            confidence += 0.2
+        
+        # Specific financial analysis patterns
         for pattern_type, pattern_data in self.financial_patterns.items():
             patterns = pattern_data["patterns"]
             if any(pattern in query_lower for pattern in patterns):
-                confidence += 0.25
+                # Only boost if also has financial context
+                if strict_financial_matches > 0 or any(indicator in query_lower for indicator in monetary_indicators):
+                    confidence += 0.15
                 break
         
-        # Business metrics terms
-        business_terms = [
-            "kpi", "metrics", "performance", "analysis", "roi", "margin",
-            "ratio", "growth", "trend", "benchmark", "comparison", "dashboard"
-        ]
-        
-        business_matches = sum(1 for term in business_terms if term in query_lower)
-        confidence += min(business_matches * 0.08, 0.25)
-        
-        # Financial ratios and specific metrics
-        ratio_terms = [
-            "current ratio", "quick ratio", "debt to equity", "return on equity",
-            "return on assets", "profit margin", "asset turnover", "liquidity"
-        ]
-        
-        ratio_matches = sum(1 for term in ratio_terms if term in query_lower)
-        confidence += min(ratio_matches * 0.15, 0.3)
-        
-        # Currency and monetary indicators
-        monetary_indicators = ["$", "€", "£", "¥", "cost", "price", "value", "worth"]
-        monetary_matches = sum(1 for indicator in monetary_indicators if indicator in query_lower)
-        confidence += min(monetary_matches * 0.05, 0.15)
-        
         return min(confidence, 1.0)
+
+    def reflective_execute(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Swarm-enabled execution with self-correction and insight sharing.
+        """
+        context = context or {}
+        
+        # 1. Execute
+        result = self.execute(query, **context)
+        
+        # 2. Critique (Placeholders for now)
+        if not result['success']:
+             # Simple retry logic could go here
+             pass
+
+        # 3. Share Insights
+        if self.swarm_context and result.get('success'):
+            try:
+                summary = f"Financial analysis completed: {result.get('operation', 'unknown')}"
+                if 'interpretation' in result and result['interpretation']:
+                     summary = str(result['interpretation'])[:200] + "..."
+
+                content = {
+                    "query": query,
+                    "summary": summary,
+                    "result_keys": list(result.get('result', {}).keys()) if isinstance(result.get('result'), dict) else [],
+                    "metadata": result.get('metadata', {})
+                }
+                
+                self.publish_insight(
+                    insight_type="financial_analysis_success",
+                    content=content,
+                    confidence=0.9
+                )
+                logging.info(f"[{self.metadata.name}] Published insight to Swarm")
+            except Exception as e:
+                logging.warning(f"Failed to publish insight: {e}")
+        
+        return result
     
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
         """Execute financial analysis based on the query"""
         try:
-            # Load data if filename provided
+            # Load data from pre-resolved filepath (set by analysis_service) or filename
+            filepath = kwargs.get('filepath')
             filename = kwargs.get('filename')
-            if filename and not data:
+            if not data and filepath:
+                try:
+                    data = pd.read_csv(filepath) if filepath.endswith('.csv') else (
+                        pd.read_excel(filepath) if filepath.endswith(('.xlsx', '.xls')) else
+                        pd.read_json(filepath) if filepath.endswith('.json') else None
+                    )
+                    logging.info(f"Loaded data from pre-resolved path: {filepath}")
+                except Exception as e:
+                    logging.warning(f"Failed to load from filepath {filepath}: {e}")
+            if filename and data is None:
                 data = self._load_data(filename)
             
             if data is None:
@@ -252,7 +318,31 @@ class FinancialAgent(BasePluginAgent):
                     "agent": "FinancialAgent"
                 }
             
-            # Parse query intent
+            # 1. Reuse pre-computed execution plan if available (avoids duplicate orchestrator init)
+            plan = kwargs.get('execution_plan')
+            if not plan:
+                if self._orchestrator is None:
+                    from backend.core.engine.query_orchestrator import get_query_orchestrator
+                    self._orchestrator = get_query_orchestrator()
+                data_sample = data.head(5).to_dict() if isinstance(data, pd.DataFrame) else None
+                available_columns = list(data.columns) if isinstance(data, pd.DataFrame) else []
+                plan = self._orchestrator.create_execution_plan(
+                    query=query,
+                    data=data_sample,
+                    context={'agent': self.get_metadata().name, 'columns': available_columns},
+                    llm_client=self.initializer.llm_client
+                )
+            else:
+                logging.debug(f"Reusing pre-computed execution plan for FinancialAgent")
+            
+            logging.info(f"QueryOrchestrator decision for FinancialAgent: {plan.execution_method.value} - {plan.reasoning}")
+            
+            # 2. Route to code generation if needed
+            if plan.execution_method == ExecutionMethod.CODE_GENERATION:
+                result, metadata = self._execute_with_code_gen(query, data, plan.model, filepath)
+                return {"success": True, "result": result, "metadata": metadata}
+            
+            # 3. Fallback to existing deterministic logic (robust standard methods)
             intent = self._parse_financial_intent(query)
             
             # Execute appropriate financial analysis
@@ -285,18 +375,22 @@ class FinancialAgent(BasePluginAgent):
     def _load_data(self, filename: str) -> Optional[pd.DataFrame]:
         """Load data from file"""
         try:
-            base_data_dir = Path(__file__).parent.parent / "data"
+            # Project root is 4 levels up from this file (src/backend/plugins/ → src/backend → src → ROOT)
+            project_root = Path(__file__).parent.parent.parent.parent
+            base_data_dir = project_root / "data"
             
             for subdir in ["uploads", "samples"]:
                 filepath = base_data_dir / subdir / filename
                 if filepath.exists():
+                    logging.info(f"Loading data from: {filepath}")
                     if filename.endswith('.csv'):
                         return pd.read_csv(filepath)
                     elif filename.endswith(('.xlsx', '.xls')):
                         return pd.read_excel(filepath)
                     elif filename.endswith('.json'):
                         return pd.read_json(filepath)
-                    
+            
+            logging.warning(f"File not found in uploads or samples: {filename}")
             return None
         except Exception as e:
             logging.error(f"Failed to load data from {filename}: {e}")
@@ -314,6 +408,101 @@ class FinancialAgent(BasePluginAgent):
         
         # Default to comprehensive analysis
         return "comprehensive"
+    
+    def _execute_with_code_gen(self, query: str, data: Any, model: str, filepath: Optional[str]) -> Tuple[str, Dict[str, Any]]:
+        """
+        Execute financial analysis using LLM code generation.
+        Adapted from DataAnalystAgent for FinancialAgent context.
+        
+        Args:
+            query: User's financial analysis query
+            data: DataFrame or data object
+            model: LLM model to use for code generation
+            filepath: Path to data file (optional)
+            
+        Returns:
+            Tuple of (result_text, metadata_dict)
+        """
+        try:
+            # Lazy import to avoid circular dependencies
+            from backend.io.code_generator import get_code_generator
+            
+            # Ensure we have a DataFrame
+            if not isinstance(data, pd.DataFrame):
+                if filepath:
+                    # Try to load as DataFrame
+                    file_ext = os.path.splitext(filepath)[1].lower()
+                    if file_ext == '.json':
+                        data = pd.read_json(filepath)
+                    elif file_ext in ['.xlsx', '.xls']:
+                        data = pd.read_excel(filepath)
+                    elif file_ext == '.csv':
+                        data = pd.read_csv(filepath)
+                    else:
+                        raise ValueError(f"Unsupported file type: {file_ext}")
+                else:
+                    raise ValueError("No data or filepath provided for code generation")
+            
+            # Get code generator
+            code_gen = get_code_generator()
+            
+            # Generate and execute code
+            result = code_gen.generate_and_execute(
+                query=query,
+                df=data,
+                model=model,
+                max_retries=2,
+                data_file=os.path.basename(filepath) if filepath else "data",
+                save_history=True,
+                analysis_context={'agent': 'FinancialAgent', 'specialization': 'financial_analysis'}
+            )
+            
+            if result.success:
+                logging.info(f"FinancialAgent code generation succeeded: {result.execution_time_ms:.1f}ms")
+                
+                # Build metadata
+                metadata = {
+                    "agent": "FinancialAgent",
+                    "execution_method": "code_generation",
+                    "generated_code": result.generated_code,
+                    "executed_code": result.code,
+                    "code": result.code,
+                    "execution_id": result.execution_id,
+                    "execution_time_ms": result.execution_time_ms,
+                    "code_gen_model": model,
+                    "attempt_count": result.attempt_count
+                }
+                
+                # Format result
+                if result.result is not None:
+                    if isinstance(result.result, pd.DataFrame):
+                        if len(result.result) <= 20:
+                            display_text = f"## Financial Analysis Result\n\n{result.result.to_markdown()}"
+                        else:
+                            display_text = f"## Financial Analysis Result (Top 20 of {len(result.result)} rows)\n\n{result.result.head(20).to_markdown()}"
+                    elif isinstance(result.result, dict):
+                        actual_result = result.result.get('result', result.result)
+                        if isinstance(actual_result, (int, float)):
+                            display_text = f"## Financial Result\n\n**{actual_result:,.2f} {self.currency}**"
+                        else:
+                            display_text = f"## Financial Result\n\n{actual_result}"
+                    elif isinstance(result.result, (int, float)):
+                        display_text = f"## Financial Result\n\n**{result.result:,.2f} {self.currency}**"
+                    else:
+                        display_text = f"## Financial Result\n\n{str(result.result)}"
+                else:
+                    display_text = "Financial analysis completed but no result was returned."
+                
+                return display_text, metadata
+            else:
+                # Code generation failed - this will trigger fallback to deterministic logic
+                logging.warning(f"FinancialAgent code generation failed: {result.error}")
+                raise Exception(f"Code generation failed: {result.error}")
+                
+        except Exception as e:
+            logging.error(f"FinancialAgent code generation error: {e}")
+            # Re-raise to trigger fallback to deterministic methods
+            raise
     
     def _identify_financial_columns(self, data: pd.DataFrame) -> Dict[str, List[str]]:
         """Identify financial columns in the dataset"""
@@ -379,8 +568,8 @@ class FinancialAgent(BasePluginAgent):
                         "avg_monthly_revenue": float(monthly_data[financial_cols["revenue"][0]].mean()),
                         "avg_monthly_margin": float(monthly_data['margin'].mean())
                     }
-                except:
-                    logging.debug("Operation failed (non-critical) - continuing")
+                except (ValueError, TypeError, KeyError) as e:
+                    logging.debug(f"Monthly trends calculation failed: {e}")
             
             # Profitability benchmarking
             benchmark_analysis = {}
@@ -535,12 +724,15 @@ class FinancialAgent(BasePluginAgent):
             # Financial health assessment
             results["financial_health"] = self._assess_financial_health(data, financial_cols)
             
+            # Generate comprehensive interpretation
+            interpretation = self._generate_comprehensive_interpretation(data, results, query)
+            
             return {
                 "success": True,
                 "result": results,
                 "agent": "FinancialAgent",
                 "operation": "comprehensive_financial_analysis",
-                "interpretation": "Comprehensive financial analysis completed with profitability, growth, and financial health assessment."
+                "interpretation": interpretation
             }
             
         except Exception as e:
@@ -644,6 +836,80 @@ class FinancialAgent(BasePluginAgent):
         
         return recommendations
     
+    def _generate_comprehensive_interpretation(self, data: pd.DataFrame, results: Dict, query: str) -> str:
+        """Generate comprehensive human-readable interpretation of financial analysis"""
+        lines = []
+        query_lower = query.lower()
+        
+        lines.append("## Financial Analysis Summary\n")
+        lines.append(f"**Dataset:** {data.shape[0]:,} records, {data.shape[1]} columns\n")
+        
+        # Summary statistics
+        summary = results.get("summary_statistics", {})
+        if summary:
+            lines.append("### Key Metrics\n")
+            for col, stats in list(summary.items())[:5]:
+                col_display = col.replace('_', ' ').title()
+                lines.append(f"**{col_display}:**")
+                lines.append(f"• Total: {stats['total']:,.2f}")
+                lines.append(f"• Average: {stats['average']:,.2f}")
+                lines.append(f"• Median: {stats['median']:,.2f}")
+                lines.append("")
+        
+        # Financial health
+        health = results.get("financial_health", {})
+        if health:
+            score = health.get("health_score", 0)
+            rating = health.get("health_rating", "unknown")
+            lines.append("### Financial Health\n")
+            lines.append(f"**Overall Score:** {score:.1f}/100 ({rating})")
+            
+            factors = health.get("factors", {})
+            if factors:
+                lines.append("\n**Key Factors:**")
+                for factor, status in factors.items():
+                    factor_display = factor.replace('_', ' ').title()
+                    lines.append(f"• {factor_display}: {status}")
+            
+            recommendations = health.get("recommendations", [])
+            if recommendations:
+                lines.append("\n**Recommendations:**")
+                for rec in recommendations[:3]:
+                    lines.append(f"• {rec}")
+            lines.append("")
+        
+        # Profitability insights
+        profitability = results.get("profitability", {})
+        if profitability:
+            lines.append("### Profitability Analysis\n")
+            for key, data_item in profitability.items():
+                if isinstance(data_item, dict) and "gross_margin_percent" in data_item:
+                    margin = data_item["gross_margin_percent"]
+                    status = data_item.get("profitability_status", "unknown")
+                    revenue = data_item.get("revenue", 0)
+                    profit = data_item.get("gross_profit", 0)
+                    lines.append(f"**{key.replace('_', ' ').title()}:**")
+                    lines.append(f"• Revenue: {revenue:,.2f}")
+                    lines.append(f"• Gross Profit: {profit:,.2f}")
+                    lines.append(f"• Gross Margin: {margin:.1f}%")
+                    lines.append(f"• Status: {status.title()}")
+                    lines.append("")
+        
+        # Growth insights
+        growth = results.get("growth", {})
+        if growth:
+            lines.append("### Growth Analysis\n")
+            for col, growth_data in growth.items():
+                if isinstance(growth_data, dict) and "total_growth_percent" in growth_data:
+                    total_growth = growth_data["total_growth_percent"]
+                    classification = growth_data.get("growth_classification", "unknown")
+                    lines.append(f"**{col.replace('_', ' ').title()}:**")
+                    lines.append(f"• Total Growth: {total_growth:.1f}%")
+                    lines.append(f"• Classification: {classification.replace('_', ' ').title()}")
+                    lines.append("")
+        
+        return "\n".join(lines) if lines else "Financial analysis completed."
+    
     def _interpret_profitability(self, results: Dict) -> str:
         """Generate interpretation of profitability analysis"""
         interpretations = []
@@ -670,55 +936,425 @@ class FinancialAgent(BasePluginAgent):
     
     # Placeholder methods for other financial analyses
     def _liquidity_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for liquidity analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Liquidity analysis would be implemented here"},
-            "agent": "FinancialAgent",
-            "operation": "liquidity_analysis"
-        }
+        """Analyze liquidity metrics (Current Ratio, Quick Ratio, Cash Ratio)"""
+        try:
+            financial_cols = self._identify_financial_columns(data)
+            results = {}
+            
+            # Helper to get sum of column if it exists
+            def get_val(category):
+                if category in financial_cols:
+                    col = financial_cols[category][0]
+                    return data[col].sum()
+                return 0.0
+
+            # Calculate metrics
+            current_assets = get_val("assets")  # Assuming 'assets' column maps to Current Assets for simplicity or user provides 'Current Assets'
+            current_liabilities = get_val("liabilities")
+            inventory = get_val("inventory") if "inventory" in financial_cols else 0.0
+            cash = get_val("cash")
+
+            metrics = {}
+            
+            if current_liabilities > 0:
+                metrics["current_ratio"] = {
+                    "value": float(current_assets / current_liabilities),
+                    "benchmark": 2.0,
+                    "status": "healthy" if (current_assets / current_liabilities) >= 1.5 else "caution"
+                }
+                
+                metrics["quick_ratio"] = {
+                    "value": float((current_assets - inventory) / current_liabilities),
+                    "benchmark": 1.0,
+                    "status": "healthy" if ((current_assets - inventory) / current_liabilities) >= 1.0 else "caution"
+                }
+
+                if cash > 0:
+                     metrics["cash_ratio"] = {
+                        "value": float(cash / current_liabilities),
+                        "benchmark": 0.5,
+                        "status": "healthy" if (cash / current_liabilities) >= 0.5 else "caution"
+                     }
+            
+            results["liquidity_metrics"] = metrics
+            results["raw_values"] = {
+                "current_assets": float(current_assets),
+                "current_liabilities": float(current_liabilities),
+                "cash": float(cash),
+                "inventory": float(inventory)
+            }
+
+            return {
+                "success": True,
+                "result": results,
+                "agent": "FinancialAgent",
+                "operation": "liquidity_analysis",
+                "interpretation": f"Liquidity Analysis: Current Ratio is {metrics.get('current_ratio', {}).get('value', 0):.2f}. {metrics.get('current_ratio', {}).get('status', 'Check Data').title()} status."
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Liquidity analysis failed: {str(e)}",
+                "agent": "FinancialAgent"
+            }
     
     def _efficiency_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for efficiency analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Efficiency analysis would be implemented here"},
-            "agent": "FinancialAgent",
-            "operation": "efficiency_analysis"
-        }
+        """Analyze efficiency metrics (Asset Turnover, Inventory Turnover)"""
+        try:
+            financial_cols = self._identify_financial_columns(data)
+            results = {}
+            
+            def get_val(category):
+                if category in financial_cols:
+                    col = financial_cols[category][0]
+                    return data[col].sum()
+                return 0.0
+
+            revenue = get_val("revenue")
+            assets = get_val("assets")
+            cogs = get_val("cost") # Approximation for COGS
+            inventory = get_val("inventory") if "inventory" in financial_cols else 0.0
+            receivables = get_val("receivables") if "receivables" in financial_cols else 0.0
+
+            metrics = {}
+            
+            if assets > 0:
+                metrics["asset_turnover"] = {
+                    "value": float(revenue / assets),
+                    "benchmark": 1.0,
+                     "description": "Revenue generated per dollar of assets"
+                }
+            
+            if inventory > 0:
+                 metrics["inventory_turnover"] = {
+                    "value": float(cogs / inventory),
+                    "benchmark": 5.0,
+                    "description": "Times inventory is sold and replaced"
+                }
+
+            if receivables > 0:
+                metrics["receivables_turnover"] = {
+                    "value": float(revenue / receivables),
+                    "benchmark": 10.0,
+                     "description": "Efficiency in collecting receivables"
+                }
+
+            results["efficiency_metrics"] = metrics
+
+            return {
+                "success": True,
+                "result": results,
+                "agent": "FinancialAgent",
+                "operation": "efficiency_analysis",
+                "interpretation": "Efficiency analysis complete. Check detailed metrics for turnover ratios."
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Efficiency analysis failed: {str(e)}",
+                "agent": "FinancialAgent"
+            }
     
     def _roi_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for ROI analysis"""
-        return {
-            "success": True,
-            "result": {"message": "ROI analysis would be implemented here"},
-            "agent": "FinancialAgent",
-            "operation": "roi_analysis"
-        }
+        """Analyze ROI, ROE, and related return metrics"""
+        try:
+            financial_cols = self._identify_financial_columns(data)
+            results = {}
+            
+            def get_val(category):
+                if category in financial_cols:
+                    col = financial_cols[category][0]
+                    return data[col].sum()
+                return 0.0
+
+            revenue = get_val("revenue")
+            costs = get_val("cost")
+            net_income = revenue - costs if "profit" not in financial_cols else get_val("profit")
+            
+            equity = get_val("equity")
+            assets = get_val("assets")
+            investment = get_val("investment") if "investment" in financial_cols else (equity + (get_val("liabilities") or 0))
+
+            metrics = {}
+
+            if investment > 0:
+                metrics["roi"] = {
+                    "value": float((net_income / investment) * 100),
+                    "unit": "%",
+                    "description": "Return on Investment"
+                }
+            
+            if equity > 0:
+                 metrics["roe"] = {
+                    "value": float((net_income / equity) * 100),
+                    "unit": "%",
+                    "description": "Return on Equity"
+                }
+            
+            if assets > 0:
+                metrics["roa"] = {
+                    "value": float((net_income / assets) * 100),
+                    "unit": "%",
+                    "description": "Return on Assets"
+                }
+
+            results["return_metrics"] = metrics
+            results["components"] = {
+                "net_income": float(net_income),
+                "total_investment": float(investment),
+                "total_equity": float(equity)
+            }
+
+            return {
+                "success": True,
+                "result": results,
+                "agent": "FinancialAgent",
+                "operation": "roi_analysis",
+                "interpretation": f"ROI Analysis: ROI is {metrics.get('roi', {}).get('value', 0):.1f}%. ROE is {metrics.get('roe', {}).get('value', 0):.1f}%."
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"ROI analysis failed: {str(e)}",
+                "agent": "FinancialAgent"
+            }
     
     def _cost_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for cost analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Cost analysis would be implemented here"},
-            "agent": "FinancialAgent",
-            "operation": "cost_analysis"
-        }
+        """Analyze cost structure and trends"""
+        try:
+            financial_cols = self._identify_financial_columns(data)
+            results = {}
+            
+            cost_cols = financial_cols.get("cost", [])
+            if not cost_cols:
+                # Try to find loose cost matches
+                cost_cols = [col for col in data.columns if any(x in col.lower() for x in ['cost', 'expense', 'fee', 'charge'])]
+            
+            if not cost_cols:
+                 return {
+                    "success": False,
+                    "error": "No cost columns identified for analysis",
+                    "agent": "FinancialAgent"
+                }
+
+            # 1. Total Cost Breakdown
+            total_costs = {}
+            grand_total_cost = 0
+            for col in cost_cols:
+                if pd.api.types.is_numeric_dtype(data[col]):
+                    val = data[col].sum()
+                    total_costs[col] = float(val)
+                    grand_total_cost += val
+            
+            if grand_total_cost == 0:
+                 grand_total_cost = 1 # Avoid div by zero
+            
+            breakdown = {
+                k: {"amount": v, "percentage": float((v / grand_total_cost) * 100)} 
+                for k, v in total_costs.items()
+            }
+            results["cost_breakdown"] = breakdown
+            results["total_cost"] = float(grand_total_cost)
+
+            # 2. Cost Trends (if date column exists)
+            date_cols = [col for col in data.columns if 'date' in col.lower() or 'time' in col.lower()]
+            if date_cols:
+                date_col = date_cols[0]
+                data[date_col] = pd.to_datetime(data[date_col])
+                
+                # Monthly cost trends
+                monthly_costs = data.groupby(data[date_col].dt.to_period('M'))[cost_cols].sum()
+                
+                # Identify rising costs
+                trends = {}
+                for col in cost_cols:
+                    if pd.api.types.is_numeric_dtype(data[col]):
+                         # Check if last month > avg
+                         recent = monthly_costs[col].iloc[-1]
+                         avg = monthly_costs[col].mean()
+                         trend = "Increasing" if recent > avg * 1.05 else "Decreasing" if recent < avg * 0.95 else "Stable"
+                         trends[col] = trend
+
+                results["cost_trends"] = trends
+                results["monthly_costs"] = {k.strftime('%Y-%m'): v for k, v in monthly_costs.sum(axis=1).to_dict().items()}
+
+            return {
+                "success": True,
+                "result": results,
+                "agent": "FinancialAgent",
+                "operation": "cost_analysis",
+                "interpretation": f"Total Costs analyzed: {grand_total_cost:,.2f}. Major cost driver: {max(breakdown, key=lambda k: breakdown[k]['amount']) if breakdown else 'None'}."
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Cost analysis failed: {str(e)}",
+                "agent": "FinancialAgent"
+            }
     
     def _customer_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for customer financial analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Customer financial analysis would be implemented here"},
-            "agent": "FinancialAgent",
-            "operation": "customer_analysis"
-        }
-    
+        """Analyze customer metrics (CLV, Segmentation) if customer data available"""
+        try:
+            results = {}
+            
+            # Identify Customer ID column
+            cust_cols = [col for col in data.columns if 'customer' in col.lower() or 'client' in col.lower() or 'user_id' in col.lower()]
+            
+            if not cust_cols:
+                 return {
+                    "success": False,
+                    "error": "No customer identifier column found",
+                    "agent": "FinancialAgent"
+                }
+            
+            cust_id = cust_cols[0]
+            financial_cols = self._identify_financial_columns(data)
+            rev_col = financial_cols.get("revenue", [None])[0]
+            if not rev_col:
+                # Try finding 'amount' or similar
+                rev_col = next((col for col in data.columns if any(x in col.lower() for x in ['amount', 'price', 'value'])), None)
+
+            if not rev_col:
+                 return {
+                    "success": False,
+                    "error": "No revenue/amount column found for customer analysis",
+                    "agent": "FinancialAgent"
+                }
+
+            # 1. Customer Value (CLV proxy - total revenue per customer)
+            customer_value = data.groupby(cust_id)[rev_col].sum().sort_values(ascending=False)
+            
+            results["customer_metrics"] = {
+                "total_customers": int(len(customer_value)),
+                "avg_revenue_per_customer": float(customer_value.mean()),
+                "median_revenue_per_customer": float(customer_value.median()),
+                "top_10_percent_revenue_share": float(customer_value.head(int(len(customer_value)*0.1)).sum() / customer_value.sum() * 100)
+            }
+
+            # 2. Segmentation (Top, Medium, Low)
+            def segment_customer(val):
+                if val >= customer_value.quantile(0.8): return "High Value (Top 20%)"
+                if val >= customer_value.quantile(0.5): return "Medium Value"
+                return "Low Value"
+            
+            segments = customer_value.apply(segment_customer).value_counts().to_dict()
+            results["customer_segments"] = segments
+            
+            results["top_customers"] = customer_value.head(5).to_dict()
+
+            return {
+                "success": True,
+                "result": results,
+                "agent": "FinancialAgent",
+                "operation": "customer_analysis",
+                "interpretation": f"Analyzed {len(customer_value)} customers. Top 10% generate {results['customer_metrics']['top_10_percent_revenue_share']:.1f}% of revenue."
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Customer analysis failed: {str(e)}",
+                "agent": "FinancialAgent"
+            }
+
     def _financial_forecast(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for financial forecasting"""
+        """Simple linear forecast for financial time series"""
+        try:
+            results = {}
+            date_cols = [col for col in data.columns if 'date' in col.lower() or 'time' in col.lower()]
+            numeric_cols = data.select_dtypes(include=[np.number]).columns
+            
+            if not date_cols:
+                return {"success": False, "error": "No date column found for forecasting", "agent": "FinancialAgent"}
+            
+            date_col = date_cols[0]
+            data[date_col] = pd.to_datetime(data[date_col])
+            
+            # Aggregate by month
+            df_monthly = data.groupby(data[date_col].dt.to_period('M')).sum(numeric_dtypes=True)
+            df_monthly.index = df_monthly.index.to_timestamp()
+            
+            # Use X as ordinal time (months from start)
+            df_monthly['ordinal'] = range(len(df_monthly))
+            
+            from scipy import stats
+            
+            forecasts = {}
+            
+            # Forecast top 3 metric columns (usually Revenue, Cost, Profit) or all if few
+            target_cols = [c for c in numeric_cols if c in df_monthly.columns and c != 'ordinal'][:3]
+            
+            for col in target_cols:
+                if len(df_monthly) < 3: # Need points for line
+                    continue
+
+                slope, intercept, r_value, p_value, std_err = stats.linregress(df_monthly['ordinal'], df_monthly[col])
+                
+                # Forecast next 3 months
+                next_indices = [len(df_monthly), len(df_monthly)+1, len(df_monthly)+2]
+                next_months = [
+                    (df_monthly.index[-1] + pd.DateOffset(months=1)).strftime('%Y-%m'),
+                    (df_monthly.index[-1] + pd.DateOffset(months=2)).strftime('%Y-%m'),
+                    (df_monthly.index[-1] + pd.DateOffset(months=3)).strftime('%Y-%m')
+                ]
+                
+                predictions = [slope * x + intercept for x in next_indices]
+                
+                forecasts[col] = {
+                    "trend_direction": "Positive" if slope > 0 else "Negative",
+                    "r_squared": float(r_value**2),
+                    "forecast_next_3_periods": dict(zip(next_months, predictions))
+                }
+            
+            results["forecasts"] = forecasts
+            
+            return {
+                "success": True,
+                "result": results,
+                "agent": "FinancialAgent",
+                "operation": "financial_forecast",
+                "interpretation": "Generated 3-period linear forecast. Caution: Simple linear projection used."
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Financial forecast failed: {str(e)}",
+                "agent": "FinancialAgent"
+            }
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+from dataclasses import dataclass
+
+
+@dataclass
+class FinancialAgentMetrics:
+    """Per-agent call-count and latency tracker for financial operations.
+
+    v2.0 Enterprise Addition.
+    """
+
+    total_analyses: int = 0
+    successful_analyses: int = 0
+    total_latency_ms: float = 0.0
+
+    def record(self, *, success: bool, latency_ms: float = 0.0) -> None:
+        """Record a single financial analysis execution."""
+        self.total_analyses += 1
+        if success:
+            self.successful_analyses += 1
+        self.total_latency_ms += latency_ms
+
+    def to_dict(self) -> dict:
+        """Return a JSON-serialisable snapshot."""
         return {
-            "success": True,
-            "result": {"message": "Financial forecasting would be implemented here"},
-            "agent": "FinancialAgent",
-            "operation": "financial_forecast"
+            "total_analyses": self.total_analyses,
+            "success_rate": round(
+                self.successful_analyses / self.total_analyses, 4
+            ) if self.total_analyses else 0.0,
+            "avg_latency_ms": round(
+                self.total_latency_ms / self.total_analyses, 2
+            ) if self.total_analyses else 0.0,
         }

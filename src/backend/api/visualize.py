@@ -1,41 +1,141 @@
-# Visualization API endpoint for generating interactive charts
-# Handles chart generation requests and returns Plotly JSON
-# Enhanced with LIDA-inspired goal-based visualization generation
+"""Visualization API — Interactive Chart Generation Endpoints
+=============================================================
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, Optional, List
-import logging
+Generates Plotly and Matplotlib charts from uploaded data files,
+with optional LIDA-inspired goal-based visualization generation.
+
+Safety model: LLM-generated charting code is validated against a
+deny-list of dangerous patterns (filesystem, network, shell access)
+and executed with a thread-pool timeout guard. Direct ``exec()`` is
+used because Plotly’s internal module system cannot pass through
+RestrictedPython’s type-safety checks.
+
+Endpoints
+---------
+``POST /goal``
+    Goal-based visualization — LLM generates chart code from a
+    natural-language objective.
+``POST /execute``
+    Execute a user-supplied Plotly code snippet against uploaded data.
+``POST /chart``
+    Simple chart generation with explicit chart type + columns.
+``POST /auto-chart``
+    Automatic chart type selection based on data characteristics.
+"""
+
+from __future__ import annotations
+
+import ast
+import base64
+import importlib
+import io
 import json
+import logging
+import re
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+from typing import Any, Dict, List, Optional
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.utils
-import re
-import ast
-import importlib
-import base64
-import io
-import matplotlib.pyplot as plt
-from backend.core.crew_singleton import get_crew_manager
-from backend.core.sandbox import EnhancedSandbox
-from backend.utils.data_utils import read_dataframe, create_data_summary, clean_code_snippet
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+from backend.core.plugin_system import get_agent_registry
+from backend.core.security.sandbox import EnhancedSandbox
+from backend.utils.data_utils import read_dataframe, create_data_summary, clean_code_snippet, DataPathResolver, preprocess_visualization_code
 from backend.visualization.dynamic_charts import ChartTypeAnalyzer, DynamicChartGenerator
 
-router = APIRouter()
 logger = logging.getLogger(__name__)
+router = APIRouter()
 
-# Debug mode flag - set to False to reduce console noise
-_DEBUG_VISUALIZE = False
+# ---------------------------------------------------------------------------
+# Safety guard — deny list for LLM-generated chart code
+# ---------------------------------------------------------------------------
+_EXEC_DENY_PATTERNS: List[str] = [
+    "import os", "import subprocess", "import shutil", "import sys",
+    "__import__", "importlib", "open(", "exec(", "eval(",
+    "os.system", "os.popen", "subprocess.", "shutil.",
+    "pathlib", "socket", "http.client", "urllib",
+    "globals(", "locals(", "compile(",
+    "getattr(", "setattr(", "delattr(",
+    "__class__", "__bases__", "__subclasses__",
+    "__builtins__", "__mro__", "breakpoint(",
+]
+_EXEC_TIMEOUT_SECONDS: int = 30
 
-def _debug_print(msg: str):
-    """Print debug message only if debug mode is enabled, with ASCII-safe output."""
-    if _DEBUG_VISUALIZE:
-        # Remove emojis for Windows console compatibility
-        safe_msg = ''.join(char if ord(char) < 128 else '?' for char in msg)
-        print(safe_msg)
+
+def _validate_code_safety(code: str) -> None:
+    """Reject code containing forbidden patterns or import statements.
+
+    Performs both string-level and AST-level checks to catch obfuscation
+    attempts. Raises ``ValueError`` on any policy violation.
+
+    Args:
+        code: The LLM-generated Python source to validate.
+
+    Raises:
+        ValueError: If the code contains a denied pattern, import, or dunder access.
+    """
+    code_lower = code.lower()
+    for pattern in _EXEC_DENY_PATTERNS:
+        if pattern.lower() in code_lower:
+            raise ValueError(f"Code blocked by safety filter: contains '{pattern}'")
+    # AST-level: reject any Import/ImportFrom nodes
+    try:
+        tree = ast.parse(code)
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                raise ValueError(f"Code blocked: import statements not allowed")
+            if isinstance(node, ast.Attribute) and isinstance(node.attr, str):
+                if node.attr.startswith('__') and node.attr.endswith('__'):
+                    raise ValueError(f"Code blocked: dunder attribute access ({node.attr})")
+    except SyntaxError:
+        raise ValueError("Code blocked: contains syntax errors that prevent safety analysis")
+
+
+def _exec_with_timeout(code: str, exec_globals: dict, timeout: int = _EXEC_TIMEOUT_SECONDS) -> dict:
+    """Execute *code* in a worker thread with safety validation and a timeout.
+
+    Args:
+        code:         Python source to execute.
+        exec_globals: Globals dict (pre-populated with ``pd``, ``px``, etc.).
+        timeout:      Max seconds before the thread is abandoned.
+
+    Returns:
+        The globals dict after execution (may contain ``fig``, ``chart``, etc.).
+
+    Raises:
+        ValueError: If the code fails safety validation.
+        FuturesTimeoutError: If execution exceeds *timeout*.
+    """
+    _validate_code_safety(code)
+    def _run():
+        exec(code, exec_globals)
+        return exec_globals
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(_run)
+        return future.result(timeout=timeout)
+
 
 class VisualizationRequest(BaseModel):
+    """Request schema for ``POST /generate`` — simple chart generation.
+
+    Accepts a data summary (or filename reference) with an optional chart
+    type, column selection, and custom Plotly parameters.  When
+    ``chart_type`` is ``"auto"`` the backend inspects column types and
+    selects the most appropriate visualisation automatically.
+
+    Attributes:
+        data_summary:  Textual summary of the dataset (used as LLM context).
+        chart_type:    Desired chart type or ``"auto"`` for automatic selection.
+        filename:      Name of a previously-uploaded data file.
+        columns:       Optional subset of columns to visualise.
+        custom_params: Arbitrary Plotly layout / trace overrides.
+    """
     data_summary: str
     chart_type: str = "auto"
     filename: Optional[str] = None
@@ -43,11 +143,35 @@ class VisualizationRequest(BaseModel):
     custom_params: Optional[Dict[str, Any]] = None
 
 class ChartExecutionRequest(BaseModel):
+    """Request schema for executing user-supplied Plotly code.
+
+    The caller provides raw Plotly Python source and a JSON-serialisable
+    data payload.  The backend injects the data as a ``pandas.DataFrame``
+    into the execution namespace before running the code.
+
+    Attributes:
+        plotly_code: Raw Python source that produces a Plotly ``Figure``.
+        data:        Column-oriented dict that will be loaded as a DataFrame.
+    """
     plotly_code: str
     data: Dict[str, Any]
 
 class GoalBasedVisualizationRequest(BaseModel):
-    """LIDA-inspired goal-based visualization request"""
+    """Request schema for ``POST /goal-based`` — LIDA-inspired visualisation.
+
+    The user supplies a natural-language *goal* (e.g. "Show sales by
+    region") and the backend analyses the referenced data file, selects
+    the best chart type, optionally applies LLM-driven filtering, and
+    returns a deterministic Plotly figure.
+
+    Attributes:
+        filename:         Name of a previously-uploaded data file.
+        goal:             Natural-language visualisation objective.
+        library:          Charting library — ``"plotly"``, ``"matplotlib"``,
+                          or ``"seaborn"``.
+        n_goals:          Number of auto-generated goals when *goal* is ``None``.
+        analysis_context: Prior analysis results to guide chart selection.
+    """
     filename: str
     goal: Optional[str] = None  # e.g., "Show distribution of sales by region"
     library: str = "plotly"  # plotly, matplotlib, seaborn
@@ -55,16 +179,23 @@ class GoalBasedVisualizationRequest(BaseModel):
     analysis_context: Optional[str] = None  # Analysis results to guide visualization
 
 def execute_plotly_code(code: str, data: pd.DataFrame) -> Dict[str, Any]:
-    """
-    Safely execute Plotly code and return the figure as JSON
-    
-    Note: Uses direct exec() instead of sandbox because Plotly modules
-    cannot pass through the sandbox's type safety checks. This is similar
-    to how matplotlib execution is handled (see execute_matplotlib_code).
+    """Safely execute Plotly charting code and return the figure as JSON.
+
+    Uses direct ``exec()`` (not RestrictedPython) because Plotly internals
+    fail type-safety checks. Safety is enforced via ``_validate_code_safety``
+    and a thread-pool timeout.
+
+    Args:
+        code: LLM-generated (or user-supplied) Plotly Python source.
+        data: The DataFrame to bind as the ``data`` variable.
+
+    Returns:
+        Dict with ``success``, ``figure_json``, and ``chart_type`` on success;
+        ``error`` on failure.
     """
     try:
         # Log the code being executed
-        logging.info(f"[PLOTLY] Executing code:\n{code[:500]}")
+        logger.info("[PLOTLY] Executing code:\n%s", code[:500])
         
         # Create execution environment with Plotly modules and data
         exec_locals = {
@@ -73,15 +204,18 @@ def execute_plotly_code(code: str, data: pd.DataFrame) -> Dict[str, Any]:
             'px': px,
             'go': go,
             'plotly': plotly,
-            'np': __import__('numpy'),
+            'np': np,
         }
         
-        # Execute the Plotly code
-        exec(code, exec_locals)
+        # Safety: validate code before execution
+        _validate_code_safety(code)
+        
+        # Execute the Plotly code with timeout
+        exec_locals = _exec_with_timeout(code, exec_locals)
         
         # Log what variables were created
         var_names = [k for k in exec_locals.keys() if not k.startswith('_') and k not in ['pd', 'data', 'px', 'go', 'plotly', 'np']]
-        logging.info(f"[PLOTLY] Variables created: {var_names}")
+        logger.info("[PLOTLY] Variables created: %s", var_names)
         
         # Look for a figure object in the results
         # Common variable names for Plotly figures
@@ -90,24 +224,23 @@ def execute_plotly_code(code: str, data: pd.DataFrame) -> Dict[str, Any]:
         for var_name in fig_candidates:
             if var_name in exec_locals:
                 fig = exec_locals[var_name]
-                logging.info(f"[PLOTLY] Found figure in variable: {var_name}")
+                logger.info("[PLOTLY] Found figure in variable: %s", var_name)
                 
                 # Convert Plotly figure to JSON with proper encoding
                 # CRITICAL: Use PlotlyJSONEncoder to handle numpy arrays
                 if hasattr(fig, 'to_dict'):
-                    logging.info(f"[PLOTLY] Using to_dict() method")
-                    from plotly.utils import PlotlyJSONEncoder
+                    logger.info("[PLOTLY] Using to_dict() method")
                     fig_dict = fig.to_dict()
                     # Use Plotly's custom encoder to handle numpy arrays
-                    figure_json = json.dumps(fig_dict, cls=PlotlyJSONEncoder)
-                    logging.info(f"[PLOTLY] JSON length: {len(figure_json)}")
+                    figure_json = json.dumps(fig_dict, cls=plotly.utils.PlotlyJSONEncoder)
+                    logger.info("[PLOTLY] JSON length: %d", len(figure_json))
                     return {
                         "success": True,
                         "figure_json": figure_json,
                         "chart_type": "plotly"
                     }
                 elif hasattr(fig, 'to_json'):
-                    logging.info(f"[PLOTLY] Using to_json() method (fallback)")
+                    logger.info("[PLOTLY] Using to_json() method (fallback)")
                     # This may use binary encoding - not ideal
                     return {
                         "success": True,
@@ -115,17 +248,26 @@ def execute_plotly_code(code: str, data: pd.DataFrame) -> Dict[str, Any]:
                         "chart_type": "plotly"
                     }
         
-        logging.warning(f"[PLOTLY] No figure found. Available variables: {var_names}")
+        logger.warning("[PLOTLY] No figure found. Available variables: %s", var_names)
         return {"error": "No Plotly figure found in executed code"}
         
     except Exception as e:
-        logging.error(f"Plotly code execution failed: {e}")
-        logging.error(f"Code that failed:\n{code}")
-        return {"error": f"Chart generation failed: {str(e)}"}
+        logger.error("Plotly code execution failed: %s", e, exc_info=True)
+        logger.error("Code that failed:\n%s", code)
+        return {"error": f"Chart generation failed: {e}"}
 
 def generate_auto_chart(df: pd.DataFrame, columns: List[str] = None) -> Dict[str, Any]:
-    """
-    Automatically generate an appropriate chart based on data characteristics
+    """Automatically select and generate a chart based on data characteristics.
+
+    Inspects numeric and categorical column counts to choose scatter, bar,
+    histogram, or categorical bar. Returns the Plotly figure as JSON.
+
+    Args:
+        df:      Source DataFrame.
+        columns: Optional subset of columns to consider.
+
+    Returns:
+        Dict with ``figure_json`` on success; ``error`` on failure.
     """
     try:
         if df.empty:
@@ -166,28 +308,44 @@ def generate_auto_chart(df: pd.DataFrame, columns: List[str] = None) -> Dict[str
         }
         
     except Exception as e:
-        logging.error(f"Auto chart generation failed: {e}")
+        logger.error("Auto chart generation failed: %s", e, exc_info=True)
         return {"error": f"Auto chart generation failed: {str(e)}"}
 
 @router.post("/generate")
-async def generate_visualization(request: VisualizationRequest):
+async def generate_visualization(request: VisualizationRequest) -> Dict[str, Any]:
+    """Generate a chart via agent routing or automatic type selection.
+
+    When ``chart_type`` is ``"auto"`` the endpoint inspects the data’s
+    column types and delegates to :func:`generate_auto_chart`.  Otherwise
+    the Visualizer agent produces Plotly code which is executed in a
+    sandboxed namespace.
+
+    Args:
+        request: :class:`VisualizationRequest` with filename, chart type,
+                 and optional column / parameter overrides.
+
+    Returns:
+        JSON dict containing ``figure_json`` (Plotly JSON string),
+        ``generated_code``, and ``chart_type`` on success; raises
+        ``HTTPException`` on failure.
+
+    Raises:
+        HTTPException 400: Missing filename or unsupported file type.
+        HTTPException 404: Referenced file not found in uploads.
+        HTTPException 500: Unexpected generation / execution error.
     """
-    Generate a visualization using CrewAI or auto-generation
-    """
-    logging.info(f"[VISUALIZE] Request: {request.chart_type}, filename: {request.filename}")
+    logger.info("[VISUALIZE] Request: %s, filename: %s", request.chart_type, request.filename)
     
     try:
         if request.filename:
             # Use centralized path resolver
-            from backend.utils.data_utils import DataPathResolver
-            
             filepath = DataPathResolver.resolve_data_file(request.filename)
             
             if not filepath:
                 raise HTTPException(status_code=404, detail=f"File '{request.filename}' not found. Please upload the file first.")
             
             filepath = str(filepath)
-            logging.info(f"[VISUALIZE] Loading data from: {filepath}")
+            logger.info("[VISUALIZE] Loading data from: %s", filepath)
             
             if request.filename.endswith('.csv'):
                 df = pd.read_csv(filepath)
@@ -199,15 +357,37 @@ async def generate_visualization(request: VisualizationRequest):
             # Use auto-generation if chart_type is "auto"
             if request.chart_type == "auto":
                 result = generate_auto_chart(df, request.columns)
-                logging.info(f"[VISUALIZE] Auto-generated chart result: {result.get('success', False)}")
+                logger.info("[VISUALIZE] Auto-generated chart result: %s", result.get('success', False))
                 return result
             
-            # Use CrewAI for custom chart generation
-            crew_manager = get_crew_manager()
-            result = crew_manager.create_visualization(
-                data_summary=request.data_summary or df.head().to_string(),
-                chart_type=request.chart_type
+            # Use Visualizer Agent for custom chart generation
+            registry = get_agent_registry()
+            viz_agent = registry.get_agent("Visualizer")
+            
+            if not viz_agent:
+                 raise HTTPException(status_code=500, detail="Visualizer Agent not found")
+
+            query = f"Create a {request.chart_type} chart for the data."
+            if request.chart_type == "auto":
+                query = "Create the most appropriate chart for this data."
+
+            execution_result = viz_agent.execute_with_logging(
+                query=query,
+                data=request.data_summary or df.head().to_string()
             )
+            
+            if execution_result.get("success"):
+                # Extract code from the result
+                raw_result = execution_result.get("result", "")
+                plotly_code = clean_code_snippet(raw_result)
+                
+                # Create a result dict similar to what was expected
+                result = {
+                    "success": True,
+                    "visualization_code": plotly_code
+                }
+            else:
+                result = {"success": False, "error": execution_result.get("error")}
             
             if result.get("success"):
                 # Execute the generated Plotly code
@@ -230,43 +410,46 @@ async def generate_visualization(request: VisualizationRequest):
             raise HTTPException(status_code=400, detail="Filename is required for visualization")
             
     except Exception as e:
-        logging.error(f"Visualization generation failed: {e}")
+        logger.error("Visualization generation failed: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Visualization failed: {str(e)}")
 
-@router.post("/execute")
-async def execute_chart_code(request: ChartExecutionRequest):
-    """
-    Execute custom Plotly code with provided data
-    """
-    logging.info("[VISUALIZE] Executing custom Plotly code")
-    
-    try:
-        # Convert data dict to DataFrame
-        df = pd.DataFrame(request.data)
-        
-        # Execute the Plotly code
-        result = execute_plotly_code(request.plotly_code, df)
-        
-        logging.info(f"[VISUALIZE] Code execution result: {result.get('success', False)}")
-        return result
-        
-    except Exception as e:
-        logging.error(f"Chart code execution failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Code execution failed: {str(e)}")
+# NOTE: /execute endpoint removed (Dec 2025)
+# Custom Plotly code execution is now handled by the main POST / endpoint
+# or via the sandbox in /api/viz/edit for modifications
 
 def preprocess_visualization_code(code: str, library: str = "plotly") -> str:
+    """Clean LLM-generated charting code before execution.
+
+    Delegates to the centralised
+    :func:`backend.utils.data_utils.preprocess_visualization_code`
+    helper which strips Markdown fences, trailing explanations, and
+    ensures the snippet is syntactically valid Python.
+
+    Args:
+        code:    Raw code string (may contain Markdown artefacts).
+        library: Target library — ``"plotly"``, ``"matplotlib"``, or
+                 ``"seaborn"``.
+
+    Returns:
+        Cleaned Python source ready for ``exec()``.
     """
-    Preprocess generated visualization code (uses centralized function).
-    Removes markdown artifacts and ensures proper structure.
-    """
-    from backend.utils.data_utils import preprocess_visualization_code as preprocess
-    return preprocess(code, library=library)
+    return preprocess_visualization_code(code, library=library)
 
 
 def execute_matplotlib_code(code: str, data: pd.DataFrame) -> Dict[str, Any]:
-    """
-    Execute matplotlib/seaborn visualization code (LIDA-inspired).
-    Returns base64-encoded PNG image.
+    """Execute Matplotlib / Seaborn charting code and return a PNG image.
+
+    The code is validated via :func:`_validate_code_safety` and executed
+    with a thread-pool timeout.  The resulting figure is rasterised to a
+    base64-encoded PNG suitable for embedding in HTML ``<img>`` tags.
+
+    Args:
+        code: Python source that uses ``plt`` / ``sns`` to produce a chart.
+        data: DataFrame injected as ``data`` in the execution namespace.
+
+    Returns:
+        Dict with ``success``, ``image_base64``, and ``chart_type`` on
+        success; ``error`` message on failure.
     """
     try:
         # Create execution environment
@@ -277,7 +460,7 @@ def execute_matplotlib_code(code: str, data: pd.DataFrame) -> Dict[str, Any]:
             'pd': pd,
             'data': data,
             'plt': plt,
-            'np': __import__('numpy'),
+            'np': np,
         }
         
         # Also import seaborn if mentioned
@@ -285,8 +468,11 @@ def execute_matplotlib_code(code: str, data: pd.DataFrame) -> Dict[str, Any]:
             import seaborn as sns
             exec_locals['sns'] = sns
         
-        # Execute code
-        exec(code, exec_locals)
+        # Safety: validate code before execution
+        _validate_code_safety(code)
+        
+        # Execute code with timeout
+        exec_locals = _exec_with_timeout(code, exec_locals)
         
         # Get figure from chart variable or current figure
         chart = exec_locals.get('chart') or exec_locals.get('fig') or plt.gcf()
@@ -307,35 +493,48 @@ def execute_matplotlib_code(code: str, data: pd.DataFrame) -> Dict[str, Any]:
         }
         
     except Exception as e:
-        logger.error(f"Matplotlib code execution failed: {e}")
+        logger.error("Matplotlib code execution failed: %s", e, exc_info=True)
         plt.close('all')  # Clean up
         return {"error": f"Chart generation failed: {str(e)}"}
 
 
 @router.post("/goal-based")
-async def generate_goal_based_visualization(request: GoalBasedVisualizationRequest):
+async def generate_goal_based_visualization(request: GoalBasedVisualizationRequest) -> Dict[str, Any]:
+    """Generate a chart from a natural-language goal (deterministic path).
+
+    Follows a three-stage pipeline:
+
+    1. **Data analysis** — :class:`ChartTypeAnalyzer` profiles the
+       uploaded DataFrame and ranks candidate chart types.
+    2. **Optional LLM filtering** — if the goal mentions specific values
+       the ``DataAnalyst`` agent produces a safe filter expression.
+    3. **Template rendering** — :class:`DynamicChartGenerator` builds
+       the Plotly figure deterministically (no LLM-generated code).
+
+    Args:
+        request: :class:`GoalBasedVisualizationRequest` with filename,
+                 goal text, and optional analysis context.
+
+    Returns:
+        JSON dict with ``visualization`` (figure JSON + chart type),
+        ``data_analysis``, ranked ``suggestions``, and
+        ``selected_chart``.
+
+    Raises:
+        HTTPException 404: Referenced file not found.
+        HTTPException 500: Chart generation or serialisation error.
     """
-    Generate visualization using DETERMINISTIC template-based approach.
-    Follows IMMUTABLE RULES: 100% accuracy, dynamic data handling, no hardcoding.
-    
-    NEW FEATURES:
-    - Auto-suggests best chart types based on data structure
-    - Allows user to choose specific chart type
-    - Template-based (no LLM code generation = 100% reliable)
-    """
-    logger.debug(f"[VISUALIZE] Goal-based request: {request.goal}, file: {request.filename}")
+    logger.debug("[VISUALIZE] Goal-based request: %s, file: %s", request.goal, request.filename)
     
     try:
         # Use centralized path resolver
-        from backend.utils.data_utils import DataPathResolver
-        
         filepath = DataPathResolver.resolve_data_file(request.filename)
         
         if not filepath:
             raise HTTPException(status_code=404, detail=f"File '{request.filename}' not found")
         
         filepath = str(filepath)
-        logger.debug(f"[VISUALIZE] Loading data from: {filepath}")
+        logger.debug("[VISUALIZE] Loading data from: %s", filepath)
         df = read_dataframe(filepath)
         
         # Analyze data structure (DYNAMIC - works with any data)
@@ -343,8 +542,8 @@ async def generate_goal_based_visualization(request: GoalBasedVisualizationReque
         data_analysis = analyzer.analyze_data_structure(df)
         suggestions = analyzer.suggest_chart_types(df, data_analysis)
         
-        logger.debug(f"[VISUALIZE] Data analysis: {data_analysis}")
-        logger.debug(f"[VISUALIZE] Chart suggestions: {len(suggestions)}")
+        logger.debug("[VISUALIZE] Data analysis: %s", data_analysis)
+        logger.debug("[VISUALIZE] Chart suggestions: %s", len(suggestions))
         
         # Determine chart type using HYBRID approach:
         # 1. Data structure analysis (deterministic, reliable)
@@ -353,13 +552,14 @@ async def generate_goal_based_visualization(request: GoalBasedVisualizationReque
         chart_params = {}
         
         # FIRST: Get smart suggestions based on actual data structure
-        logger.debug(f"[VISUALIZE] Analyzing data structure for chart suggestions...")
+        logger.debug("[VISUALIZE] Analyzing data structure for chart suggestions...")
         
         if request.goal and len(request.goal.strip()) > 10:
             # Use LLM ONLY for filtering (simpler, more reliable)
-            logger.debug(f"[VISUALIZE] Using LLM for filtering logic: {request.goal}")
+            logger.debug("[VISUALIZE] Using LLM for filtering logic: %s", request.goal)
             
-            crew_manager = get_crew_manager()
+            registry = get_agent_registry()
+            analyst_agent = registry.get_agent("DataAnalyst") # or "Time Series" or whatever, but DataAnalyst is safe fallback
             
             # STEP 1: Simple and direct - let LLM generate filter + chart suggestion together
             if request.analysis_context or request.goal:
@@ -406,12 +606,12 @@ RESPONSE (JSON only):
 
 NOW PROCESS THIS QUESTION!"""
 
-                filter_result = crew_manager.handle_query(
-                    query=filter_query,
-                    filename=request.filename,
-                    column=None,
-                    value=None
-                )
+                filter_result = {"success": False}
+                if analyst_agent:
+                    filter_result = analyst_agent.execute_with_logging(
+                        query=filter_query,
+                        data=df.head().to_string() # Context provided in query mostly
+                    )
                 
                 if filter_result.get("success") and filter_result.get("result"):
                     result_text = filter_result["result"]
@@ -431,18 +631,20 @@ NOW PROCESS THIS QUESTION!"""
                             original_rows = len(df)
                             
                             try:
-                                local_namespace = {'df': df, 'pd': pd}
-                                filtered_df = eval(filter_code, {"__builtins__": {}}, local_namespace)
+                                _validate_code_safety(filter_code)
+                                # Use pandas eval for safe expression evaluation instead of built-in eval
+                                # pandas.eval only supports arithmetic/comparison expressions on DataFrames
+                                filtered_df = df.query(filter_code) if not filter_code.strip().startswith('df') else pd.eval(filter_code, local_dict={'df': df, 'pd': pd})
                                 
                                 if isinstance(filtered_df, pd.DataFrame) and len(filtered_df) > 0:
                                     df = filtered_df
                                 else:
                                     pass  # Filter returned empty/invalid result
                             except Exception as e:
-                                logger.debug(f"Filter execution error: {e}")
+                                logger.debug("Filter execution error: %s", e)
                         
                     except Exception as e:
-                        logger.debug(f"Filter parse error: {e}")
+                        logger.debug("Filter parse error: %s", e)
         
         # SMART CHART SELECTION: Parse user's question FIRST, then use data structure
         if chart_type is None and suggestions:
@@ -466,6 +668,20 @@ NOW PROCESS THIS QUESTION!"""
                 user_intent_type = 'histogram'
             elif 'pie chart' in question_lower or 'create a pie' in question_lower or 'make a pie' in question_lower:
                 user_intent_type = 'pie'
+            elif 'heatmap' in question_lower or 'correlation matrix' in question_lower:
+                user_intent_type = 'heatmap'
+            elif 'area chart' in question_lower or 'stacked area' in question_lower:
+                user_intent_type = 'area'
+            elif 'violin plot' in question_lower or 'violin chart' in question_lower:
+                user_intent_type = 'violin'
+            elif 'funnel chart' in question_lower or 'funnel plot' in question_lower:
+                user_intent_type = 'funnel'
+            elif 'treemap' in question_lower or 'tree map' in question_lower:
+                user_intent_type = 'treemap'
+            elif 'sunburst' in question_lower or 'hierarchical' in question_lower:
+                user_intent_type = 'sunburst'
+            elif 'bubble chart' in question_lower or 'bubble plot' in question_lower:
+                user_intent_type = 'bubble'
             
             # If no explicit chart type, use keyword-based detection
             # Compare BY (categorical) -> BAR CHART
@@ -488,8 +704,12 @@ NOW PROCESS THIS QUESTION!"""
                     user_intent_type = 'line'
             
             # Share/Proportion -> PIE
-            elif any(word in question_lower for word in ['share', 'proportion', 'percentage', 'breakdown of']):
+            elif any(word in question_lower for word in ['share', 'proportion', 'percentage', 'breakdown of', 'diversification', 'composition', 'split', 'allocation']):
                 user_intent_type = 'pie'
+            
+            # Hierarchy -> TREEMAP/SUNBURST
+            elif any(word in question_lower for word in ['hierarchy', 'parent', 'child', 'nested']):
+                user_intent_type = 'treemap'
             
             # STEP 2: Find matching suggestion or use intent
             if user_intent_type:
@@ -619,13 +839,35 @@ NOW PROCESS THIS QUESTION!"""
                     if categorical_cols:
                         chart_params['names_col'] = categorical_cols[0]
                     chart_params['values_col'] = pie_numeric
+
+            elif user_intent_type == 'bubble' and len(mentioned_columns) >= 3:
+                # Bubble needs x, y, size
+                numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
+                matched_numerics = [col for col in mentioned_columns if col in numeric_cols]
+                if len(matched_numerics) >= 3:
+                    chart_params['x_col'] = matched_numerics[0]
+                    chart_params['y_col'] = matched_numerics[1]
+                    chart_params['size_col'] = matched_numerics[2]
+
+            elif user_intent_type in ['treemap', 'sunburst']:
+                # Treemap/Sunburst needs path (categoricals) and values (numeric)
+                categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+                numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
+                
+                matched_cats = [col for col in mentioned_columns if col in categorical_cols]
+                matched_nums = [col for col in mentioned_columns if col in numeric_cols]
+                
+                if matched_cats:
+                    chart_params['path_cols'] = matched_cats
+                if matched_nums:
+                    chart_params['values_col'] = matched_nums[0]
         
         # Final fallback
         if chart_type is None:
             chart_type = 'bar'
         
-        logger.debug(f"[VISUALIZE] Selected chart type: {chart_type}")
-        logger.debug(f"[VISUALIZE] Chart parameters: {chart_params}")
+        logger.debug("[VISUALIZE] Selected chart type: %s", chart_type)
+        logger.debug("[VISUALIZE] Chart parameters: %s", chart_params)
         
         # Generate chart using deterministic template
         generator = DynamicChartGenerator()
@@ -643,7 +885,7 @@ NOW PROCESS THIS QUESTION!"""
                     
                     # Case 1: Binary encoded (dict with dtype/bdata)
                     if isinstance(val, dict) and 'dtype' in val and 'bdata' in val:
-                        logger.warning(f"Binary encoding detected in trace[{trace_idx}]['{data_key}'], converting to list")
+                        logger.warning("Binary encoding detected in trace[%s]['%s'], converting to list", trace_idx, data_key)
                         
                         # Extract original data from DataFrame based on chart type
                         fixed = False
@@ -708,7 +950,7 @@ NOW PROCESS THIS QUESTION!"""
                         
                         # If not fixed, use empty list as fallback
                         if not fixed:
-                            logger.warning(f"Cannot auto-fix {data_key} for {chart_type}, using empty list")
+                            logger.warning("Cannot auto-fix %s for %s, using empty list", data_key, chart_type)
                             trace[data_key] = []
                     
                     # Case 2: Numpy array or Pandas Series
@@ -718,8 +960,6 @@ NOW PROCESS THIS QUESTION!"""
         # Recursively convert ALL numpy arrays to lists for JSON serialization
         def convert_numpy_to_list(obj):
             """Recursively convert numpy arrays to Python lists"""
-            import numpy as np
-            
             if isinstance(obj, np.ndarray):
                 return obj.tolist()
             elif isinstance(obj, dict):
@@ -756,15 +996,20 @@ NOW PROCESS THIS QUESTION!"""
         }
         
     except Exception as e:
-        logger.error(f"Goal-based visualization failed: {e}")
-        logger.error(f"Traceback:", exc_info=True)
+        logger.error("Goal-based visualization failed: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Visualization failed: {str(e)}")
 
 
 @router.get("/types")
-async def get_supported_chart_types():
-    """
-    Return list of supported chart types
+async def get_supported_chart_types() -> Dict[str, Any]:
+    """Return the catalogue of supported chart types.
+
+    Each entry maps a short key (e.g. ``"bar"``) to a human-readable
+    description.  The special key ``"auto"`` indicates that the backend
+    will choose the best chart type based on data characteristics.
+
+    Returns:
+        JSON dict with ``chart_types`` mapping and ``success`` flag.
     """
     chart_types = {
         "auto": "Automatically choose best chart type based on data",
@@ -773,7 +1018,14 @@ async def get_supported_chart_types():
         "scatter": "Scatter plot for correlation analysis",
         "histogram": "Histogram for distribution analysis",
         "box": "Box plot for statistical summary",
-        "pie": "Pie chart for proportional data"
+        "pie": "Pie chart for proportional data",
+        "heatmap": "Correlation matrix for numeric variables",
+        "area": "Stacked area chart for time series",
+        "violin": "Violin plot for distribution density",
+        "funnel": "Funnel chart for process stages",
+        "treemap": "Treemap for hierarchical data",
+        "sunburst": "Sunburst chart for radial hierarchy",
+        "bubble": "Bubble chart for multi-variable analysis"
     }
     
     return {
@@ -783,19 +1035,24 @@ async def get_supported_chart_types():
 
 
 @router.post("/suggestions")
-async def get_chart_suggestions(request: dict):
-    """
-    Get intelligent chart suggestions based on data structure.
-    
-    Request body:
-    {
-        "filename": "data.csv"
-    }
-    
+async def get_chart_suggestions(request: dict) -> Dict[str, Any]:
+    """Suggest chart types ranked by suitability for the uploaded data.
+
+    Analyses the referenced CSV/JSON file with
+    :class:`ChartTypeAnalyzer`, returning column-type breakdowns and a
+    prioritised list of chart suggestions with human-readable reasoning.
+
+    Args:
+        request: JSON body containing ``filename`` (required).
+
     Returns:
-    - Data analysis (column types, counts)
-    - Ranked chart suggestions with reasoning
-    - Recommended chart type
+        JSON dict with ``data_analysis``, ``suggestions`` list, and
+        ``recommended`` top pick.
+
+    Raises:
+        HTTPException 400: Missing ``filename``.
+        HTTPException 404: File not found.
+        HTTPException 500: Analysis error.
     """
     filename = request.get("filename")
     
@@ -803,8 +1060,6 @@ async def get_chart_suggestions(request: dict):
         raise HTTPException(status_code=400, detail="filename is required")
     
     try:
-        from backend.utils.data_utils import DataPathResolver
-        
         filepath = DataPathResolver.resolve_data_file(filename)
         if not filepath:
             raise HTTPException(status_code=404, detail=f"File '{filename}' not found")
@@ -831,5 +1086,5 @@ async def get_chart_suggestions(request: dict):
         }
         
     except Exception as e:
-        logger.error(f"Chart suggestions failed: {e}")
+        logger.error("Chart suggestions failed: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Suggestions failed: {str(e)}")

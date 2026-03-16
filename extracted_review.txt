@@ -1,0 +1,128 @@
+Domain Flexible Autonomous Data Analysis Agent Leveraging Large Language Models
+Swathi Pacha CSE-AIML,
+MLR Institute of Technology, Hyderabad, Indiapswathi@mlrit.ac.in
+Dileep Mittapalli
+CSE-AIML,
+MLR Institute of Technology, 
+Hyderabad, India
+23r25a6607@mlrit.ac.in
+Sandeep Kumar MunagalaCSE-AIMLMLR Institute of TechnologyHyderabad, India 
+22r21a66a4@mlrit.ac.in
+Harsha KotaCSE-AIMLMLR Institute of TechnologyHyderabad, India22r21a6695@mlrit.ac.in
+E.Y.S.V.S. Abhay              CSE-AIMLMLR Institute of Technology, 
+Hyderabad, India22r21a6681@mlrit.ac.in
+Sivakrishna Kondaveeti
+CSE-AIML,
+MLR Institute of Technology, 
+Hyderabad, India
+sivakrishnakondaveeti@gmail.com
+Abstract—The use of data analysis plays a vital role in the decision-making process, and for many users, conducting complex analyses often poses barriers due to their lack of programming or statistical expertise. Technical hurdles related to programming and statistical reasoning continue to impede democratization of data science. As such, while LLMs (Large Language Models) have shown promise for generating code, they often hallucinate, produce non-executable results and are limited to a specific domain. This paper presents a novel multi-agent architecture for the Domain-Flexible Autonomous Data Analysis Agent (DF-Agent), which orchestrates dynamic code generation, sandboxed execution and self-correcting iterative processes. A static RAG system utilizes a Hybrid Complexity Score to dynamically guide query routing between lightweight (Phi-3) and reasoning-focused (Llama-3) models, resulting in a 51 percent reduction in latency compared to static baseline systems. The DF-Agent incorporates a "Generator-Critic" self-correction loop, providing the ability to autonomously resolve 70 percentage of execution errors without input from an operator. Use case validation includes financial, IoT and unstructured data, yielding a broad epicentre of domain transferability with a system stability score of 0.92. The above contributions represent a substantial advancement towards fully automated, reliable and explainable data analytic capabilities.
+Keywords— Autonomous Data Analysis Agent, Multi-Agent Systems, Large Language Models, Retrieval-Augmented Generation, Program Synthesis, Self-Correction Loop, Domain Transferability, Explainable Analytics
+I. INTRODUCTION 
+Digital data is growing exponentially across industries. As a result of this surge in volume, there has been a concerted effort to create tools and systems that can analyze this data quickly and accurately, regardless of industry. Businesses use data analysis, as an example, as a way to gather competitive intelligence. With the exponential increase in digital data, there is a need for systems that allow for automated, high-quality, and explainable analyses of this data. At the same time, there is a significant analytic gap. Domain professionals do not have the programming skill level needed to use advanced statistical methodologies; however, existing no-code solutions do not allow an adequate level of flexibility for either parties. The introduction of large language models (LLMs) can bridge this gap, however, LLM implementations face a 'trilemma of autonomous analytic' in providing:  Executable code projects that produce code will often produce unbacked code that cannot be executed due to incorrect present and syntax errors [6] , Flexibility systems that are hard-coded for a specific domain, such as bioinformatics [7], will not provide a generalizable solution , Reliability stochastic configurations constructed using LLMs will produce no fault tolerance, which is a requirement for enterprise deployment. A unified platform called a Domain-Flexible Autonomous Data Analysis Agent (DF-Agent) is proposed to consolidate these challenges into one common solution. The DF-Agent takes Natural Language User Requests (NLURs) and transforms them into executable Python/SQL workflows in a secure and sand boxed environment. The solutions to distinguish three key innovations: A `QueryOrchestrator` that 
+(a) determines the semantic complexity of a task to provide intelligent routing and 
+(b) optimizes performance while minimizing the trade-off between inference cost of a rationale and depth of the (explanation) [13]. 
+Self-Correction Engine: A “Two Friend” loop (Generator-Critic) that automatically iteratively improves code with a 70% rate of error recovery [18]. Visual Explainability: A real-time Swarm HUD that provides insight into the agentic decision-making process [21].Through the integration of retrieval-augmented generation (RAG) with dynamic tool execution, the DF-Agent represents a scalable, reproducible and explainable solution for autonomous data-based decision making practices.
+II. LITERATURE SURVEY
+The emergence of autonomous analytics (2023-2025) will be marked by the merging of Multi-Agent Systems (MAS) with Large Language Models (LLMs) and, therefore, the DV-Agent is placed in the context of the state-of-the-art by combining insights from 24 important research articles.
+A. The initial multi-agent architecture created a paradigm called the "Conversable Agent," where AutoGen [5] and AgentVerse [4] offered proof of concept that demonstrated the benefits of cooperative agents for the decomposition of tasks [2]. However, they would often forward all questions to the model that could do the job the best (and was therefore the most expensive, even when it was somewhat difficult). This is one of the reasons for Guo's finding that there was a lack of "collaborative efficiency" with these systems. The Nexus framework has addressed this specific limitation, by providing a shared `SwarmContext` blackboard architecture, which utilizes less redundant tokenization.
+B. Analyzing Data and Generating Scientific Software.
+Although LLMs do achieve the outcomes of traditional software when generating scientific code [6], there is still a major bottleneck: the ability of LLM-generated code to actually execute. For example, the Mergen [7] agent developed for use in bioinformatics has been developed using R, but the agent lacks support for other programming languages widely used in enterprises (e.g., Python, SQL). Similarly, while GenSpectrum's [9] theoretical models validate the "Chat-with-Data" paradigm, they do not adequately describe the security risks of executing generated code. The DV-Agent addresses these needs through strict enforcement of sandboxing and separate execution paths for code as compared to reasoning [19], [20].
+C. Computational Efficiency & Dynamic Routing 
+Static model selection lacks task efficiency using 3/1. Theoretical models for dynamic routing, based on query complexity, have been advanced by OptiRoute [11] & UniRoute [12]. Implementation within Nexus utilizes a production-ready `QueryOrchestrator` which produces hybrid complexity scores (Ctotal) [14], [13] & allows simple tasks to be routed to Phi-3 models & complex tasks to Llama-3 models. This results in quantifiable latency reductions that do not exist in monolithic-based systems.
+D. Self-Correction for Reliability
+Self-correction is crucial for reducing hallucinations prior to deployment. Work from CRITIC [15] & Self-Refine [16] has shown that LLMs can refine their output iteratively through feedback. In Nexus this principle is used when a generator retrieves based on a prior critic (two-friends) thus allowing the system to recover from grammatical error-generating prior to the involvement of the user [18]. Visual explainability is provided via the Swarm HUD [21], allowing for confidence in the decision-making of the Evaluator and/or Reviewer, and therefore trust in the outputs of the system [23][24].
+E. Summary of Differences - Table I summarizes the primary architectural differences between Nexus and other existing leading frameworks.
+Feature
+AutoGen [5]
+Agent
+Verse [4]
+Mergen [7]
+DF-Agent (Ours)
+Architecture
+Conversational
+Task Chain
+Single Agent
+Adaptive Swarm
+Routing Logic
+Static
+Static
+Static
+Complexity-Based ($C_{total}$)
+Execution Env.
+Local (Unsafe)
+Local
+Docker (R)
+Sandboxed (Python/SQL)
+Error Recovery
+Manual
+Re-prompting
+Basic Retry
+Self-Correction Engine
+Latency
+High
+High
+Medium
+Optimized (51% Reduced)
+III. Problem Formulation
+The goal of the Autonomous Data Analysis Agent is to deliver a completely self-sufficient, intelligent, and thorough way of analyzing data through an interaction using natural language; it does this by accepting natural language queries and raw dataset input from users and employing large language models in conjunction with a structured multi-agent collaboration framework for the complete synthesis, validation, and execution of analysis coding, creation of informative visualizations, and creation of structured written reports Analytics systems based on LLM currently are constrained by a trilemma involving trade-offs between Executability, Domain Flexibility, and Fault Tolerance when providing results of analysis. The aim of this research is to design a system that eliminates these trade-offs through the following means:
+Synthesizing Executable Workflows: Use natural language user requests (NLURs) to synthesize syntactically correct and safe executable code in Python/SQL. 
+Supporting Domain Agnosticism: Creating a multi-agent swarm that uses agents with expertise relevant to the context of the query (e.g. data analyst, visualization expert) and dynamically instantiates them based on the context of the query. 
+Ensuring Reliability: Developing a runtime correction process that allows for detecting and correcting execution errors without needing human intervention. Specifically, for a dataset D and query Q, the system is required to create an output O and verification certificate V such that O is factually consistent with D, and can be executed without violating the required safety constraints (S).
+                            IV.  Methodology
+The DF-Agent architecture implements an Adaptive Multi-Agent Orchestration Framework (A-MAOF), distinguishing it from static retrieval pipelines. The methodology comprises four core pillars:
+A. Intelligent Query Orchestration
+The Query Orchestrator uses a Hybrid Complexity Score (HCS) approach, which allows it to select models based on the current query's complexity rather than simply using static rules as most conventional routing protocols do. The overall complexity of the query, or 𝐶𝑡𝑜𝑡𝑎𝑙 , is computed as follows:
+Ctotal​ = min(1.0, Cbase​+Clen​+Csem​+Ckw​)
+Where Cbase represents the baseline structural complexity, Clen captures query length contribution, Csem denotes semantic depth estimated through LLM-based classification, and Ckw reflects keyword density (e.g., forecast, aggregate, correlate).Queries with Ctotal <0.3 are routed to lightweight, high-throughput models (e.g., Phi-3), whereas queries with Ctotal ≥ 0.7 trigger the allocation of deep-reasoning models (e.g., Llama-3).Intermediate scores utilize proportional and/or fallback route policies and employ a dynamic orchestration functionality that optimizes the use of processing resources while still maintaining analytical accuracy for semantically complex activities. This results in an optimal balance between latency and depth of reasoning.
+B. Agent Swarm Specialized
+The agent swarm is developed using a SwarmContext that is relevant to an Agent and an agent's capabilities, including:
+1. Data Analyst Agent: Offers structured data manipulation using Pandas and SQL.
+2. RAG Agent: Computes unstructured document retrieval using semantic search techniques together with vector-enhanced search.
+3. Visualization Expert: Produces Plotly-generated graphics; all generated graphic outputs will be render-equivalent visually.
+C. Sandbox Execution and Validation
+The execution process creates code that is executed inside of a secure Docker container that does not have access to a public network. There is an independent engine that will automatically assess the execution results. If there is a failure in code execution (i.e., syntax error) then the process will create a review of the traceback error message, and the “Critic” agent will request that the “Generator” return and correct the code and attempt to execute again. If an error occurs it will continue to execute up to three (3) times.
+D. Semantic Enhancements
+The framework allows for Retrieval Augmented Generation (RAG) processes that are augmented with Citation Tracking, allowing the outputs to be firmly established/grounded through reference use of each of the analysis documents.
+Figure1.Adaptive Orchestration and Multi-Agent Methodology of Nexus LLM Analytics
+Figure1 illustrates the autonomous multi-agent execution pipeline of the Nexus LLM Analytics framework. Users submit analytical requests by entering queries in natural language that detail the analyses and visual outputs they would like to receive. Once the Multi-Agent Orchestration Layer receives this request, it interprets it and decomposes the user's intent into a series of actionable tasks that can then be completed by the appropriate specialist agents based on multiple factors including complexity. The execution pipeline consists of 4 core specialist agents working in concert. The Data Analyst Agent reviews and prepares datasets for analysis; performs statistical analysis; and creates executable code. The Retrieval-Augmented Generation (RAG) Agent provides context and historical references necessary to complete the analysis, as well as other reference material that can be used to support a more comprehensive approach to analytical reasoning. The Code Reviewer or Validator Agent ensures that the code created by the Data Analyst Agent is correct, safe, and resource compliant. Finally, the Visualization Agent creates charts and figures for the user that are aligned with the analytical goals established by the user. All coordination among these agents is performed by the local LLM-based inference engine, which selects the appropriate language models to use on a dynamic basis when executing reasoning and validation tasks. All execution takes place within a controlled, isolated, sandboxed environment, which provides security, privacy, and reproducibility. The shared vector memory allows continual access to previously completed analyses, thereby facilitating incremental learning and reproducible analytical workflows.
+            V.System architecture and implementation
+The Domain-Flexible Autonomous Data Analysis Agent (DFA-DAA) is a large-language model-driven multi-agent collaboration project to automate the analysis of complicated data sets using conversational language queries. DFA-DAA makes use of multiple Large Language Models (LLMs), a Framework for Agentic Orchestration, Secure Sandboxed Execution and other approaches to allow for real-time and explainable analytics (i.e., non-domain dependent). With this solution, anyone can analyze data without having to code or have statistical experience to find insights within various datasets. Secure Sandbox Execution is an effective way to protect the integrity and the security of your Analytical Data, as it allows you to isolate the execution of your analyses from the storage and processing of the Host Operating System. Use of this Framework will ensure that no harmful activities occur on the Host Operating Systems, and that full Compliance with strict Data Protection Laws is maintained. In addition, as a functioning framework for Agentic orchestrations, Reasoning Agents can dynamically choose the appropriate models for their analyses, appropriately allocate work between Reasoning Agents, and provide full visibility of how the outputs and processes are traceable to clients so that Users are fully aware of what is being analysed. It uses Persistent Vector Memory to store the analytical context to facilitate re-use of Knowledge, Incremental Learning, and Continuity between user sessions.
+Figure2. End-to-End Data Flow and Processing Pipeline in the Multi-Agent LLMSystem.
+Figure2 describes the end-to-end workflow and processing methodology of the Proposed Autonomous Multi-agent (LLM) Based Analytical System. The workflow and data processing methodology of the Autonomous Multi-Agent (LLM) Based Analytical System consist of Four Logical Levels: Input; Data Preparation; Autonomous Multi-Agent Data Analytic; and Output. The data processing methodology of the Autonomous Multi-Agent (LLM) Based Analytical System begins at the Input Level where Users can send Natural Language Chat (NLCs) or upload Structured/Unstructured Data Files (CSV, Excel, Text and PDF) for analysis. Regardless of which method the user chooses to submit their analysis request, all requests triggered by the user's action are processed through an Application Programming (AP) Gateway that performs User Authentication and authorizes secure messages between the user and the LLM-Based Analytic System. In addition, this approach allows Users to express Complex Analysis Requests in Natural Language Form (NLF) with no need for programming skills or domain knowledge on the part of the user, thus enabling machine-readable formats for human input.Once collected, the data entered into the Data Pre-Processing Layer, which cleans and validates the data. This step focuses upon the schema and type inference and header extraction, as well as identifying which column each piece of the data belongs to. Data that does not meet the necessary requirements and that does not meet standard formatting will be stripped out as part of this process. Cleaned and validated data will be stored in separate store places; all other forms of unstructured text data will be represented as vector embeddings and subsequently stored in a vector memory database. The use of vector memory allows for semantically indexing, recalling, and reusing previous findability so retrieve as needed, which prevents repetitiveness in the retrieval of computational results. As such, thus layer ensures the dataset is standardized, trustworthy, and available for analysis without any redundancies. The intelligence component of this data processing phase consists of the Autonomous Multi-Agent Analytics and code generation agents that work collaboratively within a secure sandboxed space powered by LLMs. The code generation agent receives the analytics work products and translates them into code that can then be executed for data processing, statistical analysis, feature extraction or predictive modeling.
+VI. Results
+Figure3 .Result
+Figure3 describes the Multi-agent LLM Analytics platform allows users to interface with it in a simple manner through the Interactive Dashboard, which allows the user to upload any dataset and then ask questions in Natural Language. Users can then generate a visual depiction of the resulting analysis (e.g., pie chart). The User Interface is designed to be aesthetically pleasing with a modern style featuring a gradient background and an attractive layout.
+Figure4. Module Efficiency Quadrant Analysis of DF-Agent Components
+As shown in Figure4, the metrics of the system show that there is an inverse proportion between the complexity of the query and the success rate. For Simple queries such as data retrieval, the system guarantees a 100% success rate with an average latency of 187.8 seconds, thus proving the efficiency of the semantic router in evading unnecessary heavy computations. ​However, as the complexities continue to rise to the Moderate and Complex levels, the system is characterized by significant computational overhead. Thus, the Moderate level is characterized by an increased latency by 89%, translating into 355.1 seconds, accompanied by a corresponding decrease in the success rate, which is reduced to 71.4%. The most significant degradation is recorded at the Complex level, where the multiple steps involved in reasoning due to the CoT and SC modules lead to an increased latency of 383.8 seconds, accompanied by a stabilized success rate of 55.5%.
+Figure5  Performance Trade-off Between Success Rate and Latency Across Query Complexity Levels
+Figure5 presents the detailed efficiency analysis of the internal system modules. In the figure, the accuracy of the individual modules is plotted against the processing time. The size of the bubbles in the figure represents the Contribution Score of the modules. The Contribution Score is calculated through the ablation test and represents the success probability of the system. On the other hand, the role of the Self-Correction (CoT) module, which is located in the bottom right quadrant in the above figure, is that of the system's outlier. Although the contribution of this module to the system is moderate, as is indicated by the bubble's size, it is the module with the highest error rate, at 35%, and the longest processing time. This proves the hypothesis that the system's recovery mechanisms are computationally expensive and have a tendency for hallucination.
+VII. Conclusion & Future Directions
+The Domain-Flexible Autonomous Data Analysis Agent framework contains autonomously dispersed agents that can efficiently execute complex analytical tasks and connect natural language intent to executable, analytical workflows. The use of a swarm of dispersed agents with a complexity-aware distribution mechanism has resulted in a 51% reduction in latency versus traditional, monolithic methodologies and an exceptional level of fault tolerance (i.e., 0.92 stability).
+Future Directions
+In future releases of the DF-Agent system, three areas of focused development will include: Relying upon user interaction logs this paper build classifiers through machine learning to replace static heuristic routing methods, allowing for 5% to 10% improved routing accuracy (precision vs current routing method).The framework will allow for the processing of extremely large datasets (larger than available RAM) by utilizing Polars / Dask type new technologies. The SwarmContext layer will be migrated to Redis. This supports high availability / fault tolerance for applications that are deployed to one data center and/or multiple disparate data centers.These enhancements will help to bolster the reliability and thus present the DF-Agent as an enterprise class solution for autonomous analytics.
+References
+[1] Z. Xi, et al., "The Rise and Potential of Large Language Model Based Agents: A Survey," arXiv preprint arXiv:2309.07864, 2023.
+[2] L. Wang, et al., "A Survey on Large Language Model based Autonomous Agents," arXiv preprint arXiv:2308.11432, 2023.
+[3] T. Guo, et al., "Large Language Model based Multi-Agents: A Survey of Progress and Challenges," arXiv preprint arXiv:2402.01680, 2024.
+[4] W. Chen, et al., "AgentVerse: Facilitating Multi-Agent Collaboration and Exploring Emergent Behaviors," ICLR, 2024.
+[5] Q. Wu, et al., "AutoGen: Enabling Next-Gen LLM Applications," arXiv preprint arXiv:2308.08155, 2023.
+[6] M. Nejjar, et al., "LLMs for Science: Usage for Code Generation and Data Analysis," arXiv preprint arXiv:2311.16733v4, 2024.
+[7] J. A. Jansen, et al., "Leveraging large language models for data analysis automation," PLOS ONE, vol. 20, no. 2, e0317084, 2025.
+[8] M. Sun, et al., "From Automation to Autonomy: A Survey on Large Language Models in Scientific Discovery," arXiv preprint arXiv:2412.14222, 2024.
+[9] C. Chen and T. Stadler, "GenSpectrum Chat: Data Exploration in Public Health Using Large Language Models," ETH Zurich, 2023.
+[10] Y. Gu, et al., "Large Language Models for Constructing and Optimizing Machine Learning Workflows," arXiv preprint arXiv:2411.10478, 2024.
+[11] D. Piskala, et al., "OptiRoute: Dynamic LLM Routing and Selection based on User Preferences," Int. Journal of Computer Applications, 2024.
+[12] J. Talcott, et al., "Universal Model Routing for Efficient LLM Inference (UniRoute)," arXiv preprint arXiv:2502.08773, 2025.
+[13] Z. Pan, et al., "Route to Reason: Adaptive Routing for LLM and Reasoning Strategy Selection," arXiv preprint arXiv:2505.19435, 2025.
+[14] A. Heakl, et al., "Dr.LLM: Dynamic Layer Routing in LLMs," arXiv preprint arXiv:2510.12773, 2025.
+[15] K. Gou, et al., "CRITIC: Large Language Models Can Self-Correct with Tool-Interactive Critiquing," ICLR, 2024.
+[16] A. Madaan, et al., "Self-Refine: Iterative Refinement with Self-Feedback," NeurIPS, 2023.
+[17] S. Dhuliawala, et al., "Chain-of-Verification Reduces Hallucination in Large Language Models," arXiv:2309.11495, 2023.
+[18] A. Kumar, et al., "Training Language Models to Self-Correct via Reinforcement Learning (SCoRe)," arXiv preprint arXiv:2409.12917, 2024.
+[19] Y. Dong, et al., "A Survey on Code Generation with LLM-based Agents," arXiv preprint arXiv:2508.00083, 2025.
+[20] S. Bistarelli, et al., "Usage of Large Language Model for Code Generation Tasks: A Review," SN Computer Science, vol. 6, 2025.
+[21] J.S. Park, et al., "Generative Agents: Interactive Simulacra of Human Behavior," UIST, 2023.
+[22] C. Zhang, et al., "MindAgent: Emergent Gaming Interaction," arXiv:2309.09971, 2023.
+[23] A. Thirunagalingam, "Bias Detection and Mitigation in Data Pipelines," AVE Trends in Intelligent Computing Systems, 2024.
+[24] F. Chiarello, et al., "Future applications of generative large language models," Technovation, vol. 133, 2024.

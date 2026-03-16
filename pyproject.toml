@@ -6,9 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "nexus-llm-analytics"
 version = "1.0.0"
 description = "Multi-Agent Data Analysis Assistant with local-first, privacy-preserving design"
-authors = [{name = "KOTAHARSHA25", email = "your.email@example.com"}]
+authors = [{name = "KOTAHARSHA25"}]
 license = {file = "LICENSE"}
-readme = "docs/README.md"
+readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -25,26 +25,45 @@ classifiers = [
 ]
 dependencies = [
     "fastapi",
-    "crewai",
-    "crewai_tools",
+    "uvicorn[standard]",
+    "python-multipart",
+    "pydantic",
+    "pydantic-settings",
+    "python-dotenv",
+    "requests",
+    "aiofiles",
+    "werkzeug",
+    "langchain-ollama",
     "langchain-community",
     "pandas",
     "polars",
-    "pydantic",
-    "uvicorn",
-    "python-dotenv",
-    "chromadb",
-    "plotly",
-    "PyPDF2",
-    "reportlab",
-    "RestrictedPython",
-    "python-multipart",
-    "werkzeug",
-    "openpyxl",
-    "seaborn",
+    "numpy",
     "scipy",
     "scikit-learn",
+    "statsmodels",
+    "xarray",
+    "plotly",
+    "seaborn",
+    "matplotlib",
+    "chromadb",
+    "sentence-transformers",
+    "pypdf",
+    "pdfplumber",
+    "openpyxl",
+    "python-docx",
+    "python-pptx",
+    "striprtf",
+    "html2text",
+    "chardet",
+    "python-magic",
+    "httpx",
+    "bleach",
+    "reportlab",
+    "jinja2",
+    "RestrictedPython",
     "psutil",
+    "structlog",
+    "colorlog",
 ]
 
 [project.urls]
@@ -62,11 +81,14 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.pytest.ini_options]
+pythonpath = [". ", "src"]
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = "-v --tb=short"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = [
     "unit: Unit tests",
     "integration: Integration tests", 
@@ -124,10 +146,13 @@ skips = ["B101", "B104", "B108"]
 
 [tool.coverage.run]
 source = ["src/backend"]
+branch = true
+parallel = true
 omit = [
     "*/tests/*",
     "*/__pycache__/*",
-    "*/archive/*"
+    "*/archive/*",
+    "*/chroma_db/*"
 ]
 
 [tool.coverage.report]
@@ -136,5 +161,19 @@ exclude_lines = [
     "def __repr__",
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:"
+    "if TYPE_CHECKING:",
+    "except ImportError:",
+    "pass"
 ]
+show_missing = true
+precision = 2
+fail_under = 60
+
+[tool.coverage.html]
+directory = "reports/coverage"
+
+[tool.coverage.xml]
+output = "reports/coverage.xml"
+
+[tool.coverage.json]
+output = "reports/coverage.json"

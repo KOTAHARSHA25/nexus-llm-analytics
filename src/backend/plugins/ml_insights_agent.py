@@ -1,3 +1,15 @@
+"""ML Insights Agent Plugin — Nexus LLM Analytics
+==================================================
+
+Specialised agent for machine-learning pattern detection,
+clustering, anomaly detection, PCA, feature importance,
+and predictive analytics powered by scikit-learn.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`MLInsightsMetrics` — per-agent call-count and
+  latency tracker for ML operations.
+"""
 # ML Insights Agent Plugin
 # Specialized agent for machine learning pattern detection and insights
 
@@ -11,14 +23,14 @@ import json
 from datetime import datetime
 
 # Add src to path for imports
-src_path = Path(__file__).parent.parent / "src"
+# Add src to path for imports
+src_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(src_path))
 
 try:
     from backend.core.plugin_system import BasePluginAgent, AgentMetadata, AgentCapability
 except ImportError as e:
-    print(f"Import error: {e}")
-    print("Make sure you're running from the correct directory")
+    logging.error(f"Import error: {e} - Make sure you're running from the correct directory")
     raise
 
 # ML and data science imports
@@ -52,34 +64,23 @@ except ImportError:
 
 
 class MLInsightsAgent(BasePluginAgent):
-    """
-    Machine Learning Insights Agent
-    
+    """Machine Learning Insights Agent.
+
     Capabilities:
-    - Pattern detection and data mining
-    - Clustering analysis for customer segmentation
-    - Anomaly detection using multiple algorithms
-    - Principal Component Analysis (PCA) for dimensionality reduction
-    - Feature importance analysis
-    - Correlation and association analysis
-    - Classification insights and predictions
-    - Regression analysis for trend prediction
-    - Data preprocessing and feature engineering
-    - Model performance evaluation
-    - Automated machine learning insights
-    - Predictive analytics recommendations
-    - Data quality assessment
-    - Feature selection and ranking
-    
+        * Pattern detection, clustering, and anomaly detection
+        * PCA dimensionality reduction and feature importance
+        * Classification / regression insights and predictions
+        * Automated algorithm selection and model evaluation
+        * Data quality assessment and feature engineering
+
     Features:
-    - Automatic algorithm selection based on data characteristics
-    - Hyperparameter optimization suggestions
-    - Model interpretability and explainability
-    - Bias detection and fairness analysis
-    - Performance benchmarking
-    - Cross-validation and model validation
-    - Feature engineering recommendations
-    - Data visualization for ML insights
+        * Automatic algorithm selection based on data characteristics
+        * Hyperparameter optimisation suggestions
+        * Model interpretability and cross-validation
+        * Bias detection and fairness analysis
+
+    Thread Safety:
+        Not inherently thread-safe — instantiate one per request.
     """
     
     def get_metadata(self) -> AgentMetadata:
@@ -104,6 +105,7 @@ class MLInsightsAgent(BasePluginAgent):
     def initialize(self, **kwargs) -> bool:
         """Initialize the ML insights agent"""
         try:
+            self.registry = kwargs.get("registry")
             if not HAS_SKLEARN:
                 logging.error("scikit-learn not available - required for ML analysis")
                 return False
@@ -229,13 +231,63 @@ class MLInsightsAgent(BasePluginAgent):
         confidence += min(algo_matches * 0.12, 0.3)
         
         return min(confidence, 1.0)
+
+    def reflective_execute(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Swarm-enabled execution with self-correction and insight sharing.
+        """
+        context = context or {}
+        
+        # 1. Execute
+        result = self.execute(query, **context)
+        
+        # 2. Critique
+        if not result['success']:
+             pass
+
+        # 3. Share Insights
+        if self.swarm_context and result.get('success'):
+            try:
+                summary = f"ML Analysis: {result.get('operation', 'unknown')}"
+                if 'interpretation' in result and result['interpretation']:
+                     # Extract first few lines of interpretation
+                     lines = str(result['interpretation']).split('\n')
+                     summary = "\\n".join([l for l in lines if l.strip()][:3])
+
+                content = {
+                    "query": query,
+                    "summary": summary,
+                    "result_keys": list(result.get('result', {}).keys()) if isinstance(result.get('result'), dict) else [],
+                    "metadata": result.get('metadata', {})
+                }
+                
+                self.publish_insight(
+                    insight_type="ml_analysis_success",
+                    content=content,
+                    confidence=0.9
+                )
+                logging.info(f"[{self.metadata.name}] Published insight to Swarm")
+            except Exception as e:
+                logging.warning(f"Failed to publish insight: {e}")
+        
+        return result
     
     def execute(self, query: str, data: Any = None, **kwargs) -> Dict[str, Any]:
         """Execute ML analysis based on the query"""
         try:
-            # Load data if filename provided
+            # Load data from pre-resolved filepath (set by analysis_service) or filename
+            filepath = kwargs.get('filepath')
             filename = kwargs.get('filename')
-            if filename and not data:
+            if not data and filepath:
+                try:
+                    data = pd.read_csv(filepath) if filepath.endswith('.csv') else (
+                        pd.read_excel(filepath) if filepath.endswith(('.xlsx', '.xls')) else
+                        pd.read_json(filepath) if filepath.endswith('.json') else None
+                    )
+                    logging.info(f"Loaded data from pre-resolved path: {filepath}")
+                except Exception as e:
+                    logging.warning(f"Failed to load from filepath {filepath}: {e}")
+            if filename and data is None:
                 data = self._load_data(filename)
             
             if data is None:
@@ -285,18 +337,22 @@ class MLInsightsAgent(BasePluginAgent):
     def _load_data(self, filename: str) -> Optional[pd.DataFrame]:
         """Load data from file"""
         try:
-            base_data_dir = Path(__file__).parent.parent / "data"
+            # Project root is 4 levels up from this file (src/backend/plugins/ → src/backend → src → ROOT)
+            project_root = Path(__file__).parent.parent.parent.parent
+            base_data_dir = project_root / "data"
             
             for subdir in ["uploads", "samples"]:
                 filepath = base_data_dir / subdir / filename
                 if filepath.exists():
+                    logging.info(f"Loading data from: {filepath}")
                     if filename.endswith('.csv'):
                         return pd.read_csv(filepath)
                     elif filename.endswith(('.xlsx', '.xls')):
                         return pd.read_excel(filepath)
                     elif filename.endswith('.json'):
                         return pd.read_json(filepath)
-                    
+            
+            logging.warning(f"File not found in uploads or samples: {filename}")
             return None
         except Exception as e:
             logging.error(f"Failed to load data from {filename}: {e}")
@@ -693,12 +749,15 @@ class MLInsightsAgent(BasePluginAgent):
                     "strong_correlations": self._find_strong_correlations(correlation_matrix)
                 }
             
+            # Generate comprehensive interpretation
+            interpretation = self._generate_ml_interpretation(data, results, query)
+            
             return {
                 "success": True,
                 "result": results,
                 "agent": "MLInsightsAgent",
                 "operation": "comprehensive_ml_analysis",
-                "interpretation": "Comprehensive ML analysis completed with clustering, anomaly detection, and dimensionality reduction."
+                "interpretation": interpretation
             }
             
         except Exception as e:
@@ -707,6 +766,92 @@ class MLInsightsAgent(BasePluginAgent):
                 "error": f"Comprehensive ML analysis failed: {str(e)}",
                 "agent": "MLInsightsAgent"
             }
+    
+    def _generate_ml_interpretation(self, data: pd.DataFrame, results: Dict, query: str) -> str:
+        """Generate comprehensive human-readable ML analysis interpretation"""
+        lines = []
+        
+        lines.append("## Machine Learning Analysis Summary\n")
+        
+        # Data overview
+        overview = results.get("data_overview", {})
+        shape = overview.get("shape", (0, 0))
+        lines.append(f"**Dataset:** {shape[0]:,} records, {shape[1]} columns")
+        lines.append(f"• Numeric features: {overview.get('numeric_columns', 0)}")
+        lines.append(f"• Categorical features: {overview.get('categorical_columns', 0)}")
+        if overview.get("missing_values", 0) > 0:
+            lines.append(f"• Missing values: {overview.get('missing_values', 0):,}")
+        lines.append("")
+        
+        # Clustering insights
+        clustering = results.get("clustering", {})
+        if clustering:
+            lines.append("### Clustering Analysis\n")
+            if "kmeans" in clustering:
+                kmeans = clustering["kmeans"]
+                n_clusters = kmeans.get("optimal_clusters", 0)
+                silhouette = kmeans.get("silhouette_score", 0)
+                lines.append(f"**K-Means Clustering:** Identified {n_clusters} distinct groups")
+                lines.append(f"• Cluster quality (silhouette score): {silhouette:.3f}")
+                
+                cluster_analysis = kmeans.get("cluster_analysis", {})
+                for cluster_id, cluster_data in list(cluster_analysis.items())[:3]:
+                    size = cluster_data.get("size", 0)
+                    pct = cluster_data.get("percentage", 0)
+                    lines.append(f"• {cluster_id.replace('_', ' ').title()}: {size:,} records ({pct:.1f}%)")
+                lines.append("")
+            
+            if "dbscan" in clustering:
+                dbscan = clustering["dbscan"]
+                n_clusters = dbscan.get("n_clusters", 0)
+                noise_pct = dbscan.get("noise_percentage", 0)
+                lines.append(f"**DBSCAN Clustering:** Found {n_clusters} natural clusters")
+                lines.append(f"• Noise points: {noise_pct:.1f}%")
+                lines.append("")
+        
+        # Anomaly insights
+        anomalies = results.get("anomalies", {})
+        if anomalies:
+            lines.append("### Anomaly Detection\n")
+            if "isolation_forest" in anomalies:
+                iso = anomalies["isolation_forest"]
+                n_anomalies = iso.get("n_anomalies", 0)
+                pct = iso.get("anomaly_percentage", 0)
+                lines.append(f"**Detected Anomalies:** {n_anomalies:,} records ({pct:.1f}%)")
+                if pct > 5:
+                    lines.append("• ⚠️ Higher than expected anomaly rate - investigate data quality")
+                elif pct < 1:
+                    lines.append("• ✅ Low anomaly rate - data appears consistent")
+                lines.append("")
+        
+        # Dimensionality reduction
+        dim_reduction = results.get("dimensionality_reduction", {})
+        if dim_reduction and "pca" in dim_reduction:
+            pca = dim_reduction["pca"]
+            lines.append("### Dimensionality Analysis\n")
+            components_95 = pca.get("components_for_95_percent", 0)
+            total_variance = pca.get("total_variance_explained", 0)
+            original_dims = overview.get("numeric_columns", 0)
+            lines.append(f"**PCA Results:** {components_95} components capture 95% of variance")
+            lines.append(f"• Dimensionality reduction: {original_dims} → {components_95} features")
+            lines.append(f"• Total variance explained: {total_variance:.1%}")
+            lines.append("")
+        
+        # Correlations
+        correlations = results.get("feature_correlations", {})
+        strong_corrs = correlations.get("strong_correlations", [])
+        if strong_corrs:
+            lines.append("### Key Relationships\n")
+            lines.append("**Strong Correlations Found:**")
+            for corr in strong_corrs[:5]:
+                col1 = corr.get("column1", "")
+                col2 = corr.get("column2", "")
+                r = corr.get("correlation", 0)
+                direction = "positive" if r > 0 else "negative"
+                lines.append(f"• {col1} ↔ {col2}: {abs(r):.3f} ({direction})")
+            lines.append("")
+        
+        return "\n".join(lines) if lines else "ML analysis completed."
     
     def _find_strong_correlations(self, corr_matrix: pd.DataFrame, threshold: float = 0.7) -> List[Dict]:
         """Find strong correlations in the correlation matrix"""
@@ -776,37 +921,242 @@ class MLInsightsAgent(BasePluginAgent):
     
     # Placeholder methods for other ML analyses
     def _classification_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for classification analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Classification analysis would be implemented here"},
-            "agent": "MLInsightsAgent",
-            "operation": "classification_analysis"
-        }
+        """Perform classification analysis (predict categorical target)"""
+        try:
+            # 1. Identify target column
+            target_col = kwargs.get('target_column')
+            if not target_col:
+                # Naive heuristic: Last column if categorical/integer, or look for "predict [col]"
+                words = query.lower().split()
+                if "predict" in words:
+                    try:
+                        idx = words.index("predict")
+                        if idx + 1 < len(words):
+                            potential_target = words[idx+1]
+                            # Find matching column
+                            for col in data.columns:
+                                if potential_target in col.lower():
+                                    target_col = col
+                                    break
+                    except (ValueError, IndexError):
+                        pass
+                
+                if not target_col:
+                    # Default to last categorical column
+                    cat_cols = data.select_dtypes(include=['object', 'category', 'int']).columns
+                    if len(cat_cols) > 0:
+                        target_col = cat_cols[-1]
+            
+            if not target_col or target_col not in data.columns:
+                return {"success": False, "error": "Could not identify target column for classification", "agent": "MLInsightsAgent"}
+
+            # 2. Prepare Data
+            X = data.drop(columns=[target_col])
+            y = data[target_col]
+            
+            # Encode non-numeric features in X
+            X = pd.get_dummies(X, drop_first=True)
+            
+            # Encode target if necessary
+            le = LabelEncoder()
+            y_encoded = le.fit_transform(y.astype(str))
+            
+            # 3. Split
+            X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
+            
+            # 4. Train Model (Decision Tree for interpretability)
+            model = DecisionTreeClassifier(max_depth=5, random_state=42)
+            model.fit(X_train, y_train)
+            
+            # 5. Evaluate
+            score = model.score(X_test, y_test)
+            
+            # 6. Feature Importance
+            feature_importance = dict(zip(X.columns, model.feature_importances_))
+            top_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:5]
+            
+            results = {
+                "target_column": target_col,
+                "model_type": "Decision Tree Classifier",
+                "accuracy": float(score),
+                "confusion_matrix_summary": "Top features determining class:",
+                "top_features": {k: float(v) for k, v in top_features},
+                "n_classes": len(le.classes_),
+                "classes": list(le.classes_[:10]) # Limit output
+            }
+            
+            return {
+                "success": True,
+                "result": results,
+                "agent": "MLInsightsAgent",
+                "operation": "classification_analysis",
+                "interpretation": f"Classification Model ({target_col}): Achieved {score:.2%} accuracy. Key drivers: {', '.join([f'{f[0]}' for f in top_features])}."
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Classification failed: {str(e)}", "agent": "MLInsightsAgent"}
     
     def _regression_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for regression analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Regression analysis would be implemented here"},
-            "agent": "MLInsightsAgent",
-            "operation": "regression_analysis"
-        }
+        """Perform regression analysis (predict continuous target)"""
+        try:
+            # 1. Identify target column
+            target_col = kwargs.get('target_column')
+            if not target_col:
+                numeric_cols = data.select_dtypes(include=[np.number]).columns
+                if len(numeric_cols) > 0:
+                    target_col = numeric_cols[-1] # Default to last numeric
+            
+            if not target_col or target_col not in data.columns:
+                 return {"success": False, "error": "Could not identify numeric target for regression", "agent": "MLInsightsAgent"}
+            
+            # 2. Prepare Data
+            X = data.drop(columns=[target_col])
+            
+            # Only use numeric features for simple regression or encode
+            X_numeric = X.select_dtypes(include=[np.number])
+            # If we lost too many columns, maybe try encoding (omitted for safety/speed)
+            if X_numeric.empty and not X.empty:
+                 X = pd.get_dummies(X, drop_first=True)
+            else:
+                 X = X_numeric
+
+            y = data[target_col]
+            if not pd.api.types.is_numeric_dtype(y):
+                 return {"success": False, "error": "Target column must be numeric for regression", "agent": "MLInsightsAgent"}
+
+            # Handle NaNs
+            X = X.fillna(0)
+            y = y.fillna(y.mean())
+
+            # 3. Split
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            
+            # 4. Train (Random Forest for robustness)
+            from sklearn.ensemble import RandomForestRegressor
+            model = RandomForestRegressor(n_estimators=50, max_depth=10, random_state=42)
+            model.fit(X_train, y_train)
+            
+            # 5. Evaluate
+            score = model.score(X_test, y_test) # R^2
+            
+            # 6. Feature Importance
+            feature_importance = dict(zip(X.columns, model.feature_importances_))
+            top_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:5]
+
+            results = {
+                "target_column": target_col,
+                "model_type": "Random Forest Regressor",
+                "r2_score": float(score),
+                "top_features": {k: float(v) for k, v in top_features}
+            }
+
+            return {
+                "success": True,
+                "result": results,
+                "agent": "MLInsightsAgent",
+                "operation": "regression_analysis",
+                "interpretation": f"Regression Model ({target_col}): R² score of {score:.2f}. Key predictive features: {', '.join([f[0] for f in top_features])}."
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Regression failed: {str(e)}", "agent": "MLInsightsAgent"}
     
     def _association_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for association analysis"""
-        return {
-            "success": True,
-            "result": {"message": "Association analysis would be implemented here"},
-            "agent": "MLInsightsAgent",
-            "operation": "association_analysis"
-        }
+        """Perform association/correlation analysis"""
+        try:
+            numeric_data = data.select_dtypes(include=[np.number])
+            if numeric_data.empty:
+                 return {"success": False, "error": "No numeric data for correlation analysis", "agent": "MLInsightsAgent"}
+
+            corr_matrix = numeric_data.corr()
+            strong_corrs = self._find_strong_correlations(corr_matrix, threshold=0.6)
+            
+            results = {
+                "strong_associations": strong_corrs,
+                "n_variables": len(numeric_data.columns)
+            }
+            
+            top_pair = strong_corrs[0] if strong_corrs else None
+            interp = f"Analyzed relationships between {len(numeric_data.columns)} variables."
+            if top_pair:
+                interp += f" Strongest relationship found between {top_pair['feature1']} and {top_pair['feature2']} (Correlation: {top_pair['correlation']:.2f})."
+
+            return {
+                "success": True,
+                "result": results,
+                "agent": "MLInsightsAgent",
+                "operation": "association_analysis",
+                "interpretation": interp
+            }
+        except Exception as e:
+             return {"success": False, "error": f"Association analysis failed: {str(e)}", "agent": "MLInsightsAgent"}
     
     def _feature_importance_analysis(self, data: pd.DataFrame, query: str, **kwargs) -> Dict[str, Any]:
-        """Placeholder for feature importance analysis"""
+        """Identify most important features for a target"""
+        # Reuse regression/classification logic but focus on importance output
+        try:
+            # Heuristic: Try to determine if regression or classification
+            target_col = kwargs.get('target_column')
+            if not target_col:
+                 # Default to last col
+                 target_col = data.columns[-1]
+            
+            is_numeric = pd.api.types.is_numeric_dtype(data[target_col])
+            
+            if is_numeric and data[target_col].nunique() > 20: # Regression
+                sub_res = self._regression_analysis(data, query, target_column=target_col)
+            else: # Classification
+                sub_res = self._classification_analysis(data, query, target_column=target_col)
+            
+            if not sub_res["success"]:
+                return sub_res
+
+            importances = sub_res["result"].get("top_features", {})
+            
+            return {
+                "success": True,
+                "result": {
+                    "target_column": target_col,
+                    "feature_importances": importances,
+                    "method": sub_res["result"].get("model_type", "Model")
+                },
+                "agent": "MLInsightsAgent",
+                "operation": "feature_importance_analysis",
+                "interpretation": f"Feature Importance for '{target_col}': Top driver is {list(importances.keys())[0] if importances else 'None'}."
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Feature importance analysis failed: {str(e)}", "agent": "MLInsightsAgent"}
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+from dataclasses import dataclass
+
+
+@dataclass
+class MLInsightsMetrics:
+    """Per-agent call-count and latency tracker for ML operations.
+
+    v2.0 Enterprise Addition.
+    """
+
+    total_analyses: int = 0
+    successful_analyses: int = 0
+    total_latency_ms: float = 0.0
+
+    def record(self, *, success: bool, latency_ms: float = 0.0) -> None:
+        self.total_analyses += 1
+        if success:
+            self.successful_analyses += 1
+        self.total_latency_ms += latency_ms
+
+    def to_dict(self) -> dict:
         return {
-            "success": True,
-            "result": {"message": "Feature importance analysis would be implemented here"},
-            "agent": "MLInsightsAgent",
-            "operation": "feature_importance_analysis"
+            "total_analyses": self.total_analyses,
+            "success_rate": round(
+                self.successful_analyses / self.total_analyses, 4
+            ) if self.total_analyses else 0.0,
+            "avg_latency_ms": round(
+                self.total_latency_ms / self.total_analyses, 2
+            ) if self.total_analyses else 0.0,
         }

@@ -129,7 +129,24 @@ A full-stack, privacy-first analytics platform that combines:
 
 ---
 
-### **3. THE MULTI-AGENT SYSTEM** 🤖
+### **3. INTELLIGENT ROUTING & DYNAMIC PLANS** 🧠
+
+**The Query Orchestrator:**
+Instead of just guessing, Nexus analyzes your question's complexity.
+
+1.  **Simple Queries**: ("Show me sales") -> Routed directly to **Data Analyst**.
+2.  **Complex Logic**: ("Write a script to reverse this string") -> Engages **Dynamic Planner**.
+3.  **Specialized Tasks**: ("Forecast Q3") -> Routed to **Time Series Plugin**.
+
+**Dynamic Planner (Chain-of-Thought):**
+For coding tasks, Nexus uses a "Two Friends" approach:
+*   **Generator**: Writes the code.
+*   **Critic**: Reviews it for errors/bugs.
+*   **Loop**: They talk until the code is perfect.
+
+---
+
+### **4. THE AGENT SWARM** 🤖
 
 **Your AI Team (5 Specialized Agents):**
 
@@ -205,7 +222,7 @@ A full-stack, privacy-first analytics platform that combines:
 
 ---
 
-### **4. SPECIALIZED PLUGIN AGENTS** 🔌
+### **5. SPECIALIZED PLUGIN AGENTS** 🔌
 
 **Beyond the core 5 agents, you have 5 specialized plugins:**
 
@@ -266,7 +283,7 @@ A full-stack, privacy-first analytics platform that combines:
 
 ---
 
-### **5. VISUALIZATION CAPABILITIES** 📊
+### **6. VISUALIZATION CAPABILITIES** 📊
 
 **Chart Types Available:**
 
@@ -290,7 +307,7 @@ A full-stack, privacy-first analytics platform that combines:
 
 ---
 
-### **6. REPORT GENERATION** 📄
+### **7. REPORT GENERATION** 📄
 
 **Report Types:**
 
@@ -325,7 +342,7 @@ A full-stack, privacy-first analytics platform that combines:
 
 ---
 
-### **7. REAL-TIME FEATURES** ⚡
+### **8. REAL-TIME FEATURES** ⚡
 
 **Live Updates:**
 - Progress tracking during analysis
@@ -342,7 +359,7 @@ A full-stack, privacy-first analytics platform that combines:
 
 ---
 
-### **8. SECURITY & PRIVACY** 🔒
+### **9. SECURITY & PRIVACY** 🔒
 
 **Security Features:**
 
@@ -374,7 +391,7 @@ A full-stack, privacy-first analytics platform that combines:
 
 ---
 
-### **9. MODEL MANAGEMENT** 🧮
+### **10. MODEL MANAGEMENT** 🧮
 
 **Intelligent Model Selection:**
 
@@ -424,15 +441,15 @@ A full-stack, privacy-first analytics platform that combines:
    ↓
 5. USER ASKS QUESTION
    ↓
-6. CREWMANAGER (Orchestrator)
-   - Analyzes query intent
+6. QUERY ORCHESTRATOR (The Brain)
+   - Analyzes query complexity
    - Checks plugin capabilities
-   - Routes to best agent
+   - Routes to best agent or Dynamic Planner
    ↓
-7. AGENT SELECTION
-   Plugin Agent?
-   ├─ YES → Use specialized plugin (Statistical/Financial/etc.)
-   └─ NO → Use core agent (Data/RAG/Visualization)
+7. AGENT/STRATEGY SELECTION
+   Complex Logic?
+   ├─ YES → Engage Dynamic Planner (CoT Loop)
+   └─ NO → Route to Specialized Agent
    ↓
 8. AGENT EXECUTION
    - Data Agent: Generates Python code → Sandbox execution

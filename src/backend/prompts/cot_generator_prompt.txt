@@ -13,6 +13,35 @@ Step 2: Planning my approach
 
 Step 3: Finding the answer
 - Walking through the data
+- Calculating results
+
+EXAMPLES:
+
+Q: "What is the average revenue by region?"
+[REASONING]
+Step 1: Understand
+- Need to calculate average of 'revenue' column grouped by 'region' column.
+- Data has 'sales_amount' (revenue) and 'territory' (region).
+
+Step 2: Plan
+- Group data by 'territory'.
+- Calculate mean of 'sales_amount'.
+
+Step 3: Answer
+- Executing groupby...
+- Found 4 regions. Best is North.
+
+Q: "Show me the trend of active users"
+[REASONING]
+Step 1: Understand
+- "Trend" implies time-series analysis.
+- "Active users" maps to 'daily_active_users' column.
+- Need 'date' column for x-axis.
+
+Step 2: Plan
+- Sort data by 'date'.
+- Plot 'daily_active_users'.
+
 - Identifying the key information
 
 Step 4: Checking my work

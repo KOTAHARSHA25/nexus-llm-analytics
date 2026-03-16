@@ -1,5 +1,34 @@
-# Enhanced Report Generation System
-# Publication-ready PDF/Excel reports with headers, footers, page numbers, and professional styling
+"""Enhanced Report Generation System.
+
+Publication-ready PDF and Excel report generation with professional
+headers, footers, page numbers, branded colour palette, and
+multi-section layout (title page, TOC, executive summary, key
+findings, analysis sections, statistical summary, methodology,
+glossary, appendix).
+
+Key classes:
+
+* **ColorPalette** — Professional colour constants.
+* **NumberedCanvas** — ReportLab canvas adding headers/footers.
+* **ReportTemplate** — Report configuration dataclass.
+* **PDFReportGenerator** — Full PDF report builder.
+* **ExcelReportGenerator** — Excel workbook report builder.
+* **EnhancedReportManager** — Unified interface for both formats.
+
+Enterprise v2.0 Additions
+-------------------------
+* **ReportGenerationMetrics** — Dataclass tracking generation
+  count, format distribution, average duration, and error count.
+* Enhanced class-level and method-level docstrings throughout.
+
+All v1.x APIs (``ColorPalette``, ``NumberedCanvas``,
+``ReportTemplate``, ``PDFReportGenerator``,
+``ExcelReportGenerator``, ``EnhancedReportManager``,
+``generate_report``) remain fully backward-compatible.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
+"""
 
 import os
 import json
@@ -999,3 +1028,74 @@ def generate_report(results: List[Dict[str, Any]], format_type: str = "pdf",
     manager = EnhancedReportManager()
     template = ReportTemplate(title=title) if title else None
     return manager.generate_report(results, format_type, template, output_path)
+
+
+# ============================================================================
+# Enterprise v2.0 — ReportGenerationMetrics
+# ============================================================================
+
+import threading as _threading
+from dataclasses import dataclass as _dataclass, field as _field
+import datetime as _dt
+
+
+@_dataclass
+class ReportGenerationMetrics:
+    """Aggregate report-generation metrics for observability.
+
+    Attributes:
+        total_generated: Cumulative reports generated.
+        pdf_count: PDFs generated.
+        excel_count: Excel files generated.
+        errors: Generation failures.
+        total_duration_seconds: Cumulative wall-clock generation time.
+        last_generated: ISO-8601 timestamp of the most recent report.
+
+    .. versionadded:: 2.0
+    """
+
+    total_generated: int = 0
+    pdf_count: int = 0
+    excel_count: int = 0
+    errors: int = 0
+    total_duration_seconds: float = 0.0
+    last_generated: str = _field(
+        default_factory=lambda: _dt.datetime.now().isoformat()
+    )
+
+    _lock: _threading.Lock = _field(
+        default_factory=_threading.Lock, repr=False
+    )
+
+    def record(self, fmt: str, duration_s: float, success: bool = True) -> None:
+        """Record a single report generation.
+
+        Args:
+            fmt: Report format (``pdf`` or ``excel``).
+            duration_s: Wall-clock seconds taken.
+            success: Whether generation succeeded.
+        """
+        with self._lock:
+            self.total_generated += 1
+            self.total_duration_seconds += duration_s
+            if fmt.lower() == "pdf":
+                self.pdf_count += 1
+            elif fmt.lower() in ("excel", "xlsx"):
+                self.excel_count += 1
+            if not success:
+                self.errors += 1
+            self.last_generated = _dt.datetime.now().isoformat()
+
+    def snapshot(self) -> dict:
+        """Return a JSON-serialisable snapshot."""
+        with self._lock:
+            return {
+                "total_generated": self.total_generated,
+                "pdf_count": self.pdf_count,
+                "excel_count": self.excel_count,
+                "errors": self.errors,
+                "avg_duration_s": round(
+                    self.total_duration_seconds / max(self.total_generated, 1), 3
+                ),
+                "last_generated": self.last_generated,
+            }

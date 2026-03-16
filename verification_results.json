@@ -1,0 +1,632 @@
+[
+  {
+    "file": "1.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "1.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "1.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "1.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "1.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "1.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "1.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "1.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "1.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "analyze.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "analyze.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "analyze.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "analyze.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "analyze.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "analyze.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "analyze.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "analyze.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "analyze.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "complex_nested.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "complex_nested.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "complex_nested.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "complex_nested.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "complex_nested.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "complex_nested.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "complex_nested.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "complex_nested.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "complex_nested.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "financial_quarterly.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "financial_quarterly.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "financial_quarterly.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "financial_quarterly.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "financial_quarterly.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "financial_quarterly.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "financial_quarterly.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "financial_quarterly.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "financial_quarterly.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "integration_test.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "integration_test.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "integration_test.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "integration_test.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "integration_test.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "integration_test.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "integration_test.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "integration_test.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "integration_test.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "large_transactions.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "large_transactions.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "large_transactions.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "large_transactions.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "large_transactions.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "large_transactions.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "large_transactions.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "large_transactions.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "large_transactions.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "malformed.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "malformed.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "malformed.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "malformed.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "malformed.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "malformed.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "malformed.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "malformed.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "malformed.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "nested_manufacturing.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "nested_manufacturing.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "nested_manufacturing.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "nested_manufacturing.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "nested_manufacturing.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "nested_manufacturing.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "nested_manufacturing.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "nested_manufacturing.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "nested_manufacturing.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "sales_timeseries.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "sales_timeseries.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "sales_timeseries.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "sales_timeseries.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "sales_timeseries.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "sales_timeseries.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "sales_timeseries.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "sales_timeseries.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "sales_timeseries.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "simple.json",
+    "tier": "Simple",
+    "query": "What are the keys in this JSON file?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "simple.json",
+    "tier": "Simple",
+    "query": "Count the number of records.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "simple.json",
+    "tier": "Simple",
+    "query": "Show me a sample record.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "simple.json",
+    "tier": "Intermediate",
+    "query": "Summarize the data in this file.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "simple.json",
+    "tier": "Intermediate",
+    "query": "What are the main fields and their types?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "simple.json",
+    "tier": "Intermediate",
+    "query": "Are there any missing values?",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "simple.json",
+    "tier": "God Level",
+    "query": "Analyze the data for potential anomalies and outliers.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "simple.json",
+    "tier": "God Level",
+    "query": "Perform a deep statistical analysis of the numerical fields.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  },
+  {
+    "file": "simple.json",
+    "tier": "God Level",
+    "query": "Identification of patterns or trends in the data.",
+    "status": "Skipped (No Agent)",
+    "agent": "None"
+  }
+]

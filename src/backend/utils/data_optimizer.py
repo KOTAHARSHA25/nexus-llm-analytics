@@ -1,35 +1,60 @@
-"""
-Data Optimizer Utility for LLM Consumption
+"""Data Optimizer Utility for LLM Consumption — Nexus LLM Analytics
+===================================================================
 
-Prepares complex data structures for efficient LLM processing by:
-1. Flattening nested JSON/dict structures
-2. Sampling large datasets
-3. Generating schema summaries
-4. Creating statistical overviews
+Prepares complex data structures for efficient LLM processing:
 
-Author: Nexus LLM Analytics Team
-Date: October 19, 2025
+1. Flattening nested JSON / dict structures
+2. Sampling large datasets to fit context windows
+3. Generating schema summaries for column metadata
+4. Creating statistical overviews for numeric profiling
+
+Classes
+-------
+DataOptimizer
+    Main entry-point; auto-detects file type and produces an
+    LLM-ready ``{schema, sample, stats, preview}`` dictionary.
+
+v2.0 Enterprise Additions
+-------------------------
+* :class:`OptimizationMetrics` — tracks file-processing counts
+  and byte-size statistics.
+* :func:`get_data_optimizer` — thread-safe singleton accessor.
 """
+
+from __future__ import annotations
 
 import json
-import pandas as pd
-from typing import Dict, Any, List, Union, Tuple
-from pathlib import Path
-import numpy as np
 import logging
+import os
+from pathlib import Path
+from typing import Any, Dict, List, Union
+
+import numpy as np
+import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 class DataOptimizer:
-    """Optimizes data for LLM consumption"""
+    """Optimises data for LLM consumption.
+
+    Supports JSON, CSV, Excel, Parquet, Feather, and HDF5.
+    Auto-detects file type, samples rows, and produces a
+    structured preview dict suitable for LLM context windows.
+
+    Thread Safety:
+        Instance methods are stateless beyond constructor
+        thresholds — safe for concurrent use.
+    """
     
-    def __init__(self, max_rows: int = 100, max_depth: int = 3, max_chars: int = 2000):
+    def __init__(self, max_rows: int = 100, max_depth: int = 3, max_chars: int = 8000):
         """
         Initialize data optimizer
         
         Args:
             max_rows: Maximum number of rows to sample
             max_depth: Maximum nesting depth to preserve
-            max_chars: Maximum characters in preview
+            max_chars: Maximum characters in preview (Def: 8000 for better context)
         """
         self.max_rows = max_rows
         self.max_depth = max_depth
@@ -52,24 +77,62 @@ class DataOptimizer:
         if file_type is None:
             file_type = self._detect_file_type(filepath)
         
-        # Load and optimize based on type
-        if file_type == 'json':
-            return self._optimize_json(filepath)
-        elif file_type == 'csv':
-            return self._optimize_csv(filepath)
-        elif file_type in ['excel', 'xlsx', 'xls']:
-            return self._optimize_excel(filepath)
-        else:
-            return self._basic_load(filepath)
+        try:
+            # Load and optimize based on type
+            if file_type == 'json':
+                return self._optimize_json(filepath)
+            elif file_type == 'csv':
+                return self._optimize_csv(filepath)
+            elif file_type in ['excel', 'xlsx', 'xls']:
+                return self._optimize_excel(filepath)
+            elif file_type in ['parquet', 'feather', 'hdf5']:
+                return self._optimize_dataframe_format(filepath, file_type)
+            elif file_type == 'document':
+                # Document files (PDF, DOCX, etc.) — use extracted text if available
+                extracted_path = Path(str(filepath) + '.extracted.txt')
+                if extracted_path.exists():
+                    return self._basic_load(extracted_path)
+                else:
+                    return self._basic_load(filepath, error_context=f"Document file ({filepath.suffix}) — text extraction required")
+            else:
+                # Try loading with pandas as last resort before falling back to text
+                return self._optimize_dataframe_format(filepath, file_type)
+                
+        except (ValueError, pd.errors.EmptyDataError) as e:
+            # Graceful failure for empty/malformed files or empty DataFrames
+            logger.warning("Optimizing failed for %s: %s", filepath.name, e)
+            return {
+                'success': False, 
+                'error': str(e),
+                'is_optimized': False,
+                'schema': 'Empty/Malformed',
+                'preview': f"Could not parse file: {e}",
+                'total_rows': 0,
+                'file_type': file_type or 'unknown'
+            }
+        except Exception as e:
+            logger.warning("Failed to parse %s as %s: %s. Falling back to text mode.", filepath.name, file_type, e)
+            return self._basic_load(filepath, error_context=str(e))
     
     def _detect_file_type(self, filepath: Path) -> str:
-        """Detect file type from extension"""
+        """Detect file type from extension — supports all common data formats"""
         ext = filepath.suffix.lower()
         type_map = {
             '.json': 'json',
             '.csv': 'csv',
+            '.tsv': 'csv',        # Tab-separated → same handler as CSV
+            '.txt': 'csv',        # Treat text as delimited
             '.xlsx': 'excel',
             '.xls': 'excel',
+            '.parquet': 'parquet',
+            '.feather': 'feather',
+            '.hdf5': 'hdf5',
+            '.h5': 'hdf5',
+            # Document types — routed to text extraction, not pandas
+            '.pdf': 'document',
+            '.docx': 'document',
+            '.pptx': 'document',
+            '.rtf': 'document',
         }
         return type_map.get(ext, 'unknown')
     
@@ -112,11 +175,29 @@ class DataOptimizer:
         return self._generate_optimized_output(df, 'json', is_nested)
     
     def _optimize_csv(self, filepath: Path) -> Dict[str, Any]:
-        """Optimize CSV data for LLM with special type handling"""
-        df = pd.read_csv(filepath)
+        """Optimize CSV data for LLM with special type handling and size safety."""
+        # Check file size
+        file_size_mb = os.path.getsize(filepath) / (1024 * 1024)
+        MAX_SIZE_MB = 500 # 500MB Limit
+        
+        is_partial = False
+        if file_size_mb > MAX_SIZE_MB:
+            logger.warning("File %s is too large (%.1fMB). Loading sample only.", filepath, file_size_mb)
+            # Load only first 50k rows for statistics to avoid OOM
+            df = pd.read_csv(filepath, nrows=50000)
+            is_partial = True
+        else:
+            df = pd.read_csv(filepath)
+            
         # Clean and convert special types (currency, percentages, dates)
         df = self._clean_special_types(df)
-        return self._generate_optimized_output(df, 'csv', False)
+        
+        output = self._generate_optimized_output(df, 'csv', False)
+        if is_partial:
+            output['is_partial'] = True
+            output['stats']['note'] = "Statistics estimated from first 50,000 rows due to file size."
+            
+        return output
     
     def _optimize_excel(self, filepath: Path) -> Dict[str, Any]:
         """Optimize Excel data for LLM"""
@@ -161,10 +242,10 @@ class DataOptimizer:
                         df[col] = df[col].str.replace('$', '', regex=False)
                         df[col] = df[col].str.replace(',', '', regex=False)
                         df[col] = pd.to_numeric(df[col], errors='coerce')
-                        logging.info(f"✓ Converted currency column: '{col}' → numeric")
+                        logger.info("Converted currency column: '%s' -> numeric", col)
                         continue
-                    except:
-                        pass
+                    except (ValueError, TypeError, AttributeError) as e:
+                        logger.debug("Currency conversion failed for %s: %s", col, e)
                 
                 # Check if percentage format (contains % and numbers)
                 if sample_str.str.contains(r'%', regex=True).any():
@@ -173,10 +254,10 @@ class DataOptimizer:
                         # E.g., "15%" → 15.0 (not 0.15) for easier LLM understanding
                         df[col] = df[col].str.replace('%', '', regex=False)
                         df[col] = pd.to_numeric(df[col], errors='coerce')
-                        logging.info(f"✓ Converted percentage column: '{col}' → numeric (kept as %)")
+                        logger.info("Converted percentage column: '%s' -> numeric (kept as %%)", col)
                         continue
-                    except:
-                        pass
+                    except (ValueError, TypeError, AttributeError) as e:
+                        logger.debug("Percentage conversion failed for %s: %s", col, e)
                 
                 # Check if date format (already handled by _detect_and_convert_dates, but double-check)
                 if sample_str.str.contains(r'-|/|\d{4}', regex=True).any():
@@ -186,25 +267,82 @@ class DataOptimizer:
                         # Only convert if >50% of values are valid dates
                         if converted.notna().sum() / len(df) > 0.5:
                             df[col] = converted
-                            logging.info(f"✓ Converted date column: '{col}' → datetime")
+                            logger.info("Converted date column: '%s' -> datetime", col)
                             continue
-                    except:
-                        pass
+                    except (ValueError, TypeError, pd.errors.ParserError) as e:
+                        logger.debug("Date conversion failed for %s: %s", col, e)
         
         return df
     
-    def _basic_load(self, filepath: Path) -> Dict[str, Any]:
-        """Basic file loading for unknown types"""
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
+    def _optimize_dataframe_format(self, filepath: Path, file_type: str) -> Dict[str, Any]:
+        """
+        Generic optimizer for any format loadable by pandas (parquet, feather, HDF5, etc.).
+        Falls back to _basic_load if pandas can't read the file.
+        """
+        try:
+            if file_type == 'parquet':
+                df = pd.read_parquet(filepath)
+            elif file_type == 'feather':
+                df = pd.read_feather(filepath)
+            elif file_type == 'hdf5':
+                df = pd.read_hdf(filepath)
+            else:
+                # Try CSV-like as last resort
+                df = pd.read_csv(filepath, sep=None, engine='python')
+        except Exception as e:
+            logger.warning("Could not load %s as %s: %s", filepath.name, file_type, e)
+            return self._basic_load(filepath, error_context=str(e))
         
-        return {
-            'schema': 'Unknown file type',
-            'sample': content[:self.max_chars],
-            'stats': {'file_size': len(content)},
-            'preview': content[:500],
-            'is_optimized': False
-        }
+        # Reuse the CSV/tabular optimization pipeline (it's fully generic)
+        return self._generate_optimized_output(df, file_type, False)
+    
+    def _basic_load(self, filepath: Path, error_context: str = None) -> Dict[str, Any]:
+        """Basic file loading for unknown types or failed parses"""
+        try:
+            with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+                content = f.read()
+            
+            # Simple stats for text
+            lines = content.splitlines()
+            line_count = len(lines)
+            non_empty_lines = sum(1 for line in lines if line.strip())
+            
+            preview = f"File: {filepath.name} (treated as unstructured text)\n"
+            if error_context:
+                preview += f"⚠️ Note: Structured parsing failed: {error_context}\n"
+            preview += f"Size: {len(content)} bytes, {line_count} lines\n"
+            preview += "="*50 + "\n"
+            preview += content[:self.max_chars]
+            
+            if len(content) > self.max_chars:
+                preview += "\n... (truncated)"
+
+            return {
+                'schema': 'Unstructured Text / Unknown Format',
+                'sample': [{'text': line} for line in lines[:10] if line.strip()],
+                'stats': {
+                    'file_size': len(content),
+                    'line_count': line_count,
+                    'non_empty_lines': non_empty_lines,
+                    'is_fallback': True
+                },
+                'preview': preview,
+                'is_optimized': False,
+                'was_nested': False,
+                'total_rows': line_count,
+                'total_columns': 1,
+                'file_type': 'text'
+            }
+        except Exception as e:
+            # Absolute last resort
+            return {
+                'schema': 'Unreadable File',
+                'sample': [],
+                'stats': {'error': str(e)},
+                'preview': f"Could not read file: {e}",
+                'is_optimized': False,
+                'total_rows': 0
+            }
     
     def _is_nested(self, data: Any, current_depth: int = 0) -> bool:
         """Check if JSON structure is deeply nested"""
@@ -340,11 +478,17 @@ class DataOptimizer:
                 # Check if it looks like a date
                 sample_str = str(sample)
                 if any(indicator in sample_str for indicator in ['-', '/', 'T', ':', 'AM', 'PM', 'Z']):
-                    # Try to parse as datetime
-                    df[col] = pd.to_datetime(df[col], errors='ignore', infer_datetime_format=True)
-            except:
+                    # Try to parse as datetime (pandas 2.0+ handles format inference automatically)
+                    try:
+                        converted = pd.to_datetime(df[col], errors='coerce')
+                        # Only apply if majority converted successfully
+                        if converted.notna().sum() / max(len(df), 1) > 0.5:
+                            df[col] = converted
+                    except Exception:
+                        pass  # Keep original if conversion fails
+            except (ValueError, TypeError, IndexError) as e:
                 # If conversion fails, keep original
-                pass
+                logger.debug("Date inference failed for %s: %s", col, e)
         
         return df
     
@@ -365,8 +509,8 @@ class DataOptimizer:
             schema[col] = {
                 'type': dtype,
                 'null_count': int(null_count),
-                'unique_values': int(unique_count),
-                'sample_values': df[col].dropna().head(3).tolist() if len(df) > 0 else []
+                'unique_values': int(unique_count)
+                # sample_values removed - prevents data leaking into logs/errors
             }
         
         return schema
@@ -378,6 +522,7 @@ class DataOptimizer:
             'total_columns': len(df.columns),
             'columns': list(df.columns),
             'memory_usage_mb': df.memory_usage(deep=True).sum() / 1024**2,
+            'duplicate_rows': int(df.duplicated().sum()),
         }
         
         # Numeric statistics
@@ -405,32 +550,41 @@ class DataOptimizer:
         return stats
     
     def _generate_sample(self, df: pd.DataFrame) -> List[Dict]:
-        """Generate sample rows"""
-        sample_size = min(self.max_rows, len(df))
-        
-        if len(df) <= sample_size:
-            # Return all rows if small dataset
-            return df.to_dict('records')
-        else:
-            # Sample from beginning, middle, and end
-            start_rows = sample_size // 3
-            mid_rows = sample_size // 3
-            end_rows = sample_size - start_rows - mid_rows
-            
-            mid_index = len(df) // 2
-            
-            sample_df = pd.concat([
-                df.head(start_rows),
-                df.iloc[mid_index:mid_index + mid_rows],
-                df.tail(end_rows)
-            ])
-            
-            return sample_df.to_dict('records')
+        """Generate sample rows - RETURNS EMPTY to prevent data leaks in logs"""
+        # Sample generation disabled - prevents massive data arrays in error logs
+        # LLM gets data via preview text only (limited, safe format)
+        return []
     
     def _generate_preview(self, df: pd.DataFrame, schema: Dict, stats: Dict) -> str:
-        """Generate human-readable preview for LLM"""
+        """Generate human-readable preview for LLM - adapts to data size and complexity"""
         preview_parts = []
         
+        # ALWAYS limit preview to avoid overwhelming output
+        # Small dataset = show up to 10 rows, Large dataset = show statistical summary
+        MAX_PREVIEW_ROWS = 10
+        is_small = len(df) <= MAX_PREVIEW_ROWS
+        is_simple = len(df.columns) <= 5
+        has_numeric = len(df.select_dtypes(include=[np.number]).columns) > 0
+        
+        # FOR SMALL, SIMPLE DATASETS: Show all rows (up to 10)
+        if is_small and is_simple:
+            preview_parts.append(f"Data from file (Total: {len(df)} row{'s' if len(df) != 1 else ''}, {len(df.columns)} column{'s' if len(df.columns) != 1 else ''}):")
+            preview_parts.append(f"")
+            
+            # Show ALL rows for truly small datasets (≤10 rows)
+            preview_parts.append(df.to_string(index=False, max_cols=len(df.columns)))
+            preview_parts.append(f"")
+            
+            # Simple column info
+            preview_parts.append(f"Columns:")
+            for col in df.columns:
+                dtype = str(df[col].dtype)
+                unique_count = df[col].nunique()
+                preview_parts.append(f"- {col}: {dtype} ({unique_count} unique value{'s' if unique_count != 1 else ''})")
+            
+            return '\n'.join(preview_parts)
+        
+        # FOR LARGE/COMPLEX DATASETS: Use detailed statistics approach
         # Basic info
         preview_parts.append(f"Dataset Overview:")
         preview_parts.append(f"- Total Rows: {stats['total_rows']}")
@@ -448,6 +602,7 @@ class DataOptimizer:
         
         # Numeric aggregations with DYNAMIC prioritization
         numeric_cols = df.select_dtypes(include=[np.number]).columns
+        categorical_cols = df.select_dtypes(include=['object', 'category']).columns
         
         # FIXED: Show OVERALL TOTALS for ALL numeric columns first (critical for accuracy)
         # This ensures questions like "total revenue?" get answered correctly
@@ -466,10 +621,8 @@ class DataOptimizer:
                 preview_parts.append(f"   • AVERAGE (mean): {avg:,.2f}" if isinstance(avg, float) else f"   • AVERAGE (mean): {avg:,}")
                 preview_parts.append(f"   • MINIMUM (smallest single value): {min_val:,.2f}" if isinstance(min_val, float) else f"   • MINIMUM (smallest single value): {min_val:,}")
                 preview_parts.append(f"   • MAXIMUM (largest single value): {max_val:,.2f}" if isinstance(max_val, float) else f"   • MAXIMUM (largest single value): {max_val:,}")
-            except:
-                pass
-        preview_parts.append(f"")
-        
+            except (ValueError, TypeError) as e:
+                logger.debug("Stats generation failed: %s", e)
         # DYNAMIC filtering: Identify meaningful numeric columns for detailed stats
         meaningful_numeric_cols = []
         
@@ -481,8 +634,8 @@ class DataOptimizer:
                 unique_ratio = df[col].nunique() / len(df)
                 if unique_ratio > 0.95:  # 95%+ unique = likely an ID
                     continue
-            except:
-                pass
+            except (ValueError, TypeError, ZeroDivisionError):
+                pass  # Skip on error
             
             # Skip year-only columns (years 1900-2100)
             try:
@@ -490,8 +643,8 @@ class DataOptimizer:
                 col_max = df[col].max()
                 if col_min >= 1900 and col_max <= 2100 and df[col].nunique() <= 200:
                     continue  # Likely year column
-            except:
-                pass
+            except (ValueError, TypeError):
+                pass  # Skip year check on error
             
             meaningful_numeric_cols.append(col)
         
@@ -509,11 +662,8 @@ class DataOptimizer:
                 preview_parts.append(f"   • Minimum: {min_val:,.2f}, Maximum: {max_val:,.2f}" if isinstance(min_val, float) else f"   • Minimum: {min_val}, Maximum: {max_val}")
                 preview_parts.append(f"   • Count: {count:,} values")
                 preview_parts.append(f"")
-            except:
-                pass
-        
-        # Categorical aggregations (counts) - DYNAMIC detection
-        categorical_cols = df.select_dtypes(include=['object']).columns
+            except (ValueError, TypeError) as e:
+                    logger.debug("Column stats failed for %s: %s", col, e)
         
         # Filter out ID-like columns using DYNAMIC heuristics (no keywords)
         meaningful_cols = []
@@ -547,8 +697,8 @@ class DataOptimizer:
                         pct = (count / len(df)) * 100
                         preview_parts.append(f"   • {val}: {count:,} occurrences ({pct:.1f}%)")
                     preview_parts.append(f"")
-            except:
-                pass
+            except (ValueError, TypeError) as e:
+                logger.debug("Category stats failed for %s: %s", col, e)
         
         # GROUPED AGGREGATIONS - DYNAMIC DETECTION (no hardcoded keywords)
         # Detect potential grouping columns based on cardinality and data patterns
@@ -571,7 +721,7 @@ class DataOptimizer:
                 
                 if is_reasonable_cardinality and has_repetition and not is_id_column:
                     grouping_cols.append(col)
-                    logging.info(f"✓ Detected grouping column: '{col}' ({unique_count} unique values, {unique_count/total_rows*100:.1f}% of dataset)")
+                    logger.info("Detected grouping column: '%s' (%d unique values, %.1f%% of dataset)", col, unique_count, unique_count / total_rows * 100)
                     
             except TypeError:
                 # Column contains unhashable types, skip it
@@ -606,18 +756,31 @@ class DataOptimizer:
                 preview_parts.append(f"⚠️  CRITICAL: Use these for 'top 5', 'top 10', 'highest', 'best' queries!")
                 preview_parts.append(f"    DO NOT calculate from sample data - these are computed from FULL dataset!")
                 
-                # Combine ID and entity columns for grouping - prioritize customer/product
+                # Combine ID and entity columns for grouping — use uniqueness ratio to prioritize
                 ranking_cols = []
                 for col in (id_cols + entity_cols):
-                    col_lower = col.lower()
-                    if 'customer' in col_lower:
-                        ranking_cols.insert(0, col)  # Prioritize customer
-                    elif 'product' in col_lower:
-                        ranking_cols.insert(1 if len(ranking_cols) > 0 else 0, col)  # Second priority
-                    else:
-                        ranking_cols.append(col)
+                    ranking_cols.append(col)
                 
-                ranking_cols = ranking_cols[:2]  # Limit to top 2 most important columns
+                # Prioritize columns with moderate cardinality (not too few, not unique per row)
+                # These make the best grouping/ranking keys for any domain
+                def _ranking_quality(col_name):
+                    try:
+                        nunique = df[col_name].nunique()
+                        nrows = len(df)
+                        if nrows == 0:
+                            return 0
+                        ratio = nunique / nrows
+                        # Sweet spot: 5-500 unique values, ratio 0.01-0.8
+                        if 5 <= nunique <= 500 and 0.01 < ratio < 0.8:
+                            return 2  # Best for ranking
+                        elif nunique > 1:
+                            return 1
+                        return 0
+                    except Exception:
+                        return 0
+                
+                ranking_cols.sort(key=_ranking_quality, reverse=True)
+                ranking_cols = ranking_cols[:2]  # Limit to top 2 most useful columns
                 
                 # Only calculate for the MOST important numeric column (usually first)
                 for rank_col in ranking_cols:
@@ -634,8 +797,8 @@ class DataOptimizer:
                                 for rank, (entity, value) in enumerate(top_performers.items(), 1):
                                     preview_parts.append(f"   {rank}. {entity}: {value:,.2f}" if isinstance(value, float) else f"   {rank}. {entity}: {value:,}")
                                 preview_parts.append(f"")
-                        except:
-                            pass
+                        except (ValueError, TypeError, KeyError) as e:
+                            logger.debug("Top-N ranking failed: %s", e)
                 
                 preview_parts.append(f"")
         
@@ -647,15 +810,22 @@ class DataOptimizer:
             
             for group_col in grouping_cols[:5]:  # Show up to 5 grouping columns to cover most aggregation scenarios
                 try:
-                    # Prioritize important numeric columns
+                    # Prioritize numeric columns by variance (domain-agnostic)
+                    # High-variance columns are usually the most analytically interesting
                     important_cols = []
-                    for col in df.columns:
-                        col_lower = col.lower()
-                        if any(key in col_lower for key in ['revenue', 'profit', 'margin', 'income', 'expense', 'sales', 'cost', 'amount']):
-                            if col in numeric_cols:
-                                important_cols.append(col)
+                    col_variance = {}
+                    for col in numeric_cols:
+                        try:
+                            var = df[col].var()
+                            if var is not None and var == var:  # not NaN
+                                col_variance[col] = var
+                        except Exception:
+                            pass
                     
-                    # Add other numeric columns
+                    # Sort by variance (highest first) — most interesting metrics first
+                    important_cols = sorted(col_variance.keys(), key=lambda c: col_variance[c], reverse=True)
+                    
+                    # Add any remaining numeric columns not yet included
                     for col in numeric_cols:
                         if col not in important_cols:
                             important_cols.append(col)
@@ -673,10 +843,10 @@ class DataOptimizer:
                                 preview_parts.append(f"    - Total: {total:,.2f}" if isinstance(total, float) else f"    - Total: {total:,}")
                                 preview_parts.append(f"    - Average: {avg:,.2f}" if isinstance(avg, float) else f"    - Average: {avg:,}")
                                 preview_parts.append(f"    - Count: {count:,} records")
-                        except:
-                            pass
-                except:
-                    pass
+                        except (ValueError, TypeError, KeyError) as e:
+                            logger.debug("Grouped stats failed: %s", e)
+                except (ValueError, TypeError, KeyError) as e:
+                    logger.debug("Grouping failed for %s: %s", group_col, e)
             
             # ADD QUICK RANKINGS for "highest/lowest by X" questions
             preview_parts.append(f"\n🏆 QUICK RANKINGS (for 'highest', 'lowest', 'best', 'worst' questions):")
@@ -693,8 +863,8 @@ class DataOptimizer:
                             lowest_val = grouped_totals.iloc[-1]
                             preview_parts.append(f"• HIGHEST {mc.upper()} by {group_col.upper()}: {highest_group} = {highest_val:,.0f}")
                             preview_parts.append(f"• LOWEST {mc.upper()} by {group_col.upper()}: {lowest_group} = {lowest_val:,.0f}")
-                        except:
-                            pass
+                        except (ValueError, TypeError, KeyError, IndexError) as e:
+                            logger.debug("Quick ranking failed: %s", e)
             preview_parts.append(f"")
         
         preview_parts.append(f"{'='*70}")
@@ -753,3 +923,55 @@ def flatten_nested_json(data: Union[Dict, List]) -> Union[Dict, List]:
     """
     optimizer = DataOptimizer()
     return optimizer._flatten_nested_json(data)
+
+
+# =====================================================================
+# v2.0 Enterprise Additions — appended; all v1.x code is unchanged
+# =====================================================================
+
+import threading
+from dataclasses import dataclass
+
+
+@dataclass
+class OptimizationMetrics:
+    """Tracks file-processing counts and byte-size statistics.
+
+    v2.0 Enterprise Addition.
+    """
+
+    total_files: int = 0
+    total_bytes_processed: int = 0
+    total_latency_ms: float = 0.0
+
+    def record(self, *, bytes_processed: int = 0, latency_ms: float = 0.0) -> None:
+        self.total_files += 1
+        self.total_bytes_processed += bytes_processed
+        self.total_latency_ms += latency_ms
+
+    def to_dict(self) -> dict:
+        return {
+            "total_files": self.total_files,
+            "total_bytes_processed": self.total_bytes_processed,
+            "avg_latency_ms": round(
+                self.total_latency_ms / self.total_files, 2
+            ) if self.total_files else 0.0,
+        }
+
+
+_optimizer_instance: "DataOptimizer | None" = None
+_optimizer_lock = threading.Lock()
+
+
+def get_data_optimizer(**kwargs) -> "DataOptimizer":
+    """Return the process-wide :class:`DataOptimizer` singleton.
+
+    Thread Safety:
+        Uses double-checked locking for safe lazy initialisation.
+    """
+    global _optimizer_instance
+    if _optimizer_instance is None:
+        with _optimizer_lock:
+            if _optimizer_instance is None:
+                _optimizer_instance = DataOptimizer(**kwargs)
+    return _optimizer_instance

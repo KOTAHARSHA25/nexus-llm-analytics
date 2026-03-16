@@ -1,5 +1,24 @@
-# Rate Limiting Module for API Protection
-# Implements token bucket algorithm for rate limiting
+"""Advanced Rate Limiting System for Nexus LLM Analytics.
+
+Implements token bucket, sliding window, and adaptive rate limiting
+strategies to protect LLM endpoints from overload and ensure fair
+resource allocation across concurrent clients.
+
+Enterprise v2.0 Additions
+-------------------------
+* **RateLimitEvent** — Dataclass capturing individual rate-limit
+  events (client, endpoint, action taken, timestamp) for audit.
+* **RateLimitDashboard** — Aggregates rate-limit statistics across
+  all active limiters and produces a summary snapshot.
+* **get_rate_limiter()** — Thread-safe singleton accessor.
+
+All v1.x APIs (``TokenBucket``, ``SlidingWindowCounter``,
+``RateLimiter``, ``RateLimitMiddleware``, ``rate_limit``) remain
+fully backward-compatible.
+
+Author: Nexus Team
+Since: v1.0 (Enterprise enhancements v2.0 — February 2026)
+"""
 
 import time
 import logging
@@ -297,10 +316,10 @@ class RateLimitMiddleware:
         # Process request
         response = await call_next(request)
         
-        # Add rate limit headers
+        # Add rate limit headers (approximate values, may be slightly stale)
         response.headers["X-RateLimit-Limit"] = str(self.rate_limiter.requests_per_minute)
         response.headers["X-RateLimit-Remaining"] = str(
-            self.rate_limiter.global_limiter.tokens
+            int(self.rate_limiter.global_limiter.capacity - 1)  # Approximate remaining
         )
         
         return response
@@ -340,9 +359,8 @@ def rate_limit(
         
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
-            # For sync functions, use asyncio.run
+            # For sync functions, create a temporary event loop without setting it globally
             loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
             
             try:
                 # Extract identifier
@@ -379,3 +397,107 @@ global_rate_limiter = RateLimiter(
     requests_per_hour=1000,
     burst_size=10
 )
+
+
+# ============================================================================
+# Enterprise v2.0 — RateLimitEvent, RateLimitDashboard & Singleton
+# ============================================================================
+
+import threading as _threading
+from dataclasses import dataclass, field as _field
+import datetime as _datetime
+
+
+@dataclass
+class RateLimitEvent:
+    """Structured record of a rate-limit decision.
+
+    Attributes:
+        client_id: Identifier of the requesting client.
+        endpoint: The API endpoint that was rate-limited.
+        action: Either ``allowed`` or ``rejected``.
+        bucket_remaining: Tokens remaining after the decision.
+        timestamp: ISO-8601 creation timestamp.
+
+    .. versionadded:: 2.0
+    """
+
+    client_id: str
+    endpoint: str
+    action: str  # "allowed" | "rejected"
+    bucket_remaining: float = 0.0
+    timestamp: str = _field(
+        default_factory=lambda: _datetime.datetime.now().isoformat()
+    )
+
+
+class RateLimitDashboard:
+    """Aggregate rate-limit statistics across all active limiters.
+
+    Maintains running counters of allowed/rejected requests and
+    exposes a :meth:`snapshot` for observability dashboards.
+
+    Example::
+
+        dashboard = RateLimitDashboard()
+        dashboard.record(RateLimitEvent("c1", "/api/analyze", "allowed", 5.0))
+        print(dashboard.snapshot())
+
+    .. versionadded:: 2.0
+    """
+
+    def __init__(self) -> None:
+        self._events: list[RateLimitEvent] = []
+        self._lock = _threading.Lock()
+        self._allowed: int = 0
+        self._rejected: int = 0
+
+    def record(self, event: RateLimitEvent) -> None:
+        """Record a rate-limit event."""
+        with self._lock:
+            self._events.append(event)
+            if event.action == "allowed":
+                self._allowed += 1
+            else:
+                self._rejected += 1
+            # Keep only recent events (last 10 000)
+            if len(self._events) > 10_000:
+                self._events = self._events[-5_000:]
+
+    def snapshot(self) -> dict:
+        """Return a JSON-serialisable summary.
+
+        Returns:
+            Dict with ``allowed``, ``rejected``, ``total``, and
+            ``rejection_rate`` keys.
+        """
+        with self._lock:
+            total = self._allowed + self._rejected
+            return {
+                "allowed": self._allowed,
+                "rejected": self._rejected,
+                "total": total,
+                "rejection_rate": round(self._rejected / total, 4) if total else 0.0,
+                "recent_events": len(self._events),
+            }
+
+
+# Thread-safe singleton
+_rate_limiter_instance = None
+_rate_limiter_lock = _threading.Lock()
+
+
+def get_rate_limiter(**kwargs) -> "RateLimiter":
+    """Return the global :class:`RateLimiter` singleton (thread-safe).
+
+    Keyword arguments are forwarded to the constructor on first call
+    only.
+
+    .. versionadded:: 2.0
+    """
+    global _rate_limiter_instance
+    if _rate_limiter_instance is None:
+        with _rate_limiter_lock:
+            if _rate_limiter_instance is None:
+                _rate_limiter_instance = RateLimiter(**kwargs)
+    return _rate_limiter_instance

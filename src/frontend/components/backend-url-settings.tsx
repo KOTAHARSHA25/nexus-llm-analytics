@@ -7,13 +7,26 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2, XCircle, Loader2, Globe, Laptop } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, Globe, Laptop, Share2, Copy } from "lucide-react";
 
 interface BackendHealth {
   status: string;
   timestamp: string;
   version?: string;
   ollama_running?: boolean;
+}
+
+interface NetworkInfo {
+  local_ip: string;
+  backend_url: string;
+  websocket_url: string;
+  share_instructions: {
+    step1: string;
+    step2: string;
+    step3: string;
+    step4: string;
+  };
+  firewall_note: string;
 }
 
 export function BackendUrlSettings() {
@@ -26,13 +39,35 @@ export function BackendUrlSettings() {
     health?: BackendHealth;
   } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // Load saved backend URL on mount
   useEffect(() => {
     const savedUrl = localStorage.getItem("nexus_backend_url") || "http://localhost:8000";
     setBackendUrl(savedUrl);
     setCustomUrl(savedUrl);
+    // Fetch network info from the current backend
+    fetchNetworkInfo(savedUrl);
   }, []);
+
+  const fetchNetworkInfo = async (url: string) => {
+    try {
+      const response = await fetch(`${url}/api/health/network-info`);
+      if (response.ok) {
+        const data = await response.json();
+        setNetworkInfo(data);
+      }
+    } catch (error) {
+      // Silently fail - network info is optional
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const testConnection = async (url: string) => {
     setIsTestingConnection(true);
@@ -250,6 +285,43 @@ export function BackendUrlSettings() {
             </ol>
           </div>
         </div>
+
+        {/* Network Sharing Section */}
+        {networkInfo && (
+          <div className="rounded-lg border border-green-500/30 bg-green-500/5 p-4 space-y-3">
+            <div className="flex items-center gap-2 font-semibold text-green-500">
+              <Share2 className="h-4 w-4" />
+              Share with Other Devices
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Other devices on the same WiFi network can connect to your backend using:
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono">
+                {networkInfo.backend_url}
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(networkInfo.backend_url)}
+              >
+                {copied ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>📱 <strong>On the other device:</strong></p>
+              <ol className="list-decimal list-inside pl-2">
+                <li>Open Nexus LLM Analytics</li>
+                <li>Go to Backend Connection settings</li>
+                <li>Paste the URL above and click Save</li>
+              </ol>
+            </div>
+          </div>
+        )}
 
         {/* Warning */}
         <Alert>
