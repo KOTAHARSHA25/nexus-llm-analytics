@@ -9,32 +9,108 @@
     },
     "comment": "Model tiers for intelligent routing based on query complexity"
   },
-  
   "query_analysis": {
     "code_generation_keywords": [
-      "calculate", "compute", "sum", "average", "mean", "total",
-      "count", "group by", "aggregate", "filter", "sort", "rank",
-      "correlation", "percentage", "ratio", "compare", "maximum",
-      "minimum", "median", "standard deviation", "variance",
-      "top", "bottom", "highest", "lowest", "by region", "by category",
-      "per", "each", "distribution", "breakdown", "categorize", 
-      "category", "categories", "segment", "classify", "analyze",
-      "forecast", "predict", "trend", "pattern",
-      "monthly", "daily", "yearly", "quarterly"
+      "calculate",
+      "compute",
+      "sum",
+      "average",
+      "mean",
+      "total",
+      "count",
+      "group by",
+      "aggregate",
+      "filter",
+      "sort",
+      "rank",
+      "correlation",
+      "percentage",
+      "ratio",
+      "compare",
+      "maximum",
+      "minimum",
+      "median",
+      "standard deviation",
+      "variance",
+      "top",
+      "bottom",
+      "highest",
+      "lowest",
+      "by region",
+      "by category",
+      "per",
+      "each",
+      "distribution",
+      "breakdown",
+      "categorize",
+      "category",
+      "categories",
+      "segment",
+      "classify",
+      "analyze",
+      "forecast",
+      "predict",
+      "trend",
+      "pattern",
+      "monthly",
+      "daily",
+      "yearly",
+      "quarterly",
+      "list",
+      "find",
+      "show me",
+      "which",
+      "who",
+      "whose",
+      "above",
+      "below",
+      "greater than",
+      "less than",
+      "more than",
+      "at least",
+      "at most",
+      "between",
+      "equal",
+      "not equal",
+      "exceeds",
+      "exceed",
+      "with",
+      "having",
+      "where",
+      "that have",
+      "that are",
+      "ids",
+      "records",
+      "entries",
+      "rows",
+      "items"
     ],
     "multi_step_keywords": [
-      "and then", "after that", "then predict", "correlation", 
-      "forecast", "trend", "then identify", "then recommend"
+      "and then",
+      "after that",
+      "then predict",
+      "correlation",
+      "forecast",
+      "trend",
+      "then identify",
+      "then recommend"
     ],
     "condition_keywords": [
-      "where", "if", "when", "filter", "group by", "for each"
+      "where",
+      "if",
+      "when",
+      "filter",
+      "group by",
+      "for each"
     ],
     "simple_query_patterns": [
-      "what is", "show", "list", "get", "tell me"
+      "what is",
+      "show",
+      "get",
+      "tell me"
     ],
     "comment": "Domain-agnostic query analysis patterns - customize for your domain"
   },
-  
   "dynamic_planner": {
     "enabled": true,
     "inject_into_prompts": true,
@@ -44,7 +120,6 @@
     "skip_fallback_plans": true,
     "comment": "DynamicPlanner configuration - generates step-by-step analysis strategies"
   },
-  
   "circuit_breaker": {
     "enabled": true,
     "circuits": {
@@ -82,28 +157,27 @@
     "metrics_enabled": true,
     "comment": "Circuit breaker protection for all LLM operations - prevents cascade failures"
   },
-  
   "cot_review": {
     "enabled": true,
     "auto_enable_on_routing": true,
     "complexity_threshold": 0.5,
     "max_iterations": 2,
     "timeout_per_iteration_seconds": 30,
-    
     "activation_rules": {
       "always_on_complexity": 0.7,
-      "optional_range": [0.3, 0.7],
+      "optional_range": [
+        0.3,
+        0.7
+      ],
       "always_on_code_gen": true,
       "comment": "When to activate Two Friends Model (Generator + Critic review)"
     },
-    
     "tags": {
       "reasoning_start": "[REASONING]",
       "reasoning_end": "[/REASONING]",
       "output_start": "[OUTPUT]",
       "output_end": "[/OUTPUT]"
     },
-    
     "generator": {
       "role": "generator",
       "model_source": "dynamic",
@@ -111,7 +185,6 @@
       "temperature": 0.7,
       "system_prompt_template": "cot_generator_prompt.txt"
     },
-    
     "critic": {
       "role": "critic",
       "model_source": "dynamic",
@@ -119,14 +192,12 @@
       "temperature": 0.3,
       "system_prompt_template": "cot_critic_prompt.txt"
     },
-    
     "feedback_synthesis": {
       "include_original_query": true,
       "include_previous_attempts": true,
       "max_history_iterations": 2,
       "format": "structured"
     },
-    
     "performance_tracking": {
       "log_iterations": true,
       "log_reasoning_chains": false,

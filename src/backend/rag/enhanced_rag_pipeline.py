@@ -49,6 +49,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from collections import defaultdict
 
+from backend.core.mode_manager import get_mode_manager
+
 logger = logging.getLogger(__name__)
 
 
@@ -582,6 +584,51 @@ class EnhancedRAGPipeline:
         self.min_confidence = min_confidence
         
         self._indexed = False
+
+    # ------------------------------------------------------------------
+    # Online embedding helper — Cohere → HuggingFace → local (None)
+    # ------------------------------------------------------------------
+
+    def embed_texts(
+        self, texts: List[str], input_type: str = "search_document"
+    ) -> Optional[List[List[float]]]:
+        """Generate embeddings using online APIs when in ONLINE mode.
+
+        Returns a list of float vectors if an online embedding client is
+        available, or ``None`` to signal that the caller should fall back
+        to its own local embedding strategy.
+
+        Args:
+            texts: List of strings to embed.
+            input_type: ``"search_document"`` for indexing,
+                        ``"search_query"`` for retrieval.
+
+        Returns:
+            List of float vectors, or ``None`` on failure / offline mode.
+        """
+        try:
+            mode_mgr = get_mode_manager()
+            if mode_mgr.get_mode() != "online":
+                return None
+            embed_client = mode_mgr.get_embedding_client()
+            if embed_client is None:
+                return None
+            return embed_client.embed_documents(texts) if input_type == "search_document" \
+                else [embed_client.embed_query(t) for t in texts]
+        except Exception as e:
+            logger.warning(
+                "[ModeManager] Embedding client failed, falling back to local embeddings. Error: %s", e
+            )
+            return None
+
+    def embed_query(self, query: str) -> Optional[List[float]]:
+        """Generate a single query embedding via online APIs.
+
+        Returns ``None`` when offline or when all online attempts fail,
+        signalling the caller to use its local embedding path.
+        """
+        result = self.embed_texts([query], input_type="search_query")
+        return result[0] if result else None
     
     def index_documents(self, documents: List[Dict[str, Any]]) -> None:
         """

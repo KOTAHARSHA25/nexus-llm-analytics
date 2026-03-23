@@ -66,6 +66,8 @@ if TYPE_CHECKING:
     from backend.core.engine.query_orchestrator import QueryOrchestrator
     from backend.core.query_parser import AdvancedQueryParser
 
+from backend.core.mode_manager import get_mode_manager
+
 # ---------------------------------------------------------------------------
 # Module-level singleton state
 # ---------------------------------------------------------------------------
@@ -200,6 +202,14 @@ class ModelManager:
         Raises:
             RuntimeError: If LLMClient initialization fails.
         """
+        # Online mode: Ollama is not required — return None instead of attempting connection
+        try:
+            from backend.core.mode_manager import get_mode_manager as _gmm
+            if _gmm().get_mode() == "online":
+                return None  # type: ignore[return-value]
+        except Exception:
+            pass
+
         if self._llm_client is None and self._llm_client_sentinel.state != _InitState.FAILED:
             with self._llm_client_lock:
                 if self._llm_client is None and self._llm_client_sentinel.state != _InitState.FAILED:
@@ -374,9 +384,18 @@ class ModelManager:
 
         t0 = time.monotonic()
 
+        # In online mode llm_client is Ollama-only — skip it so Ollama is not required
+        _online = False
+        try:
+            from backend.core.mode_manager import get_mode_manager as _gmm
+            _online = _gmm().get_mode() == "online"
+        except Exception:
+            pass
+
         # Critical path — must succeed or raise
         # If any step fails, _initialized stays False so next call retries
-        _ = self.llm_client
+        if not _online:
+            _ = self.llm_client  # Only needed for Ollama path
         _ = self.primary_llm
         _ = self.review_llm
 
@@ -516,9 +535,21 @@ class ModelManager:
         Returns:
             Same structure as ``warmup()``.
         """
+        # Online mode: Ollama warmup is not needed — cloud APIs are already active
+        try:
+            from backend.core.mode_manager import get_mode_manager as _gmm
+            if _gmm().get_mode() == "online":
+                logger.info("Online mode — skipping Ollama warmup")
+                return {"success": True, "latency_seconds": 0.0, "model": "online", "response": "online"}
+        except Exception:
+            pass
+
         t0 = time.monotonic()
         try:
             client = self.llm_client
+            if client is None:
+                return {"success": False, "latency_seconds": 0.0, "model": "unknown", "error": "No LLM client (Ollama not running?)"}
+
             response = await client.generate_primary_async(
                 prompt="Say 'ready' in one word."
             )
@@ -720,6 +751,72 @@ class ModelManager:
         """
         t0 = time.monotonic()
 
+        # --- Online mode: use ModeManager cloud client if available ---
+        try:
+            _mode_mgr = get_mode_manager()
+            if _mode_mgr.get_mode() == "online":
+                _online_client = _mode_mgr.get_llm_client()
+                if _online_client is not None:
+                    # Wrap cloud client in a thin LangChain-compatible shim
+                    # with runtime fallback: Groq → OpenRouter
+                    class _OnlineLLMShim:
+                        """Minimal shim so agents can call .invoke(prompt).
+                        
+                        Includes runtime fallback: if the primary client
+                        raises an exception (e.g. 403 from expired Groq key),
+                        automatically retries with the next available client.
+                        """
+                        def __init__(self, mode_mgr, tier):
+                            self._mode_mgr = mode_mgr
+                            self._tier = tier
+                        def invoke(self, prompt, **kwargs):
+                            # Build ordered client chain
+                            clients = []
+                            _groq = self._mode_mgr._get_groq()
+                            if _groq:
+                                clients.append((_groq, "Groq"))
+                            _gemini = self._mode_mgr._get_gemini()
+                            if _gemini:
+                                clients.append((_gemini, "Gemini"))
+                            _or = self._mode_mgr._get_openrouter()
+                            if _or:
+                                clients.append((_or, "OpenRouter"))
+                            
+                            last_err = None
+                            for client, name in clients:
+                                try:
+                                    return client.generate(
+                                        str(prompt), tier=self._tier
+                                    )
+                                except Exception as e:
+                                    last_err = e
+                                    logger.warning(
+                                        "Online LLM %s failed (%s), trying next...",
+                                        name, e
+                                    )
+                            
+                            raise RuntimeError(
+                                f"All online LLM clients failed. Last error: {last_err}"
+                            )
+                        def __call__(self, prompt, **kwargs):
+                            return self.invoke(prompt, **kwargs)
+
+                    self._primary_llm = _OnlineLLMShim(_mode_mgr, "complex")
+                    self._review_llm = _OnlineLLMShim(_mode_mgr, "medium")
+                    client_name = _online_client.__class__.__name__
+                    self.cached_models["primary"] = f"online:{client_name}:complex"
+                    self.cached_models["review"] = f"online:{client_name}:medium"
+                    elapsed = time.monotonic() - t0
+                    self.init_timings["llm_models"] = elapsed
+                    logger.info(
+                        "LLMs initialized via %s in %.2fs (online mode)",
+                        client_name, elapsed
+                    )
+                    return
+        except Exception as _mode_err:
+            logger.debug("Online LLM init check skipped, using Ollama: %s", _mode_err)
+
+        # --- Offline mode (default): existing Ollama path unchanged ---
         try:
             # Prefer the modern langchain-ollama package; fall back to legacy
             try:

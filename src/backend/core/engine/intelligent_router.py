@@ -37,6 +37,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .model_selector import ModelSelector
 from backend.core.query_complexity_analyzer import ComplexityScore, QueryComplexityAnalyzer
+from backend.core.mode_manager import get_mode_manager
 
 logger = logging.getLogger(__name__)
 
@@ -319,7 +320,33 @@ class IntelligentRouter:
         if selected_model is None:
             selected_model = "llama3.1:8b"  # Ultimate fallback
             reason += " (default fallback)"
-        
+
+        # --- Online mode: resolve the cloud model name for the selected tier ---
+        # When ModeManager is in ONLINE mode the actual LLM call will be handled
+        # by ModeManager.get_llm_client() in the agent layer.  We annotate the
+        # routing decision with the online model name so callers can display it,
+        # but fall back to the Ollama model name if the online client is absent.
+        try:
+            _mm = get_mode_manager()
+            if _mm.get_mode() == "online":
+                _online_client = _mm.get_llm_client()
+                if _online_client is not None:
+                    # Map tier to cloud tier label
+                    _tier_label = {
+                        ModelTier.FAST: "simple",
+                        ModelTier.BALANCED: "medium",
+                        ModelTier.FULL_POWER: "complex",
+                    }.get(selected_tier, "medium")
+                    from backend.core.online_clients import _GROQ_MODELS, _OPENROUTER_MODELS
+                    _cloud_models = (
+                        _GROQ_MODELS if _online_client.__class__.__name__ == "GroqClient"
+                        else _OPENROUTER_MODELS
+                    )
+                    selected_model = _cloud_models.get(_tier_label, selected_model)
+                    reason += f" [online:{_online_client.__class__.__name__}]"
+        except Exception as _mode_err:
+            logger.debug("Online mode check in router skipped: %s", _mode_err)
+
         decision = RoutingDecision(
             query=query,
             selected_tier=selected_tier,

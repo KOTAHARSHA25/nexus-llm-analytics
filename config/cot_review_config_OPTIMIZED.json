@@ -1,0 +1,142 @@
+{
+  "model_selection": {
+    "simple": "tinyllama",
+    "medium": "phi3:mini",
+    "complex": "llama3.1:8b",
+    "thresholds": {
+      "simple_max": 0.3,
+      "medium_max": 0.7
+    },
+    "comment": "Model tiers for intelligent routing based on query complexity"
+  },
+  
+  "query_analysis": {
+    "code_generation_keywords": [
+      "calculate", "compute", "sum", "average", "mean", "total",
+      "count", "group by", "aggregate", "filter", "sort", "rank",
+      "correlation", "percentage", "ratio", "compare", "maximum",
+      "minimum", "median", "standard deviation", "variance",
+      "top", "bottom", "highest", "lowest", "by region", "by category",
+      "per", "each", "distribution", "breakdown", "categorize", 
+      "category", "categories", "segment", "classify", "analyze",
+      "forecast", "predict", "trend", "pattern",
+      "monthly", "daily", "yearly", "quarterly"
+    ],
+    "multi_step_keywords": [
+      "and then", "after that", "then predict", "correlation", 
+      "forecast", "trend", "then identify", "then recommend"
+    ],
+    "condition_keywords": [
+      "where", "if", "when", "filter", "group by", "for each"
+    ],
+    "simple_query_patterns": [
+      "what is", "show", "list", "get", "tell me"
+    ],
+    "comment": "Domain-agnostic query analysis patterns"
+  },
+  
+  "dynamic_planner": {
+    "enabled": true,
+    "inject_into_prompts": true,
+    "max_steps": 10,
+    "max_strategy_length": 1000,
+    "max_step_length": 300,
+    "skip_fallback_plans": true,
+    "skip_for_simple_queries": true,
+    "complexity_threshold": 0.5,
+    "comment": "OPTIMIZED: Skip planning for simple queries to save 5-15s per request"
+  },
+  
+  "circuit_breaker": {
+    "enabled": true,
+    "circuits": {
+      "data_analyst": {
+        "failure_threshold": 2,
+        "recovery_timeout": 30,
+        "success_threshold": 1,
+        "timeout": 15,
+        "comment": "OPTIMIZED: Reduced from 30s to 15s"
+      },
+      "code_generator": {
+        "failure_threshold": 2,
+        "recovery_timeout": 45,
+        "success_threshold": 1,
+        "timeout": 45,
+        "comment": "OPTIMIZED: Reduced from 90s to 45s"
+      },
+      "cot_engine": {
+        "failure_threshold": 2,
+        "recovery_timeout": 30,
+        "success_threshold": 1,
+        "timeout": 20,
+        "comment": "OPTIMIZED: Reduced from 40s to 20s"
+      },
+      "visualization": {
+        "failure_threshold": 2,
+        "recovery_timeout": 30,
+        "success_threshold": 1,
+        "timeout": 15,
+        "comment": "OPTIMIZED: Reduced from 20s to 15s"
+      }
+    },
+    "expose_health_endpoint": true,
+    "log_circuit_changes": true,
+    "metrics_enabled": true,
+    "comment": "OPTIMIZED: Aggressive timeouts for 2-3x speedup"
+  },
+  
+  "cot_review": {
+    "enabled": true,
+    "auto_enable_on_routing": true,
+    "complexity_threshold": 0.75,
+    "max_iterations": 1,
+    "timeout_per_iteration_seconds": 15,
+    
+    "activation_rules": {
+      "always_on_complexity": 0.85,
+      "optional_range": [0.75, 0.85],
+      "always_on_code_gen": false,
+      "comment": "OPTIMIZED: Only activate for truly complex queries (was 0.7, now 0.85)"
+    },
+    
+    "tags": {
+      "reasoning_start": "[REASONING]",
+      "reasoning_end": "[/REASONING]",
+      "output_start": "[OUTPUT]",
+      "output_end": "[/OUTPUT]"
+    },
+    
+    "generator": {
+      "role": "generator",
+      "model_source": "dynamic",
+      "use_routed_model": true,
+      "temperature": 0.7,
+      "system_prompt_template": "cot_generator_prompt.txt"
+    },
+    
+    "critic": {
+      "role": "critic",
+      "model_source": "dynamic",
+      "use_review_model": true,
+      "temperature": 0.3,
+      "system_prompt_template": "cot_critic_prompt.txt"
+    },
+    
+    "feedback_synthesis": {
+      "include_original_query": true,
+      "include_previous_attempts": true,
+      "max_history_iterations": 1,
+      "format": "structured",
+      "comment": "OPTIMIZED: Reduced history from 2 to 1"
+    },
+    
+    "performance_tracking": {
+      "log_iterations": true,
+      "log_reasoning_chains": false,
+      "log_critic_feedback": false,
+      "export_format": "json"
+    },
+    
+    "comment": "OPTIMIZED: complexity_threshold 0.5→0.75, max_iterations 2→1, timeout 30s→15s"
+  }
+}

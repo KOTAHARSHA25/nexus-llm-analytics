@@ -165,7 +165,7 @@ class DynamicPlanner:
     @property
     def llm(self) -> Any:
         """The underlying LLM client used for plan generation."""
-        return self._initializer.llm_client
+        return self._initializer.primary_llm or self._initializer.llm_client
 
     def create_plan(self, query: str, data_preview: str, model: str | None = None) -> AnalysisPlan:
         """
@@ -194,17 +194,27 @@ class DynamicPlanner:
             
         for attempt in range(max_retries):
             try:
-                response = self.llm.generate(
-                    prompt=prompt,
-                    model=str(planning_model),
-                    adaptive_timeout=True
-                )
+                # Support both LangChain shim (.invoke) and custom offline client (.generate)
+                if hasattr(self.llm, 'invoke'):
+                    response = self.llm.invoke(prompt, model=str(planning_model))
+                else:
+                    response = self.llm.generate(
+                        prompt=prompt,
+                        model=str(planning_model),
+                        adaptive_timeout=True
+                    )
                 
-                if not response or not response.get('success'):
+                # Normalize response string
+                if isinstance(response, dict):
+                    response_text = response.get('response', '')
+                else:
+                    response_text = str(response)
+                    
+                if not response_text:
                     # If empty response, raise error to trigger retry
                     raise ValueError("Empty or failed response from LLM")
                     
-                return self._parse_plan(response.get('response', ''))
+                return self._parse_plan(response_text)
                 
             except Exception as e:
                 logger.warning(f"Dynamic planning attempt {attempt+1}/{max_retries} failed: {e}")

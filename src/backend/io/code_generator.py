@@ -692,11 +692,60 @@ result = ...
         return self._sandbox
     
     def _get_llm_client(self):
-        """Get or create LLM client"""
+        """Get or create LLM client.
+
+        In ONLINE mode uses ``ModeManager.get_llm_client()`` which returns the
+        best available cloud client (Groq → Gemini → OpenRouter) without ever
+        touching Ollama.  In OFFLINE mode falls back to the raw Ollama
+        ``LLMClient``.  Wraps whichever client is obtained in a thin adapter so
+        the rest of CodeGenerator can always call ``.generate(prompt, model)``.
+        """
         if self.llm_client is None:
-            from backend.core.llm_client import LLMClient
-            self.llm_client = LLMClient()
+            try:
+                from backend.core.mode_manager import get_mode_manager
+                mm = get_mode_manager()
+
+                if mm.get_mode() == "online":
+                    online_client = mm.get_llm_client()
+                    if online_client is not None:
+                        # Online clients expose .chat(messages=[{"role","content"}], tier=…)
+                        # Wrap to satisfy the .generate(prompt, model=…) contract here.
+                        class _OnlineClientAdapter:
+                            def __init__(self, client):
+                                self._c = client
+                            def generate(self, prompt: str, model: str = None) -> dict:
+                                try:
+                                    # Use simple single-message chat
+                                    result = self._c.chat(
+                                        messages=[{"role": "user", "content": prompt}],
+                                        tier="medium"
+                                    )
+                                    # Normalize response — online clients return plain strings
+                                    if isinstance(result, dict):
+                                        return {"response": result.get("content", result.get("response", str(result)))}
+                                    return {"response": str(result)}
+                                except Exception as exc:
+                                    return {"error": str(exc), "response": ""}
+                        self.llm_client = _OnlineClientAdapter(online_client)
+                        logger.info("CodeGenerator: using online LLM client (Groq/Gemini/OpenRouter)")
+                        return self.llm_client
+                    else:
+                        logger.warning("CodeGenerator: ModeManager returned no online client")
+            except Exception as e:
+                logger.warning("CodeGenerator: ModeManager client init failed (%s)", e)
+
+            # Offline or online-client-unavailable path — use raw Ollama LLMClient
+            try:
+                from backend.core.llm_client import LLMClient
+                self.llm_client = LLMClient()
+                logger.info("CodeGenerator: using Ollama LLMClient as backend")
+            except Exception as exc:
+                logger.error("CodeGenerator: All LLM client attempts failed: %s", exc)
+                raise RuntimeError(f"No LLM client available for code generation: {exc}") from exc
+
         return self.llm_client
+
+
     
     def generate_code(self, 
                      query: str, 

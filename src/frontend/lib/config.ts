@@ -88,6 +88,7 @@ export const config = {
     networkInfo: '/api/health/network-info',
     cacheInfo: '/api/health/cache-info',
     clearCache: '/api/health/clear-cache',
+    mode: '/api/mode',
 
     // ========== ANALYSIS (CORE FLOW) ==========
     analyze: '/api/analyze/',

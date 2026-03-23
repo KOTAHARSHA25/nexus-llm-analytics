@@ -387,7 +387,13 @@ async def analyze_stream(request: AnalyzeRequest):
             from backend.agents.model_manager import get_model_manager
             from backend.core.engine.query_orchestrator import ExecutionMethod
             manager = get_model_manager()
-            llm_client = manager.llm_client
+            # In online mode Ollama is not required — skip llm_client entirely
+            try:
+                from backend.core.mode_manager import get_mode_manager as _gmm
+                _is_online = _gmm().get_mode() == "online"
+            except Exception:
+                _is_online = False
+            llm_client = None if _is_online else manager.llm_client
             
             # Use orchestrator to create execution plan with semantic routing
             plan = None

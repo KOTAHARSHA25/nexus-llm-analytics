@@ -94,13 +94,8 @@ class SQLAgent(BasePluginAgent):
             self.query_timeout = self.config.get("query_timeout", 60)
             self.max_results = self.config.get("max_results", 10000)
             
-            # Initialize LLM Client (Optional - for graceful degradation)
-            try:
-                self.llm_client = LLMClient()
-                logging.debug("SQLAgent: LLM Client initialized")
-            except Exception as e:
-                logging.warning(f"SQLAgent: LLM Client failed to init ({e}). SQL generation will be disabled.")
-                self.llm_client = None
+            # Leave LLM client lazy-loaded dynamically in _generate_sql_query
+            # to support "online" mode toggles during runtime.
             
             # Initialize default in-memory SQLite connection for "Chat with Data"
             self._init_memory_connection()
@@ -350,7 +345,14 @@ class SQLAgent(BasePluginAgent):
     def _generate_sql_query(self, query: str, table_name: str, data: Any) -> Dict[str, Any]:
         """Generate SQL query using an LLM"""
         try:
-            if not self.llm_client:
+            from backend.agents.model_manager import get_model_manager
+            try:
+                llm = get_model_manager().primary_llm
+            except Exception as e:
+                logging.warning(f"SQLAgent Failed to get LLM: {e}")
+                llm = None
+                
+            if not llm:
                  return {
                     "success": False, 
                     "error": "LLM capabilities unavailable. Cannot generate SQL from natural language.",
@@ -382,11 +384,14 @@ class SQLAgent(BasePluginAgent):
             """
             
             # 3. Call LLM
-            # FIX: Use correct LLMClient.generate() API (returns dict, no temperature arg)
-            response_dict = self.llm_client.generate(prompt)
+            if hasattr(llm, "invoke"):
+                response_text = str(llm.invoke(prompt))
+            else:
+                # Fallback to old API
+                response_dict = getattr(llm, "generate", lambda x: x)(prompt)
+                response_text = response_dict.get("response", "") if isinstance(response_dict, dict) else str(response_dict)
             
             # 4. Clean formatting
-            response_text = response_dict.get("response", "") if isinstance(response_dict, dict) else str(response_dict)
             sql = response_text.replace("```sql", "").replace("```", "").strip()
             
             return {

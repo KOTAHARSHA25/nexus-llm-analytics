@@ -25,6 +25,7 @@ v2.0 Enterprise Additions
 from __future__ import annotations
 
 import asyncio
+import gc
 import logging
 import threading
 from typing import Dict, Any, Optional
@@ -476,17 +477,45 @@ class AnalysisService:
                 agent = self.registry.get_agent("DataAnalyst")
             else:
                 # No agent + no data = General chat query?
-                # We can't easily execute "Direct LLM" here as we need an Agent object.
-                # But we can try to find a 'GeneralAgent' or return a specific error.
                 logger.warning("No agent found and no data provided - attempting generic response")
-                # Attempt to use a Generic/Chat agent if available, otherwise specific error
                 agent = self.registry.get_agent("ChatAgent")
                 
                 if not agent:
-                    # Final fallback: Create an ad-hoc DirectLLM execution
-                    # For now, let's error gracefully instead of crashing DataAnalyst
+                    # Try direct online LLM call if in online mode
+                    try:
+                        from backend.core.mode_manager import get_mode_manager
+                        _mm = get_mode_manager()
+                        if _mm.get_mode() == "online":
+                            # Build fallback chain: Groq → OpenRouter
+                            _clients = []
+                            _g = _mm._get_groq()
+                            if _g:
+                                _clients.append((_g, "Groq"))
+                            _o = _mm._get_openrouter()
+                            if _o:
+                                _clients.append((_o, "OpenRouter"))
+                            
+                            for _client, _name in _clients:
+                                try:
+                                    logger.info("Using %s directly for no-data query", _name)
+                                    llm_response = _client.generate(query, tier="medium")
+                                    self.analysis_manager.complete_analysis(analysis_id)
+                                    return {
+                                        "success": True,
+                                        "result": llm_response,
+                                        "agent": f"DirectOnlineLLM:{_name}",
+                                        "interpretation": llm_response,
+                                        "type": "analysis_result",
+                                        "analysis_id": analysis_id
+                                    }
+                                except Exception as _e:
+                                    logger.warning("Direct %s failed: %s, trying next...", _name, _e)
+                    except Exception as online_err:
+                        logger.warning("Direct online LLM fallback failed: %s", online_err)
+                    
+                    # Offline mode or online LLM failed — return graceful message
                     return {
-                        "success": True, # Technically managed
+                        "success": True,
                         "result": "I'm not sure which agent to use for this. Please provide a file for analysis or ask a specific data question.",
                         "error": "No capable agent and no data provided",
                         "type": "response"
@@ -615,11 +644,24 @@ class AnalysisService:
                 
             # Add ID to response
             response['analysis_id'] = analysis_id
+            
+            # RAM OPTIMIZATION: Force garbage collection after analysis
+            # Clear DataFrame from context to prevent memory leaks
+            if 'dataframe' in context:
+                del context['dataframe']
+            gc.collect()
+            
             return response
             
         except Exception as e:
             logger.error("Analysis execution failed: %s", e, exc_info=True)
             self.analysis_manager.fail_analysis(analysis_id, str(e))
+            
+            # RAM OPTIMIZATION: Clean up on exception as well
+            if 'dataframe' in context:
+                del context['dataframe']
+            gc.collect()
+            
             return {
                 "success": False,
                 "error": str(e),

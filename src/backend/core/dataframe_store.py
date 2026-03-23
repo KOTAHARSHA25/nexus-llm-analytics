@@ -75,9 +75,9 @@ class DataFrameStore:
 
     def __init__(
         self,
-        max_entries: int = 20,
-        max_memory_bytes: int = 500 * 1024 * 1024,
-        ttl_seconds: float = 1800.0,
+        max_entries: int = 3,
+        max_memory_bytes: int = 50 * 1024 * 1024,
+        ttl_seconds: float = 300.0,
     ) -> None:
         self._cache: OrderedDict[str, _CacheEntry] = OrderedDict()
         self._lock = threading.RLock()

@@ -327,6 +327,26 @@ class DataAnalystAgent(BasePluginAgent):
             logging.info(f"QueryOrchestrator decision: {execution_plan.reasoning}")
             print(f"DEBUG: DataAnalystAgent: Orchestrator decision: {execution_plan.execution_method} - {execution_plan.reasoning}")
             
+            # SAFETY OVERRIDE: If we have a data file AND the query is a filter/lookup/condition
+            # query, ALWAYS use CODE_GENERATION so pandas executes on the actual DataFrame.
+            # Direct-LLM only receives pre-calculated stats and cannot access individual rows.
+            _FILTER_OPERATORS = [
+                'list', 'find', 'which', 'who', 'whose', 'filter',
+                'above', 'below', 'greater than', 'less than', 'more than', 'at least', 'at most',
+                'between', 'exceeds', 'exceed', 'having', 'that have', 'that are',
+                'ids', 'id', 'records', 'entries', 'rows with',
+                'show me all', 'show all'
+            ]
+            if filepath and execution_method.value == 'direct_llm':
+                query_lower = query.lower()
+                if any(op in query_lower for op in _FILTER_OPERATORS):
+                    logging.info(
+                        "⚡ Overriding DIRECT_LLM → CODE_GENERATION: query contains filter/condition "
+                        "operator and a data file is present. Raw data access required."
+                    )
+                    from backend.core.engine.query_orchestrator import ExecutionMethod as _EM
+                    execution_method = _EM.CODE_GENERATION
+            
             # 3. Dynamic Planning (optional enhancement - respects config)
             analysis_plan = None
             try:
@@ -439,6 +459,23 @@ class DataAnalystAgent(BasePluginAgent):
             review_level = execution_plan.review_level
             
             logging.info(f"QueryOrchestrator decision (async): {execution_plan.reasoning}")
+            
+            # SAFETY OVERRIDE: same as sync path — filter queries need code execution on real df
+            _FILTER_OPERATORS = [
+                'list', 'find', 'which', 'who', 'whose', 'filter',
+                'above', 'below', 'greater than', 'less than', 'more than', 'at least', 'at most',
+                'between', 'exceeds', 'exceed', 'having', 'that have', 'that are',
+                'ids', 'id', 'records', 'entries', 'rows with',
+                'show me all', 'show all'
+            ]
+            if filepath and execution_method.value == 'direct_llm':
+                query_lower_a = query.lower()
+                if any(op in query_lower_a for op in _FILTER_OPERATORS):
+                    logging.info(
+                        "⚡ (async) Overriding DIRECT_LLM → CODE_GENERATION: filter query with data file."
+                    )
+                    from backend.core.engine.query_orchestrator import ExecutionMethod as _EM_A
+                    execution_method = _EM_A.CODE_GENERATION
             
             # 3. Dynamic Planning
             try:
@@ -902,7 +939,8 @@ Answer:"""
                 
                 # Wrap LLM call in circuit breaker for graceful degradation
                 def llm_call():
-                    response = self.initializer.llm_client.generate(prompt, model=selected_model)
+                    # primary_llm (which can be _OnlineLLMShim) implements .invoke() but not .generate()
+                    response = self.initializer.primary_llm.invoke(prompt, model=selected_model)
                     # Format response to circuit breaker expected format
                     if isinstance(response, dict):
                         return {"success": True, "response": response.get('response', str(response))}
@@ -918,7 +956,7 @@ Answer:"""
                 return result.get("response", result.get("result", str(result)))
             else:
                 # Fallback if Phase 1 not available
-                response = self.initializer.llm_client.generate(prompt, model=selected_model)
+                response = self.initializer.primary_llm.invoke(prompt, model=selected_model)
                 if isinstance(response, dict): return response.get('response', str(response))
                 return str(response)
         except Exception as e:
@@ -986,7 +1024,9 @@ Answer:"""
                 
                 if cb_config is None:
                     # Circuit breaker disabled in config
-                    response = await self.initializer.llm_client.generate_async(prompt, model=selected_model)
+                    # _OnlineLLMShim currently only implements .invoke() and __call__(), so we use that.
+                    # In a true async LangChain shim, this would be ainvoke(). We'll fallback to sync call inside async for now.
+                    response = self.initializer.primary_llm.invoke(prompt, model=selected_model)
                     if isinstance(response, dict): return response.get('response', str(response))
                     return str(response)
                 
@@ -1002,7 +1042,8 @@ Answer:"""
                 
                 # Wrap async LLM call in circuit breaker (use async_call, not sync call)
                 async def async_llm_call():
-                    response = await self.initializer.llm_client.generate_async(prompt, model=selected_model)
+                    # Fallback to sync invoke() as shim doesn't implement generate_async / ainvoke yet
+                    response = self.initializer.primary_llm.invoke(prompt, model=selected_model)
                     if isinstance(response, dict):
                         return {"success": True, "response": response.get('response', str(response))}
                     return {"success": True, "response": str(response)}
@@ -1018,7 +1059,7 @@ Answer:"""
                 return result.get("response", result.get("result", str(result)))
             else:
                 # Fallback if Phase 1 not available
-                response = await self.initializer.llm_client.generate_async(prompt, model=selected_model)
+                response = self.initializer.primary_llm.invoke(prompt, model=selected_model)
                 if isinstance(response, dict): return response.get('response', str(response))
                 return str(response)
         except Exception as e:

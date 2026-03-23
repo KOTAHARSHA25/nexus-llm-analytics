@@ -41,6 +41,7 @@ try:
     from backend.core.config import get_settings, validate_config
     from backend.core.rate_limiter import RateLimitMiddleware, global_rate_limiter
     from backend.core.error_handling import error_handler
+    from backend.api.mode import router as mode_router
     
     
     # Auto-configure models on startup is now handled in lifespan (see below)
@@ -97,6 +98,14 @@ async def lifespan(app: FastAPI):
         )
     except Exception as init_error:
         logger.warning("⚠️ ModelManager init warning: %s", init_error)
+
+    # STEP 1b: Initialize ModeManager singleton (always starts OFFLINE)
+    try:
+        from backend.core.mode_manager import get_mode_manager as _get_mm
+        _mode_mgr = _get_mm()
+        logger.info("✅ ModeManager ready — mode=%s", _mode_mgr.get_mode())
+    except Exception as mm_err:
+        logger.warning("⚠️ ModeManager init warning: %s", mm_err)
     
     # STEP 2: Async warmup — forces Ollama to load model into VRAM/RAM
     try:
@@ -253,6 +262,9 @@ app.include_router(report.router, prefix="/api/report", tags=["report"])
 app.include_router(visualize.router, prefix="/api/visualize", tags=["visualize"])
 app.include_router(models.router, prefix="/api/models", tags=["models"])
 app.include_router(health.router, prefix="/api/health", tags=["health"])
+
+# Mode toggle router (GET/POST /api/mode)
+app.include_router(mode_router, prefix="/api")
 
 # Import and mount history router
 from backend.api import history

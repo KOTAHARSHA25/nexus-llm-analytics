@@ -261,6 +261,15 @@ class ModelSelector:
             logger.info("ModelSelector: Using injected test models")
             return ModelSelector._override_models
 
+        # In online mode Ollama is not required — skip entirely
+        try:
+            from backend.core.mode_manager import get_mode_manager as _gmm
+            if _gmm().get_mode() == "online":
+                logger.debug("Online mode — skipping Ollama model discovery")
+                return {}
+        except Exception:
+            pass
+
         from backend.core.config import get_settings
 
         if requests is None:
@@ -299,8 +308,8 @@ class ModelSelector:
             return models_info
             
         except Exception as e:
-            # Log the actual error to help debugging
-            logger.error("Could not fetch models from Ollama at %s: %s", ollama_url, e, exc_info=True)
+            # Log at debug level — Ollama not running is normal in online mode or early dev
+            logger.debug("Ollama not available at %s (%s) — returning empty model list", ollama_url, type(e).__name__)
             return {}
     
     @staticmethod
@@ -349,15 +358,15 @@ class ModelSelector:
         memory_info = ModelSelector.get_system_memory()
         available_ram = memory_info["available_gb"]
         total_ram = memory_info["total_gb"]
-        
-        logger.info("System Memory: %.1fGB total, %.1fGB available", total_ram, available_ram)
-        
-        # Fetch installed models dynamically
+
+        # Fetch installed models dynamically — do this BEFORE logging memory so
+        # we only print the System Memory line when Ollama is actually reachable.
         installed_models = ModelSelector._get_installed_models()
         if not installed_models:
-            # Don't log as error - Ollama not running is expected during development
-            logger.debug("No models found in Ollama (Ollama not running or no models installed)")
+            logger.debug("No Ollama models found — Ollama not running or online mode active")
             raise RuntimeError("No models installed. Run: ollama pull <model-name>")
+
+        logger.info("System Memory: %.1fGB total, %.1fGB available", total_ram, available_ram)
         
         # Update MODEL_REQUIREMENTS with actual installed models
         ModelSelector.MODEL_REQUIREMENTS = installed_models

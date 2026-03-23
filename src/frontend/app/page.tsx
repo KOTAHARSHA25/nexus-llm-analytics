@@ -13,7 +13,7 @@ import ModelSettings from "@/components/model-settings";
 import SetupWizard from "@/components/setup-wizard";
 import {
   Download, Menu, X, Sparkles, BarChart3, Brain,
-  RefreshCw, AlertCircle, Info
+  RefreshCw, AlertCircle, Info, Wifi, WifiOff
 } from "lucide-react";
 import { FileInfo } from "@/hooks/useDashboardState";
 import { getEndpoint } from "@/lib/config";
@@ -40,6 +40,12 @@ export default function AnalyticsDashboard() {
   const [retryCount, setRetryCount] = useState(0);
   const [streamEvents, setStreamEvents] = useState<StreamEvent[]>([]);
 
+  // Online/Offline mode toggle
+  const [nexusMode, setNexusMode] = useState<"offline" | "online">("offline");
+  const [modeToast, setModeToast] = useState<string | null>(null);
+  const modeToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [ollamaStatus, setOllamaStatus] = useState<"running" | "stopped" | "starting" | "stopping" | "unknown">("unknown");
+
   // AbortController ref for cancelling in-flight streaming requests
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -48,6 +54,75 @@ export default function AnalyticsDashboard() {
     checkFirstTimeUser();
     loadQueryHistory();
   }, []);
+
+  // Restore mode from localStorage and sync with backend on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("nexus_mode");
+
+    // Using TS type assertion below to ensure "online" or "offline" is passed if the string is valid
+    const syncMode = async () => {
+      try {
+        if (saved === "online" || saved === "offline") {
+          // If we have a saved preference, tell the backend to use it
+          setNexusMode(saved as "online" | "offline");
+          await fetch(getEndpoint('mode'), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mode: saved }),
+          });
+        } else {
+          // Otherwise, fetch whatever the backend is currently using
+          const res = await fetch(getEndpoint('mode'));
+          if (res.ok) {
+            const data = await res.json();
+            if (data.mode === "online" || data.mode === "offline") {
+              setNexusMode(data.mode);
+              localStorage.setItem("nexus_mode", data.mode);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to sync mode with backend on mount:", e);
+      }
+    };
+
+    syncMode();
+  }, []);
+
+  const showModeToast = (msg: string) => {
+    setModeToast(msg);
+    if (modeToastTimerRef.current) clearTimeout(modeToastTimerRef.current);
+    modeToastTimerRef.current = setTimeout(() => setModeToast(null), 3500);
+  };
+
+  const handleModeToggle = async () => {
+    const newMode = nexusMode === "offline" ? "online" : "offline";
+    try {
+      const res = await fetch(getEndpoint('mode'), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: newMode }),
+      });
+      if (!res.ok) throw new Error(`Server responded ${res.status}`);
+      setNexusMode(newMode);
+      localStorage.setItem("nexus_mode", newMode);
+      showModeToast(
+        newMode === "online"
+          ? "Switched to Online Mode — Using cloud APIs"
+          : "Switched to Offline Mode — Using local models"
+      );
+    } catch (e) {
+      console.warn("Mode switch failed:", e);
+      // Still update UI so user isn't blocked if backend is temporarily unavailable
+      setNexusMode(newMode);
+      localStorage.setItem("nexus_mode", newMode);
+      showModeToast(
+        newMode === "online"
+          ? "Switched to Online Mode — Using cloud APIs"
+          : "Switched to Offline Mode — Using local models"
+      );
+    }
+  };
 
   const checkFirstTimeUser = async () => {
     try {
@@ -461,6 +536,22 @@ export default function AnalyticsDashboard() {
         {/* Main content */}
         <main className="flex-1 p-4 md:p-6 max-w-full">
           <div className="max-w-7xl mx-auto space-y-6">
+
+            {/* Mode Toast Notification */}
+            {modeToast && (
+              <div
+                className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl
+                           glass-card border border-white/30 text-white text-sm shadow-2xl
+                           animate-in fade-in slide-in-from-top-3 duration-300"
+              >
+                {nexusMode === "online"
+                  ? <Wifi className="h-4 w-4 text-green-400 flex-shrink-0" />
+                  : <WifiOff className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                }
+                {modeToast}
+              </div>
+            )}
+
             {/* Hero Section */}
             <div className="text-center space-y-4 py-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-white border border-white/30">
@@ -474,6 +565,64 @@ export default function AnalyticsDashboard() {
                 Transform your data into insights with our advanced AI multi-agent system.
                 Upload files or paste text, ask questions in natural language, and get comprehensive analysis.
               </p>
+
+              {/* Online / Offline Mode Toggle */}
+              <div className="inline-flex flex-col items-center gap-2 mt-2">
+                <div className="inline-flex items-center gap-3">
+                  <span className={`text-sm font-medium transition-colors ${nexusMode === "offline" ? "text-white" : "text-white/40"}`}>
+                    Offline
+                  </span>
+                  <button
+                    onClick={handleModeToggle}
+                    aria-label={`Switch to ${nexusMode === "offline" ? "online" : "offline"} mode`}
+                    className={`relative inline-flex h-7 w-14 items-center rounded-full border-2 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50
+                      ${nexusMode === "online"
+                        ? "bg-gradient-to-r from-green-500 to-emerald-500 border-green-400/60"
+                        : "bg-white/10 border-white/20 hover:border-white/40"
+                      }`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-all duration-300
+                        ${nexusMode === "online" ? "translate-x-[30px]" : "translate-x-[2px]"}`}
+                    />
+                  </button>
+                  <span className={`text-sm font-medium transition-colors ${nexusMode === "online" ? "text-green-400" : "text-white/40"}`}>
+                    Online
+                  </span>
+                  {nexusMode === "online" && (
+                    <span className="flex items-center gap-1 text-xs text-green-400/80 bg-green-500/10 border border-green-500/20 rounded-full px-2.5 py-0.5">
+                      <Wifi className="h-3 w-3" />
+                      Cloud APIs active
+                    </span>
+                  )}
+                </div>
+
+                {/* Ollama process status indicator */}
+                {nexusMode === "offline" && ollamaStatus === "running" && (
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
+                    <span className="text-green-400">Ollama running</span>
+                  </div>
+                )}
+                {nexusMode === "offline" && ollamaStatus === "starting" && (
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse inline-block" />
+                    <span className="text-yellow-300/80">Ollama starting\u2026</span>
+                  </div>
+                )}
+                {nexusMode === "offline" && ollamaStatus === "stopped" && (
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-400 inline-block" />
+                    <span className="text-red-400/80">Ollama not running</span>
+                  </div>
+                )}
+                {nexusMode === "online" && (ollamaStatus === "stopped" || ollamaStatus === "stopping") && (
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white/20 inline-block" />
+                    <span className="text-white/40">Ollama idle</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Main Interface Grid */}

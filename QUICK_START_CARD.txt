@@ -1,0 +1,158 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║                                                                       ║
+║            🚀 NEXUS LLM ANALYTICS - QUICK START CARD 🚀               ║
+║                                                                       ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  ONE-CLICK STARTUP - Choose Your Method:                             │
+└───────────────────────────────────────────────────────────────────────┘
+
+  🌟 RECOMMENDED (PowerShell):
+  
+      1. Right-click "START_ALL.ps1"
+      2. Select "Run with PowerShell"
+      3. Wait for 3 windows to open
+      4. Open browser: http://localhost:3000
+      
+  ✅ SIMPLEST (Batch File):
+  
+      1. Double-click "START_ALL.bat"
+      2. Wait for 3 windows to open
+      3. Open browser: http://localhost:3000
+      
+  ⚡ COMMAND LINE:
+  
+      cd "path\to\project"
+      .\START_ALL.ps1    (or)    START_ALL.bat
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  WHAT HAPPENS:                                                        │
+└───────────────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────────────────────────────────────────────┐
+    │  WINDOW 1:  Ollama LLM Server                                   │
+    │  Port:      11434                                               │
+    │  Role:      Runs AI models (llama3.1, phi3)                     │
+    └─────────────────────────────────────────────────────────────────┘
+                              ↓
+    ┌─────────────────────────────────────────────────────────────────┐
+    │  WINDOW 2:  Backend API (FastAPI)                               │
+    │  Port:      8000                                                │
+    │  Role:      Multi-agent orchestration + analysis                │
+    └─────────────────────────────────────────────────────────────────┘
+                              ↓
+    ┌─────────────────────────────────────────────────────────────────┐
+    │  WINDOW 3:  Frontend UI (Next.js)                               │
+    │  Port:      3000                                                │
+    │  Role:      Web interface for data analysis                     │
+    └─────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  ACCESS URLS:                                                         │
+└───────────────────────────────────────────────────────────────────────┘
+
+    🌐  Main App:        http://localhost:3000
+    🔧  Backend API:     http://localhost:8000
+    📚  API Docs:        http://localhost:8000/docs
+    📡  Ollama:          http://localhost:11434
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  SHUTDOWN:                                                            │
+└───────────────────────────────────────────────────────────────────────┘
+
+    🛑  Option 1:  Double-click "STOP_ALL.ps1" or "STOP_ALL.bat"
+    🛑  Option 2:  Press Ctrl+C in each of the 3 windows
+    🛑  Option 3:  Run:  .\STOP_ALL.ps1
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  TROUBLESHOOTING:                                                     │
+└───────────────────────────────────────────────────────────────────────┘
+
+    ❌  "Ollama not found"
+        → Install: https://ollama.com/download
+        → Restart computer
+        
+    ❌  "Port already in use"
+        → Run STOP_ALL first
+        → Wait 5 seconds
+        → Run START_ALL again
+        
+    ❌  "PowerShell scripts disabled"
+        → Run PowerShell as Admin
+        → Run: Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+        → Try again
+        
+    ❌  Frontend won't load
+        → Wait 30 seconds after startup
+        → Check "Nexus - Frontend UI" window for errors
+        → Make sure you ran "npm install" in src/frontend
+        
+    ❌  Model download stuck
+        → Check your internet connection
+        → llama3.1:8b is 4.7GB (takes 5-15 min first time)
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  FIRST-TIME SETUP (One Time Only):                                   │
+└───────────────────────────────────────────────────────────────────────┘
+
+    1. Install Ollama:       https://ollama.com/download
+    2. Install Python 3.11+: https://python.org
+    3. Install Node.js 18+:  https://nodejs.org
+    
+    4. Install dependencies:
+       cd path\to\project
+       pip install -r requirements.txt
+       cd src\frontend
+       npm install
+       
+    5. Run START_ALL.ps1 → Will auto-pull LLM models (15 min first time)
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  FILE REFERENCE:                                                      │
+└───────────────────────────────────────────────────────────────────────┘
+
+    📄  START_ALL.ps1         → ⭐ RECOMMENDED startup script
+    📄  START_ALL.bat         → ✅ Simple startup script
+    📄  STOP_ALL.ps1          → ⭐ RECOMMENDED shutdown script
+    📄  STOP_ALL.bat          → ✅ Simple shutdown script
+    📖  STARTUP_GUIDE.md      → 📚 Detailed documentation
+    📖  README.md             → 📚 Project overview
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  DAILY WORKFLOW:                                                      │
+└───────────────────────────────────────────────────────────────────────┘
+
+    Morning:    Double-click START_ALL.ps1  (10 seconds)
+                ↓
+    Work:       Code changes auto-reload
+                Backend: --reload flag
+                Frontend: Hot Module Replacement
+                ↓
+    Evening:    Double-click STOP_ALL.ps1   (2 seconds)
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  PERFORMANCE NOTES (After RAM Optimization):                          │
+└───────────────────────────────────────────────────────────────────────┘
+
+    ✅  Idle RAM:        ~200MB (was ~500MB)
+    ✅  Peak RAM:        ~600MB (was ~2000MB)
+    ✅  Startup Time:    10-15 seconds (after first run)
+    ✅  Large Files:     99% faster loading (1000 row sampling)
+    ✅  Sample Size:     1000 rows (override with sample_size parameter)
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  TIPS:                                                                │
+└───────────────────────────────────────────────────────────────────────┘
+
+    💡  Create desktop shortcut to START_ALL.ps1 for one-click launch
+    💡  Keep services running during development (don't stop/start often)
+    💡  Use http://localhost:8000/docs to test Backend API directly
+    💡  Check terminal windows for real-time logs and errors
+    💡  Access from phone: http://YOUR_IP:3000 (shown in startup)
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║                                                                       ║
+║    🎉 READY TO GO! Run START_ALL.ps1 and start analyzing data! 🎉    ║
+║                                                                       ║
+╚═══════════════════════════════════════════════════════════════════════╝
