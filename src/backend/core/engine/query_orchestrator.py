@@ -228,9 +228,13 @@ class QueryOrchestrator:
         """
         if config_path is None:
             # Auto-detect: look in config/ directory
+            # Use resolve() to get absolute path regardless of CWD
+            _this_file = Path(__file__).resolve()
             possible_paths = [
-                Path(__file__).parent.parent.parent.parent / 'config' / 'cot_review_config.json',
-                Path.cwd() / 'config' / 'cot_review_config.json'
+                _this_file.parent.parent.parent.parent / 'config' / 'cot_review_config.json',  # project root/config/
+                _this_file.parent.parent.parent.parent.parent / 'config' / 'cot_review_config.json',  # one level up
+                Path.cwd() / 'config' / 'cot_review_config.json',  # cwd/config/
+                Path.cwd().parent / 'config' / 'cot_review_config.json',  # parent of cwd/config/
             ]
             for path in possible_paths:
                 if path.exists():

@@ -100,7 +100,7 @@ class AnalysisService:
                               'critic': {'system_prompt_template': 'critic_prompt.j2'}}
                 
                 manager = get_model_manager()
-                self._cot_engine = SelfCorrectionEngine(config, manager.llm_client)
+                self._cot_engine = SelfCorrectionEngine(config, manager.safe_llm_client)
                 logger.info("SelfCorrectionEngine initialized")
             except Exception as e:
                 logger.warning("Failed to initialize SelfCorrectionEngine: %s", e)
@@ -130,9 +130,9 @@ class AnalysisService:
                 logger.info("🧠 Reusing pre-computed plan: %s (avoids double orchestrator run)", plan.model)
                 return plan.model
             
-            # Get LLM client for semantic routing
+            # Get LLM client for semantic routing (safe — returns None in online mode or when Ollama unavailable)
             manager = get_model_manager()
-            llm_client = manager.llm_client
+            llm_client = manager.safe_llm_client
             
             # Create execution plan using QueryOrchestrator with semantic routing
             plan = self.orchestrator.create_execution_plan(
@@ -278,7 +278,7 @@ class AnalysisService:
             plan = context.get('execution_plan')
             if not plan:
                 manager = get_model_manager()
-                llm_client = manager.llm_client
+                llm_client = manager.safe_llm_client  # safe — never raises
                 plan = self.orchestrator.create_execution_plan(
                     query=query,
                     data=None,

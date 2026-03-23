@@ -230,6 +230,23 @@ class ModelManager:
         return self._llm_client
 
     @property
+    def safe_llm_client(self) -> Optional[Any]:
+        """Return llm_client or None — NEVER raises.
+
+        Use this in routing/planning paths where a missing Ollama is acceptable
+        and should gracefully fall back to heuristic processing instead of
+        crashing the entire request.
+
+        In online mode: returns None (Ollama not needed).
+        In offline mode with running Ollama: returns the LLMClient.
+        In offline mode without Ollama: returns None (no crash).
+        """
+        try:
+            return self.llm_client
+        except Exception:
+            return None
+
+    @property
     def primary_llm(self) -> Any:
         """Return the LangChain-wrapped primary analysis LLM.
 
